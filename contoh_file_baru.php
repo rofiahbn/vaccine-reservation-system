@@ -1,1 +1,0 @@
-trserdasdasd savve dulu
