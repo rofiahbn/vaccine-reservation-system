@@ -30,6 +30,131 @@
             font-size: 14px;
         }
 
+        .search-section {
+            background: #f0eeea;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .search-section h2 {
+            color: rgb(0, 0, 0);
+            font-size: 22px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .search-section p {
+            color: rgba(0, 0, 0);
+            font-size: 14px;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .search-simple {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .search-input-main {
+            padding: 14px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-input-main::placeholder {
+            color: #95a5a6;
+        }
+
+        .search-input-main:focus {
+            outline: none;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-search-main {
+            padding: 12px 30px;
+            background:  #fbac07;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 700;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-search-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .search-results {
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .patient-card {
+            background: white;
+            padding: 15px;
+            border: 2px solid #ecf0f1;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .patient-card:hover {
+            border-color: #e8e8e8;
+        }
+
+        .patient-card h4 {
+            color: #2c3e50;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .patient-card p {
+            color: #7f8c8d;
+            font-size: 13px;
+            margin: 3px 0;
+        }
+
+        .patient-card .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            background: #27ae60;
+            color: white;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-top: 5px;
+            cursor: pointer;
+        }
+
+        .patient-card .badge:hover {
+            background: #229954;
+        }
+
+        .divider {
+            background: white;
+            padding: 14px 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .divider span {
+            color: #7f8c8d;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
         .form-section {
             margin-bottom: 30px;
             padding-bottom: 20px;
@@ -115,7 +240,7 @@
         }
 
         .btn-add {
-            background: #27ae60;
+            background: #fbac07;
             color: white;
             display: inline-flex;
             align-items: center;
@@ -123,7 +248,7 @@
         }
 
         .btn-add:hover {
-            background: #229954;
+            background: #fbac07;
         }
 
         .btn-remove {

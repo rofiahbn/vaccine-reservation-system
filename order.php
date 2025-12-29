@@ -10,6 +10,26 @@
 </head>
 <body>
     <div class="container">
+        <h1>Formulir Pendaftaran Pasien</h1>
+        <p class="subtitle">Lengkapi data berikut untuk mendaftar vaksinasi</p>
+
+        <!-- Search Section for Existing Patient -->
+        <div class="search-section">
+            <h2>Cari dan Temukan Datamu</h2>
+            <p>Cukup masukkan nama Anda. Jika sudah pernah mendaftar, sistem akan menemukan data Anda secara otomatis agar proses lebih cepat dan praktis</p>
+            
+            <div class="search-simple">
+                <input type="text" id="searchName" class="search-input-main" placeholder="Nama">
+                <input type="text" id="searchNIK" class="search-input-main" placeholder="NIK">
+                <button type="button" class="btn-search-main" onclick="searchPatient()">
+                    Cari
+                </button>
+            </div>
+
+            <div id="searchResults" style="display:none;"></div>
+        </div>
+
+    <div class="container">
     <h1>Formulir Pendaftaran Pasien</h1>
     <p class="subtitle">Lengkapi data berikut untuk mendaftar vaksinasi</p>
 

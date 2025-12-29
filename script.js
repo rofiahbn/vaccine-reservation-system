@@ -41,6 +41,57 @@ function hitungUsia() {
         function removeField(btn) {
             btn.parentElement.remove();
         }
+
+        // Search existing patient
+        function searchPatient() {
+            const name = document.getElementById('searchName').value.trim();
+            const nik = document.getElementById('searchNIK').value.trim();
+
+            if (!name && !nik) {
+                alert('Masukkan Nama atau NIK untuk mencari data pasien');
+                return;
+            }
+
+            const resultsDiv = document.getElementById('searchResults');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = '<div class="loading">🔍 Mencari data pasien...</div>';
+
+            // AJAX request
+            const params = new URLSearchParams();
+            if (name) params.append('name', name);
+            if (nik) params.append('nik', nik);
+
+            fetch('search_patient.php?' + params.toString())
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.patients.length > 0) {
+                        let html = '<div class="search-results">';
+                        data.patients.forEach(patient => {
+                            html += `
+                                <div class="patient-card">
+                                    <h4>${patient.nama_lengkap}</h4>
+                                    <p>📋 No. RM: ${patient.no_rekam_medis}</p>
+                                    <p>📅 ${patient.tanggal_lahir} (${patient.usia} tahun)</p>
+                                    <p>📱 ${patient.phone || '-'}</p>
+                                    <span class="badge" onclick="selectPatient(${patient.id})">Klik untuk melanjutkan</span>
+                                </div>
+                            `;
+                        });
+                        html += '</div>';
+                        resultsDiv.innerHTML = html;
+                    } else {
+                        resultsDiv.innerHTML = '<div class="no-results">😔 Tidak ditemukan data pasien dengan kriteria tersebut.<br>Silakan daftar sebagai pasien baru di bawah.</div>';
+                    }
+                })
+                .catch(error => {
+                    resultsDiv.innerHTML = '<div class="no-results">❌ Terjadi kesalahan saat mencari data</div>';
+                });
+        }
+
+        // Select existing patient and redirect to calendar
+        function selectPatient(patientId) {
+            window.location.href = 'calender.php?id_pasien=' + patientId;
+        }
         
         // Validasi form sebelum submit
         document.getElementById('registrationForm').addEventListener('submit', function(e) {
