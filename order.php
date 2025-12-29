@@ -29,11 +29,10 @@
             <div id="searchResults" style="display:none;"></div>
         </div>
 
-    <div class="container">
-    <h1>Formulir Pendaftaran Pasien</h1>
-    <p class="subtitle">Lengkapi data berikut untuk mendaftar vaksinasi</p>
-
     <form id="registrationForm" method="POST" action="save_patient.php">
+
+        <div class="participant">
+            <h2 class="participant-title">Data Peserta 1</h2>
 
         <div class="form-section">
             <h2 class="section-title">Data Pribadi</h2>
@@ -51,11 +50,11 @@
 
                 <div class="form-group">
                     <label>Tanggal Lahir <span class="required">*</span></label>
-                    <input type="date" name="tanggal_lahir" id="tanggalLahir" required onchange="hitungUsia()">
+                    <input type="date" name="tanggal_lahir" class="tanggalLahir" required onchange="hitungUsia()">
                 </div>
 
-                <div class="info-box" id="usiaInfo" style="display:none;">
-                    Usia: <strong id="usiaText">-</strong> tahun (<span id="kategoriText">-</span>)
+                <div class="info-box" class="usiaInfo" style="display:none;">
+                    Usia: <strong class="usiaText">-</strong> tahun (<span class="kategoriText">-</span>)
                 </div>
             </div>
             
@@ -156,11 +155,21 @@
                     <textarea name="riwayat_obat" placeholder="Obat yang sedang dikonsumsi rutin. Kosongkan jika tidak ada."></textarea>
                 </div>
             </div>
+        </div>
+
+            <!-- Container untuk peserta tambahan -->
+            <div id="additionalParticipants"></div>
+
+            <!-- Button Tambah Peserta -->
+            <button type="button" class="btn btn-add-participant" onclick="addParticipant()">
+                ➕ Tambah Pendaftar
+            </button>
 
             <button type="submit" class="btn btn-primary">Lanjut ke Pemilihan Jadwal →</button>
         </form>
 
         <script src="script.js"></script>
+        <script src="participant.js"></script>
 
     </div>
 

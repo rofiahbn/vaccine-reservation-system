@@ -128,3 +128,4 @@ function hitungUsia() {
                 alert('Minimal harus ada 1 email, 1 nomor HP, dan 1 alamat yang diisi!');
             }
         });
+        
