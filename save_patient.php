@@ -3,20 +3,23 @@ include "config.php";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    $nama_lengkap   = mysqli_real_escape_string($conn, $_POST['nama_lengkap']);
-    $nama_panggilan = mysqli_real_escape_string($conn, $_POST['nama_panggilan']);
-    $tanggal_lahir  = mysqli_real_escape_string($conn, $_POST['tanggal_lahir']);
-    $jenis_kelamin  = mysqli_real_escape_string($conn, $_POST['jenis_kelamin']);
-    $nik_paspor     = mysqli_real_escape_string($conn, $_POST['nik_paspor']);
-    $kebangsaan     = mysqli_real_escape_string($conn, $_POST['kebangsaan']);
-    $pekerjaan      = mysqli_real_escape_string($conn, $_POST['pekerjaan']);
-    $nama_wali      = mysqli_real_escape_string($conn, $_POST['nama_wali']);
+    $p = $_POST['participants'][0];
 
-    $riwayat_alergi   = mysqli_real_escape_string($conn, $_POST['riwayat_alergi']);
-    $riwayat_penyakit = mysqli_real_escape_string($conn, $_POST['riwayat_penyakit']);
-    $riwayat_obat     = mysqli_real_escape_string($conn, $_POST['riwayat_obat']);
+    $nama_lengkap   = mysqli_real_escape_string($conn, $p['nama_lengkap']);
+    $nama_panggilan = mysqli_real_escape_string($conn, $p['nama_panggilan']);
+    $tanggal_lahir  = mysqli_real_escape_string($conn, $p['tanggal_lahir']);
+    $jenis_kelamin  = mysqli_real_escape_string($conn, $p['jenis_kelamin']);
+    $nik_paspor     = mysqli_real_escape_string($conn, $p['nik_paspor']);
+    $kebangsaan     = mysqli_real_escape_string($conn, $p['kebangsaan']);
+    $pekerjaan      = mysqli_real_escape_string($conn, $p['pekerjaan']);
+    $nama_wali      = mysqli_real_escape_string($conn, $p['nama_wali']);
 
-    $pelayanan      = mysqli_real_escape_string($conn, $_POST['pelayanan']);
+    $riwayat_alergi   = mysqli_real_escape_string($conn, $p['riwayat_alergi']);
+    $riwayat_penyakit = mysqli_real_escape_string($conn, $p['riwayat_penyakit']);
+    $riwayat_obat     = mysqli_real_escape_string($conn, $p['riwayat_obat']);
+
+    $pelayanan = mysqli_real_escape_string($conn, $p['pelayanan']);
+
 
 
 
@@ -42,7 +45,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $patient_id = mysqli_insert_id($conn);
 
         // simpan email
-        foreach ($_POST['emails'] as $i => $email) {
+        foreach ($p['emails'] ?? [] as $i => $email) {
             if ($email != '') {
                 $is_primary = ($i == 0) ? 1 : 0;
                 mysqli_query($conn, "INSERT INTO patient_emails (patient_id, email, is_primary)
@@ -51,7 +54,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         // simpan phone
-        foreach ($_POST['phones'] as $i => $phone) {
+        foreach ($p['phones'] ?? [] as $i => $phone) {
             if ($phone != '') {
                 $is_primary = ($i == 0) ? 1 : 0;
                 mysqli_query($conn, "INSERT INTO patient_phones (patient_id, phone, is_primary)
@@ -60,7 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         // simpan address
-        foreach ($_POST['addresses'] as $i => $address) {
+        foreach ($p['addresses'] ?? [] as $i => $address) {
             if ($address != '') {
                 $is_primary = ($i == 0) ? 1 : 0;
                 mysqli_query($conn, "INSERT INTO patient_addresses (patient_id, alamat, is_primary)
@@ -68,8 +71,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
 
-        if (!empty($_POST['vaksin'])) {
-            foreach ($_POST['vaksin'] as $vaksin) {
+        if (!empty($p['vaksin'])) {
+            foreach ($p['vaksin'] as $vaksin) {
                 $vaksin = mysqli_real_escape_string($conn, $vaksin);
                 mysqli_query($conn, "
                     INSERT INTO patient_services (patient_id, service_type, service_name)
@@ -78,8 +81,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
 
-        if (!empty($_POST['vitamin'])) {
-            foreach ($_POST['vitamin'] as $vitamin) {
+        if (!empty($p['vitamin'])) {
+            foreach ($p['vitamin'] as $vitamin) {
                 $vitamin = mysqli_real_escape_string($conn, $vitamin);
                 mysqli_query($conn, "
                     INSERT INTO patient_services (patient_id, service_type, service_name)
