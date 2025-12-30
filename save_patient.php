@@ -16,6 +16,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $riwayat_penyakit = mysqli_real_escape_string($conn, $_POST['riwayat_penyakit']);
     $riwayat_obat     = mysqli_real_escape_string($conn, $_POST['riwayat_obat']);
 
+    $pelayanan      = mysqli_real_escape_string($conn, $_POST['pelayanan']);
+
+
 
     // hitung usia
     $birthDate = new DateTime($tanggal_lahir);
@@ -62,6 +65,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $is_primary = ($i == 0) ? 1 : 0;
                 mysqli_query($conn, "INSERT INTO patient_addresses (patient_id, alamat, is_primary)
                 VALUES ($patient_id, '$address', $is_primary)");
+            }
+        }
+
+        if (!empty($_POST['vaksin'])) {
+            foreach ($_POST['vaksin'] as $vaksin) {
+                $vaksin = mysqli_real_escape_string($conn, $vaksin);
+                mysqli_query($conn, "
+                    INSERT INTO patient_services (patient_id, service_type, service_name)
+                    VALUES ($patient_id, 'Vaksin', '$vaksin')
+                ");
+            }
+        }
+
+        if (!empty($_POST['vitamin'])) {
+            foreach ($_POST['vitamin'] as $vitamin) {
+                $vitamin = mysqli_real_escape_string($conn, $vitamin);
+                mysqli_query($conn, "
+                    INSERT INTO patient_services (patient_id, service_type, service_name)
+                    VALUES ($patient_id, 'Vitamin', '$vitamin')
+                ");
             }
         }
 
