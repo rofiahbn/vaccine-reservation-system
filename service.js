@@ -202,6 +202,80 @@ function tampilkanPilihanPelayanan() {
                     </div>
                 </div>
             `;
+    } else if (pelayanan === 'Antigen') {
+        container.style.display = 'block';
+        container.innerHTML = `
+            <div class="form-group" style="margin-top: 20px;">
+                <label>Pilih Antigen <span class="required">*</span></label>
+                <p style="font-size:13px; color:#7f8c8d; margin-bottom:10px;">
+                    Pilih jenis tes antigen yang Anda butuhkan
+                </p>
+
+                <div class="vaksin-grid">
+                    <label class="checkbox-item">
+                        <input type="radio" name="antigen" value="Rapid Antigen Reguler" required>
+                        Rapid Antigen Reguler
+                    </label>
+
+                    <label class="checkbox-item">
+                        <input type="radio" name="antigen" value="Rapid Antigen Abbot Nasofarin" required>
+                        Rapid Antigen Abbot Nasofarin
+                    </label>
+
+                    <label class="checkbox-item">
+                        <input type="radio" name="antigen" value="Rapid Antigen Abbot Nasal" required>
+                        Rapid Antigen Abbot Nasal
+                    </label>
+                </div>
+            </div>
+        `;
+    } else if (pelayanan === 'Obat') {
+        container.style.display = 'block';
+        container.innerHTML = `
+            <div class="form-group" style="margin-top: 20px;">
+                <label>Pilih Obat <span class="required">*</span></label>
+                <p style="font-size:13px; color:#7f8c8d; margin-bottom:10px;">
+                    Anda dapat memilih lebih dari 1 obat sesuai kebutuhan anda
+                </p>
+
+                <div class="vaksin-grid">
+                    <label class="checkbox-item">
+                        <input type="radio" name="obat[]" value="Pantoprazole 40 mg Vial" required>
+                        Pantoprazole 40 mg Vial
+                    </label>
+
+                    <label class="checkbox-item">
+                        <input type="radio" name="obat[]" value="Paracetamol 1g fl" required>
+                        Paracetamol 1g fl
+                    </label>
+
+                    <label class="checkbox-item">
+                        <input type="radio" name="obat[]" value="Tuberculin PPD RT 23 SSI" required>
+                        Tuberculin PPD RT 23 SSI
+                    </label>
+
+                    <label class="checkbox-item">
+                        <input type="radio" name="obat[]" value="Zoladex 3.6mg" required>
+                        Zoladex 3.6mg
+                    </label>
+                </div>
+            </div>
+        `;
+    } else if (pelayanan === 'PCR') {
+        container.style.display = 'block';
+        container.innerHTML = `
+            <div class="form-group" style="margin-top: 20px;">
+                <label>Pilih PCR <span class="required">*</span></label>
+                
+                <div class="vaksin-grid">
+                    <label class="checkbox-item">
+                        <input type="radio" name="pcr[]" value="PCR Sameday" required>
+                        PCR Sameday
+                    </label>
+
+                </div>
+            </div>
+        `;
 
     } else {
         container.style.display = 'none';
