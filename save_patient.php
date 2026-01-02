@@ -5,6 +5,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $p = $_POST['participants'][0];
 
+    // ================= VALIDASI KONTAK (INI PENTING) =================
+    $emails    = array_filter($p['emails'] ?? []);
+    $phones    = array_filter($p['phones'] ?? []);
+    $addresses = array_filter($p['addresses'] ?? []);
+
+    if (count($emails) < 1 || count($phones) < 1 || count($addresses) < 1) {
+        die("Minimal harus ada 1 email, 1 nomor HP, dan 1 alamat yang diisi!");
+    }
+    // =================================================================
+
     $nama_lengkap   = mysqli_real_escape_string($conn, $p['nama_lengkap']);
     $nama_panggilan = mysqli_real_escape_string($conn, $p['nama_panggilan']);
     $tanggal_lahir  = mysqli_real_escape_string($conn, $p['tanggal_lahir']);
@@ -20,57 +30,59 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $pelayanan = mysqli_real_escape_string($conn, $p['pelayanan']);
 
-
-
-
     // hitung usia
     $birthDate = new DateTime($tanggal_lahir);
     $today = new DateTime();
     $usia = $today->diff($birthDate)->y;
     $kategori_usia = ($usia < 18) ? 'Anak' : 'Dewasa';
 
-
     // generate no rekam medis
     $no_rekam_medis = 'RM' . time();
 
-    // INSERT ke patients
+    // INSERT patients
     $query = "INSERT INTO patients 
-    (no_rekam_medis, nama_lengkap, nama_panggilan, tanggal_lahir, usia, kategori_usia, jenis_kelamin, nik_paspor, kebangsaan, pekerjaan, nama_wali, riwayat_alergi, riwayat_penyakit, riwayat_obat)
-    VALUES 
-    ('$no_rekam_medis', '$nama_lengkap', '$nama_panggilan', '$tanggal_lahir', '$usia', '$kategori_usia', '$jenis_kelamin', '$nik_paspor', '$kebangsaan', '$pekerjaan', '$nama_wali', '$riwayat_alergi', '$riwayat_penyakit', '$riwayat_obat')";
+        (no_rekam_medis, nama_lengkap, nama_panggilan, tanggal_lahir, usia, kategori_usia, jenis_kelamin, nik_paspor, kebangsaan, pekerjaan, nama_wali, riwayat_alergi, riwayat_penyakit, riwayat_obat)
+        VALUES 
+        ('$no_rekam_medis', '$nama_lengkap', '$nama_panggilan', '$tanggal_lahir', '$usia', '$kategori_usia', '$jenis_kelamin', '$nik_paspor', '$kebangsaan', '$pekerjaan', '$nama_wali', '$riwayat_alergi', '$riwayat_penyakit', '$riwayat_obat')";
 
     if (mysqli_query($conn, $query)) {
 
-        // ambil id pasien terakhir
         $patient_id = mysqli_insert_id($conn);
 
-        // simpan email
-        foreach ($p['emails'] ?? [] as $i => $email) {
-            if ($email != '') {
-                $is_primary = ($i == 0) ? 1 : 0;
-                mysqli_query($conn, "INSERT INTO patient_emails (patient_id, email, is_primary)
-                VALUES ($patient_id, '$email', $is_primary)");
-            }
+        // ================= SIMPAN EMAIL =================
+        foreach ($emails as $i => $email) {
+            $email = mysqli_real_escape_string($conn, $email);
+            $is_primary = ($i === array_key_first($emails)) ? 1 : 0;
+
+            mysqli_query($conn, "
+                INSERT INTO patient_emails (patient_id, email, is_primary)
+                VALUES ($patient_id, '$email', $is_primary)
+            ");
         }
 
-        // simpan phone
-        foreach ($p['phones'] ?? [] as $i => $phone) {
-            if ($phone != '') {
-                $is_primary = ($i == 0) ? 1 : 0;
-                mysqli_query($conn, "INSERT INTO patient_phones (patient_id, phone, is_primary)
-                VALUES ($patient_id, '$phone', $is_primary)");
-            }
+        // ================= SIMPAN PHONE =================
+        foreach ($phones as $i => $phone) {
+            $phone = mysqli_real_escape_string($conn, $phone);
+            $is_primary = ($i === array_key_first($phones)) ? 1 : 0;
+
+            mysqli_query($conn, "
+                INSERT INTO patient_phones (patient_id, phone, is_primary)
+                VALUES ($patient_id, '$phone', $is_primary)
+            ");
         }
 
-        // simpan address
-        foreach ($p['addresses'] ?? [] as $i => $address) {
-            if ($address != '') {
-                $is_primary = ($i == 0) ? 1 : 0;
-                mysqli_query($conn, "INSERT INTO patient_addresses (patient_id, alamat, is_primary)
-                VALUES ($patient_id, '$address', $is_primary)");
-            }
+        // ================= SIMPAN ADDRESS =================
+        foreach ($addresses as $i => $address) {
+            $address = mysqli_real_escape_string($conn, $address);
+            $is_primary = ($i === array_key_first($addresses)) ? 1 : 0;
+
+            mysqli_query($conn, "
+                INSERT INTO patient_addresses (patient_id, alamat, is_primary)
+                VALUES ($patient_id, '$address', $is_primary)
+            ");
         }
 
+        // ================= SIMPAN PELAYANAN =================
         if (!empty($p['vaksin'])) {
             foreach ($p['vaksin'] as $vaksin) {
                 $vaksin = mysqli_real_escape_string($conn, $vaksin);
@@ -91,7 +103,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
 
-        // REDIRECT KE CALENDAR
         header("Location: calender.php?id_pasien=$patient_id");
         exit;
 
