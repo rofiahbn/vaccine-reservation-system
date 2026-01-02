@@ -124,9 +124,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // Validasi minimal 1 kontak
-            const emails = document.querySelectorAll('input[name="emails[]"]');
-            const phones = document.querySelectorAll('input[name="phones[]"]');
-            const addresses = document.querySelectorAll('textarea[name="addresses[]"]');
+            const emails = document.querySelectorAll('input[name^="participants"][name$="[emails][]"]');
+            const phones = document.querySelectorAll('input[name^="participants"][name$="[phones][]"]');
+            const addresses = document.querySelectorAll('textarea[name^="participants"][name$="[addresses][]"]');
             
             let emailValid = false;
             let phoneValid = false;
