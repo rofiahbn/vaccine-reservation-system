@@ -6,9 +6,34 @@
     <title>Pendaftaran Pasien Vaksinasi</title>
 
     <link rel="stylesheet" href="style.css">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <nav class="navbar">
+        <div class="nav-logo">
+            <img src="logo-vaksinin.jpeg" alt="Vaksinin">
+        </div>
+
+        <ul class="nav-menu">
+            <li><a href="order.php">Home</a></li>
+            <li><a href="#">Layanan</a></li>
+            <li><a href="#">Jadwal Vaksin</a></li>
+            <li><a href="#">Dokter</a></li>
+            <li><a href="#">Profil</a></li>
+            <li><a href="#">FAQ</a></li>
+            <li><a href="#">Kontak</a></li>
+        </ul>
+    </nav>
+
+    <header class="main-header">
+        <div class="hero">
+            <div class="hero-content">
+                <span class="hero-badge">Pendaftaran online resmi melalui Vaksinin.id</span>
+                <h1>Lindungi Diri dan<br>Keluarga dengan Vaksinasi</h1>
+            </div>
+        </div>
+    </header>
+
     <div class="container">
         <div class="search-section">
             <h2>Cari dan Temukan Datamu</h2>
@@ -25,13 +50,14 @@
             <div id="searchResults" style="display:none;"></div>
         </div>
 
+    <h1>Formulir Pendaftaran Pasien</h1>
+    <p class="subtitle">Isi dan lengkapi data dibawah ini untuk melanjutkan proses pendaftaran</p>
+
     <form id="registrationForm" method="POST" action="save_patient.php">
 
     <div class="participant">
-        <h2 class="participant-title">Data Peserta 1</h2>
 
         <div class="form-section">
-            <h2 class="section-title">Data Pribadi</h2>
 
             <div class="form-group">
                 <label>Nama Lengkap <span class="required">*</span></label>
@@ -93,7 +119,6 @@
 
         <!-- Kontak -->
         <div class="form-section">
-            <h2 class="section-title">Informasi Kontak</h2>
             
             <div class="form-group">
                 <label>Email <span class="required">*</span></label>
@@ -184,6 +209,71 @@
         <script src="service.js?v=<?php echo time(); ?>"></script>
 
     </div>
+<footer class="footer">
+    <div class="footer-container">
+        <div class="nav-logo-footer">
+            <img src="logo-vaksinin.jpeg" alt="Vaksinin">
+        </div>
 
+        <div class="footer-section">
+            <h3>Jam Operasional</h3>
+            <h4>Home Service</h4>
+            <p>Dengan bantuan helper</p>
+            <h4>Klinik</h4>
+            <p>Senin - Sabtu : 08:00 – 17:00</p>
+            <p>Minggu : 08:00 – 18:30</p>
+            <div class="note">
+                <p>Hari libur nasional dan hari besar lainnya : <b>Tutup</b></p>
+            </div>
+        </div>
+        
+        <div class="footer-section">
+            <h3>Hubungi Kami</h3>
+            <h4>Klinik Vaksinin</h4>
+            <p>Komplek Ruko Sentra Menteng Blok M No. 981<br>
+            Jl. MH. Thamrin, Bintaro Sektor 7<br>
+            Kel. Pondok Jaya, Kec. Pondok Aren,<br>
+            Kota Tangerang Selatan, Banten 15220</p>
+            <a href="https://goo.gl/maps/f2suTc2vR7JC1Me47" class="map-link" target="_blank">
+                Lihat di Google Maps
+            </a>
+        </div>
+    </div>
+    
+    <!-- CONTACT ICONS DI TENGAH BAWAH -->
+    <div class="contact-icons-wrapper">
+        <div class="contact-icons-container">
+            <div class="contact-icons-row">
+                <div class="contact-icon-item">
+                    <i class="fab fa-whatsapp"></i>
+                    <span class="number">082137372757</span>
+                </div>
+                <div class="contact-icon-item">
+                    <i class="fas fa-phone"></i>
+                    <span class="number">02122214342</span>
+                </div>
+                <div class="contact-icon-item">
+                    <i class="fab fa-instagram"></i>
+                    <a href="https://instagram.com/vaksinin.id" target="_blank">@vaksinin.id</a>
+                </div>
+                <div class="contact-icon-item">
+                    <i class="fab fa-facebook"></i>
+                    <a href="https://facebook.com/vaksinin.id" target="_blank">vaksinin.id</a>
+                </div>
+                <div class="contact-icon-item">
+                    <i class="fas fa-envelope"></i>
+                    <a href="mailto:vaksinin.id@gmail.com">vaksinin.id@gmail.com</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="copyright">
+        <p>© 2024 Vaksinin.id - Seluruh hak cipta dilindungi undang-undang</p>
+        <p>Lindungi Diri dan Keluarga dengan Vaksinasi</p>
+    </div>
+</footer>
 </body>
+
+
 </html>

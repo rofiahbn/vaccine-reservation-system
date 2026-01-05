@@ -5,22 +5,133 @@
         }
 
         body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-        background: #f5f5f5;
-        padding: 20px;
-        line-height: 1.6;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #ffffff;
+            padding: 0;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            height: 64px;
+            background: linear-gradient(
+                90deg,
+                #ffc107 0%,
+                #ffb300 40%,
+                #ff9800 100%
+            );
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 48px;
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            width: 100%;
+        }
+
+        .nav-logo img {
+            height: 32px;      /* sesuaikan kalau terlalu besar/kecil */
+            width: auto;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            gap: 24px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-menu li a {
+            text-decoration: none;
+            color: white;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .nav-menu li a:hover {
+            text-decoration: underline;
+        }
+
+        .main-header {
+            position: relative;
+            width: 100%;
+            min-height: 420px;
+            background:
+                linear-gradient(
+                    rgba(255, 179, 0, 0),
+                    rgba(255, 179, 0, 0.85)
+                ),
+                url("hero-vaksin.jpeg");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: white;
+            padding-bottom: 60px;
+        }
+
+        .hero {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 48px 0;
+            display: flex;
+            justify-content: flex-end; /* teks di kanan */
+        }
+
+        .hero-content {
+            max-width: 520px;
+            color: white;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: #ffffff;
+            color: #ff9800;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 14px;
+        }
+
+        .hero h1 {
+            color: white;
+            font-size: 40px;
+            line-height: 1.3;
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                justify-content: center;
+                padding: 48px 24px;
+            }
+
+            .hero-content {
+                text-align: center;
+            }
+
+            .hero h1 {
+                font-size: 28px;
+            }
         }
 
         .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 900px;
+            margin: 0 auto; /* Center horizontal */
+            padding: 40px 20px; 
+            position: relative;
+            z-index: 10;
+            margin-bottom: 40px;
         }
 
         h1 {
+            color : #fbac07;
             margin-bottom: 10px;
             font-size: 24px;
         }
@@ -31,14 +142,11 @@
         }
 
         .search-section {
-            background: #f0eeea;
-            padding: 30px;
-            border-radius: 12px;
             margin-bottom: 30px;
         }
 
         .search-section h2 {
-            color: rgb(0, 0, 0);
+            color: #fbac07;
             font-size: 22px;
             margin-bottom: 10px;
             font-weight: 700;
@@ -161,12 +269,6 @@
             border-bottom: 1px solid #ecf0f1;
         }
 
-        .section-title {
-            font-size: 18px;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
-
         .form-group {
             margin-bottom: 15px;
         }
@@ -262,7 +364,7 @@
         }
 
         .btn-primary {
-            background: #3498db;
+            background: #fbac07;
             color: white;
             width: 100%;
             padding: 15px;
@@ -440,5 +542,266 @@
             
             .section-title {
                 font-size: 16px;
+            }
+        }
+        /* FOOTER */
+        .footer {
+            background: linear-gradient(
+                90deg,
+                #ffc107 0%,
+                #ffb300 40%,
+                #ff9800 100%
+            );
+            padding: 50px 0 20px;
+            margin-top: 60px;
+            width: 100%;
+            position: relative;
+            overflow-x: hidden;
+            color: white;
+            min-height: 400px; /* Tambah tinggi minimum untuk footer */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 40px;
+            flex: 1; /* Isi ruang yang tersedia */
+        }
+
+        .nav-logo-footer img {
+            height: 60px;
+        }
+
+        .footer-section {
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .footer-section h3 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .footer-section h4 {
+            font-size: 16px;
+            margin: 12px 0 8px 0;
+            font-weight: bold;
+        }
+
+        .footer-section p {
+            margin: 4px 0;
+            line-height: 1.4;
+            font-size: 14px;
+        }
+
+        .note {
+            margin-top: 15px;
+            font-style: italic;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .map-link {
+            color: white;
+            text-decoration: underline;
+            font-size: 14px;
+        }
+
+        .map-link:hover {
+            opacity: 0.8;
+        }
+
+        /* ===== CONTACT ICONS STYLING TANPA KOTAK ===== */
+        .contact-icons-wrapper {
+            width: 100%;
+            margin-top: auto; /* PUSH KE BAWAH */
+            padding: 20px 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .contact-icons-container {
+            text-align: center;
+            width: 100%;
+        }
+
+        .contact-icons-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin: 0 auto;
+        }
+
+        /* INDIVIDUAL CONTACT ITEMS TANPA BACKGROUND */
+        .contact-icon-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 0;
+            transition: all 0.3s ease;
+        }
+
+        .contact-icon-item:hover {
+            transform: translateY(-2px);
+        }
+
+        /* ICON STYLING */
+        .contact-icon-item i {
+            font-size: 20px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .contact-icon-item .number,
+        .contact-icon-item a {
+            color: white;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .contact-icon-item a:hover {
+            text-decoration: underline;
+        }
+        /* ===== AKHIR CONTACT ICONS STYLING ===== */
+
+        .copyright {
+            width: 100%;
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.3);
+            font-size: 12px;
+        }
+
+        .copyright p {
+            margin: 5px 0;
+        }
+
+        /* Responsif untuk mobile */
+        @media (max-width: 768px) {
+            .footer {
+                padding: 40px 0 15px;
+                margin-top: 40px;
+                min-height: auto;
+            }
+            
+            .footer-container {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                gap: 30px;
+                padding: 0 15px;
+            }
+            
+            .nav-logo-footer {
+                margin-bottom: 15px;
+            }
+            
+            .nav-logo-footer img {
+                height: 50px;
+            }
+            
+            .footer-section {
+                min-width: 100%;
+            }
+            
+            .footer-section h3 {
+                font-size: 18px;
+                margin-bottom: 12px;
+            }
+            
+            .footer-section h4 {
+                font-size: 15px;
+                margin: 10px 0 6px 0;
+            }
+            
+            .footer-section p {
+                font-size: 13px;
+                line-height: 1.3;
+            }
+            
+            .note {
+                margin-top: 12px;
+                font-size: 12px;
+            }
+            
+            /* RESPONSIVE CONTACT ICONS */
+            .contact-icons-wrapper {
+                margin-top: 30px;
+                padding: 15px 0;
+            }
+            
+            .contact-icons-row {
+                gap: 20px;
+            }
+            
+            .contact-icon-item {
+                padding: 6px 0;
+            }
+            
+            .contact-icon-item i {
+                font-size: 18px;
+            }
+            
+            .contact-icon-item .number,
+            .contact-icon-item a {
+                font-size: 14px;
+            }
+            
+            .copyright {
+                margin-top: 15px;
+                padding-top: 15px;
+                font-size: 11px;
+            }
+        }
+
+        /* Untuk ukuran sangat kecil */
+        @media (max-width: 480px) {
+            .footer {
+                padding: 30px 0 10px;
+                margin-top: 30px;
+            }
+            
+            .footer-container {
+                gap: 25px;
+                padding: 0 12px;
+            }
+            
+            .nav-logo-footer img {
+                height: 45px;
+            }
+            
+            .footer-section h3 {
+                font-size: 16px;
+            }
+            
+            .footer-section h4 {
+                font-size: 14px;
+            }
+            
+            .footer-section p {
+                font-size: 12px;
+            }
+            
+            /* CONTACT ICONS UNTUK 480px */
+            .contact-icons-row {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .contact-icon-item {
+                justify-content: center;
+                width: 100%;
             }
         }
