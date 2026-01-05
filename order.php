@@ -10,10 +10,6 @@
 </head>
 <body>
     <div class="container">
-        <h1>Formulir Pendaftaran Pasien</h1>
-        <p class="subtitle">Lengkapi data berikut untuk mendaftar vaksinasi</p>
-
-        <!-- Search Section for Existing Patient -->
         <div class="search-section">
             <h2>Cari dan Temukan Datamu</h2>
             <p>Cukup masukkan nama Anda. Jika sudah pernah mendaftar, sistem akan menemukan data Anda secara otomatis agar proses lebih cepat dan praktis</p>
