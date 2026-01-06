@@ -10,6 +10,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['id_pasien']) || !iss
 
 $patient_id = intval($_POST['id_pasien']);
 $tanggal = $_POST['tanggal'];
+$waktu   = $_POST['waktu_booking'];
+
+$datetime = new DateTime("$tanggal $waktu");
 
 // Ambil data pasien dari database
 $stmt = mysqli_prepare($conn, "SELECT * FROM patients WHERE id = ?");

@@ -38,6 +38,7 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
     <link rel="stylesheet" href="calender.css">
 
     <link rel="stylesheet" href="layout.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <nav class="navbar">
@@ -135,6 +136,14 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
                 Tanggal yang dipilih: <strong id="dateText"></strong>
             </div>
 
+            <input type="hidden" name="waktu_booking" id="selectedTime">
+
+            <div class="time-slots" id="timeSlots" style="display:none;">
+                <h3>Pilih Jam</h3>
+                <div class="slots-container" id="slotsContainer"></div>
+            </div>
+
+
             <button type="submit" class="btn-submit" id="btnSubmit" disabled>
                 Selesai
             </button>
@@ -148,5 +157,70 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
         const namaBulanNow = '<?php echo $nama_bulan[$bulan]; ?>';
     </script>
     <script src="calender.js"></script>
+
+    <footer class="footer">
+    <div class="footer-container">
+        <div class="nav-logo-footer">
+            <img src="logo-vaksinin.jpeg" alt="Vaksinin">
+        </div>
+
+        <div class="footer-section">
+            <h3>Jam Operasional</h3>
+            <h4>Home Service</h4>
+            <p>Dengan bantuan helper</p>
+            <h4>Klinik</h4>
+            <p>Senin - Sabtu : 08:00 – 17:00</p>
+            <p>Minggu : 08:00 – 18:30</p>
+            <div class="note">
+                <p>Hari libur nasional dan hari besar lainnya : <b>Tutup</b></p>
+            </div>
+        </div>
+        
+        <div class="footer-section">
+            <h3>Hubungi Kami</h3>
+            <h4>Klinik Vaksinin</h4>
+            <p>Komplek Ruko Sentra Menteng Blok M No. 981<br>
+            Jl. MH. Thamrin, Bintaro Sektor 7<br>
+            Kel. Pondok Jaya, Kec. Pondok Aren,<br>
+            Kota Tangerang Selatan, Banten 15220</p>
+            <a href="https://goo.gl/maps/f2suTc2vR7JC1Me47" class="map-link" target="_blank">
+                Lihat di Google Maps
+            </a>
+        </div>
+    </div>
+    
+    <!-- CONTACT ICONS DI TENGAH BAWAH -->
+    <div class="contact-icons-wrapper">
+        <div class="contact-icons-container">
+            <div class="contact-icons-row">
+                <div class="contact-icon-item">
+                    <i class="fab fa-whatsapp"></i>
+                    <span class="number">082137372757</span>
+                </div>
+                <div class="contact-icon-item">
+                    <i class="fas fa-phone"></i>
+                    <span class="number">02122214342</span>
+                </div>
+                <div class="contact-icon-item">
+                    <i class="fab fa-instagram"></i>
+                    <a href="https://instagram.com/vaksinin.id" target="_blank">@vaksinin.id</a>
+                </div>
+                <div class="contact-icon-item">
+                    <i class="fab fa-facebook"></i>
+                    <a href="https://facebook.com/vaksinin.id" target="_blank">vaksinin.id</a>
+                </div>
+                <div class="contact-icon-item">
+                    <i class="fas fa-envelope"></i>
+                    <a href="mailto:vaksinin.id@gmail.com">vaksinin.id@gmail.com</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="copyright">
+        <p>© 2024 Vaksinin.id - Seluruh hak cipta dilindungi undang-undang</p>
+        <p>Lindungi Diri dan Keluarga dengan Vaksinasi</p>
+    </div>
+</footer>
 </body>
 </html>

@@ -13,7 +13,7 @@ body {
 }
 
 .container {
-    max-width: 600px;
+    max-width: 500px;
     margin: 0 auto;
     background: white;
     padding: 30px;
@@ -199,3 +199,4 @@ h1 {
         font-size: 18px;
     }
 }
+
