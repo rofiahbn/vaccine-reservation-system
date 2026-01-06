@@ -36,8 +36,35 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pilih Tanggal dan Jadwalkan</title>
     <link rel="stylesheet" href="calender.css">
+
+    <link rel="stylesheet" href="layout.css">
 </head>
 <body>
+    <nav class="navbar">
+        <div class="nav-logo">
+            <img src="logo-vaksinin.jpeg" alt="Vaksinin">
+        </div>
+
+        <ul class="nav-menu">
+            <li><a href="order.php">Home</a></li>
+            <li><a href="#">Layanan</a></li>
+            <li><a href="#">Jadwal Vaksin</a></li>
+            <li><a href="#">Dokter</a></li>
+            <li><a href="#">Profil</a></li>
+            <li><a href="#">FAQ</a></li>
+            <li><a href="#">Kontak</a></li>
+        </ul>
+    </nav>
+
+    <header class="main-header">
+        <div class="hero">
+            <div class="hero-content">
+                <span class="hero-badge">Pendaftaran online resmi melalui Vaksinin.id</span>
+                <h1>Lindungi Diri dan<br>Keluarga dengan Vaksinasi</h1>
+            </div>
+        </div>
+    </header>
+
     <div class="container">
         <h1>Pilih Tanggal dan Jadwalkan</h1>
 
