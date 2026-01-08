@@ -2,65 +2,101 @@
 session_start();
 include "config.php";
 
-// Cek apakah ada data dari form
-if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['id_pasien']) || !isset($_POST['tanggal'])) {
+// validasi awal
+if (
+    $_SERVER['REQUEST_METHOD'] !== 'POST' ||
+    !isset($_POST['id_pasien'], $_POST['tanggal'], $_POST['waktu_booking'])
+) {
     header('Location: order.php');
     exit;
 }
 
-$patient_id = intval($_POST['id_pasien']);
+$waktu = $_POST['waktu_booking'] ?? null;
+
+$waktu_format = $waktu
+    ? date('H:i', strtotime($waktu))
+    : '-';
+
+$patient_id = (int) $_POST['id_pasien'];
 $tanggal = $_POST['tanggal'];
 $waktu   = $_POST['waktu_booking'];
 
-$datetime = new DateTime("$tanggal $waktu");
+// ================= VALIDASI SLOT =================
+$cek = $conn->prepare("
+    SELECT id FROM bookings
+    WHERE tanggal_booking = ?
+      AND waktu_booking = ?
+      AND status != 'cancelled'
+    LIMIT 1
+");
+$cek->bind_param("ss", $tanggal, $waktu);
+$cek->execute();
+$cek->store_result();
 
-// Ambil data pasien dari database
-$stmt = mysqli_prepare($conn, "SELECT * FROM patients WHERE id = ?");
-mysqli_stmt_bind_param($stmt, "i", $patient_id);
-mysqli_stmt_execute($stmt);
-$result = mysqli_stmt_get_result($stmt);
-$patient = mysqli_fetch_assoc($result);
-mysqli_stmt_close($stmt);
+if ($cek->num_rows > 0) {
+    echo "<script>
+        alert('Jam ini sudah dibooking, silakan pilih jam lain.');
+        window.history.back();
+    </script>";
+    exit;
+}
+$cek->close();
+
+// ================= DATA PASIEN =================
+$stmt = $conn->prepare("SELECT * FROM patients WHERE id = ?");
+$stmt->bind_param("i", $patient_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$patient = $result->fetch_assoc();
+$stmt->close();
 
 if (!$patient) {
-    die("Data pasien tidak ditemukan!");
+    die("Data pasien tidak ditemukan");
 }
 
-// Ambil email primary
-$stmt = mysqli_prepare($conn, "SELECT email FROM patient_emails WHERE patient_id = ? AND is_primary = 1 LIMIT 1");
-mysqli_stmt_bind_param($stmt, "i", $patient_id);
-mysqli_stmt_execute($stmt);
-$result = mysqli_stmt_get_result($stmt);
-$email_data = mysqli_fetch_assoc($result);
-$email = $email_data ? $email_data['email'] : '-';
-mysqli_stmt_close($stmt);
+// email
+$stmt = $conn->prepare("
+    SELECT email FROM patient_emails
+    WHERE patient_id = ? AND is_primary = 1 LIMIT 1
+");
+$stmt->bind_param("i", $patient_id);
+$stmt->execute();
+$email = $stmt->get_result()->fetch_assoc()['email'] ?? '-';
+$stmt->close();
 
-// Ambil phone primary
-$stmt = mysqli_prepare($conn, "SELECT phone FROM patient_phones WHERE patient_id = ? AND is_primary = 1 LIMIT 1");
-mysqli_stmt_bind_param($stmt, "i", $patient_id);
-mysqli_stmt_execute($stmt);
-$result = mysqli_stmt_get_result($stmt);
-$phone_data = mysqli_fetch_assoc($result);
-$phone = $phone_data ? $phone_data['phone'] : '-';
-mysqli_stmt_close($stmt);
+// phone
+$stmt = $conn->prepare("
+    SELECT phone FROM patient_phones
+    WHERE patient_id = ? AND is_primary = 1 LIMIT 1
+");
+$stmt->bind_param("i", $patient_id);
+$stmt->execute();
+$phone = $stmt->get_result()->fetch_assoc()['phone'] ?? '-';
+$stmt->close();
 
-// Ambil phone primary
-$stmt = mysqli_prepare($conn, "SELECT alamat FROM patient_addresses WHERE patient_id = ? AND is_primary = 1 LIMIT 1");
-mysqli_stmt_bind_param($stmt, "i", $patient_id);
-mysqli_stmt_execute($stmt);
-$result = mysqli_stmt_get_result($stmt);
-$address_data = mysqli_fetch_assoc($result);
-$address = $address_data ? $address_data['alamat'] : '-';
-mysqli_stmt_close($stmt);
+// address
+$stmt = $conn->prepare("
+    SELECT alamat FROM patient_addresses
+    WHERE patient_id = ? AND is_primary = 1 LIMIT 1
+");
+$stmt->bind_param("i", $patient_id);
+$stmt->execute();
+$address = $stmt->get_result()->fetch_assoc()['alamat'] ?? '-';
+$stmt->close();
 
-// Format tanggal Indonesia
+// format tanggal
 $tanggal_obj = new DateTime($tanggal);
-$hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-$bulan = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-$tanggal_format = $hari[$tanggal_obj->format('w')] . ', ' . $tanggal_obj->format('d') . ' ' . $bulan[$tanggal_obj->format('n')] . ' ' . $tanggal_obj->format('Y');
+$hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+$bulan = ['', 'Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+$tanggal_format =
+    $hari[$tanggal_obj->format('w')] . ', ' .
+    $tanggal_obj->format('d') . ' ' .
+    $bulan[$tanggal_obj->format('n')] . ' ' .
+    $tanggal_obj->format('Y');
 
 mysqli_close($conn);
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -148,12 +184,17 @@ mysqli_close($conn);
 
         <div class="card highlight">
             <h2 class="card-title">📅 Jadwal Reservasi</h2>
-            
-            <div class="data-row">
-                <span class="label">Tanggal</span>
-                <span class="value bold"><?php echo $tanggal_format; ?></span>
+                
+                <div class="data-row">
+                    <span class="label">Tanggal</span>
+                    <span class="value bold"><?php echo $tanggal_format; ?></span>
+                </div>
+
+                <div class="data-row">
+                    <span class="label">Waktu</span>
+                    <span class="value bold"><?php echo $waktu_format; ?></span>
+                </div>
             </div>
-        </div>
 
         <?php if ($patient['riwayat_alergi'] || $patient['riwayat_penyakit']): ?>
         <div class="card warning">
@@ -183,6 +224,7 @@ mysqli_close($conn);
             <form method="POST" action="save_booking.php" style="flex: 1;">
                 <input type="hidden" name="id_pasien" value="<?php echo $patient_id; ?>">
                 <input type="hidden" name="tanggal" value="<?php echo $tanggal; ?>">
+                <input type="hidden" name="waktu_booking" value="<?= $waktu ?>">
                 
                 <button type="submit" class="btn btn-primary">
                     Konfirmasi & Lanjutkan →

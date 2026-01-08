@@ -111,7 +111,7 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
                     $class .= ' full';
                     echo "<div class='$class'>$tgl</div>";
                 } else {
-                    echo "<div class='$class' onclick='selectDate($tgl)'>$tgl</div>";
+                    echo "<div class='$class' onclick='selectDate(this, $tgl)'>$tgl</div>";
                 }
             }
             ?>

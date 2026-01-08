@@ -1,31 +1,27 @@
 let selectedDateValue = null;
 
-function selectDate(day) {
-    // Remove previous selection
+function selectDate(element, day) {
     document.querySelectorAll('.day').forEach(d => {
         d.classList.remove('selected');
     });
 
-    // Add selection to clicked day
-    event.target.classList.add('selected');
+    element.classList.add('selected');
 
-    // Format tanggal
-    const bulan = bulanNow;
-    const tahun = tahunNow;
-    const tanggal = `${tahun}-${String(bulan).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-
+    const tanggal = `${tahunNow}-${String(bulanNow).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     selectedDateValue = tanggal;
-    document.getElementById('selectedDate').value = tanggal;
 
-    // Format display
-    const namaBulan = namaBulanNow;
-    document.getElementById('dateText').textContent = `${day} ${namaBulan} ${tahun}`;
+    document.getElementById('selectedDate').value = tanggal;
+    document.getElementById('dateText').textContent =
+        `${day} ${namaBulanNow} ${tahunNow}`;
     document.getElementById('dateDisplay').style.display = 'block';
 
-    // Enable submit button
-    document.getElementById('btnSubmit').disabled = false;
-}
+    // reset jam
+    document.getElementById('selectedTime').value = '';
+    document.getElementById('btnSubmit').disabled = true;
 
+    // ⬇️ INI YANG SEKARANG AKAN JALAN
+    generateTimeSlots();
+}
 
 function prevMonth() {
     let bulan = bulanNow;
@@ -56,3 +52,43 @@ function nextMonth() {
     document.getElementById('inputTahun').value = tahun;
     document.getElementById('monthForm').submit();
 }
+
+function generateTimeSlots() {
+    const container = document.getElementById('slotsContainer');
+    container.innerHTML = '';
+
+    // Jam operasional
+    let startHour = 9;
+    let endHour = 17;
+    let interval = 15; // menit
+
+    for (let hour = startHour; hour < endHour; hour++) {
+        for (let minute = 0; minute < 60; minute += interval) {
+            const time =
+                String(hour).padStart(2, '0') + ':' +
+                String(minute).padStart(2, '0');
+
+            const slot = document.createElement('div');
+            slot.classList.add('time-slot');
+            slot.textContent = time;
+
+            slot.onclick = () => selectTime(slot, time);
+
+            container.appendChild(slot);
+        }
+    }
+
+    document.getElementById('timeSlots').style.display = 'block';
+}
+
+function selectTime(element, time) {
+    document.querySelectorAll('.time-slot').forEach(s => {
+        s.classList.remove('selected');
+    });
+
+    element.classList.add('selected');
+    document.getElementById('selectedTime').value = time;
+
+    document.getElementById('btnSubmit').disabled = false;
+}
+

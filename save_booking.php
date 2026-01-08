@@ -3,13 +3,17 @@ session_start();
 include "config.php";
 
 // Cek apakah ada data dari form
-if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['id_pasien']) || !isset($_POST['tanggal'])) {
+if (
+    $_SERVER['REQUEST_METHOD'] !== 'POST' ||
+    !isset($_POST['id_pasien'], $_POST['tanggal'], $_POST['waktu_booking'])
+) {
     header('Location: order.php');
     exit;
 }
 
 $patient_id = intval($_POST['id_pasien']);
 $tanggal = $_POST['tanggal'];
+$waktu = $_POST['waktu_booking'];
 
 // Ambil data pasien
 $stmt = mysqli_prepare($conn, "SELECT * FROM patients WHERE id = ?");
@@ -66,8 +70,39 @@ $nomor_antrian = $date_code . '-' . str_pad($new_number, 3, '0', STR_PAD_LEFT);
 $status = 'pending'; // status: pending, confirmed, completed, cancelled
 $created_at = date('Y-m-d H:i:s');
 
-$stmt = mysqli_prepare($conn, "INSERT INTO bookings (patient_id, nomor_antrian, tanggal_booking, status, created_at) VALUES (?, ?, ?, ?, ?)");
-mysqli_stmt_bind_param($stmt, "issss", $patient_id, $nomor_antrian, $tanggal, $status, $created_at);
+$cek = $conn->prepare("
+    SELECT id FROM bookings
+    WHERE tanggal_booking = ?
+      AND waktu_booking = ?
+      AND status != 'cancelled'
+    LIMIT 1
+");
+$cek->bind_param("ss", $tanggal, $waktu);
+$cek->execute();
+$cek->store_result();
+
+if ($cek->num_rows > 0) {
+    die("Slot waktu ini sudah terisi");
+}
+$cek->close();
+
+$stmt = mysqli_prepare($conn, "
+    INSERT INTO bookings
+    (patient_id, nomor_antrian, tanggal_booking, waktu_booking, status, created_at)
+    VALUES (?, ?, ?, ?, ?, ?)
+");
+
+mysqli_stmt_bind_param(
+    $stmt,
+    "isssss",
+    $patient_id,
+    $nomor_antrian,
+    $tanggal,
+    $waktu,
+    $status,
+    $created_at
+);
+
 
 if (mysqli_stmt_execute($stmt)) {
     $booking_id = mysqli_insert_id($conn);
@@ -122,6 +157,10 @@ mysqli_close($conn);
                 <div class="booking-detail-item">
                     <span class="label">Tanggal</span>
                     <span class="value"><?php echo date('d/m/Y', strtotime($tanggal)); ?></span>
+                </div>
+                <div class="booking-detail-item">
+                    <span class="label">Waktu</span>
+                    <span class="value"><?php echo date('H:i', strtotime($waktu)); ?></span>
                 </div>
                 <?php if ($email): ?>
                 <div class="booking-detail-item">
