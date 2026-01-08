@@ -65,8 +65,8 @@ function searchPatient() {
     const name = document.getElementById('searchName').value.trim();
     const nik = document.getElementById('searchNIK').value.trim();
 
-    if (!name && !nik) {
-        alert('Masukkan Nama atau NIK untuk mencari data pasien');
+    if (!name || !nik) {
+        alert('Masukkan Nama dan NIK untuk mencari data pasien');
         return;
     }
 

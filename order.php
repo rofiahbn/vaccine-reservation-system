@@ -39,7 +39,7 @@
     <div class="container">
         <div class="search-section">
             <h2>Cari dan Temukan Datamu</h2>
-            <p>Cukup masukkan nama Anda. Jika sudah pernah mendaftar, sistem akan menemukan data Anda secara otomatis agar proses lebih cepat dan praktis</p>
+            <p>Cukup masukkan nama dan NIK Anda. Jika sudah pernah mendaftar, sistem akan menemukan data Anda secara otomatis agar proses lebih cepat dan praktis</p>
             
             <div class="search-simple">
                 <input type="text" id="searchName" class="search-input-main" placeholder="Nama">
@@ -224,7 +224,7 @@
             <h4>Klinik</h4>
             <p>Senin - Sabtu : 08:00 – 17:00</p>
             <p>Minggu : 08:00 – 18:30</p>
-            <div class="note">
+            <div class="note-footer">
                 <p>Hari libur nasional dan hari besar lainnya : <b>Tutup</b></p>
             </div>
         </div>

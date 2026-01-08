@@ -41,9 +41,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // INSERT patients
     $query = "INSERT INTO patients 
-        (no_rekam_medis, nama_lengkap, nama_panggilan, tanggal_lahir, usia, kategori_usia, jenis_kelamin, nik_paspor, kebangsaan, pekerjaan, nama_wali, riwayat_alergi, riwayat_penyakit, riwayat_obat)
+        (no_rekam_medis, nama_lengkap, nama_panggilan, tanggal_lahir, usia, kategori_usia, jenis_kelamin, nik_paspor, kebangsaan, pekerjaan, nama_wali, riwayat_alergi, riwayat_penyakit, riwayat_obat, pelayanan)
         VALUES 
-        ('$no_rekam_medis', '$nama_lengkap', '$nama_panggilan', '$tanggal_lahir', '$usia', '$kategori_usia', '$jenis_kelamin', '$nik_paspor', '$kebangsaan', '$pekerjaan', '$nama_wali', '$riwayat_alergi', '$riwayat_penyakit', '$riwayat_obat')";
+        ('$no_rekam_medis', '$nama_lengkap', '$nama_panggilan', '$tanggal_lahir', '$usia', '$kategori_usia', '$jenis_kelamin', '$nik_paspor', '$kebangsaan', '$pekerjaan', '$nama_wali', '$riwayat_alergi', '$riwayat_penyakit', '$riwayat_obat', '$pelayanan')";
 
     if (mysqli_query($conn, $query)) {
 
@@ -83,8 +83,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         // ================= SIMPAN PELAYANAN =================
-        if (!empty($p['vaksin'])) {
-            foreach ($p['vaksin'] as $vaksin) {
+        if (!empty($_POST['vaksin'])) {
+            foreach ($_POST['vaksin'] as $vaksin) {
                 $vaksin = mysqli_real_escape_string($conn, $vaksin);
                 mysqli_query($conn, "
                     INSERT INTO patient_services (patient_id, service_type, service_name)
@@ -93,12 +93,42 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
 
-        if (!empty($p['vitamin'])) {
-            foreach ($p['vitamin'] as $vitamin) {
+        if (!empty($_POST['vitamin'])) {
+            foreach ($_POST['vitamin'] as $vitamin) {
                 $vitamin = mysqli_real_escape_string($conn, $vitamin);
                 mysqli_query($conn, "
                     INSERT INTO patient_services (patient_id, service_type, service_name)
                     VALUES ($patient_id, 'Vitamin', '$vitamin')
+                ");
+            }
+        }
+
+        if (!empty($_POST['antigen'])) {
+            foreach ($_POST['antigen'] as $antigen) {
+                $antigen = mysqli_real_escape_string($conn, $antigen);
+                mysqli_query($conn, "
+                    INSERT INTO patient_services (patient_id, service_type, service_name)
+                    VALUES ($patient_id, 'Antigen', '$antigen')
+                ");
+            }
+        }
+
+        if (!empty($_POST['obat'])) {
+            foreach ($_POST['obat'] as $obat) {
+                $obat = mysqli_real_escape_string($conn, $obat);
+                mysqli_query($conn, "
+                    INSERT INTO patient_services (patient_id, service_type, service_name)
+                    VALUES ($patient_id, 'Obat', '$obat')
+                ");
+            }
+        }
+
+        if (!empty($_POST['pcr'])) {
+            foreach ($_POST['pcr'] as $pcr) {
+                $pcr = mysqli_real_escape_string($conn, $pcr);
+                mysqli_query($conn, "
+                    INSERT INTO patient_services (patient_id, service_type, service_name)
+                    VALUES ($patient_id, 'PCR', '$pcr')
                 ");
             }
         }

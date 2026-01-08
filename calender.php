@@ -171,7 +171,7 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
             <h4>Klinik</h4>
             <p>Senin - Sabtu : 08:00 – 17:00</p>
             <p>Minggu : 08:00 – 18:30</p>
-            <div class="note">
+            <div class="note-footer">
                 <p>Hari libur nasional dan hari besar lainnya : <b>Tutup</b></p>
             </div>
         </div>
