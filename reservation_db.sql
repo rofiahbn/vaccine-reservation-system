@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 24, 2025 at 07:51 AM
+-- Generation Time: Jan 08, 2026 at 05:57 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -20,6 +20,46 @@ SET time_zone = "+00:00";
 --
 -- Database: `reservation_db`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `bookings`
+--
+
+CREATE TABLE `bookings` (
+  `id` int(11) NOT NULL,
+  `patient_id` int(11) NOT NULL,
+  `nomor_antrian` varchar(20) NOT NULL,
+  `tanggal_booking` date NOT NULL,
+  `waktu_booking` time NOT NULL,
+  `status` enum('pending','confirmed','completed','cancelled') DEFAULT 'pending',
+  `catatan` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `bookings`
+--
+
+INSERT INTO `bookings` (`id`, `patient_id`, `nomor_antrian`, `tanggal_booking`, `waktu_booking`, `status`, `catatan`, `created_at`, `updated_at`) VALUES
+(1, 12, '260128-001', '2026-01-28', '10:15:00', 'pending', NULL, '2026-01-08 05:47:53', '2026-01-08 11:47:53'),
+(2, 11, '260121-001', '2026-01-21', '10:15:00', 'pending', NULL, '2026-01-08 05:48:12', '2026-01-08 11:48:12');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `booking_services`
+--
+
+CREATE TABLE `booking_services` (
+  `id` int(11) NOT NULL,
+  `booking_id` int(11) NOT NULL,
+  `nama_layanan` varchar(100) NOT NULL,
+  `harga` decimal(10,2) DEFAULT 0.00,
+  `created_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -80,6 +120,7 @@ CREATE TABLE `patients` (
   `riwayat_alergi` text DEFAULT NULL,
   `riwayat_penyakit` text DEFAULT NULL,
   `riwayat_obat` text DEFAULT NULL,
+  `pelayanan` varchar(50) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -88,11 +129,19 @@ CREATE TABLE `patients` (
 -- Dumping data for table `patients`
 --
 
-INSERT INTO `patients` (`id`, `no_rekam_medis`, `nama_lengkap`, `nama_panggilan`, `tanggal_lahir`, `usia`, `kategori_usia`, `jenis_kelamin`, `nik_paspor`, `kebangsaan`, `pekerjaan`, `nama_wali`, `riwayat_alergi`, `riwayat_penyakit`, `riwayat_obat`, `created_at`, `updated_at`) VALUES
-(1, 'RM1766558659', 'Rofi\'ah Budi Nadia', 'fiah', '0000-00-00', 0, 'Anak', '', '3314014701030001', 'Indonesia', 'umum', 'p', '', '', '', '2025-12-24 06:44:19', '2025-12-24 06:44:19'),
-(2, 'RM1766558769', 'Rofi\'ah Budi Nadia', 'fiah', '0000-00-00', 0, 'Anak', '', '3314014701030001', 'Indonesia', 'umum', 'p', '', '', '', '2025-12-24 06:46:09', '2025-12-24 06:46:09'),
-(3, 'RM1766558850', 'Rofi\'ah Budi Nadia', 'fiah', '0000-00-00', 0, 'Anak', '', '3314014701030001', 'Indonesia', 'umum', 'p', '', '', '', '2025-12-24 06:47:30', '2025-12-24 06:47:30'),
-(4, 'RM1766558925', 'Rofi\'ah Budi Nadia', 'fiah', '0000-00-00', 0, 'Anak', '', '3314014701030001', 'Indonesia', 'umum', 'p', '', '', '', '2025-12-24 06:48:45', '2025-12-24 06:48:45');
+INSERT INTO `patients` (`id`, `no_rekam_medis`, `nama_lengkap`, `nama_panggilan`, `tanggal_lahir`, `usia`, `kategori_usia`, `jenis_kelamin`, `nik_paspor`, `kebangsaan`, `pekerjaan`, `nama_wali`, `riwayat_alergi`, `riwayat_penyakit`, `riwayat_obat`, `pelayanan`, `created_at`, `updated_at`) VALUES
+(9, 'RM1766984285', 'Rofi\'ah Budi Nadia', 'fiah', '2003-01-07', 22, 'Dewasa', 'L', '3314014701030001', 'Indonesia', 'umum', 'p', '', '', '', '', '2025-12-29 04:58:05', '2025-12-29 04:58:05'),
+(10, 'RM1767081742', 'Rofi\'ah Budi Nadia', 'fiah', '2003-01-07', 22, 'Dewasa', 'P', '3314014701030001', 'Indonesia', 'umum', 'p', '', '', '', '', '2025-12-30 08:02:22', '2025-12-30 08:02:22'),
+(11, 'RM1767082539', 'Rofi\'ah Budi Nadia', 'fiah', '2003-01-07', 22, 'Dewasa', 'P', '3314014701030001', 'Indonesia', 'umum', 'p', '', '', '', '', '2025-12-30 08:15:39', '2025-12-30 08:15:39'),
+(12, 'RM1767084128', 'Rofi\'ah Budi Nadia', 'fiah', '2025-12-02', 0, 'Anak', 'P', '3314014701030001', 'Indonesia', 'umum', 'p', '', '', '', '', '2025-12-30 08:42:08', '2025-12-30 08:42:08'),
+(13, 'RM1767085866', 'h', 'fiah', '2025-12-13', 0, 'Anak', 'L', '3314014701030001', 'Indonesia', 'umum', 'p', '', '', '', '', '2025-12-30 09:11:06', '2025-12-30 09:11:06'),
+(14, 'RM1767088401', 'Rofi\'ah Budi Nadia', '', '2025-12-10', 0, 'Anak', 'L', '1234567890987654', 'Indonesia', '', '', '', '', '', '', '2025-12-30 09:53:21', '2025-12-30 09:53:21'),
+(15, 'RM1767357394', 'Rofiah Budi Nadia', 'fiah', '2003-01-07', 22, 'Dewasa', 'P', '3314014701030001', 'Indonesia', 'umum', 'p', 'gaada', 'gaada', 'gaada', '', '2026-01-02 12:36:34', '2026-01-02 12:36:34'),
+(16, 'RM1767359382', 'Rofiah Budi Nadia', 'fiah', '2003-01-07', 22, 'Dewasa', 'P', '3314014701030001', 'Indonesia', 'umum', 'p', 'gaada', 'gaada', 'gaada', '', '2026-01-02 13:09:42', '2026-01-02 13:09:42'),
+(17, 'RM1767678456', 'rofiah', 'fiah', '2026-01-07', 0, 'Anak', 'P', '123567098765432', 'Indonesia', '', '', '', '', '', '', '2026-01-06 05:47:36', '2026-01-06 05:47:36'),
+(18, 'RM1767678534', 'rofiah', 'fiah', '2026-01-07', 0, 'Anak', 'P', '123567098765432', 'Indonesia', '', '', '', '', '', '', '2026-01-06 05:48:54', '2026-01-06 05:48:54'),
+(19, 'RM1767678557', 'rofiah', 'fiah', '2026-01-07', 0, 'Anak', 'P', '123567098765432', 'Indonesia', '', '', '', '', '', '', '2026-01-06 05:49:17', '2026-01-06 05:49:17'),
+(20, 'RM1767695019', 'Rofiah Budi Nadia', 'fiah', '2003-01-07', 22, 'Dewasa', 'P', '3314014701030001', 'Indonesia', 'umum', 'p', '', '', '', '', '2026-01-06 10:23:39', '2026-01-06 10:23:39');
 
 -- --------------------------------------------------------
 
@@ -112,10 +161,19 @@ CREATE TABLE `patient_addresses` (
 --
 
 INSERT INTO `patient_addresses` (`id`, `patient_id`, `alamat`, `is_primary`) VALUES
-(1, 1, 'salam', 1),
-(2, 2, 'salam', 1),
-(3, 3, 'salam', 1),
-(4, 4, 'salam', 1);
+(9, 9, 'salam', 1),
+(10, 10, 'salam', 1),
+(11, 11, 'salam', 1),
+(12, 12, 'salam', 1),
+(13, 13, 'salam', 1),
+(14, 14, 'sal', 1),
+(15, 14, 'dsad', 0),
+(16, 15, 'salam', 1),
+(17, 16, 'salam', 1),
+(18, 17, 'salam', 1),
+(19, 18, 'salam', 1),
+(20, 19, 'salam', 1),
+(21, 20, 'salam', 1);
 
 -- --------------------------------------------------------
 
@@ -135,10 +193,19 @@ CREATE TABLE `patient_emails` (
 --
 
 INSERT INTO `patient_emails` (`id`, `patient_id`, `email`, `is_primary`) VALUES
-(1, 1, 'rofiahbudi@gmail.com', 1),
-(2, 2, 'rofiahbudi@gmail.com', 1),
-(3, 3, 'rofiahbudi@gmail.com', 1),
-(4, 4, 'rofiahbudi@gmail.com', 1);
+(9, 9, 'rofiahbudi@gmail.com', 1),
+(10, 10, 'rofiahbudi@gmail.com', 1),
+(11, 11, 'rofiahbudi@gmail.com', 1),
+(12, 12, 'rofiahbudi@gmail.com', 1),
+(13, 13, 'rofiahbudi@gmail.com', 1),
+(14, 14, 'rofiahbudi@gmail.com', 1),
+(15, 14, 'rofiahbudi@gmail.com', 0),
+(16, 15, 'rofiahbudi@gmail.com', 1),
+(17, 16, 'rofiahbudi@gmail.com', 1),
+(18, 17, 'rofiahbudi@gmail.com', 1),
+(19, 18, 'rofiahbudi@gmail.com', 1),
+(20, 19, 'rofiahbudi@gmail.com', 1),
+(21, 20, 'rofiahbudi@gmail.com', 1);
 
 -- --------------------------------------------------------
 
@@ -158,10 +225,44 @@ CREATE TABLE `patient_phones` (
 --
 
 INSERT INTO `patient_phones` (`id`, `patient_id`, `phone`, `is_primary`) VALUES
-(1, 1, '085876923088', 1),
-(2, 2, '085876923088', 1),
-(3, 3, '085876923088', 1),
-(4, 4, '085876923088', 1);
+(9, 9, '085876923088', 1),
+(10, 10, '085876923088', 1),
+(11, 11, '085876923088', 1),
+(12, 12, '085876923088', 1),
+(13, 13, '085876923088', 1),
+(14, 13, '085876923088', 0),
+(15, 14, '23', 1),
+(16, 14, '133', 0),
+(17, 15, '085876923088', 1),
+(18, 16, '085876923088', 1),
+(19, 17, '0898653248', 1),
+(20, 18, '0898653248', 1),
+(21, 19, '0898653248', 1),
+(22, 20, '085876923088', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `patient_services`
+--
+
+CREATE TABLE `patient_services` (
+  `id` int(11) NOT NULL,
+  `patient_id` int(11) NOT NULL,
+  `service_type` enum('Vaksin','Vitamin','Antigen','PCR','Obat') DEFAULT NULL,
+  `service_name` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `patient_services`
+--
+
+INSERT INTO `patient_services` (`id`, `patient_id`, `service_type`, `service_name`, `created_at`) VALUES
+(1, 10, 'Vaksin', 'Adacel (Sanofi)', '2025-12-30 08:02:22'),
+(2, 11, 'Vaksin', 'Arexvy (GSK)', '2025-12-30 08:15:39'),
+(3, 12, 'Vaksin', 'Pneumovax 23 (MSD)', '2025-12-30 08:42:08'),
+(4, 13, 'Vaksin', 'Influvac Tetra (Abbott)', '2025-12-30 09:11:06');
 
 -- --------------------------------------------------------
 
@@ -219,8 +320,7 @@ INSERT INTO `time_slots` (`id`, `slot_date`, `slot_time`, `max_capacity`, `curre
 (10, '2025-12-24', '13:30:00', 3, 0, 1),
 (11, '2025-12-24', '14:00:00', 3, 0, 1),
 (12, '2025-12-24', '14:30:00', 3, 0, 1),
-(13, '2025-12-24', '15:00:00', 3, 0, 1),
-(14, '2025-12-24', '15:30:00', 3, 0, 1);
+(13, '2025-12-24', '15:00:00', 3, 0, 1);
 
 -- --------------------------------------------------------
 
@@ -272,6 +372,27 @@ INSERT INTO `vaccines` (`id`, `vaccine_name`, `description`, `price`, `stock`, `
 --
 
 --
+-- Indexes for table `bookings`
+--
+ALTER TABLE `bookings`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `nomor_antrian` (`nomor_antrian`),
+  ADD UNIQUE KEY `unique_slot` (`tanggal_booking`,`waktu_booking`),
+  ADD KEY `idx_patient` (`patient_id`),
+  ADD KEY `idx_tanggal` (`tanggal_booking`),
+  ADD KEY `idx_waktu` (`waktu_booking`),
+  ADD KEY `idx_tanggal_waktu` (`tanggal_booking`,`waktu_booking`),
+  ADD KEY `idx_status` (`status`),
+  ADD KEY `idx_nomor_antrian` (`nomor_antrian`);
+
+--
+-- Indexes for table `booking_services`
+--
+ALTER TABLE `booking_services`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_booking` (`booking_id`);
+
+--
 -- Indexes for table `kipi_records`
 --
 ALTER TABLE `kipi_records`
@@ -316,6 +437,12 @@ ALTER TABLE `patient_phones`
   ADD KEY `patient_id` (`patient_id`);
 
 --
+-- Indexes for table `patient_services`
+--
+ALTER TABLE `patient_services`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `reservations`
 --
 ALTER TABLE `reservations`
@@ -350,6 +477,18 @@ ALTER TABLE `vaccines`
 --
 
 --
+-- AUTO_INCREMENT for table `bookings`
+--
+ALTER TABLE `bookings`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `booking_services`
+--
+ALTER TABLE `booking_services`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `kipi_records`
 --
 ALTER TABLE `kipi_records`
@@ -365,24 +504,30 @@ ALTER TABLE `medical_records`
 -- AUTO_INCREMENT for table `patients`
 --
 ALTER TABLE `patients`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `patient_addresses`
 --
 ALTER TABLE `patient_addresses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `patient_emails`
 --
 ALTER TABLE `patient_emails`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `patient_phones`
 --
 ALTER TABLE `patient_phones`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+
+--
+-- AUTO_INCREMENT for table `patient_services`
+--
+ALTER TABLE `patient_services`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
@@ -412,6 +557,18 @@ ALTER TABLE `vaccines`
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `bookings`
+--
+ALTER TABLE `bookings`
+  ADD CONSTRAINT `fk_patient_id` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `booking_services`
+--
+ALTER TABLE `booking_services`
+  ADD CONSTRAINT `booking_services_ibfk_1` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `kipi_records`
