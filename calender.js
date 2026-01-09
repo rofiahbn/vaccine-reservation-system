@@ -57,25 +57,33 @@ function generateTimeSlots() {
     const container = document.getElementById('slotsContainer');
     container.innerHTML = '';
 
-    // Jam operasional
+    // Jam operasional 09:00 - 16:30
     let startHour = 9;
-    let endHour = 17;
+    let startMinute = 0;
+
+    let endHour = 16;
+    let endMinute = 30;
+
     let interval = 15; // menit
 
-    for (let hour = startHour; hour < endHour; hour++) {
-        for (let minute = 0; minute < 60; minute += interval) {
-            const time =
-                String(hour).padStart(2, '0') + ':' +
-                String(minute).padStart(2, '0');
+    let startTime = startHour * 60 + startMinute;
+    let endTime   = endHour * 60 + endMinute;
 
-            const slot = document.createElement('div');
-            slot.classList.add('time-slot');
-            slot.textContent = time;
+    for (let time = startTime; time <= endTime; time += interval) {
+        let hour = Math.floor(time / 60);
+        let minute = time % 60;
 
-            slot.onclick = () => selectTime(slot, time);
+        const label =
+            String(hour).padStart(2, '0') + ':' +
+            String(minute).padStart(2, '0');
 
-            container.appendChild(slot);
-        }
+        const slot = document.createElement('div');
+        slot.classList.add('time-slot');
+        slot.textContent = label;
+
+        slot.onclick = () => selectTime(slot, label);
+
+        container.appendChild(slot);
     }
 
     document.getElementById('timeSlots').style.display = 'block';

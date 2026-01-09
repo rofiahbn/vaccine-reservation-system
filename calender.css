@@ -229,3 +229,12 @@ h1 {
     color: #fff;
     border-color: #2563eb;
 }
+
+.time-slot.full {
+    background: #ddd;
+    color: #777;
+    cursor: not-allowed;
+}
+.time-slot.full:hover {
+    background: #ddd;
+}

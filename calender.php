@@ -1,4 +1,5 @@
 <?php
+
 session_start();
 
 // Ambil patient_id dari URL
@@ -24,11 +25,12 @@ $nama_bulan = [
 $jumlah_hari = cal_days_in_month(CAL_GREGORIAN, $bulan, $tahun);
 
 // Hari pertama bulan (0=Minggu, 6=Sabtu)
-$hari_pertama = date('w', strtotime("$tahun-$bulan-01"));
+$hari_awal = date('w', strtotime("$tahun-$bulan-01"));
 
 // Hari ini
 $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -92,7 +94,6 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
 
             <?php
             // Kosongkan hari sebelum tanggal 1
-            $hari_awal = ($hari_pertama == 0) ? 6 : $hari_pertama - 1; // Konversi ke Senin = 0
             for ($i = 0; $i < $hari_awal; $i++) {
                 echo '<div class="day empty"></div>';
             }
