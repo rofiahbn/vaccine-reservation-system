@@ -33,9 +33,11 @@ if (!empty($name)) {
 }
 
 if (!empty($nik)) {
-    $query .= " AND p.nik_paspor LIKE ?";
+    // FIXED: Cari di kolom nik ATAU paspor
+    $query .= " AND (p.nik LIKE ? OR p.paspor LIKE ?)";
     $params[] = "%$nik%";
-    $types .= 's';
+    $params[] = "%$nik%";
+    $types .= 'ss';
 }
 
 $query .= " ORDER BY p.created_at DESC LIMIT 10";
@@ -45,12 +47,7 @@ $stmt = mysqli_prepare($conn, $query);
 
 if (!empty($params)) {
     // Bind parameters dinamis
-    $bind_params = array_merge([$types], $params);
-    $refs = [];
-    foreach ($bind_params as $key => $value) {
-        $refs[$key] = &$bind_params[$key];
-    }
-    call_user_func_array([$stmt, 'bind_param'], $refs);
+    mysqli_stmt_bind_param($stmt, $types, ...$params);
 }
 
 mysqli_stmt_execute($stmt);

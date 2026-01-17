@@ -1,192 +1,120 @@
 <?php
 session_start();
-include "config.php";
 
-// Cek apakah ada data dari form
-if (
-    $_SERVER['REQUEST_METHOD'] !== 'POST' ||
-    !isset($_POST['id_pasien'], $_POST['tanggal'], $_POST['waktu_booking'])
-) {
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: order.php');
     exit;
 }
 
-$patient_id = intval($_POST['id_pasien']);
-$tanggal = $_POST['tanggal'];
-$waktu = $_POST['waktu_booking'];
+// Validasi data
+$errors = [];
 
-// Ambil data pasien
-$stmt = mysqli_prepare($conn, "SELECT * FROM patients WHERE id = ?");
-mysqli_stmt_bind_param($stmt, "i", $patient_id);
-mysqli_stmt_execute($stmt);
-$result = mysqli_stmt_get_result($stmt);
-$patient = mysqli_fetch_assoc($result);
-mysqli_stmt_close($stmt);
+$pelayanan = $_POST['pelayanan'] ?? '';
+$nama_lengkap = $_POST['nama_lengkap'] ?? '';
+$tanggal_lahir = $_POST['tanggal_lahir'] ?? '';
+$jenis_kelamin = $_POST['jenis_kelamin'] ?? '';
+$tanggal_booking = $_POST['tanggal_booking'] ?? '';
+$waktu_booking = $_POST['waktu_booking'] ?? '';
+$action = $_POST['action'] ?? ''; // 'add_more' atau 'finish'
 
-if (!$patient) {
-    die("Data pasien tidak ditemukan!");
+if (empty($pelayanan)) $errors[] = 'Pelayanan harus dipilih';
+if (empty($nama_lengkap)) $errors[] = 'Nama lengkap harus diisi';
+if (empty($tanggal_lahir)) $errors[] = 'Tanggal lahir harus diisi';
+if (empty($jenis_kelamin)) $errors[] = 'Jenis kelamin harus dipilih';
+if (empty($tanggal_booking)) $errors[] = 'Tanggal booking harus dipilih';
+if (empty($waktu_booking)) $errors[] = 'Waktu booking harus dipilih';
+
+// Validasi identitas sesuai layanan
+if ($pelayanan === 'Umroh/Haji/Luar Negeri') {
+    if (empty($_POST['paspor'])) {
+        $errors[] = 'Nomor Paspor harus diisi untuk layanan Umroh/Haji/Luar Negeri';
+    }
+} else if ($pelayanan === 'Vaksinasi Umum/Infus Vitamin') {
+    if (empty($_POST['nik'])) {
+        $errors[] = 'NIK harus diisi untuk layanan Vaksinasi Umum/Infus Vitamin';
+    } else if (strlen($_POST['nik']) !== 16) {
+        $errors[] = 'NIK harus 16 digit';
+    }
 }
 
-// Ambil email primary
-$stmt = mysqli_prepare($conn, "SELECT email FROM patient_emails WHERE patient_id = ? AND is_primary = 1 LIMIT 1");
-mysqli_stmt_bind_param($stmt, "i", $patient_id);
-mysqli_stmt_execute($stmt);
-$result = mysqli_stmt_get_result($stmt);
-$email_data = mysqli_fetch_assoc($result);
-$email = $email_data ? $email_data['email'] : '';
-mysqli_stmt_close($stmt);
+// Validasi kontak
+$emails = array_filter($_POST['emails'] ?? []);
+$phones = array_filter($_POST['phones'] ?? []);
 
-// Ambil phone primary
-$stmt = mysqli_prepare($conn, "SELECT phone FROM patient_phones WHERE patient_id = ? AND is_primary = 1 LIMIT 1");
-mysqli_stmt_bind_param($stmt, "i", $patient_id);
-mysqli_stmt_execute($stmt);
-$result = mysqli_stmt_get_result($stmt);
-$phone_data = mysqli_fetch_assoc($result);
-$phone = $phone_data ? $phone_data['phone'] : '';
-mysqli_stmt_close($stmt);
+if (count($emails) < 1) $errors[] = 'Minimal harus ada 1 email';
+if (count($phones) < 1) $errors[] = 'Minimal harus ada 1 nomor HP';
 
-// Generate nomor antrian (format: YYMMDD-XXX)
-$date_code = date('ymd', strtotime($tanggal));
+// Validasi alamat
+if (empty($_POST['alamat'])) $errors[] = 'Alamat harus diisi';
+if (empty($_POST['provinsi'])) $errors[] = 'Provinsi harus dipilih';
+if (empty($_POST['kota'])) $errors[] = 'Kota harus dipilih';
 
-// Cek nomor antrian terakhir untuk tanggal tersebut
-$stmt = mysqli_prepare($conn, "SELECT nomor_antrian FROM bookings WHERE DATE(tanggal_booking) = ? ORDER BY id DESC LIMIT 1");
-mysqli_stmt_bind_param($stmt, "s", $tanggal);
-mysqli_stmt_execute($stmt);
-$result = mysqli_stmt_get_result($stmt);
-$last_booking = mysqli_fetch_assoc($result);
-mysqli_stmt_close($stmt);
-
-if ($last_booking) {
-    // Ambil 3 digit terakhir dan tambah 1
-    $last_number = intval(substr($last_booking['nomor_antrian'], -3));
-    $new_number = $last_number + 1;
-} else {
-    $new_number = 1;
+// Jika ada error, kembali ke order.php dengan error message
+if (!empty($errors)) {
+    $_SESSION['error_message'] = implode('<br>', $errors);
+    header('Location: order.php');
+    exit;
 }
 
-$nomor_antrian = $date_code . '-' . str_pad($new_number, 3, '0', STR_PAD_LEFT);
+// Hitung usia
+$birthDate = new DateTime($tanggal_lahir);
+$today = new DateTime();
+$usia = $today->diff($birthDate)->y;
+$kategori_usia = ($usia < 18) ? 'Anak' : 'Dewasa';
 
-// Simpan booking ke database
-$status = 'pending'; // status: pending, confirmed, completed, cancelled
-$created_at = date('Y-m-d H:i:s');
+// Siapkan data peserta
+$participant_data = [
+    'pelayanan' => $pelayanan,
+    'nama_lengkap' => $nama_lengkap,
+    'nama_panggilan' => $_POST['nama_panggilan'] ?? '',
+    'tanggal_lahir' => $tanggal_lahir,
+    'usia' => $usia,
+    'kategori_usia' => $kategori_usia,
+    'jenis_kelamin' => $jenis_kelamin,
+    'nik' => $_POST['nik'] ?? '',
+    'paspor' => $_POST['paspor'] ?? '',
+    'kebangsaan' => $_POST['kebangsaan'] ?? 'Indonesia',
+    'pekerjaan' => $_POST['pekerjaan'] ?? '',
+    'nama_wali' => $_POST['nama_wali'] ?? '',
+    'emails' => $emails,
+    'phones' => $phones,
+    'alamat' => $_POST['alamat'],
+    'provinsi' => $_POST['provinsi'],
+    'kota' => $_POST['kota'],
+    'riwayat_alergi' => $_POST['riwayat_alergi'] ?? '',
+    'riwayat_penyakit' => $_POST['riwayat_penyakit'] ?? '',
+    'riwayat_obat' => $_POST['riwayat_obat'] ?? '',
+    'tanggal_booking' => $tanggal_booking,
+    'waktu_booking' => $waktu_booking
+];
 
-$cek = $conn->prepare("
-    SELECT id FROM bookings
-    WHERE tanggal_booking = ?
-      AND waktu_booking = ?
-      AND status != 'cancelled'
-    LIMIT 1
-");
-$cek->bind_param("ss", $tanggal, $waktu);
-$cek->execute();
-$cek->store_result();
-
-if ($cek->num_rows > 0) {
-    die("Slot waktu ini sudah terisi");
-}
-$cek->close();
-
-$stmt = mysqli_prepare($conn, "
-    INSERT INTO bookings
-    (patient_id, nomor_antrian, tanggal_booking, waktu_booking, status, created_at)
-    VALUES (?, ?, ?, ?, ?, ?)
-");
-
-mysqli_stmt_bind_param(
-    $stmt,
-    "isssss",
-    $patient_id,
-    $nomor_antrian,
-    $tanggal,
-    $waktu,
-    $status,
-    $created_at
-);
-
-
-if (mysqli_stmt_execute($stmt)) {
-    $booking_id = mysqli_insert_id($conn);
-    mysqli_stmt_close($stmt);
+// Cek action
+if ($action === 'add_more') {
+    // Simpan ke session sebagai peserta pertama
+    if (!isset($_SESSION['participants'])) {
+        $_SESSION['participants'] = [];
+    }
+    $_SESSION['participants'][] = $participant_data;
     
-    // TODO: Kirim email notifikasi
-    // TODO: Kirim WhatsApp notifikasi
+    // Redirect ke add_participant.php
+    $_SESSION['success_message'] = 'Peserta pertama berhasil ditambahkan! Silakan tambah peserta berikutnya.';
+    header('Location: add_participant.php');
+    exit;
     
-    // Simpan booking_id ke session untuk halaman sukses
-    $_SESSION['last_booking_id'] = $booking_id;
-    $_SESSION['nomor_antrian'] = $nomor_antrian;
+} else if ($action === 'finish') {
+    // Simpan peserta pertama ke session juga
+    if (!isset($_SESSION['participants'])) {
+        $_SESSION['participants'] = [];
+    }
+    $_SESSION['participants'][] = $participant_data;
     
-} else {
-    mysqli_stmt_close($stmt);
-    die("Gagal menyimpan booking: " . mysqli_error($conn));
+    // Redirect langsung ke konfirmasi
+    header('Location: booking_confirmation.php');
+    exit;
 }
 
-mysqli_close($conn);
+// Fallback jika action tidak valid
+$_SESSION['error_message'] = 'Action tidak valid';
+header('Location: order.php');
+exit;
 ?>
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pendaftaran Berhasil</title>
-    <link rel="stylesheet" href="save_booking.css">
-    <link rel="stylesheet" href="layout.css">
-</head>
-<body>
-    <div class="success-container">
-        <div class="success-icon">
-            <svg viewBox="0 0 52 52">
-                <polyline class="checkmark" points="14 27 22 35 38 19"/>
-            </svg>
-        </div>
-
-        <h1>Pendaftaran Berhasil</h1>
-        <p class="subtitle">
-            Invoice telah dikirim ke email atau nomor telepon Anda.<br>
-            Klik di sini untuk download invoice.
-        </p>
-
-        <div class="booking-info">
-            <div class="booking-number">Nomor Antrian Anda</div>
-            <div class="antrian-number"><?php echo htmlspecialchars($nomor_antrian); ?></div>
-            
-            <div class="booking-details">
-                <div class="booking-detail-item">
-                    <span class="label">Nama Pasien</span>
-                    <span class="value"><?php echo htmlspecialchars($patient['nama_lengkap']); ?></span>
-                </div>
-                <div class="booking-detail-item">
-                    <span class="label">Tanggal</span>
-                    <span class="value"><?php echo date('d/m/Y', strtotime($tanggal)); ?></span>
-                </div>
-                <div class="booking-detail-item">
-                    <span class="label">Waktu</span>
-                    <span class="value"><?php echo date('H:i', strtotime($waktu)); ?></span>
-                </div>
-                <?php if ($email): ?>
-                <div class="booking-detail-item">
-                    <span class="label">Email</span>
-                    <span class="value"><?php echo htmlspecialchars($email); ?></span>
-                </div>
-                <?php endif; ?>
-                <?php if ($phone): ?>
-                <div class="booking-detail-item">
-                    <span class="label">No. HP</span>
-                    <span class="value"><?php echo htmlspecialchars($phone); ?></span>
-                </div>
-                <?php endif; ?>
-            </div>
-        </div>
-
-        <a href="generate_invoice.php?booking_id=<?php echo $booking_id; ?>" class="btn-download">
-            Download Invoice
-        </a>
-
-        <div class="info-text">
-            <strong>Catatan:</strong> Simpan nomor antrian Anda. Tunjukkan nomor ini saat datang ke klinik. Anda juga akan menerima notifikasi via email/WhatsApp.
-        </div>
-
-        <a href="index.php" class="back-link">← Kembali ke Beranda</a>
-    </div>
-    
-</body>
-</html>

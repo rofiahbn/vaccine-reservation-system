@@ -12,14 +12,13 @@ body {
     overflow-x: hidden;
 }
 
-/* ===== CONTAINER ===== */
 .container {
     max-width: 900px;
     margin: 0 auto;
-    padding: 40px 20px;
-    position: relative;
-    z-index: 10;
-    margin-bottom: 40px;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.1);
 }
 
 h1 {
@@ -275,7 +274,7 @@ textarea {
 }
 
 .btn-primary:hover {
-    background: #2980b9;
+    background: #b98929;
 }
 
 /* ===== PARTICIPANT FORM ===== */
@@ -526,6 +525,20 @@ textarea {
         font-size: 15px;
     }
     
+    .btn-primary:disabled {
+        background: #cccccc;
+        color: #666666;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    .btn-secondary:disabled {
+        background: #e0e0e0;
+        color: #999999;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
     /* Radio Group */
     .radio-group {
         gap: 15px;

@@ -192,7 +192,7 @@ if (isset($errors) && count($errors) > 0) {
         <div class="hero">
             <div class="hero-content">
                 <span class="hero-badge">Pendaftaran online resmi melalui Vaksinin.id</span>
-                <h1>Tambah Peserta Vaksinasi</h1>
+                <h1>Lindungi Diri dan<br>Keluarga dengan Vaksinasi</h1>
             </div>
         </div>
     </header>
@@ -204,7 +204,7 @@ if (isset($errors) && count($errors) > 0) {
 
         <div class="info-banner">
             <i class="fas fa-info-circle"></i>
-            <strong>Informasi:</strong> Isi data peserta dan pilih jadwal untuk peserta ini. Setelah selesai, Anda bisa menambah peserta lain atau kembali ke halaman utama.
+            <strong>Informasi:</strong> Isi data peserta dan pilih jadwal untuk peserta ini. Setelah selesai, Anda bisa menambah peserta lain atau selesai.
         </div>
 
         <?php if (!empty($error_message)): ?>
@@ -217,7 +217,7 @@ if (isset($errors) && count($errors) > 0) {
         <h1>Formulir Data Peserta</h1>
         <p class="subtitle">Isi dan lengkapi data peserta tambahan</p>
 
-        <form id="addParticipantForm" method="POST" action="save_booking.php">
+        <form id="addParticipantForm" method="POST" action="">
             
             <!-- PILIH LAYANAN DULU -->
             <div class="form-section">
@@ -380,15 +380,10 @@ if (isset($errors) && count($errors) > 0) {
             <div class="form-section">
                 <h2 class="section-title">Pilih Jadwal untuk Peserta Ini</h2>
                 
-                <form method="GET" action="" id="monthForm">
-                    <input type="hidden" name="bulan" id="inputBulan" value="<?php echo $bulan; ?>">
-                    <input type="hidden" name="tahun" id="inputTahun" value="<?php echo $tahun; ?>">
-                </form>
-
                 <div class="calendar-header">
-                    <button type="button" onclick="prevMonth()">&lt;</button>
-                    <h2><?php echo $nama_bulan[$bulan] . ' ' . $tahun; ?></h2>
-                    <button type="button" onclick="nextMonth()">&gt;</button>
+                    <button type="button" onclick="changeMonth(-1)">&lt;</button>
+                    <h2 id="calendarTitle"><?php echo $nama_bulan[$bulan] . ' ' . $tahun; ?></h2>
+                    <button type="button" onclick="changeMonth(1)">&gt;</button>
                 </div>
 
                 <div class="calendar-days">
@@ -420,16 +415,7 @@ if (isset($errors) && count($errors) > 0) {
                         if ($clickable) {
                             echo "<div class='$class' onclick='selectDate(this, $tgl)' title='$title'>$tgl</div>";
                         } else {
-                            echo "<div class='$class' title='$title'>$tgl";
-                            
-                            // Tambah icon untuk libur/tutup
-                            if ($status['is_holiday']) {
-                                echo "<span class='date-icon'>🏖️</span>";
-                            } else if ($status['is_closed']) {
-                                echo "<span class='date-icon'>🔒</span>";
-                            }
-                            
-                            echo "</div>";
+                            echo "<div class='$class' title='$title'>$tgl</div>";
                         }
                     }
                     ?>

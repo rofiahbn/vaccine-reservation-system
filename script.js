@@ -278,8 +278,18 @@ function selectDate(element, day) {
 
     // Reset jam
     document.getElementById('selectedTime').value = '';
-    document.getElementById('btnSelesai').disabled = true;
-
+    
+    // Disable SEMUA button sampai pilih jam
+    const btnTambah = document.getElementById('btnTambahPeserta');
+    const btnSelesai = document.getElementById('btnSelesai');
+    const btnAddMore = document.getElementById('btnAddMore');
+    const btnFinish = document.getElementById('btnFinish');
+    
+    if (btnTambah) btnTambah.disabled = true;
+    if (btnSelesai) btnSelesai.disabled = true;
+    if (btnAddMore) btnAddMore.disabled = true;
+    if (btnFinish) btnFinish.disabled = true;
+    
     // Generate time slots
     generateTimeSlots(tanggal);
 }
@@ -294,9 +304,8 @@ function prevMonth() {
         tahun--;
     }
 
-    document.getElementById('inputBulan').value = bulan;
-    document.getElementById('inputTahun').value = tahun;
-    document.getElementById('monthForm').submit();
+    // Redirect dengan parameter GET
+    window.location.href = `?bulan=${bulan}&tahun=${tahun}`;
 }
 
 function nextMonth() {
@@ -309,9 +318,8 @@ function nextMonth() {
         tahun++;
     }
 
-    document.getElementById('inputBulan').value = bulan;
-    document.getElementById('inputTahun').value = tahun;
-    document.getElementById('monthForm').submit();
+    // Redirect dengan parameter GET
+    window.location.href = `?bulan=${bulan}&tahun=${tahun}`;
 }
 
 function generateTimeSlots(tanggal) {
@@ -329,14 +337,14 @@ function generateTimeSlots(tanggal) {
 
             // Cek hari libur
             if (data.is_holiday) {
-                container.innerHTML = `<div class="no-results">🏖️ Hari Libur: ${data.holiday_name}<br>Klinik tutup.</div>`;
+                container.innerHTML = `<div class="no-results">Hari Libur: ${data.holiday_name}<br>Klinik tutup.</div>`;
                 document.getElementById('timeSlots').style.display = 'block';
                 return;
             }
 
             // Cek klinik tutup
             if (data.is_closed) {
-                container.innerHTML = '<div class="no-results">🔒 Klinik tutup di hari ini</div>';
+                container.innerHTML = '<div class="no-results">Klinik tutup di hari ini</div>';
                 document.getElementById('timeSlots').style.display = 'block';
                 return;
             }
@@ -385,8 +393,19 @@ function selectTime(element, time) {
     element.classList.add('selected');
     document.getElementById('selectedTime').value = time;
 
-    // Enable button Selesai
-    document.getElementById('btnSelesai').disabled = false;
+    // Enable KEDUA button (untuk order.php)
+    const btnTambah = document.getElementById('btnTambahPeserta');
+    const btnSelesai = document.getElementById('btnSelesai');
+    
+    if (btnTambah) btnTambah.disabled = false;
+    if (btnSelesai) btnSelesai.disabled = false;
+    
+    // Untuk add_participant.php (button lain)
+    const btnAddMore = document.getElementById('btnAddMore');
+    const btnFinish = document.getElementById('btnFinish');
+    
+    if (btnAddMore) btnAddMore.disabled = false;
+    if (btnFinish) btnFinish.disabled = false;
 }
 
 // ==================== FORM VALIDATION ====================
@@ -478,6 +497,34 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    function prevMonth() {
+    let bulan = bulanNow;
+    let tahun = tahunNow;
+
+    bulan--;
+    if (bulan < 1) {
+        bulan = 12;
+        tahun--;
+    }
+
+    // Redirect dengan parameter GET
+    window.location.href = `?bulan=${bulan}&tahun=${tahun}`;
+}
+
+function nextMonth() {
+    let bulan = bulanNow;
+    let tahun = tahunNow;
+
+    bulan++;
+    if (bulan > 12) {
+        bulan = 1;
+        tahun++;
+    }
+
+    // Redirect dengan parameter GET
+    window.location.href = `?bulan=${bulan}&tahun=${tahun}`;
+}
     
     // Load provinsi saat halaman load
     if (typeof loadProvinsi === 'function') {

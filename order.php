@@ -78,15 +78,6 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
             <div id="searchResults" style="display:none;"></div>
         </div>
 
-        <!-- Notification jika ada peserta yang sudah ditambahkan -->
-        <?php if ($participant_count > 0): ?>
-        <div class="participant-notification">
-            <i class="fas fa-check-circle"></i>
-            <strong><?php echo $participant_count; ?> peserta</strong> sudah ditambahkan.
-            <a href="view_participants.php" style="color: #2563eb; text-decoration: underline;">Lihat daftar</a>
-        </div>
-        <?php endif; ?>
-
         <h1>Formulir Pendaftaran Pasien</h1>
         <p class="subtitle">Isi dan lengkapi data dibawah ini untuk melanjutkan proses pendaftaran</p>
 
@@ -252,11 +243,6 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
             <!-- KALENDER BOOKING -->
             <div class="form-section">
                 <h2 class="section-title">Pilih Jadwal</h2>
-                
-                <form method="GET" action="" id="monthForm">
-                    <input type="hidden" name="bulan" id="inputBulan" value="<?php echo $bulan; ?>">
-                    <input type="hidden" name="tahun" id="inputTahun" value="<?php echo $tahun; ?>">
-                </form>
 
                 <div class="calendar-header">
                     <button type="button" onclick="prevMonth()">&lt;</button>
@@ -293,16 +279,7 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
                         if ($clickable) {
                             echo "<div class='$class' onclick='selectDate(this, $tgl)' title='$title'>$tgl</div>";
                         } else {
-                            echo "<div class='$class' title='$title'>$tgl";
-                            
-                            // Tambah icon untuk libur/tutup
-                            if ($status['is_holiday']) {
-                                echo "<span class='date-icon'>🏖️</span>";
-                            } else if ($status['is_closed']) {
-                                echo "<span class='date-icon'>🔒</span>";
-                            }
-                            
-                            echo "</div>";
+                            echo "<div class='$class' title='$title'>$tgl</div>";
                         }
                     }
                     ?>
@@ -343,11 +320,11 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
 
             <!-- BUTTONS -->
             <div class="form-actions">
-                <button type="button" class="btn btn-secondary" onclick="window.location.href='add_participant.php'">
+                <button type="submit" name="action" value="add_more" class="btn btn-secondary" id="btnTambahPeserta" disabled>
                     <i class="fas fa-user-plus"></i> Tambah Peserta
                 </button>
                 
-                <button type="submit" class="btn btn-primary" id="btnSelesai">
+                <button type="submit" name="action" value="finish" class="btn btn-primary" id="btnSelesai" disabled>
                     <i class="fas fa-check"></i> Selesai
                 </button>
             </div>

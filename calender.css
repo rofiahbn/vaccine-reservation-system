@@ -13,19 +13,12 @@ body {
 }
 
 .container {
-    max-width: 500px;
+    max-width: 900px;
     margin: 0 auto;
     background: white;
     padding: 30px;
     border-radius: 15px;
     box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-}
-
-h1 {
-    color: #fbac07;
-    font-size: 20px;
-    margin-bottom: 25px;
-    font-weight: 600;
 }
 
 .calendar-header {
@@ -221,13 +214,13 @@ h1 {
 }
 
 .time-slot:hover {
-    background: #e6f0ff;
+    background: #fff3b5;
 }
 
 .time-slot.selected {
-    background: #2563eb;
+    background: #fbac07;
     color: #fff;
-    border-color: #2563eb;
+    border-color: #fbac07;
 }
 
 .time-slot.full {
