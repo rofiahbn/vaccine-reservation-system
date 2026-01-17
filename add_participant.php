@@ -3,10 +3,6 @@ session_start();
 include "config.php";
 include "calendar_helper.php";
 
-// Ambil data peserta dari session (untuk multi participant)
-$participants = isset($_SESSION['participants']) ? $_SESSION['participants'] : [];
-$participant_count = count($participants);
-
 // Set bulan dan tahun untuk kalender
 $bulan = isset($_GET['bulan']) ? intval($_GET['bulan']) : date('n');
 $tahun = isset($_GET['tahun']) ? intval($_GET['tahun']) : date('Y');
@@ -26,18 +22,155 @@ $hari_awal = date('w', strtotime("$tahun-$bulan-01"));
 
 // Hari ini
 $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
+
+// Jika form di-submit
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Validasi data
+    $errors = [];
+    
+    $pelayanan = $_POST['pelayanan'] ?? '';
+    $nama_lengkap = $_POST['nama_lengkap'] ?? '';
+    $tanggal_lahir = $_POST['tanggal_lahir'] ?? '';
+    $jenis_kelamin = $_POST['jenis_kelamin'] ?? '';
+    $tanggal_booking = $_POST['tanggal_booking'] ?? '';
+    $waktu_booking = $_POST['waktu_booking'] ?? '';
+    $action = $_POST['action'] ?? ''; // 'add_more' atau 'finish'
+    
+    if (empty($pelayanan)) $errors[] = 'Pelayanan harus dipilih';
+    if (empty($nama_lengkap)) $errors[] = 'Nama lengkap harus diisi';
+    if (empty($tanggal_lahir)) $errors[] = 'Tanggal lahir harus diisi';
+    if (empty($jenis_kelamin)) $errors[] = 'Jenis kelamin harus dipilih';
+    if (empty($tanggal_booking)) $errors[] = 'Tanggal booking harus dipilih';
+    if (empty($waktu_booking)) $errors[] = 'Waktu booking harus dipilih';
+    
+    // Validasi identitas sesuai layanan
+    if ($pelayanan === 'Umroh/Haji/Luar Negeri') {
+        if (empty($_POST['paspor'])) {
+            $errors[] = 'Nomor Paspor harus diisi untuk layanan Umroh/Haji/Luar Negeri';
+        }
+    } else if ($pelayanan === 'Vaksinasi Umum/Infus Vitamin') {
+        if (empty($_POST['nik'])) {
+            $errors[] = 'NIK harus diisi untuk layanan Vaksinasi Umum/Infus Vitamin';
+        } else if (strlen($_POST['nik']) !== 16) {
+            $errors[] = 'NIK harus 16 digit';
+        }
+    }
+    
+    // Validasi kontak
+    $emails = array_filter($_POST['emails'] ?? []);
+    $phones = array_filter($_POST['phones'] ?? []);
+    
+    if (count($emails) < 1) $errors[] = 'Minimal harus ada 1 email';
+    if (count($phones) < 1) $errors[] = 'Minimal harus ada 1 nomor HP';
+    
+    // Validasi alamat
+    if (empty($_POST['alamat'])) $errors[] = 'Alamat harus diisi';
+    if (empty($_POST['provinsi'])) $errors[] = 'Provinsi harus dipilih';
+    if (empty($_POST['kota'])) $errors[] = 'Kota harus dipilih';
+    
+    if (empty($errors)) {
+        // Simpan data peserta ke session
+        if (!isset($_SESSION['participants'])) {
+            $_SESSION['participants'] = [];
+        }
+        
+        // Hitung usia
+        $birthDate = new DateTime($tanggal_lahir);
+        $today = new DateTime();
+        $usia = $today->diff($birthDate)->y;
+        $kategori_usia = ($usia < 18) ? 'Anak' : 'Dewasa';
+        
+        $participant_data = [
+            'pelayanan' => $pelayanan,
+            'nama_lengkap' => $nama_lengkap,
+            'nama_panggilan' => $_POST['nama_panggilan'] ?? '',
+            'tanggal_lahir' => $tanggal_lahir,
+            'usia' => $usia,
+            'kategori_usia' => $kategori_usia,
+            'jenis_kelamin' => $jenis_kelamin,
+            'nik' => $_POST['nik'] ?? '',
+            'paspor' => $_POST['paspor'] ?? '',
+            'kebangsaan' => $_POST['kebangsaan'] ?? 'Indonesia',
+            'pekerjaan' => $_POST['pekerjaan'] ?? '',
+            'nama_wali' => $_POST['nama_wali'] ?? '',
+            'emails' => $emails,
+            'phones' => $phones,
+            'alamat' => $_POST['alamat'],
+            'provinsi' => $_POST['provinsi'],
+            'kota' => $_POST['kota'],
+            'riwayat_alergi' => $_POST['riwayat_alergi'] ?? '',
+            'riwayat_penyakit' => $_POST['riwayat_penyakit'] ?? '',
+            'riwayat_obat' => $_POST['riwayat_obat'] ?? '',
+            'tanggal_booking' => $tanggal_booking,
+            'waktu_booking' => $waktu_booking
+        ];
+        
+        $_SESSION['participants'][] = $participant_data;
+        
+        // Cek action button mana yang diklik
+        if ($action === 'add_more') {
+            // Redirect ke add_participant.php lagi (form baru)
+            $_SESSION['success_message'] = 'Peserta berhasil ditambahkan! Silakan tambah peserta lagi.';
+            header('Location: add_participant.php');
+            exit;
+        } else if ($action === 'finish') {
+            // Redirect ke halaman konfirmasi
+            header('Location: booking_confirmation.php');
+            exit;
+        }
+    }
+}
+
+// Jika ada error dari validasi sebelumnya
+$error_message = '';
+if (isset($errors) && count($errors) > 0) {
+    $error_message = implode('<br>', $errors);
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pendaftaran Pasien Vaksinasi</title>
+    <title>Tambah Peserta - Vaksinin</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="layout.css">
     <link rel="stylesheet" href="calender.css">
     <link rel="stylesheet" href="calendar_styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #2563eb;
+            text-decoration: none;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        .back-button:hover {
+            text-decoration: underline;
+        }
+        .error-message {
+            background: #fee;
+            border: 1px solid #fcc;
+            padding: 15px;
+            border-radius: 8px;
+            color: #c33;
+            margin-bottom: 20px;
+        }
+        .info-banner {
+            background: #e0f2fe;
+            border-left: 4px solid #0284c7;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .info-banner i {
+            color: #0284c7;
+            margin-right: 8px;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -59,38 +192,32 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
         <div class="hero">
             <div class="hero-content">
                 <span class="hero-badge">Pendaftaran online resmi melalui Vaksinin.id</span>
-                <h1>Lindungi Diri dan<br>Keluarga dengan Vaksinasi</h1>
+                <h1>Tambah Peserta Vaksinasi</h1>
             </div>
         </div>
     </header>
 
     <div class="container">
-        <!-- Search Section -->
-        <div class="search-section">
-            <h2>Cari dan Temukan Datamu</h2>
-            <p>Cukup masukkan nama dan NIK Anda. Jika sudah pernah mendaftar, sistem akan menemukan data Anda secara otomatis agar proses lebih cepat dan praktis</p>
-            
-            <div class="search-simple">
-                <input type="text" id="searchName" class="search-input-main" placeholder="Nama">
-                <input type="text" id="searchNIK" class="search-input-main" placeholder="NIK">
-                <button type="button" class="btn-search-main" onclick="searchPatient()">Cari</button>
-            </div>
-            <div id="searchResults" style="display:none;"></div>
+        <a href="order.php" class="back-button">
+            <i class="fas fa-arrow-left"></i> Kembali ke Halaman Utama
+        </a>
+
+        <div class="info-banner">
+            <i class="fas fa-info-circle"></i>
+            <strong>Informasi:</strong> Isi data peserta dan pilih jadwal untuk peserta ini. Setelah selesai, Anda bisa menambah peserta lain atau kembali ke halaman utama.
         </div>
 
-        <!-- Notification jika ada peserta yang sudah ditambahkan -->
-        <?php if ($participant_count > 0): ?>
-        <div class="participant-notification">
-            <i class="fas fa-check-circle"></i>
-            <strong><?php echo $participant_count; ?> peserta</strong> sudah ditambahkan.
-            <a href="view_participants.php" style="color: #2563eb; text-decoration: underline;">Lihat daftar</a>
+        <?php if (!empty($error_message)): ?>
+        <div class="error-message">
+            <strong><i class="fas fa-exclamation-triangle"></i> Terjadi Kesalahan:</strong><br>
+            <?php echo $error_message; ?>
         </div>
         <?php endif; ?>
 
-        <h1>Formulir Pendaftaran Pasien</h1>
-        <p class="subtitle">Isi dan lengkapi data dibawah ini untuk melanjutkan proses pendaftaran</p>
+        <h1>Formulir Data Peserta</h1>
+        <p class="subtitle">Isi dan lengkapi data peserta tambahan</p>
 
-        <form id="registrationForm" method="POST" action="save_booking.php">
+        <form id="addParticipantForm" method="POST" action="save_booking.php">
             
             <!-- PILIH LAYANAN DULU -->
             <div class="form-section">
@@ -251,7 +378,7 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
 
             <!-- KALENDER BOOKING -->
             <div class="form-section">
-                <h2 class="section-title">Pilih Jadwal</h2>
+                <h2 class="section-title">Pilih Jadwal untuk Peserta Ini</h2>
                 
                 <form method="GET" action="" id="monthForm">
                     <input type="hidden" name="bulan" id="inputBulan" value="<?php echo $bulan; ?>">
@@ -343,11 +470,15 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
 
             <!-- BUTTONS -->
             <div class="form-actions">
-                <button type="button" class="btn btn-secondary" onclick="window.location.href='add_participant.php'">
-                    <i class="fas fa-user-plus"></i> Tambah Peserta
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='order.php'">
+                    <i class="fas fa-times"></i> Batal
                 </button>
                 
-                <button type="submit" class="btn btn-primary" id="btnSelesai">
+                <button type="submit" name="action" value="add_more" class="btn btn-secondary" id="btnAddMore" disabled>
+                    <i class="fas fa-user-plus"></i> Tambah Peserta Lagi
+                </button>
+                
+                <button type="submit" name="action" value="finish" class="btn btn-primary" id="btnFinish" disabled>
                     <i class="fas fa-check"></i> Selesai
                 </button>
             </div>
@@ -422,6 +553,28 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
         const namaBulanNow = '<?php echo $nama_bulan[$bulan]; ?>';
     </script>
     <script src="provinces.js"></script>
-    <script src="script.js?v=<?php echo time(); ?>"></script>
+    <script src="script.js"></script>
+    <script>
+        // Override button submit untuk enable/disable KEDUA button
+        function selectTime(element, time) {
+            document.querySelectorAll('.time-slot').forEach(s => {
+                s.classList.remove('selected');
+            });
+
+            element.classList.add('selected');
+            document.getElementById('selectedTime').value = time;
+
+            // Enable KEDUA button
+            document.getElementById('btnAddMore').disabled = false;
+            document.getElementById('btnFinish').disabled = false;
+        }
+        
+        // Load provinsi saat halaman load
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof loadProvinsi === 'function') {
+                loadProvinsi();
+            }
+        });
+    </script>
 </body>
 </html>
