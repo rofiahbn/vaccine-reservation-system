@@ -28,6 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validasi data
     $errors = [];
     
+    $service_type = $_POST['service_type'] ?? '';
     $pelayanan = $_POST['pelayanan'] ?? '';
     $nama_lengkap = $_POST['nama_lengkap'] ?? '';
     $tanggal_lahir = $_POST['tanggal_lahir'] ?? '';
@@ -36,6 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $waktu_booking = $_POST['waktu_booking'] ?? '';
     $action = $_POST['action'] ?? ''; // 'add_more' atau 'finish'
     
+    if (empty($service_type)) $errors[] = 'Tipe layanan harus dipilih';
     if (empty($pelayanan)) $errors[] = 'Pelayanan harus dipilih';
     if (empty($nama_lengkap)) $errors[] = 'Nama lengkap harus diisi';
     if (empty($tanggal_lahir)) $errors[] = 'Tanggal lahir harus diisi';
@@ -81,6 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $kategori_usia = ($usia < 18) ? 'Anak' : 'Dewasa';
         
         $participant_data = [
+            'service_type' => $service_type,
             'pelayanan' => $pelayanan,
             'nama_lengkap' => $nama_lengkap,
             'nama_panggilan' => $_POST['nama_panggilan'] ?? '',
@@ -218,6 +221,31 @@ if (isset($errors) && count($errors) > 0) {
         <p class="subtitle">Isi dan lengkapi data peserta tambahan</p>
 
         <form id="addParticipantForm" method="POST" action="">
+
+            <!-- PILIH TIPE LAYANAN -->
+            <div class="form-section">
+                <div class="form-group">
+                    <label>Tipe Layanan <span class="required">*</span></label>
+                    <div class="radio-group">
+                        <label class="radio-card">
+                            <input type="radio" name="service_type" value="Home Service" required>
+                            <div class="radio-card-content">
+                                <i class="fas fa-home"></i>
+                                <strong>Home Service</strong>
+                                <small>Layanan ke rumah Anda</small>
+                            </div>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="service_type" value="In Clinic" required>
+                            <div class="radio-card-content">
+                                <i class="fas fa-hospital"></i>
+                                <strong>In Clinic</strong>
+                                <small>Kunjungi klinik kami</small>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
             
             <!-- PILIH LAYANAN DULU -->
             <div class="form-section">

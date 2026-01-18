@@ -162,11 +162,12 @@ try {
         $catatan = 'Pendaftaran online';
         
         $query_booking = "INSERT INTO bookings 
-                         (patient_id, nomor_antrian, tanggal_booking, waktu_booking, status, catatan, created_at, updated_at)
-                         VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())";
+                 (patient_id, service_type, nomor_antrian, tanggal_booking, waktu_booking, status, catatan, created_at, updated_at)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
         $stmt_booking = mysqli_prepare($conn, $query_booking);
-        mysqli_stmt_bind_param($stmt_booking, 'isssss',
+        mysqli_stmt_bind_param($stmt_booking, 'issssss',
             $patient_id,
+            $p['service_type'], 
             $nomor_antrian,
             $p['tanggal_booking'],
             $p['waktu_booking'],
@@ -200,6 +201,7 @@ try {
     
     // Hapus data participants dari session
     unset($_SESSION['participants']);
+    unset($_SESSION['booking_active']);
     
     // Redirect ke success page
     header('Location: booking_success.php');

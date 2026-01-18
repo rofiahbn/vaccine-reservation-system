@@ -9,6 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // Validasi data
 $errors = [];
 
+$service_type = $_POST['service_type'] ?? '';
 $pelayanan = $_POST['pelayanan'] ?? '';
 $nama_lengkap = $_POST['nama_lengkap'] ?? '';
 $tanggal_lahir = $_POST['tanggal_lahir'] ?? '';
@@ -17,6 +18,7 @@ $tanggal_booking = $_POST['tanggal_booking'] ?? '';
 $waktu_booking = $_POST['waktu_booking'] ?? '';
 $action = $_POST['action'] ?? ''; // 'add_more' atau 'finish'
 
+if (empty($service_type)) $errors[] = 'Tipe layanan harus dipilih';
 if (empty($pelayanan)) $errors[] = 'Pelayanan harus dipilih';
 if (empty($nama_lengkap)) $errors[] = 'Nama lengkap harus diisi';
 if (empty($tanggal_lahir)) $errors[] = 'Tanggal lahir harus diisi';
@@ -64,6 +66,7 @@ $kategori_usia = ($usia < 18) ? 'Anak' : 'Dewasa';
 
 // Siapkan data peserta
 $participant_data = [
+    'service_type' => $service_type,
     'pelayanan' => $pelayanan,
     'nama_lengkap' => $nama_lengkap,
     'nama_panggilan' => $_POST['nama_panggilan'] ?? '',

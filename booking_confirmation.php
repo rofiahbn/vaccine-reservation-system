@@ -194,6 +194,12 @@ $total_peserta = count($participants);
                         <i class="fas fa-clock"></i>
                         <span><?php echo $p['waktu_booking']; ?> WIB</span>
                     </div>
+                    <div class="schedule-item">
+                        <i class="fas fa-stethoscope"></i>
+                        <span>
+                            <?php echo htmlspecialchars($p['service_type'] ?? '-'); ?>
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>

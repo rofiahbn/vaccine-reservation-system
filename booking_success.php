@@ -107,6 +107,14 @@ function formatTanggalIndonesia($tanggal) {
                             <span><?php echo htmlspecialchars($booking['no_rekam_medis']); ?></span>
                         </div>
                     </div>
+
+                    <div class="booking-detail-item">
+                        <i class="fas fa-<?php echo $booking['service_type'] === 'Home Service' ? 'home' : 'hospital'; ?>"></i>
+                        <div>
+                            <strong>Tipe Layanan</strong>
+                            <span><?php echo htmlspecialchars($booking['service_type']); ?></span>
+                        </div>
+                    </div>
                     
                     <div class="booking-detail-item">
                         <i class="fas fa-calendar-day"></i>

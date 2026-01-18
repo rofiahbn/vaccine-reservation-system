@@ -3,6 +3,11 @@ session_start();
 include "config.php";
 include "calendar_helper.php";
 
+if (!isset($_SESSION['booking_active'])) {
+    $_SESSION['participants'] = [];
+    $_SESSION['booking_active'] = true;
+}
+
 // Ambil data peserta dari session (untuk multi participant)
 $participants = isset($_SESSION['participants']) ? $_SESSION['participants'] : [];
 $participant_count = count($participants);
@@ -82,6 +87,31 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
         <p class="subtitle">Isi dan lengkapi data dibawah ini untuk melanjutkan proses pendaftaran</p>
 
         <form id="registrationForm" method="POST" action="save_booking.php">
+
+            <!-- PILIH TIPE LAYANAN -->
+            <div class="form-section">
+                <div class="form-group">
+                    <label>Tipe Layanan <span class="required">*</span></label>
+                    <div class="radio-group">
+                        <label class="radio-card">
+                            <input type="radio" name="service_type" value="Home Service" required>
+                            <div class="radio-card-content">
+                                <i class="fas fa-home"></i>
+                                <strong>Home Service</strong>
+                                <small>Layanan ke rumah Anda</small>
+                            </div>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="service_type" value="In Clinic" required>
+                            <div class="radio-card-content">
+                                <i class="fas fa-hospital"></i>
+                                <strong>In Clinic</strong>
+                                <small>Kunjungi klinik kami</small>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
             
             <!-- PILIH LAYANAN DULU -->
             <div class="form-section">

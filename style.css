@@ -157,6 +157,67 @@ h1 {
     font-weight: 600;
 }
 
+/* Radio Card Style */
+.radio-card {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 100%;
+}
+
+.radio-card:hover {
+    border-color: #fbac07;
+    background: #fffbf0;
+}
+
+.radio-card input[type="radio"] {
+    margin-right: 12px;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.radio-card input[type="radio"]:checked + .radio-card-content {
+    color: #fbac07;
+}
+
+.radio-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.radio-card-content i {
+    font-size: 24px;
+    margin-bottom: 5px;
+}
+
+.radio-card-content strong {
+    font-size: 16px;
+}
+
+.radio-card-content small {
+    color: #7f8c8d;
+    font-size: 13px;
+}
+
+.radio-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+@media (max-width: 768px) {
+    .radio-group {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* ===== FORM SECTION ===== */
 .form-section {
     margin-bottom: 30px;
