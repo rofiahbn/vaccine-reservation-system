@@ -47,7 +47,7 @@ function formatTanggalIndonesia($tanggal) {
 <body>
     <nav class="navbar">
         <div class="nav-logo">
-            <img src="logo-vaksinin.jpeg" alt="Vaksinin">
+            <img src="vaksinin-logo.png" alt="Vaksinin">
         </div>
         <ul class="nav-menu">
             <li><a href="order.php">Home</a></li>
@@ -161,7 +161,7 @@ function formatTanggalIndonesia($tanggal) {
     <footer class="footer">
         <div class="footer-container">
             <div class="nav-logo-footer">
-                <img src="logo-vaksinin.jpeg" alt="Vaksinin">
+                <img src="vaksinin-logo.png" alt="Vaksinin">
             </div>
             <div class="footer-section">
                 <h3>Jam Operasional</h3>

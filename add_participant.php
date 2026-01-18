@@ -7,6 +7,15 @@ include "calendar_helper.php";
 $bulan = isset($_GET['bulan']) ? intval($_GET['bulan']) : date('n');
 $tahun = isset($_GET['tahun']) ? intval($_GET['tahun']) : date('Y');
 
+// CEK MODE EDIT
+$is_edit_mode = isset($_SESSION['editing_mode']) && $_SESSION['editing_mode'] === true;
+$editing_index = isset($_SESSION['editing_index']) ? intval($_SESSION['editing_index']) : -1;
+$edit_data = [];
+
+if ($is_edit_mode && $editing_index >= 0 && isset($_SESSION['participants'][$editing_index])) {
+    $edit_data = $_SESSION['participants'][$editing_index];
+}
+
 // Nama bulan dalam bahasa Indonesia
 $nama_bulan = [
     1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
@@ -107,9 +116,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'tanggal_booking' => $tanggal_booking,
             'waktu_booking' => $waktu_booking
         ];
+
+        // Simpan selected products ke participant data
+        if (isset($_POST['selected_products']) && !empty($_POST['selected_products'])) {
+            $selected_products = json_decode($_POST['selected_products'], true);
+            $participant_data['selected_products'] = $selected_products;
+        } else {
+            $participant_data['selected_products'] = [];
+        }
         
-        $_SESSION['participants'][] = $participant_data;
-        
+        // Cek apakah mode edit atau tambah baru
+        if ($is_edit_mode && $editing_index >= 0) {
+            // MODE EDIT: Update data peserta yang sudah ada
+            $_SESSION['participants'][$editing_index] = $participant_data;
+            
+            // Clear editing mode
+            unset($_SESSION['editing_mode']);
+            unset($_SESSION['editing_index']);
+            
+            // Set success message
+            $_SESSION['success_message'] = 'Data peserta berhasil diupdate!';
+            
+            // Redirect langsung ke konfirmasi (tidak peduli tombol apa yang diklik)
+            header('Location: booking_confirmation.php');
+            exit;
+        } else {
+            // MODE TAMBAH: Tambah peserta baru
+            $_SESSION['participants'][] = $participant_data;
+        }
+
         // Cek action button mana yang diklik
         if ($action === 'add_more') {
             // Redirect ke add_participant.php lagi (form baru)
@@ -139,7 +174,6 @@ if (isset($errors) && count($errors) > 0) {
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="layout.css">
     <link rel="stylesheet" href="calender.css">
-    <link rel="stylesheet" href="calendar_styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .back-button {
@@ -178,7 +212,7 @@ if (isset($errors) && count($errors) > 0) {
 <body>
     <nav class="navbar">
         <div class="nav-logo">
-            <img src="logo-vaksinin.jpeg" alt="Vaksinin">
+            <img src="vaksinin-logo.png" alt="Vaksinin">
         </div>
         <ul class="nav-menu">
             <li><a href="order.php">Home</a></li>
@@ -217,8 +251,18 @@ if (isset($errors) && count($errors) > 0) {
         </div>
         <?php endif; ?>
 
-        <h1>Formulir Data Peserta</h1>
-        <p class="subtitle">Isi dan lengkapi data peserta tambahan</p>
+        <?php if ($is_edit_mode): ?>
+            <h1><i class="fas fa-edit"></i> Edit Data Peserta</h1>
+            <p class="subtitle">Perbarui data peserta yang sudah ada</p>
+            
+            <div class="info-banner">
+                <i class="fas fa-info-circle"></i>
+                <strong>Mode Edit:</strong> Anda sedang mengedit data peserta. Klik "Simpan Perubahan" untuk menyimpan.
+            </div>
+        <?php else: ?>
+            <h1>Formulir Data Peserta</h1>
+            <p class="subtitle">Isi dan lengkapi data peserta tambahan</p>
+        <?php endif; ?>
 
         <form id="addParticipantForm" method="POST" action="">
 
@@ -263,18 +307,18 @@ if (isset($errors) && count($errors) > 0) {
             <div class="form-section">
                 <div class="form-group">
                     <label id="labelNama">Nama Lengkap <span class="required">*</span></label>
-                    <input type="text" name="nama_lengkap" id="namaLengkap" required placeholder="Masukkan nama lengkap">
+                    <input type="text" name="nama_lengkap" id="namaLengkap" required placeholder="Masukkan nama lengkap" value="<?php echo htmlspecialchars($edit_data['nama_lengkap'] ?? ''); ?>">
                 </div>
 
                 <div class="row">
                     <div class="form-group">
                         <label>Nama Panggilan</label>
-                        <input type="text" name="nama_panggilan" placeholder="Nama Panggilan">
+                        <input type="text" name="nama_panggilan" placeholder="Nama Panggilan" value="<?php echo htmlspecialchars($edit_data['nama_panggilan'] ?? ''); ?>">
                     </div>
 
                     <div class="form-group">
                         <label>Tanggal Lahir <span class="required">*</span></label>
-                        <input type="date" name="tanggal_lahir" id="tanggalLahir" required onchange="hitungUsia()">
+                        <input type="date" name="tanggal_lahir" id="tanggalLahir" required onchange="hitungUsia()" value="<?php echo htmlspecialchars($edit_data['tanggal_lahir'] ?? ''); ?>">
                     </div>
                 </div>
 
@@ -287,10 +331,10 @@ if (isset($errors) && count($errors) > 0) {
                         <label>Jenis Kelamin <span class="required">*</span></label>
                         <div class="radio-group">
                             <label>
-                                <input type="radio" name="jenis_kelamin" value="L" required> Laki-laki 
+                                <input type="radio" name="jenis_kelamin" value="L" required <?php echo (isset($edit_data['jenis_kelamin']) && $edit_data['jenis_kelamin'] === 'L') ? 'checked' : ''; ?>> Laki-laki 
                             </label>
                             <label>
-                                <input type="radio" name="jenis_kelamin" value="P" required> Perempuan 
+                                <input type="radio" name="jenis_kelamin" value="P" required <?php echo (isset($edit_data['jenis_kelamin']) && $edit_data['jenis_kelamin'] === 'P') ? 'checked' : ''; ?>> Perempuan 
                             </label>
                         </div>
                     </div>
@@ -300,30 +344,30 @@ if (isset($errors) && count($errors) > 0) {
                 <div class="row">
                     <div class="form-group" id="fieldNIK">
                         <label>NIK <span class="required" id="nikRequired">*</span></label>
-                        <input type="text" name="nik" id="inputNIK" placeholder="16 digit NIK" maxlength="16">
+                        <input type="text" name="nik" id="inputNIK" placeholder="16 digit NIK" maxlength="16" value="<?php echo htmlspecialchars($edit_data['nik'] ?? ''); ?>">
                     </div>
                     
                     <div class="form-group" id="fieldPaspor" style="display:none;">
                         <label>No. Paspor <span class="required" id="pasporRequired">*</span></label>
-                        <input type="text" name="paspor" id="inputPaspor" placeholder="Nomor Paspor">
+                        <input type="text" name="paspor" id="inputPaspor" placeholder="Nomor Paspor" value="<?php echo htmlspecialchars($edit_data['paspor'] ?? ''); ?>">
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="form-group">
                         <label>Kebangsaan</label>
-                        <input type="text" name="kebangsaan" value="Indonesia" placeholder="Kebangsaan">
+                        <input type="text" name="kebangsaan" placeholder="Kebangsaan" value="<?php echo htmlspecialchars($edit_data['kebangsaan'] ?? 'Indonesia'); ?>">
                     </div>
                     
                     <div class="form-group">
                         <label>Pekerjaan</label>
-                        <input type="text" name="pekerjaan" placeholder="Pekerjaan saat ini">
+                        <input type="text" name="pekerjaan" placeholder="Pekerjaan saat ini" value="<?php echo htmlspecialchars($edit_data['pekerjaan'] ?? ''); ?>">
                     </div>
                 </div>
 
                 <div class="form-group" id="fieldNamaWali" style="display:none;">
                     <label>Nama Wali <span class="required">*</span></label>
-                    <input type="text" name="nama_wali" id="inputNamaWali" placeholder="Nama orang tua/wali">
+                    <input type="text" name="nama_wali" id="inputNamaWali" placeholder="Nama orang tua/wali" value="<?php echo htmlspecialchars($edit_data['nama_wali'] ?? ''); ?>">
                 </div>
             </div>
 
@@ -404,67 +448,98 @@ if (isset($errors) && count($errors) > 0) {
                 </div>
             </div>
 
+            <!-- PILIH PRODUK/LAYANAN -->
+            <div class="form-section">
+                <h2 class="section-title">Pilih Layanan Tambahan</h2>
+                <p class="subtitle">Pilih opsi layanan yang ingin Anda pesan</p>
+                
+                <!-- Selected Products Badge -->
+                <div class="selected-badges" id="selectedBadges" style="display:none;">
+                    <!-- Badge akan muncul di sini -->
+                </div>
+                
+                <!-- Search Box -->
+                <div class="form-group">
+                    <input type="text" class="search-box-layanan" id="searchLayanan" placeholder="🔍 Ketik nama layanan...">
+                </div>
+                
+                <!-- Category Accordion -->
+                <div class="category-accordion" id="categoryAccordion">
+                    <!-- Categories akan di-load via JavaScript -->
+                </div>
+                
+                <!-- Hidden input untuk submit -->
+                <input type="hidden" name="selected_products" id="selectedProductsInput">
+                
+                <!-- Info total -->
+                <div class="total-info" id="totalInfo" style="display:none;">
+                    Total dipilih: <strong id="totalCount">0</strong> layanan
+                </div>
+            </div>
+
             <!-- KALENDER BOOKING -->
             <div class="form-section">
                 <h2 class="section-title">Pilih Jadwal untuk Peserta Ini</h2>
                 
-                <div class="calendar-header">
-                    <button type="button" onclick="changeMonth(-1)">&lt;</button>
-                    <h2 id="calendarTitle"><?php echo $nama_bulan[$bulan] . ' ' . $tahun; ?></h2>
-                    <button type="button" onclick="changeMonth(1)">&gt;</button>
-                </div>
+                <div class="calendar-wrapper">
+                    <div class="calendar-header">
+                        <button type="button" onclick="prevMonth()">&lt;</button>
+                        <h2><?php echo $nama_bulan[$bulan] . ' ' . $tahun; ?></h2>
+                        <button type="button" onclick="nextMonth()">&gt;</button>
+                    </div>
 
-                <div class="calendar-days">
-                    <div class="day-header">M</div>
-                    <div class="day-header">S</div>
-                    <div class="day-header">S</div>
-                    <div class="day-header">R</div>
-                    <div class="day-header">K</div>
-                    <div class="day-header">J</div>
-                    <div class="day-header">S</div>
+                    <div class="calendar-days">
+                        <div class="day-header">M</div>
+                        <div class="day-header">S</div>
+                        <div class="day-header">S</div>
+                        <div class="day-header">R</div>
+                        <div class="day-header">K</div>
+                        <div class="day-header">J</div>
+                        <div class="day-header">S</div>
 
-                    <?php
-                    // Kosongkan hari sebelum tanggal 1
-                    for ($i = 0; $i < $hari_awal; $i++) {
-                        echo '<div class="day empty"></div>';
-                    }
-
-                    // Tampilkan tanggal
-                    for ($tgl = 1; $tgl <= $jumlah_hari; $tgl++) {
-                        $tanggal_full = sprintf('%04d-%02d-%02d', $tahun, $bulan, $tgl);
-                        $is_today = ($tgl == $hari_ini);
-                        
-                        // Cek status tanggal (libur, tutup, penuh)
-                        $status = checkDateStatus($conn, $tanggal_full);
-                        $class = getDateClass($status, $is_today);
-                        $title = getDateTitle($status);
-                        $clickable = isDateClickable($status);
-                        
-                        if ($clickable) {
-                            echo "<div class='$class' onclick='selectDate(this, $tgl)' title='$title'>$tgl</div>";
-                        } else {
-                            echo "<div class='$class' title='$title'>$tgl</div>";
+                        <?php
+                        // Kosongkan hari sebelum tanggal 1
+                        for ($i = 0; $i < $hari_awal; $i++) {
+                            echo '<div class="day empty"></div>';
                         }
-                    }
-                    ?>
-                </div>
 
-                <div class="legend">
-                    <div class="legend-item">
-                        <div class="legend-box tersedia"></div>
-                        <span>Tersedia</span>
+                        // Tampilkan tanggal
+                        for ($tgl = 1; $tgl <= $jumlah_hari; $tgl++) {
+                            $tanggal_full = sprintf('%04d-%02d-%02d', $tahun, $bulan, $tgl);
+                            $is_today = ($tgl == $hari_ini);
+                            
+                            // Cek status tanggal (libur, tutup, penuh)
+                            $status = checkDateStatus($conn, $tanggal_full);
+                            $class = getDateClass($status, $is_today);
+                            $title = getDateTitle($status);
+                            $clickable = isDateClickable($status);
+                            
+                            if ($clickable) {
+                                echo "<div class='$class' onclick='selectDate(this, $tgl)' title='$title'>$tgl</div>";
+                            } else {
+                                echo "<div class='$class' title='$title'>$tgl</div>";
+                            }
+                        }
+                        ?>
                     </div>
-                    <div class="legend-item">
-                        <div class="legend-box penuh"></div>
-                        <span>Jadwal Penuh</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-box holiday"></div>
-                        <span>Libur</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-box closed"></div>
-                        <span>Tutup</span>
+
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-box tersedia"></div>
+                            <span>Tersedia</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-box penuh"></div>
+                            <span>Jadwal Penuh</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-box holiday"></div>
+                            <span>Libur</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-box closed"></div>
+                            <span>Tutup</span>
+                        </div>
                     </div>
                 </div>
 
@@ -484,17 +559,27 @@ if (isset($errors) && count($errors) > 0) {
 
             <!-- BUTTONS -->
             <div class="form-actions">
-                <button type="button" class="btn btn-secondary" onclick="window.location.href='order.php'">
-                    <i class="fas fa-times"></i> Batal
-                </button>
-                
-                <button type="submit" name="action" value="add_more" class="btn btn-secondary" id="btnAddMore" disabled>
-                    <i class="fas fa-user-plus"></i> Tambah Peserta Lagi
-                </button>
-                
-                <button type="submit" name="action" value="finish" class="btn btn-primary" id="btnFinish" disabled>
-                    <i class="fas fa-check"></i> Selesai
-                </button>
+                <?php if ($is_edit_mode): ?>
+                    <button type="button" class="btn btn-secondary" onclick="cancelEdit()">
+                        <i class="fas fa-times"></i> Batal
+                    </button>
+                    
+                    <button type="submit" name="action" value="finish" class="btn btn-primary" id="btnFinish" disabled>
+                        <i class="fas fa-save"></i> Simpan Perubahan
+                    </button>
+                <?php else: ?>
+                    <button type="button" class="btn btn-secondary" onclick="window.location.href='booking_confirmation.php'">
+                        <i class="fas fa-arrow-left"></i> Kembali ke Konfirmasi
+                    </button>
+                    
+                    <button type="submit" name="action" value="add_more" class="btn btn-secondary" id="btnAddMore" disabled>
+                        <i class="fas fa-user-plus"></i> Tambah Peserta Lagi
+                    </button>
+                    
+                    <button type="submit" name="action" value="finish" class="btn btn-primary" id="btnFinish" disabled>
+                        <i class="fas fa-check"></i> Selesai
+                    </button>
+                <?php endif; ?>
             </div>
         </form>
     </div>
@@ -502,7 +587,7 @@ if (isset($errors) && count($errors) > 0) {
     <footer class="footer">
         <div class="footer-container">
             <div class="nav-logo-footer">
-                <img src="logo-vaksinin.jpeg" alt="Vaksinin">
+                <img src="vaksinin-logo.png" alt="Vaksinin">
             </div>
             <div class="footer-section">
                 <h3>Jam Operasional</h3>
@@ -568,20 +653,8 @@ if (isset($errors) && count($errors) > 0) {
     </script>
     <script src="provinces.js"></script>
     <script src="script.js"></script>
+    <script src="service.js"></script>
     <script>
-        // Override button submit untuk enable/disable KEDUA button
-        function selectTime(element, time) {
-            document.querySelectorAll('.time-slot').forEach(s => {
-                s.classList.remove('selected');
-            });
-
-            element.classList.add('selected');
-            document.getElementById('selectedTime').value = time;
-
-            // Enable KEDUA button
-            document.getElementById('btnAddMore').disabled = false;
-            document.getElementById('btnFinish').disabled = false;
-        }
         
         // Load provinsi saat halaman load
         document.addEventListener('DOMContentLoaded', function() {
@@ -589,6 +662,13 @@ if (isset($errors) && count($errors) > 0) {
                 loadProvinsi();
             }
         });
+
+        // Cancel edit mode
+        function cancelEdit() {
+            if (confirm('Batalkan edit? Perubahan tidak akan disimpan.')) {
+                window.location.href = 'cancel_edit.php';
+            }
+        }
     </script>
 </body>
 </html>

@@ -91,6 +91,14 @@ $participant_data = [
     'waktu_booking' => $waktu_booking
 ];
 
+// ========== SIMPAN SELECTED PRODUCTS KE PARTICIPANT DATA ==========
+if (isset($_POST['selected_products']) && !empty($_POST['selected_products'])) {
+    $selected_products = json_decode($_POST['selected_products'], true);
+    $participant_data['selected_products'] = $selected_products;
+} else {
+    $participant_data['selected_products'] = [];
+}
+
 // Cek action
 if ($action === 'add_more') {
     // Simpan ke session sebagai peserta pertama

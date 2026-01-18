@@ -14,9 +14,9 @@ body {
 
 .container {
     max-width: 900px;
-    margin: 0 auto;
+    margin: 40px auto 0 !important;
     background: white;
-    padding: 30px;
+    padding: 30px !important;
     border-radius: 15px;
     box-shadow: 0 2px 15px rgba(0,0,0,0.1);
 }
@@ -661,5 +661,206 @@ textarea {
     .search-input-main,
     .btn-search-main {
         font-size: 14px;
+    }
+}
+/* ========== PRODUCT SELECTION STYLING ========== */
+
+/* Search Box Layanan */
+.search-box-layanan {
+    width: 100%;
+    max-width: 800px;
+    padding: 12px 15px 12px 40px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: border-color 0.3s;
+    background: white;
+    margin: 0 auto;
+}
+
+.search-box-layanan:focus {
+    outline: none;
+    border-color: #fbac07;
+    box-shadow: 0 0 0 3px rgba(251, 172, 7, 0.1);
+}
+
+/* Category Accordion */
+.category-accordion {
+    margin-top: 20px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.category-item {
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.category-item:last-child {
+    border-bottom: none;
+}
+
+.category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: #f8f9fa;
+    cursor: pointer;
+    transition: background 0.3s;
+    font-weight: 600;
+    color: #333;
+}
+
+.category-header:hover {
+    background: #fff8e1;
+}
+
+.category-header i {
+    transition: transform 0.3s;
+    color: #fbac07;
+    font-size: 14px;
+}
+
+.category-content {
+    padding: 10px 20px;
+    background: white;
+}
+
+/* Product Checkbox */
+.product-checkbox {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    margin: 5px 0;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.product-checkbox:hover {
+    background: #fffbf0;
+}
+
+.product-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-right: 12px;
+    cursor: pointer;
+    accent-color: #fbac07;
+}
+
+.product-checkbox span {
+    color: #333;
+    font-size: 14px;
+}
+
+/* Selected Badges */
+.selected-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #fffbf0;
+    border-radius: 10px;
+    border: 2px solid #fbac07;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.product-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #fbac07 0%, #f59e0b 100%);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    animation: fadeInBadge 0.3s;
+    box-shadow: 0 2px 4px rgba(251, 172, 7, 0.2);
+}
+
+.product-badge button {
+    background: rgba(255, 255, 255, 0.3);
+    border: none;
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.product-badge button:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* Total Info */
+.total-info {
+    margin-top: 15px;
+    padding: 12px;
+    background: #fffbf0;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 14px;
+    color: #555;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    border: 1px solid #fbac07;
+}
+
+.total-info strong {
+    color: #fbac07;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+/* Animation */
+@keyframes fadeInBadge {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .search-box-layanan,
+    .category-accordion,
+    .selected-badges,
+    .total-info {
+        max-width: 100%;
+    }
+    
+    .category-header {
+        padding: 12px 15px;
+        font-size: 14px;
+    }
+    
+    .product-checkbox {
+        padding: 8px;
+    }
+    
+    .product-badge {
+        font-size: 12px;
+        padding: 6px 10px;
     }
 }

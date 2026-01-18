@@ -45,40 +45,68 @@ try {
 
         $nik    = !empty($p['nik']) ? $p['nik'] : null;
         $paspor = !empty($p['paspor']) ? $p['paspor'] : null;
-        
-        // 2. INSERT KE TABLE PATIENTS
-        $query_patient = "INSERT INTO patients 
-            (no_rekam_medis, nama_lengkap, nama_panggilan, tanggal_lahir, usia, kategori_usia, 
-            jenis_kelamin, nik, paspor, kebangsaan, pekerjaan, nama_wali, 
-            riwayat_alergi, riwayat_penyakit, riwayat_obat, pelayanan, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
-        
-        $stmt = mysqli_prepare($conn, $query_patient);
-        
-        mysqli_stmt_bind_param($stmt, 'ssssisssssssssss',
-            $no_rekam_medis,
-            $p['nama_lengkap'],
-            $p['nama_panggilan'],
-            $p['tanggal_lahir'],
-            $p['usia'],
-            $p['kategori_usia'],
-            $p['jenis_kelamin'],
-            $nik,
-            $paspor,
-            $p['kebangsaan'],
-            $p['pekerjaan'],
-            $p['nama_wali'],
-            $p['riwayat_alergi'],
-            $p['riwayat_penyakit'],
-            $p['riwayat_obat'],
-            $p['pelayanan']
-        );
-        
-        if (!mysqli_stmt_execute($stmt)) {
-            throw new Exception("Gagal menyimpan data pasien: " . mysqli_error($conn));
+
+        // CEK APAKAH PASIEN SUDAH ADA (BERDASARKAN NIK / PASPOR)
+        $patient_id = null;
+
+        if (!empty($nik)) {
+            $cek = mysqli_prepare($conn, "SELECT id FROM patients WHERE nik = ? LIMIT 1");
+            mysqli_stmt_bind_param($cek, 's', $nik);
+            mysqli_stmt_execute($cek);
+            $res = mysqli_stmt_get_result($cek);
+            if ($row = mysqli_fetch_assoc($res)) {
+                $patient_id = $row['id'];
+            }
         }
+
+        if (!$patient_id && !empty($paspor)) {
+            $cek = mysqli_prepare($conn, "SELECT id FROM patients WHERE paspor = ? LIMIT 1");
+            mysqli_stmt_bind_param($cek, 's', $paspor);
+            mysqli_stmt_execute($cek);
+            $res = mysqli_stmt_get_result($cek);
+            if ($row = mysqli_fetch_assoc($res)) {
+                $patient_id = $row['id'];
+            }
+        }
+
         
-        $patient_id = mysqli_insert_id($conn);
+        // 2. INSERT KE TABLE PATIENTS (HANYA JIKA BELUM ADA)
+        if (!$patient_id) {
+
+            $query_patient = "INSERT INTO patients 
+                (no_rekam_medis, nama_lengkap, nama_panggilan, tanggal_lahir, usia, kategori_usia, 
+                jenis_kelamin, nik, paspor, kebangsaan, pekerjaan, nama_wali, 
+                riwayat_alergi, riwayat_penyakit, riwayat_obat, pelayanan, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
+
+            $stmt = mysqli_prepare($conn, $query_patient);
+
+            mysqli_stmt_bind_param($stmt, 'ssssisssssssssss',
+                $no_rekam_medis,
+                $p['nama_lengkap'],
+                $p['nama_panggilan'],
+                $p['tanggal_lahir'],
+                $p['usia'],
+                $p['kategori_usia'],
+                $p['jenis_kelamin'],
+                $nik,
+                $paspor,
+                $p['kebangsaan'],
+                $p['pekerjaan'],
+                $p['nama_wali'],
+                $p['riwayat_alergi'],
+                $p['riwayat_penyakit'],
+                $p['riwayat_obat'],
+                $p['pelayanan']
+            );
+
+            if (!mysqli_stmt_execute($stmt)) {
+                throw new Exception("Gagal menyimpan data pasien: " . mysqli_error($conn));
+            }
+
+            $patient_id = mysqli_insert_id($conn);
+        }
+
         
         // 3. INSERT KE TABLE PATIENT_EMAILS
         if (!empty($p['emails'])) {
@@ -180,9 +208,27 @@ try {
         }
         
         $booking_id = mysqli_insert_id($conn);
+
+        // 9. INSERT KE TABLE BOOKING_SERVICES (Layanan yang dipilih)
+        if (!empty($p['selected_products']) && is_array($p['selected_products'])) {
+            $query_service = "INSERT INTO booking_services (booking_id, nama_layanan) VALUES (?, ?)";
+            $stmt_service = mysqli_prepare($conn, $query_service);
+            
+            foreach ($p['selected_products'] as $product) {
+                $nama_layanan = $product['name'];
+                mysqli_stmt_bind_param($stmt_service, 'is', $booking_id, $nama_layanan);
+                
+                if (!mysqli_stmt_execute($stmt_service)) {
+                    throw new Exception("Gagal menyimpan layanan: " . mysqli_error($conn));
+                }
+            }
+            
+            mysqli_stmt_close($stmt_service);
+        }
         
         // Simpan info sukses
         $success_bookings[] = [
+            'service_type' => $p['service_type'],
             'nama' => $p['nama_lengkap'],
             'no_rekam_medis' => $no_rekam_medis,
             'nomor_antrian' => $nomor_antrian,

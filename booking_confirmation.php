@@ -38,7 +38,7 @@ $total_peserta = count($participants);
 
     <nav class="navbar">
         <div class="nav-logo">
-            <img src="logo-vaksinin.jpeg" alt="Vaksinin">
+            <img src="vaksinin-logo.png" alt="Vaksinin">
         </div>
         <ul class="nav-menu">
             <li><a href="order.php">Home</a></li>
@@ -78,8 +78,16 @@ $total_peserta = count($participants);
                     <div class="participant-number"><?php echo $index + 1; ?></div>
                     <div class="participant-name"><?php echo htmlspecialchars($p['nama_lengkap']); ?></div>
                 </div>
-                <div class="participant-badge">
-                    <?php echo htmlspecialchars($p['pelayanan']); ?>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <div class="participant-badge">
+                        <?php echo htmlspecialchars($p['pelayanan']); ?>
+                    </div>
+                    <button type="button" class="btn-edit-small" onclick="editParticipant(<?php echo $index; ?>)" title="Edit Peserta">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button type="button" class="btn-delete-small" onclick="deleteParticipant(<?php echo $index; ?>)" title="Hapus Peserta">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </div>
             </div>
 
@@ -202,18 +210,37 @@ $total_peserta = count($participants);
                     </div>
                 </div>
             </div>
+
+            <?php if (!empty($p['selected_products']) && is_array($p['selected_products'])): ?>
+            <div class="selected-services">
+                <h4><i class="fas fa-list-check"></i> Layanan yang Dipilih</h4>
+                <div class="services-list">
+                    <?php foreach ($p['selected_products'] as $product): ?>
+                    <div class="service-badge">
+                        <i class="fas fa-check-circle"></i>
+                        <?php echo htmlspecialchars($product['name']); ?>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+
         </div>
         <?php endforeach; ?>
 
         <form action="final_submit.php" method="POST" id="confirmForm">
 
             <div class="action-buttons">
-                <button type="button" class="btn btn-back" onclick="window.location.href='order.php'">
-                    Kembali & Edit
+                <button type="button" class="btn btn-add" onclick="window.location.href='add_participant.php'">
+                    <i class="fas fa-user-plus"></i> Tambah Peserta Lagi
+                </button>
+                
+                <button type="button" class="btn btn-danger" onclick="resetAll()">
+                    <i class="fas fa-trash"></i> Reset Semua
                 </button>
 
                 <button type="submit" class="btn btn-confirm" id="confirmBtn">
-                    Konfirmasi & Simpan
+                    <i class="fas fa-check-circle"></i> Konfirmasi & Simpan
                 </button>
             </div>
 
@@ -224,7 +251,7 @@ $total_peserta = count($participants);
     <footer class="footer">
         <div class="footer-container">
             <div class="nav-logo-footer">
-                <img src="logo-vaksinin.jpeg" alt="Vaksinin">
+                <img src="vaksinin-logo.png" alt="Vaksinin">
             </div>
             <div class="footer-section">
                 <h3>Jam Operasional</h3>
@@ -284,19 +311,39 @@ $total_peserta = count($participants);
     </footer>
 
     <script>
-        document.getElementById('confirmForm').addEventListener('submit', function (e) {
+    // Confirm sebelum submit
+    document.getElementById('confirmForm').addEventListener('submit', function (e) {
+        if (!confirm('Apakah Anda yakin semua data sudah benar dan ingin melanjutkan?')) {
+            e.preventDefault();
+            return;
+        }
 
-            if (!confirm('Apakah Anda yakin semua data sudah benar dan ingin melanjutkan?')) {
-                e.preventDefault(); // batal submit
-                return;
-            }
+        const btn = document.getElementById('confirmBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+    });
 
-            const btn = document.getElementById('confirmBtn');
-            btn.disabled = true;
-            btn.innerHTML = 'Menyimpan...';
+    // Edit Peserta
+    function editParticipant(index) {
+        if (confirm('Edit data peserta ini? Data akan dimuat di form edit.')) {
+            window.location.href = 'edit_participant.php?index=' + index;
+        }
+    }
 
-        });
-        </script>
+    // Hapus Peserta
+    function deleteParticipant(index) {
+        if (confirm('Yakin ingin menghapus peserta ini?')) {
+            window.location.href = 'delete_participant.php?index=' + index;
+        }
+    }
+
+    // Reset Semua
+    function resetAll() {
+        if (confirm('PERHATIAN! Ini akan menghapus SEMUA peserta dan kembali ke halaman awal. Lanjutkan?')) {
+            window.location.href = 'reset_session.php';
+        }
+    }
+    </script>
 
 </body>
 </html>

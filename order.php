@@ -41,13 +41,12 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="layout.css">
     <link rel="stylesheet" href="calender.css">
-    <link rel="stylesheet" href="calendar_styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-logo">
-            <img src="logo-vaksinin.jpeg" alt="Vaksinin">
+            <img src="vaksinin-logo.png" alt="Vaksinin">
         </div>
         <ul class="nav-menu">
             <li><a href="order.php">Home</a></li>
@@ -269,68 +268,99 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
                     </button>
                 </div>
             </div>
+            
+            <!-- PILIH PRODUK/LAYANAN -->
+            <div class="form-section">
+                <h2 class="section-title">Pilih Layanan Tambahan</h2>
+                <p class="subtitle">Pilih opsi layanan yang ingin Anda pesan</p>
+                
+                <!-- Selected Products Badge -->
+                <div class="selected-badges" id="selectedBadges" style="display:none;">
+                    <!-- Badge akan muncul di sini -->
+                </div>
+                
+                <!-- Search Box -->
+                <div class="form-group">
+                    <input type="text" class="search-box-layanan" id="searchLayanan" placeholder="🔍 Ketik nama layanan...">
+                </div>
+                
+                <!-- Category Accordion -->
+                <div class="category-accordion" id="categoryAccordion">
+                    <!-- Categories akan di-load via JavaScript -->
+                </div>
+                
+                <!-- Hidden input untuk submit -->
+                <input type="hidden" name="selected_products" id="selectedProductsInput">
+                
+                <!-- Info total -->
+                <div class="total-info" id="totalInfo" style="display:none;">
+                    Total dipilih: <strong id="totalCount">0</strong> layanan
+                </div>
+            </div>
 
             <!-- KALENDER BOOKING -->
             <div class="form-section">
                 <h2 class="section-title">Pilih Jadwal</h2>
 
-                <div class="calendar-header">
-                    <button type="button" onclick="prevMonth()">&lt;</button>
-                    <h2><?php echo $nama_bulan[$bulan] . ' ' . $tahun; ?></h2>
-                    <button type="button" onclick="nextMonth()">&gt;</button>
-                </div>
+                <div class="calendar-wrapper">
+                    <div class="calendar-header">
+                        <button type="button" onclick="prevMonth()">&lt;</button>
+                        <h2><?php echo $nama_bulan[$bulan] . ' ' . $tahun; ?></h2>
+                        <button type="button" onclick="nextMonth()">&gt;</button>
+                    </div>
 
-                <div class="calendar-days">
-                    <div class="day-header">M</div>
-                    <div class="day-header">S</div>
-                    <div class="day-header">S</div>
-                    <div class="day-header">R</div>
-                    <div class="day-header">K</div>
-                    <div class="day-header">J</div>
-                    <div class="day-header">S</div>
+                    <div class="calendar-days">
+                        <div class="day-header">M</div>
+                        <div class="day-header">S</div>
+                        <div class="day-header">S</div>
+                        <div class="day-header">R</div>
+                        <div class="day-header">K</div>
+                        <div class="day-header">J</div>
+                        <div class="day-header">S</div>
 
-                    <?php
-                    // Kosongkan hari sebelum tanggal 1
-                    for ($i = 0; $i < $hari_awal; $i++) {
-                        echo '<div class="day empty"></div>';
-                    }
-
-                    // Tampilkan tanggal
-                    for ($tgl = 1; $tgl <= $jumlah_hari; $tgl++) {
-                        $tanggal_full = sprintf('%04d-%02d-%02d', $tahun, $bulan, $tgl);
-                        $is_today = ($tgl == $hari_ini);
-                        
-                        // Cek status tanggal (libur, tutup, penuh)
-                        $status = checkDateStatus($conn, $tanggal_full);
-                        $class = getDateClass($status, $is_today);
-                        $title = getDateTitle($status);
-                        $clickable = isDateClickable($status);
-                        
-                        if ($clickable) {
-                            echo "<div class='$class' onclick='selectDate(this, $tgl)' title='$title'>$tgl</div>";
-                        } else {
-                            echo "<div class='$class' title='$title'>$tgl</div>";
+                        <?php
+                        // Kosongkan hari sebelum tanggal 1
+                        for ($i = 0; $i < $hari_awal; $i++) {
+                            echo '<div class="day empty"></div>';
                         }
-                    }
-                    ?>
-                </div>
 
-                <div class="legend">
-                    <div class="legend-item">
-                        <div class="legend-box tersedia"></div>
-                        <span>Tersedia</span>
+                        // Tampilkan tanggal
+                        for ($tgl = 1; $tgl <= $jumlah_hari; $tgl++) {
+                            $tanggal_full = sprintf('%04d-%02d-%02d', $tahun, $bulan, $tgl);
+                            $is_today = ($tgl == $hari_ini);
+                            
+                            // Cek status tanggal (libur, tutup, penuh)
+                            $status = checkDateStatus($conn, $tanggal_full);
+                            $class = getDateClass($status, $is_today);
+                            $title = getDateTitle($status);
+                            $clickable = isDateClickable($status);
+                            
+                            if ($clickable) {
+                                echo "<div class='$class' onclick='selectDate(this, $tgl)' title='$title'>$tgl</div>";
+                            } else {
+                                echo "<div class='$class' title='$title'>$tgl</div>";
+                            }
+                        }
+                        ?>
                     </div>
-                    <div class="legend-item">
-                        <div class="legend-box penuh"></div>
-                        <span>Jadwal Penuh</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-box holiday"></div>
-                        <span>Libur</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-box closed"></div>
-                        <span>Tutup</span>
+
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-box tersedia"></div>
+                            <span>Tersedia</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-box penuh"></div>
+                            <span>Jadwal Penuh</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-box holiday"></div>
+                            <span>Libur</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-box closed"></div>
+                            <span>Tutup</span>
+                        </div>
                     </div>
                 </div>
 
@@ -364,7 +394,7 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
     <footer class="footer">
         <div class="footer-container">
             <div class="nav-logo-footer">
-                <img src="logo-vaksinin.jpeg" alt="Vaksinin">
+                <img src="vaksinin-logo.png" alt="Vaksinin">
             </div>
             <div class="footer-section">
                 <h3>Jam Operasional</h3>
@@ -430,5 +460,6 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
     </script>
     <script src="provinces.js"></script>
     <script src="script.js?v=<?php echo time(); ?>"></script>
+    <script src="service.js"></script>
 </body>
 </html>
