@@ -3,40 +3,94 @@
 // Data produk per kategori
 const productData = {
     "Vaksinasi": [
-        { id: 1, name: "Vaksin Flu" },
-        { id: 2, name: "Vaksin Hepatitis" },
-        { id: 3, name: "Vaksin COVID-19" },
-        { id: 4, name: "Vaksin Meningitis" },
-        { id: 5, name: "Vaksin Typhoid" }
+        { id: 1, name: "Adacel (Sanofi)" },
+        { id: 2, name: "Arexvy (GSK)" },
+        { id: 3, name: "Avaxim 160 (Sanofi)" },
+        { id: 4, name: "Avaxim 80 (Sanofi)" },
+        { id: 5, name: "BCG (Biofarma)" },
+        { id: 6, name: "Boostrix (GSK)" },
+        { id: 7, name: "bOPV Polio (Biofarma)" },
+        { id: 8, name: "Campak (Biofarma)" },
+        { id: 9, name: "Cervarix (GSK)" },
+        { id: 10, name: "Engerix B 10mcg (GSK)" },
+        { id: 11, name: "Engerix B 20mcg (GSK)" },
+        { id: 12, name: "Euvax B Adult (Sanofi)" },
+        { id: 13, name: "Euvax B Pediatric (Sanofi)" },
+        { id: 14, name: "Fluarix Tetra (GSK)" },
+        { id: 15, name: "Formening (Mersi)" },
+        { id: 16, name: "Gardasil (MSD)" },
+        { id: 17, name: "Gardasil 9 (MSD)" },
+        { id: 18, name: "Havrix 1440 (GSK)" },
+        { id: 19, name: "Havrix 720 (GSK)" },
+        { id: 20, name: "Hepatitis B Dewasa (Biofarma)" },
+        { id: 21, name: "Hexaxim (Sanofi)" },
+        { id: 22, name: "Imojev (Sanofi)" },
+        { id: 23, name: "Infanrix Hexa (GSK)" },
+        { id: 24, name: "Influvac Tetra (Abbott)" },
+        { id: 25, name: "Inlive (Sinovac)" },
+        { id: 26, name: "IPV (Biofarma)" },
+        { id: 27, name: "MMR II (MSD)" },
+        { id: 28, name: "MR (Biofarma)" },
+        { id: 29, name: "Menactra (Sanofi)" },
+        { id: 30, name: "Menivax (Biofarma)" },
+        { id: 31, name: "Menquadfi (Sanofi)" },
+        { id: 32, name: "Pneumovax 23 (MSD)" },
+        { id: 33, name: "Prevenar 13 (Pfizer)" },
+        { id: 34, name: "Prevenar 20 (Pfizer)" },
+        { id: 35, name: "Proquad (MSD)" },
+        { id: 36, name: "Qdenga (Takeda)" },
+        { id: 37, name: "Rotarix (GSK)" },
+        { id: 38, name: "Rotateq (MSD)" },
+        { id: 39, name: "Shingrix (GSK)" },
+        { id: 40, name: "Stamaril (Sanofi)" },
+        { id: 41, name: "Synflorix (GSK)" },
+        { id: 42, name: "Tetraxim (Sanofi)" },
+        { id: 43, name: "Twinrix (GSK)" },
+        { id: 44, name: "Typhim Vi (Sanofi)" },
+        { id: 45, name: "Varivax (MSD)" },
+        { id: 46, name: "Vaxigrip Tetra (Sanofi)" },
+        { id: 47, name: "Vaxneuvance (MSD)" },
+        { id: 48, name: "Vecon Adult (Biofarma)" },
+        { id: 49, name: "Verorab (Sanofi)" },
+        { id: 50, name: "Vivaxim (Sanofi)" }
     ],
+
     "Paket Kesehatan": [
-        { id: 6, name: "Infus Vitamin C Booster" },
-        { id: 7, name: "Infus Immunity" },
-        { id: 8, name: "Paket Premium Imunisasi" },
-        { id: 9, name: "Medical Check Up" }
+        { id: 51, name: "Home Care" },
+        { id: 52, name: "Telekonsultasi" },
+        { id: 53, name: "Pemeriksaan Dokter" },
+        { id: 54, name: "Medical Check Up Lengkap" },
+        { id: 55, name: "Medical Check Up Standard" },
+        { id: 56, name: "Pemeriksaan Asam Urat" },
+        { id: 57, name: "Pemeriksaan Gula Darah" },
+        { id: 58, name: "Pemeriksaan Kolesterol" }
     ],
+
     "Vitamin": [
-        { id: 10, name: "Vitamin B Complex" },
-        { id: 11, name: "Vitamin D3" },
-        { id: 12, name: "Suntik Vitamin C" }
+        { id: 59, name: "Vitamin B Complex" },
+        { id: 60, name: "Vitamin D3" },
+        { id: 61, name: "Suntik Vitamin C" },
+        { id: 62, name: "Vitamin Badan Bugar" },
+        { id: 63, name: "Vitamin Bugar Kinclong" },
+        { id: 64, name: "Vitamin Jeruk Segar" },
+        { id: 65, name: "Vitamin Remaja Abadi" },
+        { id: 66, name: "Vitamin Segar Bugar" },
+        { id: 67, name: "Vitamin Segar Kinclong" },
+        { id: 68, name: "Vitamin Sultan" },
+        { id: 69, name: "Vitamin Segar Bugar Ekstra" },
+        { id: 70, name: "Vitamin Sultan +" },
+        { id: 71, name: "Vitamin Badan Bugar Ekstra" },
+        { id: 72, name: "Vitamin Jeruk Segar Ekstra" }
     ],
+
     "Obat": [
-        { id: 13, name: "Obat Anti Mabuk" },
-        { id: 14, name: "Obat Anti Malaria" },
-        { id: 15, name: "Obat Diare" }
+        { id: 73, name: "Pantoprazole 40 mg Vial" },
+        { id: 74, name: "Paracetamol 1 g Fl" },
+        { id: 75, name: "Tuberculin PPD RT 23 SSI" }
     ],
     "Swab": [
-        { id: 16, name: "Swab Antigen COVID-19" },
-        { id: 17, name: "Swab PCR COVID-19" }
-    ],
-    "Lab": [
-        { id: 18, name: "Cek Darah Lengkap" },
-        { id: 19, name: "Cek Kolesterol" },
-        { id: 20, name: "Cek Gula Darah" }
-    ],
-    "Servis": [
-        { id: 21, name: "Konsultasi Dokter" },
-        { id: 22, name: "Pemasangan Infus" }
+        { id: 76, name: "Swab Antigen COVID-19" },
+        { id: 77, name: "Swab PCR COVID-19" }
     ]
 };
 
