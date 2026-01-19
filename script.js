@@ -98,23 +98,6 @@ function hitungUsia() {
 }
 
 // ==================== DYNAMIC FIELDS ====================
-function addField(type) {
-    let container, inputHTML;
-    
-    if (type === 'email') {
-        container = document.getElementById('emailContainer');
-        inputHTML = '<input type="email" name="emails[]" placeholder="contoh@email.com">';
-    } else if (type === 'phone') {
-        container = document.getElementById('phoneContainer');
-        inputHTML = '<input type="tel" name="phones[]" placeholder="08123456789">';
-    }
-    
-    const div = document.createElement('div');
-    div.className = 'dynamic-field';
-    div.innerHTML = inputHTML + '<button type="button" class="btn btn-remove" onclick="removeField(this)">×</button>';
-    container.appendChild(div);
-}
-
 function removeField(btn) {
     const container = btn.parentElement.parentElement;
     const fields = container.querySelectorAll('.dynamic-field');
@@ -202,28 +185,19 @@ function fillPatientData(patientId) {
                 document.getElementById('inputNamaWali').value = p.nama_wali || '';
                 
                 // Kontak
-                if (data.emails && data.emails.length > 0) {
-                    const emailContainer = document.getElementById('emailContainer');
-                    emailContainer.innerHTML = '';
-                    data.emails.forEach(email => {
-                        const div = document.createElement('div');
-                        div.className = 'dynamic-field';
-                        div.innerHTML = `<input type="email" name="emails[]" value="${email}" placeholder="contoh@email.com">
-                            <button type="button" class="btn btn-remove" onclick="removeField(this)">×</button>`;
-                        emailContainer.appendChild(div);
-                    });
+                // Kontak (SINGLE, bukan array)
+                if (data.email) {
+                    const emailInput = document.querySelector('input[name="email"]');
+                    if (emailInput) {
+                        emailInput.value = data.email;
+                    }
                 }
-                
-                if (data.phones && data.phones.length > 0) {
-                    const phoneContainer = document.getElementById('phoneContainer');
-                    phoneContainer.innerHTML = '';
-                    data.phones.forEach(phone => {
-                        const div = document.createElement('div');
-                        div.className = 'dynamic-field';
-                        div.innerHTML = `<input type="tel" name="phones[]" value="${phone}" placeholder="08123456789">
-                            <button type="button" class="btn btn-remove" onclick="removeField(this)">×</button>`;
-                        phoneContainer.appendChild(div);
-                    });
+
+                if (data.phone) {
+                    const phoneInput = document.querySelector('input[name="phone"]');
+                    if (phoneInput) {
+                        phoneInput.value = data.phone;
+                    }
                 }
                 
                 if (data.address) {

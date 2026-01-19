@@ -68,11 +68,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     
     // Validasi kontak
-    $emails = array_filter($_POST['emails'] ?? []);
-    $phones = array_filter($_POST['phones'] ?? []);
-    
-    if (count($emails) < 1) $errors[] = 'Minimal harus ada 1 email';
-    if (count($phones) < 1) $errors[] = 'Minimal harus ada 1 nomor HP';
+    $emails = $_POST['emails'] ?? [];
+    $phones = $_POST['phones'] ?? [];
+
+    if (empty($emails[0])) $errors[] = 'Email harus diisi';
+    if (empty($phones[0])) $errors[] = 'Nomor HP harus diisi';
+
+    // Filter array (hapus yang kosong)
+    $emails = array_filter($emails);
+    $phones = array_filter($phones);
     
     // Validasi alamat
     if (empty($_POST['alamat'])) $errors[] = 'Alamat harus diisi';
@@ -272,19 +276,19 @@ if (isset($errors) && count($errors) > 0) {
                     <label>Tipe Layanan <span class="required">*</span></label>
                     <div class="radio-group">
                         <label class="radio-card">
+                            <input type="radio" name="service_type" value="In Clinic" checked required>
+                            <div class="radio-card-content">
+                                <i class="fas fa-hospital"></i>
+                                <strong>In Clinic</strong>
+                                <small>Kunjungi klinik kami</small>
+                            </div>
+                        </label>
+                        <label class="radio-card">
                             <input type="radio" name="service_type" value="Home Service" required>
                             <div class="radio-card-content">
                                 <i class="fas fa-home"></i>
                                 <strong>Home Service</strong>
                                 <small>Layanan ke rumah Anda</small>
-                            </div>
-                        </label>
-                        <label class="radio-card">
-                            <input type="radio" name="service_type" value="In Clinic" required>
-                            <div class="radio-card-content">
-                                <i class="fas fa-hospital"></i>
-                                <strong>In Clinic</strong>
-                                <small>Kunjungi klinik kami</small>
                             </div>
                         </label>
                     </div>
@@ -375,22 +379,12 @@ if (isset($errors) && count($errors) > 0) {
             <div class="form-section">
                 <div class="form-group">
                     <label>Email <span class="required">*</span></label>
-                    <div id="emailContainer">
-                        <div class="dynamic-field">
-                            <input type="email" name="emails[]" required placeholder="contoh@email.com">
-                        </div>
-                    </div>
-                    <button type="button" class="btn btn-add" onclick="addField('email')">+ Tambah Email</button>
+                    <input type="email" name="emails[]" required placeholder="contoh@email.com" value="<?php echo htmlspecialchars($edit_data['emails'][0] ?? ''); ?>">
                 </div>
-                
+
                 <div class="form-group">
                     <label>Nomor HP <span class="required">*</span></label>
-                    <div id="phoneContainer">
-                        <div class="dynamic-field">
-                            <input type="tel" name="phones[]" required placeholder="08123456789">
-                        </div>
-                    </div>
-                    <button type="button" class="btn btn-add" onclick="addField('phone')">+ Tambah Nomor HP</button>
+                    <input type="tel" name="phones[]" required placeholder="08123456789" value="<?php echo htmlspecialchars($edit_data['phones'][0] ?? ''); ?>">
                 </div>
                 
                 <div class="form-group">
@@ -504,21 +498,28 @@ if (isset($errors) && count($errors) > 0) {
                         }
 
                         // Tampilkan tanggal
+                        $today_date = date('Y-m-d');
+
                         for ($tgl = 1; $tgl <= $jumlah_hari; $tgl++) {
-                            $tanggal_full = sprintf('%04d-%02d-%02d', $tahun, $bulan, $tgl);
-                            $is_today = ($tgl == $hari_ini);
-                            
-                            // Cek status tanggal (libur, tutup, penuh)
-                            $status = checkDateStatus($conn, $tanggal_full);
-                            $class = getDateClass($status, $is_today);
-                            $title = getDateTitle($status);
-                            $clickable = isDateClickable($status);
-                            
-                            if ($clickable) {
-                                echo "<div class='$class' onclick='selectDate(this, $tgl)' title='$title'>$tgl</div>";
-                            } else {
-                                echo "<div class='$class' title='$title'>$tgl</div>";
-                            }
+                        $tanggal_full = sprintf('%04d-%02d-%02d', $tahun, $bulan, $tgl);
+                        $is_today = ($tanggal_full === $today_date);
+
+                        // ❌ JIKA TANGGAL SUDAH LEWAT → DISABLE
+                        if ($tanggal_full < $today_date) {
+                            echo "<div class='day disabled past-date' title='Tanggal sudah lewat'>$tgl</div>";
+                            continue;
+                        }
+
+                        // Cek status dari DB
+                        $status = checkDateStatus($conn, $tanggal_full);
+                        $class = getDateClass($status, $is_today);
+                        $title = getDateTitle($status);
+                        $clickable = isDateClickable($status);
+
+                        if ($clickable) {
+                            echo "<div class='$class' onclick='selectDate(this, $tgl)' title='$title'>$tgl</div>";
+                        } else {
+                            echo "<div class='$class' title='$title'>$tgl</div>";
                         }
                         ?>
                     </div>

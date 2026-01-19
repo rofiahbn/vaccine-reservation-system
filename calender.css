@@ -299,3 +299,12 @@ h2 {
         font-size: 14px;
     }
 }
+
+.day.past-date {
+    background: #f9fafb;
+    color: #bfbfbf;
+    border: 1px solid #eee;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+

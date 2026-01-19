@@ -93,19 +93,19 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
                     <label>Tipe Layanan <span class="required">*</span></label>
                     <div class="radio-group">
                         <label class="radio-card">
+                            <input type="radio" name="service_type" value="In Clinic" checked required>
+                            <div class="radio-card-content">
+                                <i class="fas fa-hospital"></i>
+                                <strong>In Clinic</strong>
+                                <small>Kunjungi klinik kami</small>
+                            </div>
+                        </label>
+                        <label class="radio-card">
                             <input type="radio" name="service_type" value="Home Service" required>
                             <div class="radio-card-content">
                                 <i class="fas fa-home"></i>
                                 <strong>Home Service</strong>
                                 <small>Layanan ke rumah Anda</small>
-                            </div>
-                        </label>
-                        <label class="radio-card">
-                            <input type="radio" name="service_type" value="In Clinic" required>
-                            <div class="radio-card-content">
-                                <i class="fas fa-hospital"></i>
-                                <strong>In Clinic</strong>
-                                <small>Kunjungi klinik kami</small>
                             </div>
                         </label>
                     </div>
@@ -122,6 +122,8 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
                         <option value="Vaksinasi Umum/Infus Vitamin">Layanan Vaksinasi Umum/Infus Vitamin</option>
                     </select>
                 </div>
+
+                <input type="hidden" name="is_umroh" id="isUmroh" value="0">
             </div>
 
             <!-- DATA DIRI -->
@@ -196,31 +198,17 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
             <div class="form-section">
                 <div class="form-group">
                     <label>Email <span class="required">*</span></label>
-                    <div id="emailContainer">
-                        <div class="dynamic-field">
-                            <input type="email" name="emails[]" required placeholder="contoh@email.com">
-                        </div>
-                    </div>
-                    <button type="button" class="btn btn-add" onclick="addField('email')">+ Tambah Email</button>
+                    <input type="email" name="emails[]" required placeholder="contoh@email.com">
                 </div>
                 
                 <div class="form-group">
                     <label>Nomor HP <span class="required">*</span></label>
-                    <div id="phoneContainer">
-                        <div class="dynamic-field">
-                            <input type="tel" name="phones[]" required placeholder="08123456789">
-                        </div>
-                    </div>
-                    <button type="button" class="btn btn-add" onclick="addField('phone')">+ Tambah Nomor HP</button>
+                    <input type="tel" name="phones[]" required placeholder="08123456789">
                 </div>
                 
                 <div class="form-group">
                     <label>Alamat Lengkap <span class="required">*</span></label>
-                    <div id="addressContainer">
-                        <div class="dynamic-field">
-                            <textarea name="alamat" required placeholder="Jalan, RT/RW, Kelurahan, Kecamatan"></textarea>
-                        </div>
-                    </div>
+                    <textarea name="alamat" required placeholder="Jalan, RT/RW, Kelurahan, Kecamatan"></textarea>
                 </div>
 
                 <div class="row">
@@ -325,22 +313,31 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
                         }
 
                         // Tampilkan tanggal
+                        $today_date = date('Y-m-d');
+
                         for ($tgl = 1; $tgl <= $jumlah_hari; $tgl++) {
-                            $tanggal_full = sprintf('%04d-%02d-%02d', $tahun, $bulan, $tgl);
-                            $is_today = ($tgl == $hari_ini);
-                            
-                            // Cek status tanggal (libur, tutup, penuh)
-                            $status = checkDateStatus($conn, $tanggal_full);
-                            $class = getDateClass($status, $is_today);
-                            $title = getDateTitle($status);
-                            $clickable = isDateClickable($status);
-                            
-                            if ($clickable) {
-                                echo "<div class='$class' onclick='selectDate(this, $tgl)' title='$title'>$tgl</div>";
-                            } else {
-                                echo "<div class='$class' title='$title'>$tgl</div>";
-                            }
+                        $tanggal_full = sprintf('%04d-%02d-%02d', $tahun, $bulan, $tgl);
+                        $is_today = ($tanggal_full === $today_date);
+
+                        // ❌ JIKA TANGGAL SUDAH LEWAT → DISABLE
+                        if ($tanggal_full < $today_date) {
+                            echo "<div class='day disabled past-date' title='Tanggal sudah lewat'>$tgl</div>";
+                            continue;
                         }
+
+                        // Cek status dari DB
+                        $status = checkDateStatus($conn, $tanggal_full);
+                        $class = getDateClass($status, $is_today);
+                        $title = getDateTitle($status);
+                        $clickable = isDateClickable($status);
+
+                        if ($clickable) {
+                            echo "<div class='$class' onclick='selectDate(this, $tgl)' title='$title'>$tgl</div>";
+                        } else {
+                            echo "<div class='$class' title='$title'>$tgl</div>";
+                        }
+                    }
+
                         ?>
                     </div>
 

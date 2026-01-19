@@ -40,11 +40,15 @@ if ($pelayanan === 'Umroh/Haji/Luar Negeri') {
 }
 
 // Validasi kontak
-$emails = array_filter($_POST['emails'] ?? []);
-$phones = array_filter($_POST['phones'] ?? []);
+$emails = $_POST['emails'] ?? [];
+$phones = $_POST['phones'] ?? [];
 
-if (count($emails) < 1) $errors[] = 'Minimal harus ada 1 email';
-if (count($phones) < 1) $errors[] = 'Minimal harus ada 1 nomor HP';
+if (empty($emails[0])) $errors[] = 'Email harus diisi';
+if (empty($phones[0])) $errors[] = 'Nomor HP harus diisi';
+
+// Filter array (hapus yang kosong)
+$emails = array_filter($emails);
+$phones = array_filter($phones);
 
 // Validasi alamat
 if (empty($_POST['alamat'])) $errors[] = 'Alamat harus diisi';
