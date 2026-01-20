@@ -247,7 +247,8 @@ $total_weeks = ceil($total_days / 7);
                                                         (($status == 'cancelled') ? 'status-cancelled' : 'status-pending');
                                                     ?>
 
-                                                    <div class="booking-item <?php echo $color_class; ?>">
+                                                    <div class="booking-item <?php echo $color_class; ?>" 
+                                                        onclick="showBookingDetail(<?php echo $bookings[0]['id']; ?>)">
                                                         <?php foreach ($bookings as $index => $b): ?>
                                                             <div class="booking-row">
                                                                 <span class="queue-no">
@@ -358,28 +359,5 @@ $total_weeks = ceil($total_days / 7);
     </div>
 
     <script src="js/admin.js"></script>
-    <script>
-        const currentYear = <?php echo $current_year; ?>;
-        
-        function changeMonth() {
-            const month = document.getElementById('monthSelect').value;
-            window.location.href = `dashboard.php?month=${month}&year=${currentYear}&week=1`;
-        }
-        
-        function changeWeek() {
-            const month = document.getElementById('monthSelect').value;
-            const week = document.getElementById('weekSelect').value;
-            window.location.href = `dashboard.php?month=${month}&year=${currentYear}&week=${week}`;
-        }
-        
-        function toggleView() {
-            alert('Fitur toggle view akan dikembangkan');
-        }
-        
-        function showBookingDetail(bookings) {
-            console.log('Booking detail:', bookings);
-            // Next step: show modal/detail
-        }
-    </script>
 </body>
 </html>

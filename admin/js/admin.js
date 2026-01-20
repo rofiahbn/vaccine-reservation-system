@@ -24,17 +24,14 @@ function filterBookingList(filter) {
 }
 
 // Show booking detail (will be implemented in next step)
-function showBookingDetail(bookings) {
-    console.log('Show detail for bookings:', bookings);
-    
-    // Preview in console for now
-    if (Array.isArray(bookings) && bookings.length > 0) {
-        console.table(bookings);
-        
-        // Next step: Show modal/detail panel
-        alert(`${bookings.length} booking(s) found in this slot.\nNext step: Will show detailed modal.`);
-    }
+function showBookingDetail(bookingId) {
+    console.log('CLICK BOOKING ID:', bookingId);
+
+    if (!bookingId) return;
+
+    window.location.href = 'booking_detail.php?id=' + bookingId;
 }
+
 
 // Change month handler (called from inline script in dashboard.php)
 function changeMonth() {

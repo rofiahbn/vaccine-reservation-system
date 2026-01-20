@@ -1,0 +1,227 @@
+/* ============================= */
+/* LAYOUT UTAMA */
+/* ============================= */
+
+.detail-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 24px;
+    align-items: start;
+}
+
+/* ============================= */
+/* KONTEN KIRI (DETAIL PESANAN) */
+/* ============================= */
+
+.detail-container {
+    flex: 1;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+}
+
+/* Judul */
+.detail-container h2 {
+    font-size: 20px;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+/* Grup data */
+.detail-group {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 14px 20px;
+    margin-bottom: 14px;
+}
+
+.detail-label {
+    font-weight: 500;
+    color: #555;
+}
+
+.detail-value {
+    color: #222;
+}
+
+/* Garis pemisah */
+.detail-divider {
+    margin: 18px 0;
+    border-bottom: 1px solid #eee;
+}
+
+/* ============================= */
+/* PANEL KANAN */
+/* ============================= */
+
+.detail-right {
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ============================= */
+/* CARD PANEL */
+/* ============================= */
+
+.side-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+}
+
+/* Header card */
+.side-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.side-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* ============================= */
+/* BUTTON ICON */
+/* ============================= */
+
+.side-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.btn-icon {
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background: #ffffff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-icon:hover {
+    background: #f4f4f4;
+}
+
+.btn-icon.danger {
+    background: #ffe3e3;
+    border-color: #ffb3b3;
+}
+
+.btn-icon.danger:hover {
+    background: #ffcfcf;
+}
+
+/* ============================= */
+/* BODY PANEL */
+/* ============================= */
+
+.side-body {
+    margin: 12px 0;
+    font-size: 14px;
+}
+
+.empty-text {
+    color: #aaa;
+    font-style: italic;
+}
+
+/* ============================= */
+/* TOMBOL TAMBAH DOKTER */
+/* ============================= */
+
+.btn-add-worker {
+    width: 100%;
+    padding: 10px;
+    border-radius: 12px;
+    border: none;
+    background: #e6ffe6;
+    color: #207520;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-add-worker:hover {
+    background: #caffca;
+}
+
+/* ============================= */
+/* ACTION BUTTONS */
+/* ============================= */
+
+.btn-accept {
+    width: 100%;
+    background: #bdeaff;
+    color: #004e75;
+    border: none;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: all 0.2s ease;
+}
+
+.btn-accept:hover {
+    background: #9adfff;
+}
+
+.btn-cancel {
+    width: 100%;
+    background: #ffc6c6;
+    color: #7a0000;
+    border: none;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-cancel:hover {
+    background: #ffaaaa;
+}
+
+/* ============================= */
+/* RESPONSIVE (TABLET & MOBILE) */
+/* ============================= */
+
+@media (max-width: 1024px) {
+    .detail-layout {
+        flex-direction: column;
+    }
+
+    .detail-right {
+        width: 100%;
+        flex-direction: row;
+    }
+
+    .side-card {
+        flex: 1;
+    }
+}
+
+@media (max-width: 600px) {
+    .detail-right {
+        flex-direction: column;
+    }
+
+    .detail-group {
+        grid-template-columns: 1fr;
+    }
+
+    .detail-label {
+        font-size: 13px;
+    }
+
+    .detail-value {
+        font-size: 14px;
+    }
+}
