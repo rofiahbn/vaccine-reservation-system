@@ -28,17 +28,35 @@ $stmt->bind_param('s', $today);
 $stmt->execute();
 $total_today = $stmt->get_result()->fetch_assoc()['total'];
 
-// Pesanan selesai
-$sql_done = "SELECT COUNT(*) as total FROM bookings WHERE status = 'completed'";
-$total_done = $conn->query($sql_done)->fetch_assoc()['total'];
+/// Pesanan selesai hari ini
+$sql_done = "SELECT COUNT(*) as total 
+             FROM bookings 
+             WHERE status = 'completed' 
+             AND DATE(tanggal_booking) = ?";
+$stmt = $conn->prepare($sql_done);
+$stmt->bind_param('s', $today);
+$stmt->execute();
+$total_done = $stmt->get_result()->fetch_assoc()['total'];
 
-// Pesanan dibatalkan
-$sql_cancelled = "SELECT COUNT(*) as total FROM bookings WHERE status = 'cancelled'";
-$total_cancelled = $conn->query($sql_cancelled)->fetch_assoc()['total'];
+// Pesanan dibatalkan hari ini
+$sql_cancelled = "SELECT COUNT(*) as total 
+                  FROM bookings 
+                  WHERE status = 'cancelled' 
+                  AND DATE(tanggal_booking) = ?";
+$stmt = $conn->prepare($sql_cancelled);
+$stmt->bind_param('s', $today);
+$stmt->execute();
+$total_cancelled = $stmt->get_result()->fetch_assoc()['total'];
 
-// Pesanan belum diproses
-$sql_pending = "SELECT COUNT(*) as total FROM bookings WHERE status = 'pending'";
-$total_pending = $conn->query($sql_pending)->fetch_assoc()['total'];
+// Pesanan belum diproses hari ini
+$sql_pending = "SELECT COUNT(*) as total 
+                FROM bookings 
+                WHERE status = 'pending' 
+                AND DATE(tanggal_booking) = ?";
+$stmt = $conn->prepare($sql_pending);
+$stmt->bind_param('s', $today);
+$stmt->execute();
+$total_pending = $stmt->get_result()->fetch_assoc()['total'];
 
 // Get bookings for calendar view (current week)
 $week_start = sprintf('%04d-%02d-%02d', $current_year, $current_month, $start_date);
@@ -95,6 +113,7 @@ $all_bookings = $conn->query($sql_all);
 $total_days = cal_days_in_month(CAL_GREGORIAN, $current_month, $current_year);
 $total_weeks = ceil($total_days / 7);
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -283,7 +302,11 @@ $total_weeks = ceil($total_days / 7);
                 <div class="legend-item">
                     <span class="legend-dot cancelled"></span>
                     <span>Dibatalkan</span>
-                </div>                                                
+                </div>
+                <div class="legend-item">
+                    <span class="legend-dot completed"></span>
+                    <span>Selesai</span>
+                </div>                                                 
             </div>
         </div>
 
@@ -291,11 +314,12 @@ $total_weeks = ceil($total_days / 7);
         <div class="booking-list">
             <div class="section-header">
                 <h2>Booking List</h2>
-                <select class="filter-select">
-                    <option>Terbaru</option>
-                    <option>Terlama</option>
-                    <option>Selesai</option>
-                    <option>Pending</option>
+                <select class="filter-select" id="bookingFilter" onchange="filterBookingList()">
+                    <option value="latest">Terbaru</option>
+                    <option value="pending">Pending</option>
+                    <option value="confirmed">Dalam Antrian</option>
+                    <option value="completed">Selesai</option>
+                    <option value="cancelled">Dibatalkan</option>
                 </select>
             </div>
 
@@ -312,6 +336,26 @@ $total_weeks = ceil($total_days / 7);
                 </thead>
                 <tbody>
                     <?php while ($booking = $all_bookings->fetch_assoc()): ?>
+                        <?php
+                        // Ambil semua dokter untuk booking ini
+                        $booking_id = $booking['id'];
+                        $sql_staff = "
+                            SELECT s.gelar, s.nama_lengkap
+                            FROM booking_staff bs
+                            JOIN staff s ON bs.staff_id = s.id
+                            WHERE bs.booking_id = ?
+                        ";
+                        $stmt_staff = $conn->prepare($sql_staff);
+                        $stmt_staff->bind_param("i", $booking_id);
+                        $stmt_staff->execute();
+                        $result_staff = $stmt_staff->get_result();
+
+                        $dokters = [];
+                        while ($row = $result_staff->fetch_assoc()) {
+                            $dokters[] = htmlspecialchars($row['gelar'].' '.$row['nama_lengkap']);
+                        }
+                        ?>
+
                         <?php
                         // Get services for this booking
                         $sql_services = "SELECT nama_layanan FROM booking_services WHERE booking_id = ?";
@@ -339,18 +383,33 @@ $total_weeks = ceil($total_days / 7);
 
                         <!-- DOKTER -->
                         <td>
-                            <?= $booking['dokter_nama']
-                                ? htmlspecialchars($booking['dokter_gelar'].' '.$booking['dokter_nama'])
-                                : '-' ?>
+                            <?php if (!empty($dokters)): ?>
+                                <?php foreach ($dokters as $dokter): ?>
+                                    <div><?= $dokter ?></div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                -
+                            <?php endif; ?>
                         </td>
+
 
                         <!-- STATUS -->
                         <td>
                             <span class="status-badge <?= $booking['status'] ?>">
-                                <?= $booking['status'] == 'pending' ? 'Sedang Berlangsung' :
-                                ($booking['status'] == 'completed' ? 'Selesai' : 'Dibatalkan') ?>
+                                <?php 
+                                    if ($booking['status'] == 'pending') {
+                                        echo 'Menunggu Konfirmasi';
+                                    } elseif ($booking['status'] == 'confirmed') {
+                                        echo 'Pasien Dalam Antrian';
+                                    } elseif ($booking['status'] == 'completed') {
+                                        echo 'Pesanan Selesai';
+                                    } elseif ($booking['status'] == 'cancelled') {
+                                        echo 'Pesanan Dibatalkan';
+                                    }
+                                ?>
                             </span>
                         </td>
+
                     </tr>
                     <?php endwhile; ?>
                 </tbody>

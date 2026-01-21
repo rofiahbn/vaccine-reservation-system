@@ -19,7 +19,7 @@ body {
 =================================================== */
 .sidebar {
     width: 220px;
-    background: #2d3748;
+    background: #3b3a3d;
     color: white;
     padding: 20px 0;
     position: fixed;
@@ -298,6 +298,10 @@ body {
 }
 
 .legend-dot.confirmed {
+    background: #1e40af;
+}
+
+.legend-dot.completed {
     background: #10b981;
 }
 
@@ -344,7 +348,8 @@ body {
 
 /* Status: Confirmed (Hijau) */
 .booking-item.status-confirmed {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+    color : white;
 }
 
 .booking-item.status-confirmed .booking-status {
@@ -355,9 +360,24 @@ body {
     color: white;
 }
 
+/* Status: Completed (Hijau) */
+.booking-item.status-completed {
+    background: linear-gradient(135deg, #065f46 0%, #1e8a58 100%);
+    color : white;
+}
+
+.booking-item.status-completed .booking-status {
+    color: #ffffff; /* Putih biar kontras */
+}
+
+.booking-item.status-completed .booking-count {
+    color: white;
+}
+
 /* Status: Cancelled (Merah) */
 .booking-item.status-cancelled {
     background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color : white;
 }
 
 .booking-item.status-cancelled .booking-status {
@@ -367,6 +387,7 @@ body {
 .booking-item.status-cancelled .booking-count {
     color: white;
 }
+
 
 .booking-status {
     font-size: 10px; /* Dari 11px jadi 10px */
@@ -475,9 +496,14 @@ body {
     color: #065f46;
 }
 
-.status-badge.pending {
+.status-badge.confirmed {
     background: #dbeafe;
     color: #1e40af;
+}
+
+.status-badge.pending {
+    background: #fefddb;
+    color: #fbac07;
 }
 
 .status-badge.cancelled {

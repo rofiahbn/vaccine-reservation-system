@@ -27,6 +27,19 @@ if ($result->num_rows == 0) {
 
 $booking = $result->fetch_assoc();
 
+// Get staff yang sudah ditugaskan ke booking
+$sql_staff = "
+    SELECT s.id, s.nama_lengkap, s.gelar, s.role
+    FROM booking_staff bs
+    JOIN staff s ON bs.staff_id = s.id
+    WHERE bs.booking_id = ?
+";
+$stmt_staff = $conn->prepare($sql_staff);
+$stmt_staff->bind_param("i", $booking_id);
+$stmt_staff->execute();
+$staffs = $stmt_staff->get_result();
+$dokter_count = $staffs->num_rows;
+
 // Get emails
 $sql_emails = "SELECT email FROM patient_emails WHERE patient_id = ? ORDER BY is_primary DESC";
 $stmt_e = $conn->prepare($sql_emails);
@@ -69,7 +82,7 @@ $services = $stmt_s->get_result();
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="logo">
-            <img src="../logo-vaksinin.jpeg" alt="Vaksinin">
+            <img src="vaksinin-logo.png" alt="Vaksinin">
         </div>
         <nav class="nav-menu">
             <a href="dashboard.php" class="nav-item">
@@ -94,10 +107,14 @@ $services = $stmt_s->get_result();
     <!-- Main Content -->
     <div class="main-content">
         <div class="detail-header">
-            <button onclick="window.history.back()" class="btn-back">
+            <button onclick="window.location.href='dashboard.php'" class="btn-back">
                 <i class="fas fa-arrow-left"></i> Kembali
             </button>
             <h1>Detail Pesanan #<?php echo $booking['nomor_antrian']; ?></h1>
+
+            <button class="btn-edit" onclick="editBooking(<?php echo $booking_id; ?>)">
+                <i class="fas fa-edit"></i> Edit
+            </button>
         </div>
 
         <div class="detail-layout">
@@ -109,10 +126,17 @@ $services = $stmt_s->get_result();
                     </div>
                     <div class="status-info">
                         <h3>Status Pesanan</h3>
-                        <span class="status-badge-large <?php echo $booking['status']; ?>">
+                        <span class="status-badge-large <?= $booking['status']; ?>">
                             <?php 
-                            echo $booking['status'] == 'pending' ? 'Menunggu Konfirmasi' : 
-                                ($booking['status'] == 'confirmed' ? 'Pasien Dalam Antrian' : 'Pesanan Dibatalkan'); 
+                                if ($booking['status'] == 'pending') {
+                                    echo 'Menunggu Konfirmasi';
+                                } elseif ($booking['status'] == 'confirmed') {
+                                    echo 'Pasien Dalam Antrian';
+                                } elseif ($booking['status'] == 'completed') {
+                                    echo 'Pesanan Selesai';
+                                } elseif ($booking['status'] == 'cancelled') {
+                                    echo 'Pesanan Dibatalkan';
+                                } 
                             ?>
                         </span>
                     </div>
@@ -256,41 +280,70 @@ $services = $stmt_s->get_result();
                 <div class="side-card">
                     <div class="side-header">
                         <h3>Tenaga Kerja</h3>
-                        <div class="side-actions">
-                            <button class="btn-icon"><i class="fas fa-user-plus"></i> Pilih</button>
-                            <button class="btn-icon danger"><i class="fas fa-trash"></i> Hapus</button>
-                        </div>
                     </div>
 
                     <div class="side-body">
-                        <span class="empty-text">-</span>
+                        <?php if($staffs->num_rows > 0): ?>
+                            <?php while($s = $staffs->fetch_assoc()): ?>
+                                <div class="staff-item" id="staff-<?= $s['id'] ?>">
+                                    <span><?= htmlspecialchars($s['gelar'].' '.$s['nama_lengkap']); ?></span>
+                                    <button class="btn-delete-staff" onclick="removeStaff(<?= $booking_id ?>, <?= $s['id'] ?>)">Hapus</button>
+                                </div>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <span class="empty-text">Belum ada staff</span>
+                        <?php endif; ?>
                     </div>
 
-                    <button class="btn-add-worker">Tambah Dokter</button>
+                    <button class="btn-add-worker" onclick="openAddDoctorPopup()">
+                        <i class="fas fa-user-md"></i> Tambah Dokter
+                    </button>
                 </div>
 
                 <!-- Action Buttons -->
                 <div class="side-card">
-                    <button class="btn-accept"
-                        onclick="updateStatus(<?= $booking_id ?>, 'confirmed')">
-                        Terima Booking
+                    <button class="btn-accept" 
+                            onclick="updateStatus(<?= $booking_id ?>, 'confirmed')"
+                            <?= $dokter_count === 0 ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : '' ?>>
+                        <i class="fas fa-check-circle"></i> Terima Booking
                     </button>
 
-                    <button class="btn-cancel"
-                        onclick="updateStatus(<?= $booking_id ?>, 'cancelled')">
-                        Cancel Booking
+                    <button class="btn-reschedule" onclick="rescheduleBooking(<?= $booking_id ?>)">
+                        <i class="fas fa-calendar-alt"></i> Reschedule
+                    </button>
+
+                    <button class="btn-cancel" onclick="updateStatus(<?= $booking_id ?>, 'cancelled')">
+                        <i class="fas fa-times-circle"></i> Cancel Booking
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Popup overlay -->
+    <div id="addDoctorPopup" class="popup-overlay" style="display:none;">
+        <div class="popup-content">
+            <h3>Pilih Dokter</h3>
+            <div id="doctorContainer">
+                <select class="doctorSelect">
+                    <option value="">-- Pilih Dokter --</option>
+                    <?php
+                    $staff_result = $conn->query("SELECT id, nama_lengkap, gelar FROM staff ORDER BY nama_lengkap ASC");
+                    while ($staff = $staff_result->fetch_assoc()) {
+                        echo '<option value="'.$staff['id'].'">'.htmlspecialchars($staff['gelar'].' '.$staff['nama_lengkap']).'</option>';
+                    }
+                    ?>
+                </select>
+            </div>
+            <button type="button" onclick="addDoctorDropdown()">Tambah Tenaga Kerja</button>
+            <button type="button" onclick="assignDoctors()">Selesai</button>
+            <button type="button" onclick="closeAddDoctorPopup()">Batal</button>
+        </div>
+    </div>
+
     <script>
-    function updateStatus(bookingId, status) {
-        if (confirm('Yakin ingin mengubah status pesanan?')) {
-            window.location.href = `update_status.php?id=${bookingId}&status=${status}`;
-        }
-    }
+        const bookingId = <?= $booking_id ?>;
     </script>
+    <script src="js/detail.js"></script>
 </body>
 </html>
