@@ -56,7 +56,7 @@ function checkDateStatus($conn, $tanggal) {
     $start_time = intval($buka_hour) * 60 + intval($buka_min);
     $end_time = intval($tutup_hour) * 60 + intval($tutup_min);
     
-    $interval = 5; // 5 menit
+    $interval = 15; 
     $total_slots = floor(($end_time - $start_time) / $interval) + 1;
     
     // Hitung berapa slot yang sudah di-booking

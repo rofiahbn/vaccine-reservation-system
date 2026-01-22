@@ -39,6 +39,9 @@ $stmt_staff->bind_param("i", $booking_id);
 $stmt_staff->execute();
 $staffs = $stmt_staff->get_result();
 $dokter_count = $staffs->num_rows;
+$disable_accept =
+    ($dokter_count === 0) ||
+    ($booking['status'] === 'confirmed');
 
 // Get emails
 $sql_emails = "SELECT email FROM patient_emails WHERE patient_id = ? ORDER BY is_primary DESC";
@@ -76,6 +79,7 @@ $services = $stmt_s->get_result();
     <title>Detail Pesanan - Vaksinin</title>
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="css/detail.css">
+    <link rel="stylesheet" href="css/reschedule.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -287,7 +291,9 @@ $services = $stmt_s->get_result();
                             <?php while($s = $staffs->fetch_assoc()): ?>
                                 <div class="staff-item" id="staff-<?= $s['id'] ?>">
                                     <span><?= htmlspecialchars($s['gelar'].' '.$s['nama_lengkap']); ?></span>
-                                    <button class="btn-delete-staff" onclick="removeStaff(<?= $booking_id ?>, <?= $s['id'] ?>)">Hapus</button>
+                                    <button class="btn-delete-staff" onclick="removeStaff(<?= $booking_id ?>, <?= $s['id'] ?>)" title="Hapus">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </div>
                             <?php endwhile; ?>
                         <?php else: ?>
@@ -302,20 +308,100 @@ $services = $stmt_s->get_result();
 
                 <!-- Action Buttons -->
                 <div class="side-card">
-                    <button class="btn-accept" 
+                    <button class="btn-accept"
                             onclick="updateStatus(<?= $booking_id ?>, 'confirmed')"
-                            <?= $dokter_count === 0 ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : '' ?>>
+                            <?= $disable_accept ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : '' ?>>
                         <i class="fas fa-check-circle"></i> Terima Booking
                     </button>
-
-                    <button class="btn-reschedule" onclick="rescheduleBooking(<?= $booking_id ?>)">
+                    <button type="button" class="btn-reschedule" onclick="openRescheduleModal()">
                         <i class="fas fa-calendar-alt"></i> Reschedule
                     </button>
-
-                    <button class="btn-cancel" onclick="updateStatus(<?= $booking_id ?>, 'cancelled')">
+                    <button id="btn-cancel" class="btn-cancel" 
+                            onclick="cancelBooking(this, <?= $booking_id ?>)">
                         <i class="fas fa-times-circle"></i> Cancel Booking
                     </button>
                 </div>
+            </div>
+        </div>
+
+        <!-- Reschedule Modal -->
+        <div id="rescheduleModal" class="modal-reschedule" style="display:none;">
+            <div class="reschedule-content">
+                <h2>Ubah Jadwal Pasien</h2>
+                
+                <form id="rescheduleForm">
+                    <input type="hidden" name="booking_id" value="<?php echo $booking_id; ?>">
+                    
+                    <!-- Pilih Tanggal -->
+                    <div class="reschedule-section">                     
+                        <div class="calendar-header-reschedule">
+                            <button type="button" onclick="changeMonthReschedule(-1)">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <span id="currentMonthYear"></span>
+                            <button type="button" onclick="changeMonthReschedule(1)">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="calendar-days-reschedule" id="calendarDaysReschedule">
+                            <div class="day-header">M</div>
+                            <div class="day-header">S</div>
+                            <div class="day-header">S</div>
+                            <div class="day-header">R</div>
+                            <div class="day-header">K</div>
+                            <div class="day-header">J</div>
+                            <div class="day-header">S</div>
+                            <!-- Days akan di-generate oleh JS -->
+                        </div>
+                        
+                        <div class="legend-reschedule">
+                            <div class="legend-item">
+                                <div class="legend-box tersedia"></div>
+                                <span>Tersedia</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-box penuh"></div>
+                                <span>Jadwal Penuh</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-box holiday"></div>
+                                <span>Libur</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-box closed"></div>
+                                <span>Tutup</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" name="new_date" id="selectedNewDate">
+                    
+                    <!-- Selected Date Display -->
+                    <div class="selected-date-reschedule" id="dateDisplayReschedule" style="display:none;">
+                        Tanggal yang dipilih: <strong id="dateTextReschedule"></strong>
+                    </div>
+                    
+                    <!-- Pilih Waktu -->
+                    <div class="reschedule-section" id="timeSlotsSection" style="display:none;">
+                        <h3>Pilih Waktu</h3>
+                        <div class="time-slots-reschedule" id="timeSlots">
+                            <!-- Time slots akan di-generate oleh JS -->
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" name="new_time" id="selectedNewTime">
+                    
+                    <!-- Actions -->
+                    <div class="reschedule-actions">
+                        <button type="button" class="btn-cancel-reschedule" onclick="closeRescheduleModal()">
+                            Batal
+                        </button>
+                        <button type="submit" class="btn-submit-reschedule" id="btnSubmitReschedule" disabled>
+                            Jadwalkan Ulang
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -345,5 +431,6 @@ $services = $stmt_s->get_result();
         const bookingId = <?= $booking_id ?>;
     </script>
     <script src="js/detail.js"></script>
+    <script src="js/reschedule.js"></script>
 </body>
 </html>

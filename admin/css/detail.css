@@ -377,13 +377,16 @@
     font-style: itali
 }
 
+/* ===================================================
+   MODAL/POPUP STYLES
+=================================================== */
 .popup-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -392,50 +395,169 @@
 
 .popup-content {
     background: white;
-    padding: 25px 30px;
-    border-radius: 10px;
-    width: 300px;
-    text-align: center;
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
 }
 
 .popup-content h3 {
-    margin-bottom: 15px;
+    font-size: 20px;
+    color: #2d3748;
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-align: left;
 }
 
-.popup-actions {
-    margin-top: 20px;
-    display: flex;
-    gap: 10px;
-    justify-content: center;
+/* Doctor Container */
+#doctorContainer {
+    margin-bottom: 20px;
 }
 
-.btn-delete-staff {
-    background: #ef4444;
-    border: none;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 12px;
-    transition: all 0.2s ease;
+.doctor-select-wrapper {
+    margin-bottom: 12px;
 }
 
-.btn-delete-staff:hover {
-    background: #dc2626;
-    transform: translateY(-1px);
+.doctorSelect {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+    transition: border-color 0.2s;
 }
 
-/* STAFF ITEM FLEX */
+/* Staff Item Display */
 .staff-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 6px 10px;
-    border-radius: 6px;
-    margin-bottom: 6px;
+    padding: 10px 12px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 10px;
     transition: all 0.2s;
 }
 
 .staff-item:hover {
-    background-color: #f3f4f6;
+    background: #f3f4f6;
+    border-color: #d1d5db;
+}
+
+.staff-item-name {
+    font-size: 14px;
+    color: #1f2937;
+    font-weight: 500;
+}
+
+.btn-delete-staff {
+    background: transparent;
+    border: none;
+    color: #ef4444;
+    padding: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+}
+
+.btn-delete-staff:hover {
+    background: #fee2e2;
+    color: #dc2626;
+    transform: scale(1.1);
+}
+
+.btn-delete-staff i {
+    pointer-events: none;
+}
+
+/* Popup Actions */
+.popup-actions {
+    margin-top: 25px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.popup-content button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.popup-content button[onclick="addDoctorDropdown()"] {
+    background: #10b981;
+    color: white;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.popup-content button[onclick="addDoctorDropdown()"]:hover {
+    background: #059669;
+}
+
+.popup-content button[onclick="assignDoctors()"] {
+    background: #3b82f6;
+    color: white;
+    flex: 1;
+}
+
+.popup-content button[onclick="assignDoctors()"]:hover {
+    background: #2563eb;
+}
+
+.popup-content button[onclick="closeAddDoctorPopup()"] {
+    background: #6b7280;
+    color: white;
+    flex: 1;
+}
+
+.popup-content button[onclick="closeAddDoctorPopup()"]:hover {
+    background: #4b5563;
+}
+
+/* Alternative style - sesuai gambar */
+.popup-content {
+    background: white;
+    padding: 25px 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.popup-content h3 {
+    font-size: 18px;
+    color: #1f2937;
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Select dropdown style */
+select.doctorSelect {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+    color: #374151;
+    cursor: pointer;
+}
+
+select.doctorSelect:hover {
+    border-color: #d1d5db;
 }

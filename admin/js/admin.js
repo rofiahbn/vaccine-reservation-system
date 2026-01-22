@@ -153,52 +153,34 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-document.addEventListener('DOMContentLoaded', function () {
-    const filterSelect = document.getElementById('bookingFilter');
-    const tbody = document.querySelector('.list-table tbody');
-
-    if (!filterSelect || !tbody) {
-        console.error('Filter atau tabel tidak ditemukan');
-        return;
-    }
-
-    // Simpan semua row awal (INI PENTING)
-    const allRows = Array.from(tbody.querySelectorAll('tr'));
-
-    filterSelect.addEventListener('change', filterBookingList);
-
-    function filterBookingList() {
-        const filter = filterSelect.value;
-
-        // Kosongkan tabel
-        tbody.innerHTML = '';
-
-        let filteredRows = allRows.filter(row => {
-            const badge = row.querySelector('.status-badge');
-            if (!badge) return false;
-
-            if (filter === 'latest') return true;
-
-            return badge.classList.contains(filter);
-        });
-
-        // Urutkan kalau "Terbaru"
-        if (filter === 'latest') {
-            filteredRows.sort((a, b) => {
-                const aDate = parseDate(a.cells[3].innerText);
-                const bDate = parseDate(b.cells[3].innerText);
-                return bDate - aDate;
-            });
+function filterBookingList() {
+    const filter = document.getElementById('bookingFilter').value;
+    const rows = document.querySelectorAll('.list-table tbody tr');
+    
+    console.log('Filter:', filter); // Debug
+    console.log('Total rows:', rows.length); // Debug
+    
+    rows.forEach(row => {
+        const badge = row.querySelector('.status-badge');
+        
+        if (!badge) {
+            console.log('Badge tidak ditemukan di row:', row);
+            return;
         }
-
-        // Masukkan kembali ke tabel
-        filteredRows.forEach(row => tbody.appendChild(row));
-    }
-
-    function parseDate(text) {
-        // format: 18/01/2026 - 09:00 WIB
-        const datePart = text.split(' - ')[0];
-        const [d, m, y] = datePart.split('/');
-        return new Date(`${y}-${m}-${d}`);
-    }
-});
+        
+        // Show all for "latest"
+        if (filter === 'latest') {
+            row.style.display = '';
+            return;
+        }
+        
+        // Check if badge has the filter class
+        if (badge.classList.contains(filter)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+        
+        console.log('Row status:', badge.classList, 'Visible:', row.style.display !== 'none');
+    });
+}

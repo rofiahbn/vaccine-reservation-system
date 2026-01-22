@@ -76,7 +76,7 @@ $bookings_result = $stmt_bookings->get_result();
 $bookings_grid = [];
 while ($row = $bookings_result->fetch_assoc()) {
     $day = date('N', strtotime($row['tanggal_booking'])); // 1=Monday, 6=Saturday
-    $time = substr($row['waktu_booking'], 0, 5); // HH:MM
+    $time = date('H:i', strtotime($row['waktu_booking']));
     
     // DEBUG: Print data
     echo "<!-- DEBUG: Date={$row['tanggal_booking']}, Day=$day, Time=$time, Status={$row['status']} -->";
@@ -262,8 +262,10 @@ $total_weeks = ceil($total_days / 7);
                                                     $status = $bookings[0]['status'];
 
                                                     $color_class =
-                                                        ($status == 'confirmed') ? 'status-confirmed' :
-                                                        (($status == 'cancelled') ? 'status-cancelled' : 'status-pending');
+                                                        ($status === 'confirmed') ? 'status-confirmed' :
+                                                        (($status === 'completed') ? 'status-completed' :
+                                                        (($status === 'cancelled') ? 'status-cancelled' :
+                                                        (($status === 'pending') ? 'status-pending' : '')));
                                                     ?>
 
                                                     <div class="booking-item <?php echo $color_class; ?>" 
