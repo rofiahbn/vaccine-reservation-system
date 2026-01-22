@@ -155,32 +155,10 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 
 function filterBookingList() {
     const filter = document.getElementById('bookingFilter').value;
-    const rows = document.querySelectorAll('.list-table tbody tr');
-    
-    console.log('Filter:', filter); // Debug
-    console.log('Total rows:', rows.length); // Debug
-    
-    rows.forEach(row => {
-        const badge = row.querySelector('.status-badge');
-        
-        if (!badge) {
-            console.log('Badge tidak ditemukan di row:', row);
-            return;
-        }
-        
-        // Show all for "latest"
-        if (filter === 'latest') {
-            row.style.display = '';
-            return;
-        }
-        
-        // Check if badge has the filter class
-        if (badge.classList.contains(filter)) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
-        
-        console.log('Row status:', badge.classList, 'Visible:', row.style.display !== 'none');
-    });
+
+    const url = new URL(window.location.href);
+    url.searchParams.set('filter', filter);
+
+    window.location.href = url.toString();
 }
+

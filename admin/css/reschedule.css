@@ -259,3 +259,54 @@
 .time-slot-reschedule:active {
     transform: scale(0.95);
 }
+
+/* =========================
+   RESCHEDULE ACTION BUTTONS
+========================= */
+
+.reschedule-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 25px;
+}
+
+/* BASE */
+.reschedule-actions button {
+    padding: 12px 22px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+/* BATAL */
+.btn-cancel-reschedule {
+    background: #f1f5f9;
+    color: #374151;
+}
+
+.btn-cancel-reschedule:hover {
+    background: #e5e7eb;
+}
+
+/* SUBMIT - JADWALKAN ULANG */
+.btn-submit-reschedule {
+    background: #60a5fa;          /* biru primary */
+    color: white;
+    box-shadow: 0 4px 8px rgba(59,130,246,0.3);
+}
+
+.btn-submit-reschedule:hover {
+    background: #2563eb;
+}
+
+/* DISABLED STATE */
+.btn-submit-reschedule:disabled {
+    background: #d1d5db;
+    color: #9ca3af;
+    cursor: not-allowed;
+    box-shadow: none;
+}

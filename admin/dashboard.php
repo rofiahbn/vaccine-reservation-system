@@ -58,6 +58,72 @@ $stmt->bind_param('s', $today);
 $stmt->execute();
 $total_pending = $stmt->get_result()->fetch_assoc()['total'];
 
+// Ambil antrian yang sedang berjalan (display only)
+$sql_now_serving = "
+    SELECT 
+        b.id,
+        b.nomor_antrian,
+        p.nama_lengkap,
+        GROUP_CONCAT(bs.nama_layanan SEPARATOR '<br>') AS layanan,
+        b.status
+    FROM bookings b
+    JOIN patients p ON b.patient_id = p.id
+    LEFT JOIN booking_services bs ON bs.booking_id = b.id
+    WHERE DATE(b.tanggal_booking) = ?
+      AND b.status IN ('confirmed', 'pending')
+    GROUP BY b.id
+    ORDER BY 
+        FIELD(b.status, 'confirmed', 'pending'),
+        b.waktu_booking ASC
+    LIMIT 1
+";
+
+$stmt = $conn->prepare($sql_now_serving);
+$stmt->bind_param('s', $today);
+$stmt->execute();
+$now_serving = $stmt->get_result()->fetch_assoc();
+
+$filter = isset($_GET['filter']) ? $_GET['filter'] : 'latest';
+
+$where = "";
+$order = "";
+
+if ($filter == 'pending') {
+    $where = "WHERE b.status = 'pending'";
+    $order = "ORDER BY b.tanggal_booking ASC, b.waktu_booking ASC";
+} 
+elseif ($filter == 'confirmed') {
+    $where = "WHERE b.status = 'confirmed'";
+    $order = "ORDER BY b.tanggal_booking ASC, b.waktu_booking ASC";
+}
+elseif ($filter == 'completed') {
+    $where = "WHERE b.status = 'completed'";
+    $order = "ORDER BY b.tanggal_booking DESC, b.waktu_booking DESC";
+}
+elseif ($filter == 'cancelled') {
+    $where = "WHERE b.status = 'cancelled'";
+    $order = "ORDER BY b.tanggal_booking DESC, b.waktu_booking DESC";
+}
+else { // latest
+    $order = "ORDER BY b.tanggal_booking DESC, b.waktu_booking DESC";
+}
+
+$sql_all = "
+    SELECT 
+        b.*, 
+        p.nama_lengkap,
+        s.nama_lengkap AS dokter_nama,
+        s.gelar AS dokter_gelar
+    FROM bookings b
+    JOIN patients p ON b.patient_id = p.id
+    LEFT JOIN staff s ON b.doctor_id = s.id
+    $where
+    $order
+    LIMIT 50
+";
+
+$all_bookings = $conn->query($sql_all);
+
 // Get bookings for calendar view (current week)
 $week_start = sprintf('%04d-%02d-%02d', $current_year, $current_month, $start_date);
 $week_end = sprintf('%04d-%02d-%02d', $current_year, $current_month, $end_date);
@@ -103,7 +169,9 @@ $sql_all = "
     FROM bookings b
     JOIN patients p ON b.patient_id = p.id
     LEFT JOIN staff s ON b.doctor_id = s.id
-    ORDER BY b.created_at DESC
+    ORDER BY 
+        b.tanggal_booking DESC,
+        b.waktu_booking DESC
     LIMIT 50
 ";
 
@@ -201,6 +269,47 @@ $total_weeks = ceil($total_days / 7);
                 </div>
             </div>
         </div>
+
+        <?php if ($now_serving): ?>
+        <div class="now-serving-card">
+
+            <!-- KIRI: NOMOR ANTRIAN -->
+            <div class="now-number">
+                <div class="label">Nomor Antrian</div>
+                <div class="number"><?= htmlspecialchars($now_serving['nomor_antrian']) ?></div>
+                <div class="now-status">Sedang Dilayani</div>
+            </div>
+
+            <!-- GARIS PEMISAH -->
+            <div class="divider"></div>
+
+            <!-- TENGAH: NAMA -->
+            <div class="now-info">
+                <div class="info-row">
+                    <i class="fas fa-user"></i>
+                    <span class="info-label">Nama :</span>
+                    <span class="info-value"><?= htmlspecialchars($now_serving['nama_lengkap']) ?></span>
+                </div>
+            </div>
+
+            <!-- KANAN: LAYANAN -->
+            <div class="now-info">
+                <div class="info-row">
+                    <i class="fas fa-check-circle"></i>
+                    <span class="info-label">Layanan :</span>
+                </div>
+                <div class="service-list">
+                    <?= $now_serving['layanan'] ?>
+                </div>
+            </div>
+
+            <!-- ICON KANAN -->
+            <div class="now-icon" onclick="location.reload()" title="Perbarui Tampilan">
+                <i class="fas fa-sync-alt"></i>
+            </div>
+        </div>
+        <?php endif; ?>
+
 
         <!-- Booking View -->
         <div class="booking-view">
@@ -317,11 +426,11 @@ $total_weeks = ceil($total_days / 7);
             <div class="section-header">
                 <h2>Booking List</h2>
                 <select class="filter-select" id="bookingFilter" onchange="filterBookingList()">
-                    <option value="latest">Terbaru</option>
-                    <option value="pending">Pending</option>
-                    <option value="confirmed">Dalam Antrian</option>
-                    <option value="completed">Selesai</option>
-                    <option value="cancelled">Dibatalkan</option>
+                    <option value="latest" <?= ($filter=='latest')?'selected':'' ?>>Terbaru</option>
+                    <option value="pending" <?= ($filter=='pending')?'selected':'' ?>>Pending</option>
+                    <option value="confirmed" <?= ($filter=='confirmed')?'selected':'' ?>>Dalam Antrian</option>
+                    <option value="completed" <?= ($filter=='completed')?'selected':'' ?>>Selesai</option>
+                    <option value="cancelled" <?= ($filter=='cancelled')?'selected':'' ?>>Dibatalkan</option>
                 </select>
             </div>
 
@@ -420,5 +529,24 @@ $total_weeks = ceil($total_days / 7);
     </div>
 
     <script src="js/admin.js"></script>
+    <script>
+        document.querySelector('.now-icon').addEventListener('click', function() {
+
+            fetch('get_now_serving.php')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        document.querySelector('.number').innerText = data.nomor_antrian;
+                        document.querySelector('.info-value').innerText = data.nama_lengkap;
+                        document.querySelector('.service-list').innerHTML = data.layanan;
+                    } else {
+                        // mode kosong
+                        location.reload(); 
+                    }
+                });
+
+        });
+        </script>
+
 </body>
 </html>

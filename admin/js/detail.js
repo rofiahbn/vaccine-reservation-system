@@ -23,30 +23,38 @@ function updateStatus(bookingId, newStatus) {
 
         function assignDoctors() {
             const selects = document.querySelectorAll('.doctorSelect');
-            const doctorIds = [];
+            let doctorIds = [];
 
             selects.forEach(sel => {
-                if(sel.value) doctorIds.push(sel.value);
+                if (sel.value) doctorIds.push(sel.value);
             });
 
-            if(doctorIds.length === 0) {
-                alert('Silakan pilih minimal satu dokter!');
+            if (doctorIds.length === 0) {
+                alert('Pilih minimal 1 dokter');
                 return;
             }
 
+            const formData = new FormData();
+            formData.append('booking_id', bookingId);
+            formData.append('doctor_ids', doctorIds.join(',')); // "1,2,3"
+
             fetch('assign_doctor.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `booking_id=${bookingId}&doctor_ids=${doctorIds.join(',')}`
+                body: formData
             })
             .then(res => res.text())
-            .then(data => {
-                alert('Dokter berhasil ditambahkan!');
-                closeAddDoctorPopup();
-                location.reload();
-            })
-            .catch(err => console.error(err));
+            .then(res => {
+                if (res.trim() === 'success') {
+
+                    closeAddDoctorPopup();
+                    location.reload(); // 🔥 MODE CONFIRMED LANGSUNG AKTIF
+
+                } else {
+                    alert('Gagal menambahkan dokter');
+                }
+            });
         }
+
 
         function openAddDoctorPopup() {
             document.getElementById('addDoctorPopup').style.display = 'flex';

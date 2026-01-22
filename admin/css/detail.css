@@ -315,6 +315,120 @@
     transform: none;
 }
 
+.side-card hr {
+    border: none;
+    border-top: 1px solid #e5e7eb;
+    margin: 14px 0;
+}
+
+/* BASE BUTTON STYLE */
+.action-buttons button {
+    width: 100%;
+    padding: 13px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+/* PRIMARY ACTION */
+.btn-process {
+    background: #DCFCE7;        /* SUCCESS SOFT */
+    color: #166534;
+    border: 1px solid #86EFAC;
+}
+
+.btn-process:hover {
+    background: #BBF7D0;
+}
+
+/* Proses Pembayaran */
+.btn-payment {
+    background: #22C55E;        /* SUCCESS */
+    color: white;
+    box-shadow: 0 4px 8px rgba(34,197,94,0.3);
+}
+
+.btn-payment:hover {
+    background: #16A34A;
+}
+
+/* Selesai */
+.btn-finish {
+    background: #2563EB;        /* PRIMARY */
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    box-shadow: 0 4px 8px rgba(37,99,235,0.3);
+}
+
+.btn-finish:hover {
+    background: #1D4ED8;
+}
+
+
+/* ================================
+   SECONDARY ACTION
+================================ */
+
+/* Cetak Surat */
+.btn-print {
+    background: #FEF3C7;        /* WARNING SOFT */
+    color: #92400E;
+    border: 1px solid #FDE68A;
+}
+
+.btn-print:hover {
+    background: #FDE68A;
+}
+
+/* Reschedule */
+.btn-reschedule {
+    background: #DBEAFE;        /* PRIMARY SOFT */
+    color: #1E3A8A;
+    border: 1px solid #BFDBFE;
+}
+
+.btn-reschedule:hover {
+    background: #BFDBFE;
+}
+
+
+/* ================================
+   DANGER / DESTRUCTIVE
+================================ */
+
+/* Cancel Booking */
+.btn-cancel {
+    background: #FEE2E2;        /* DANGER SOFT */
+    color: #991B1B;
+    border: 1px solid #FCA5A5;
+}
+
+.btn-cancel:hover {
+    background: #FECACA;
+}
+
+/* DISABLED */
+.side-card button:disabled {
+    background: #e5e7eb;
+    color: #9ca3af;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* OPTIONAL: ICON STYLE */
+.side-card button i {
+    font-size: 14px;
+}
 
 /* ===================================================
    STATUS CARD (HIDE STATUS INFO)

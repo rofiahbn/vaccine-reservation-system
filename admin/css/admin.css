@@ -161,6 +161,199 @@ body {
     color: #9ca3af;
 }
 
+.now-serving-card {
+    margin-top: 25px;
+    margin-bottom: 35px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px 26px;
+    display: flex;
+    align-items: flex-start;
+    gap: 30px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+}
+
+/* KIRI */
+.now-number {
+    min-width: 160px;
+    text-align: center;
+    padding-top: 10px;
+}
+
+.now-number .label {
+    font-size: 14px;
+    color: #777;
+    margin-bottom: 6px;
+}
+
+.now-number .number {
+    font-size: 44px;
+    font-weight: 700;
+    color: #333;
+}
+
+/* PEMISAH */
+.divider {
+    width: 1px;
+    height: 90px;
+    background: #ddd;
+}
+
+/* INFO */
+.now-info {
+    min-width: 220px;
+    padding: 12px 26px 20px 26px;
+}
+
+.info-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+.info-row i {
+    color: #2ecc71;
+}
+
+.info-label {
+    color: #777;
+}
+
+.info-value {
+    font-weight: 600;
+    color: #333;
+}
+
+/* LAYANAN */
+.service-list {
+    margin-left: 22px;
+    font-size: 13px;
+    color: #444;
+    line-height: 1.5;
+}
+
+/* ICON KANAN */
+.now-icon {
+    margin-left: auto;
+    font-size: 26px;
+    color: #4a6cf7;
+}
+
+/* Tombol refresh */
+.refresh-btn {
+    cursor: pointer;
+    font-size: 24px;
+    color: #4a6cf7;
+    transition: transform 0.3s ease;
+}
+
+/* Hover efek */
+.refresh-btn:hover {
+    transform: rotate(90deg);
+}
+
+.now-status {
+    margin-top: 6px;
+    font-size: 13px;
+    color: #2ecc71;
+    font-weight: 600;
+}
+
+@media (max-width: 900px) {
+
+    .now-serving-card {
+        gap: 20px;
+    }
+
+    /* Nomor antrian full width */
+    .now-number {
+        width: 100%;
+        text-align: left;
+    }
+
+    /* Nama + layanan sejajar, tapi pindah baris */
+    .now-main-info {
+        width: 100%;
+        gap: 30px;
+    }
+
+    .now-block {
+        min-width: 200px;
+    }
+
+    /* Icon refresh tetap di kanan */
+    .now-icon {
+        margin-left: auto;
+    }
+}
+
+@media (max-width: 900px) {
+
+    .now-serving-card {
+        gap: 20px;
+    }
+
+    /* Nomor antrian full width */
+    .now-number {
+        width: 100%;
+        text-align: left;
+    }
+
+    /* Nama + layanan sejajar, tapi pindah baris */
+    .now-main-info {
+        width: 100%;
+        gap: 30px;
+    }
+
+    .now-block {
+        min-width: 200px;
+    }
+
+    /* Icon refresh tetap di kanan */
+    .now-icon {
+        margin-left: auto;
+    }
+}
+
+@media (max-width: 600px) {
+
+    .now-serving-card {
+        padding: 20px;
+        gap: 16px;
+    }
+
+    /* Nomor antrian center */
+    .now-number {
+        width: 100%;
+        text-align: center;
+    }
+
+    .now-number .number {
+        font-size: 36px;   /* lebih kecil biar muat */
+    }
+
+    /* Info stack vertical */
+    .now-main-info {
+        flex-direction: column;
+        gap: 16px;
+        width: 100%;
+    }
+
+    .now-block {
+        min-width: unset;
+        width: 100%;
+    }
+
+    /* Refresh pindah ke kanan bawah */
+    .now-icon {
+        margin-left: auto;
+        align-self: flex-end;
+    }
+}
+
+
 /* ===================================================
    BOOKING VIEW SECTION
 =================================================== */
@@ -362,7 +555,7 @@ body {
 
 /* Status: Completed (Hijau) */
 .booking-item.status-completed {
-    background: linear-gradient(135deg, #065f46 0%, #1e8a58 100%);
+    background: linear-gradient(135deg, #065f46 0%, #1e8a47 100%);
     color : white;
 }
 

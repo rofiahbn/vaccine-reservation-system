@@ -1,0 +1,69 @@
+/* KERTAS */
+.surat-template {
+    width: 794px;
+    min-height: 1123px;
+
+    padding: 80px 90px;
+
+    font-family: "Times New Roman", serif;
+    font-size: 14px;
+    line-height: 1.8;
+
+    border: 1px solid #e5e7eb;
+    background: white;
+
+    transform: scale(0.42);            /* 🔥 pas buat panel kecil */
+    transform-origin: top center;
+
+    box-sizing: border-box;
+    z-index: 1; 
+}
+
+/* JUDUL */
+.surat-template h2 {
+    text-align: center;
+    font-size: 16px;
+    margin-bottom: 22px;
+    letter-spacing: 1px;
+}
+
+/* PARAGRAF */
+.surat-template p {
+    margin-bottom: 18px;      /* 🔥 lebih lega */
+    text-align: justify;     /* surat resmi look */
+    font-size: 13px;
+}
+
+/* TABEL */
+.surat-template table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+.surat-template td {
+    padding: 6px 10px;        /* 🔥 jarak kiri kanan */
+    vertical-align: top;
+    font-size: 13px;
+}
+
+.surat-template .label {
+    width: 140px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.surat-template .separator {
+    width: 10px;
+}
+
+.surat-template .value {
+    word-break: break-word;
+}
+
+/* MODE FULLSCREEN */
+.modal-preview .surat-template {
+    transform: scale(1);       /* 🔥 ukuran asli A4 */
+    margin: 0 auto;
+}

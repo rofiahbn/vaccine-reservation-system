@@ -39,9 +39,7 @@ $stmt_staff->bind_param("i", $booking_id);
 $stmt_staff->execute();
 $staffs = $stmt_staff->get_result();
 $dokter_count = $staffs->num_rows;
-$disable_accept =
-    ($dokter_count === 0) ||
-    ($booking['status'] === 'confirmed');
+$disable_accept = ($booking['status'] !== 'pending');
 
 // Get emails
 $sql_emails = "SELECT email FROM patient_emails WHERE patient_id = ? ORDER BY is_primary DESC";
@@ -301,25 +299,79 @@ $services = $stmt_s->get_result();
                         <?php endif; ?>
                     </div>
 
-                    <button class="btn-add-worker" onclick="openAddDoctorPopup()">
+                    <button class="btn-add-worker" onclick="openAddDoctorPopup()" <?= ($booking['status']=='pending') ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : '' ?>>
                         <i class="fas fa-user-md"></i> Tambah Dokter
                     </button>
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="side-card">
+                <div class="side-card action-buttons">
+
+                <?php if ($booking['status'] == 'pending'): ?>
+
+                    <!-- MODE AWAL: BELUM DIKONFIRMASI -->
                     <button class="btn-accept"
-                            onclick="updateStatus(<?= $booking_id ?>, 'confirmed')"
+                            onclick="openAddDoctorPopup()"
                             <?= $disable_accept ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : '' ?>>
                         <i class="fas fa-check-circle"></i> Terima Booking
                     </button>
+
                     <button type="button" class="btn-reschedule" onclick="openRescheduleModal()">
                         <i class="fas fa-calendar-alt"></i> Reschedule
                     </button>
+
                     <button id="btn-cancel" class="btn-cancel" 
                             onclick="cancelBooking(this, <?= $booking_id ?>)">
                         <i class="fas fa-times-circle"></i> Cancel Booking
                     </button>
+
+                <?php elseif ($booking['status'] == 'confirmed'): ?>
+
+                    <!-- MODE OPERASIONAL: SUDAH ADA DOKTER -->
+
+                    <button class="btn-process"
+                            onclick="window.location.href='proses_tindakan.php?id=<?= $booking_id ?>'">
+                        Proses / Tindakan
+                    </button>
+
+                    <button class="btn-print">
+                        Cetak Surat
+                    </button>
+
+                    <button type="button" class="btn-reschedule" onclick="openRescheduleModal()">
+                        <i class="fas fa-calendar-alt"></i> Reschedule
+                    </button>
+
+                    <button id="btn-cancel" class="btn-cancel" 
+                            onclick="cancelBooking(this, <?= $booking_id ?>)">
+                        <i class="fas fa-times-circle"></i> Cancel Booking
+                    </button>
+
+                    <hr>
+
+                    <button class="btn-payment">
+                        Proses Pembayaran
+                    </button>
+
+                    <button class="btn-finish"
+                            onclick="updateStatus(<?= $booking_id ?>, 'completed')">
+                        Selesai
+                    </button>
+
+
+                <?php elseif ($booking['status'] == 'completed'): ?>
+
+                    <!-- MODE SELESAI -->
+                    <button class="btn-print">
+                        Cetak Surat
+                    </button>
+
+                    <button class="btn-payment" disabled style="opacity:0.6;">
+                        Pembayaran Selesai
+                    </button>
+
+                <?php endif; ?>
+
                 </div>
             </div>
         </div>

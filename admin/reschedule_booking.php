@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'config.php';
+require_once '../config.php';
 
 header('Content-Type: application/json');
 
@@ -19,40 +19,53 @@ try {
         throw new Exception('Data tidak lengkap!');
     }
     
+    $newTimeFormatted = $newTime . ':00';
+    
     // Cek apakah slot tersedia
     $checkQuery = "SELECT COUNT(*) as count 
                    FROM bookings 
-                   WHERE appointment_date = :date 
-                   AND appointment_time = :time 
+                   WHERE tanggal_booking = ? 
+                   AND waktu_booking = ? 
                    AND status IN ('confirmed', 'scheduled')
-                   AND id != :booking_id";
+                   AND id != ?";
     
-    $stmt = $pdo->prepare($checkQuery);
-    $stmt->execute([
-        ':date' => $newDate,
-        ':time' => $newTime . ':00',
-        ':booking_id' => $bookingId
-    ]);
+    $stmt = $conn->prepare($checkQuery);
     
-    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$stmt) {
+        throw new Exception('Query error: ' . $conn->error);
+    }
     
-    if ($result['count'] > 0) {
+    $stmt->bind_param("ssi", $newDate, $newTimeFormatted, $bookingId);
+    $stmt->execute();
+    $stmt->bind_result($count);
+    $stmt->fetch();
+    $stmt->close();
+    
+    if ($count > 0) {
         throw new Exception('Slot sudah terisi! Pilih waktu lain.');
     }
     
     // Update booking
     $updateQuery = "UPDATE bookings 
-                    SET appointment_date = :date,
-                        appointment_time = :time,
+                    SET tanggal_booking = ?,
+                        waktu_booking = ?,
                         updated_at = NOW()
-                    WHERE id = :booking_id";
+                    WHERE id = ?";
     
-    $stmt = $pdo->prepare($updateQuery);
-    $stmt->execute([
-        ':date' => $newDate,
-        ':time' => $newTime . ':00',
-        ':booking_id' => $bookingId
-    ]);
+    $stmt = $conn->prepare($updateQuery);
+    
+    if (!$stmt) {
+        throw new Exception('Query error: ' . $conn->error);
+    }
+    
+    $stmt->bind_param("ssi", $newDate, $newTimeFormatted, $bookingId);
+    $stmt->execute();
+    
+    if ($stmt->affected_rows === 0) {
+        throw new Exception('Tidak ada perubahan data atau booking tidak ditemukan!');
+    }
+    
+    $stmt->close();
     
     echo json_encode([
         'success' => true,
@@ -64,5 +77,10 @@ try {
         'success' => false,
         'message' => $e->getMessage()
     ]);
+}
+
+// Tutup koneksi jika diperlukan
+if (isset($conn)) {
+    $conn->close();
 }
 ?>

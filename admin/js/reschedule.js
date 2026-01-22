@@ -268,7 +268,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 formData.append('new_date', newDate);
                 formData.append('new_time', newTime);
                 
-                const response = await fetch('../admin/reschedule_booking.php', {
+                const response = await fetch('reschedule_booking.php', {
                     method: 'POST',
                     body: formData
                 });
