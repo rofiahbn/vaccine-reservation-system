@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 18, 2026 at 06:21 AM
+-- Generation Time: Jan 22, 2026 at 09:15 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -37,43 +37,17 @@ CREATE TABLE `bookings` (
   `status` enum('pending','confirmed','completed','cancelled') DEFAULT 'pending',
   `catatan` text DEFAULT NULL,
   `created_at` datetime NOT NULL,
-  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `doctor_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `bookings`
 --
 
-INSERT INTO `bookings` (`id`, `patient_id`, `service_type`, `nomor_antrian`, `tanggal_booking`, `waktu_booking`, `status`, `catatan`, `created_at`, `updated_at`) VALUES
-(25, 35, 'Home Service', '20260116-001', '2026-01-16', '08:00:00', 'confirmed', NULL, '0000-00-00 00:00:00', '2026-01-16 21:15:57'),
-(26, 35, 'Home Service', '20260116-002', '2026-01-16', '09:00:00', 'confirmed', NULL, '0000-00-00 00:00:00', '2026-01-16 21:15:57'),
-(27, 35, 'Home Service', '20260117-001', '2026-01-17', '10:00:00', 'pending', NULL, '0000-00-00 00:00:00', '2026-01-16 21:15:57'),
-(28, 35, 'Home Service', '20260118-001', '2026-01-18', '11:00:00', 'confirmed', NULL, '0000-00-00 00:00:00', '2026-01-16 21:15:57'),
-(29, 36, 'Home Service', '20260116-003', '2026-01-16', '10:00:00', 'confirmed', NULL, '0000-00-00 00:00:00', '2026-01-16 21:15:57'),
-(30, 36, 'Home Service', '20260116-004', '2026-01-16', '13:00:00', 'pending', NULL, '0000-00-00 00:00:00', '2026-01-16 21:15:57'),
-(31, 36, 'Home Service', '20260119-001', '2026-01-19', '14:00:00', 'confirmed', NULL, '0000-00-00 00:00:00', '2026-01-16 21:15:57'),
-(32, 36, 'Home Service', '20260121-001', '2026-01-21', '15:00:00', 'pending', NULL, '0000-00-00 00:00:00', '2026-01-16 21:15:57'),
-(34, 35, 'Home Service', '2026115-002', '2026-01-15', '09:00:00', 'confirmed', NULL, '0000-00-00 00:00:00', '2026-01-16 21:15:57'),
-(35, 35, 'Home Service', '2026115-003', '2026-01-15', '10:00:00', 'confirmed', NULL, '0000-00-00 00:00:00', '2026-01-16 21:15:57'),
-(36, 35, 'Home Service', '2026115-004', '2026-01-15', '11:00:00', 'confirmed', NULL, '0000-00-00 00:00:00', '2026-01-16 21:15:57'),
-(37, 35, 'Home Service', '2026115-005', '2026-01-15', '13:00:00', 'confirmed', NULL, '0000-00-00 00:00:00', '2026-01-16 21:15:57'),
-(38, 35, 'Home Service', '2026115-006', '2026-01-15', '14:00:00', 'confirmed', NULL, '0000-00-00 00:00:00', '2026-01-16 21:15:57'),
-(39, 35, 'Home Service', '2026115-007', '2026-01-15', '15:00:00', 'confirmed', NULL, '0000-00-00 00:00:00', '2026-01-16 21:15:57'),
-(40, 36, 'Home Service', '2026115-008', '2026-01-15', '16:00:00', 'confirmed', NULL, '0000-00-00 00:00:00', '2026-01-16 21:15:57'),
-(41, 38, 'Home Service', '20260122-001', '2026-01-22', '16:15:00', 'pending', 'Pendaftaran online', '2026-01-17 16:12:38', '2026-01-17 16:12:38'),
-(42, 64, 'Home Service', '20260124-001', '2026-01-24', '16:15:00', 'pending', 'Pendaftaran online', '2026-01-17 17:21:02', '2026-01-17 17:21:02'),
-(43, 65, 'Home Service', '20260129-001', '2026-01-29', '14:00:00', 'pending', 'Pendaftaran online', '2026-01-17 17:21:02', '2026-01-17 17:21:02'),
-(44, 66, 'Home Service', '20260129-002', '2026-01-29', '16:15:00', 'pending', 'Pendaftaran online', '2026-01-17 17:21:02', '2026-01-17 17:21:02'),
-(45, 67, 'Home Service', '20260128-001', '2026-01-28', '13:45:00', 'pending', 'Pendaftaran online', '2026-01-17 17:21:02', '2026-01-17 17:21:02'),
-(46, 68, 'Home Service', '20260130-001', '2026-01-30', '14:15:00', 'pending', 'Pendaftaran online', '2026-01-17 19:51:03', '2026-01-17 19:51:03'),
-(47, 69, 'Home Service', '20260130-002', '2026-01-30', '12:15:00', 'pending', 'Pendaftaran online', '2026-01-17 20:39:33', '2026-01-17 20:39:33'),
-(48, 70, 'Home Service', '20260130-003', '2026-01-30', '14:30:00', 'pending', 'Pendaftaran online', '2026-01-17 20:39:33', '2026-01-17 20:39:33'),
-(49, 71, 'Home Service', '20260130-004', '2026-01-30', '12:30:00', 'pending', 'Pendaftaran online', '2026-01-17 20:48:30', '2026-01-17 20:48:30'),
-(50, 72, 'Home Service', '20260130-005', '2026-01-30', '16:00:00', 'pending', 'Pendaftaran online', '2026-01-17 20:51:44', '2026-01-17 20:51:44'),
-(51, 73, 'Home Service', '20260130-006', '2026-01-30', '16:15:00', 'pending', 'Pendaftaran online', '2026-01-17 20:51:44', '2026-01-17 20:51:44'),
-(52, 75, 'In Clinic', '20260130-007', '2026-01-30', '10:15:00', 'pending', 'Pendaftaran online', '2026-01-18 11:24:13', '2026-01-18 11:24:13'),
-(53, 77, 'In Clinic', '20260130-008', '2026-01-30', '16:30:00', 'pending', 'Pendaftaran online', '2026-01-18 11:44:39', '2026-01-18 11:44:39'),
-(54, 78, 'In Clinic', '20260130-009', '2026-01-30', '14:00:00', 'pending', 'Pendaftaran online', '2026-01-18 11:57:47', '2026-01-18 11:57:47');
+INSERT INTO `bookings` (`id`, `patient_id`, `service_type`, `nomor_antrian`, `tanggal_booking`, `waktu_booking`, `status`, `catatan`, `created_at`, `updated_at`, `doctor_id`) VALUES
+(78, 1, 'In Clinic', '20260120-001', '2026-01-20', '09:00:00', 'confirmed', 'Pendaftaran online', '2026-01-20 09:38:53', '2026-01-22 08:29:22', 1),
+(79, 2, 'In Clinic', '20260121-001', '2026-01-21', '09:00:00', 'pending', 'Pendaftaran online', '2026-01-20 23:23:09', '2026-01-21 21:32:51', NULL);
 
 -- --------------------------------------------------------
 
@@ -85,9 +59,37 @@ CREATE TABLE `booking_services` (
   `id` int(11) NOT NULL,
   `booking_id` int(11) NOT NULL,
   `nama_layanan` varchar(100) NOT NULL,
-  `harga` decimal(10,2) DEFAULT 0.00,
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `booking_services`
+--
+
+INSERT INTO `booking_services` (`id`, `booking_id`, `nama_layanan`, `created_at`) VALUES
+(18, 78, 'Adacel (Sanofi)', '2026-01-20 09:38:53'),
+(19, 79, 'Campak (Biofarma)', '2026-01-20 23:23:09'),
+(20, 79, 'Swab Antigen COVID-19', '2026-01-20 23:23:09');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `booking_staff`
+--
+
+CREATE TABLE `booking_staff` (
+  `id` int(11) NOT NULL,
+  `booking_id` int(11) NOT NULL,
+  `staff_id` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `booking_staff`
+--
+
+INSERT INTO `booking_staff` (`id`, `booking_id`, `staff_id`, `created_at`) VALUES
+(6, 78, 1, '2026-01-22 01:26:04');
 
 -- --------------------------------------------------------
 
@@ -155,7 +157,8 @@ INSERT INTO `jadwal_libur` (`id`, `tanggal`, `keterangan`, `jenis`) VALUES
 (38, '2026-06-16', '1 Muharram 1448 H', 'nasional'),
 (39, '2026-08-17', 'Hari Proklamasi Kemerdekaan RI', 'nasional'),
 (40, '2026-08-25', 'Maulid Nabi Muhammad SAW', 'nasional'),
-(41, '2026-12-25', 'Kelahiran Yesus Kristus (Natal)', 'nasional');
+(41, '2026-12-25', 'Kelahiran Yesus Kristus (Natal)', 'nasional'),
+(42, '2026-01-22', 'libur', 'nasional');
 
 -- --------------------------------------------------------
 
@@ -227,23 +230,8 @@ CREATE TABLE `patients` (
 --
 
 INSERT INTO `patients` (`id`, `no_rekam_medis`, `nama_lengkap`, `nama_panggilan`, `tanggal_lahir`, `usia`, `kategori_usia`, `jenis_kelamin`, `nik`, `paspor`, `kebangsaan`, `pekerjaan`, `nama_wali`, `riwayat_alergi`, `riwayat_penyakit`, `riwayat_obat`, `pelayanan`, `created_at`, `updated_at`) VALUES
-(35, 'RM1768539532', 'Rofiah Budi Nadia', 'fiah', '2023-01-31', 2, 'Anak', 'P', NULL, NULL, 'Indonesia', 'umum', 'p', 'sdc', 'csd', 'csx', 'Vaksin', '2026-01-16 04:58:52', '2026-01-16 04:58:52'),
-(36, 'RM1768547346', 'Rofiah Budi Nadia', 'fiah', '2003-01-07', 23, 'Dewasa', 'P', NULL, NULL, 'Indonesia', 'umum', 'p', '', '', '', 'Antigen', '2026-01-16 07:09:06', '2026-01-16 07:09:06'),
-(37, '', 'Pasien Test', NULL, '1990-01-01', NULL, 'Anak', 'L', '1234567890123456', NULL, 'Indonesia', NULL, NULL, NULL, NULL, NULL, '', '2026-01-16 14:13:23', '2026-01-16 14:13:23'),
-(38, 'RM202601170001', 'Rofiah Budi Nadia', 'fiah', '2003-01-07', 23, 'Dewasa', 'P', '3314014701030001', '', 'Indonesia', 'umum', '', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-01-17 09:12:38', '2026-01-17 09:12:38'),
-(64, 'RM202601170002', 'Rofi\'ah Budi Nadia', 'fiah', '2006-09-11', 19, 'Dewasa', 'P', NULL, '0987654321234', 'Indonesia', 'umum', '', '', '', '', 'Umroh/Haji/Luar Negeri', '2026-01-17 10:21:02', '2026-01-17 10:21:02'),
-(65, 'RM202601170003', 'Rofiah Budi Nadia', 'fiah', '2003-01-07', 23, 'Dewasa', 'P', '3314014701030001', NULL, 'Indonesia', 'umum', '', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-01-17 10:21:02', '2026-01-17 10:21:02'),
-(66, 'RM202601170004', 'w', 'fiah', '2023-07-06', 2, 'Anak', 'L', NULL, '087654321234567', 'Indonesia', 'umum', 'wr', '', '', '', 'Umroh/Haji/Luar Negeri', '2026-01-17 10:21:02', '2026-01-17 10:21:02'),
-(67, 'RM202601170005', 'w', 'fiah', '2023-07-06', 2, 'Anak', 'P', NULL, '087654321234567', 'Indonesia', 'umum', 'wr', '', '', '', 'Umroh/Haji/Luar Negeri', '2026-01-17 10:21:02', '2026-01-17 10:21:02'),
-(68, 'RM202601170006', 'b', '', '2024-01-30', 1, 'Anak', 'P', '0987654321234567', NULL, 'Indonesia', 'umum', 'd', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-01-17 12:51:03', '2026-01-17 12:51:03'),
-(69, 'RM202601170007', 'b', '', '2024-01-30', 1, 'Anak', 'P', '0987654321234567', NULL, 'Indonesia', 'umum', 'd', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-01-17 13:39:33', '2026-01-17 13:39:33'),
-(70, 'RM202601170008', 'a', '', '2026-01-02', 0, 'Anak', 'P', '1234567890987654', NULL, 'Indonesia', 'umum', 'd', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-01-17 13:39:33', '2026-01-17 13:39:33'),
-(71, 'RM202601170009', 'b', '', '2024-01-30', 1, 'Anak', 'P', '0987654321234567', NULL, 'Indonesia', 'umum', 'd', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-01-17 13:48:30', '2026-01-17 13:48:30'),
-(72, 'RM202601170010', 'b', '', '2024-01-30', 1, 'Anak', 'P', '0987654321234567', NULL, 'Indonesia', 'umum', 'd', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-01-17 13:51:44', '2026-01-17 13:51:44'),
-(73, 'RM202601170011', 'b', '', '2024-01-30', 1, 'Anak', 'P', '0987654321234567', NULL, 'Indonesia', 'umum', 'd', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-01-17 13:51:44', '2026-01-17 13:51:44'),
-(75, 'RM202601180001', 'Rofiah Budi Nadia', 'fiah', '2003-01-07', 23, 'Dewasa', 'P', '3314014701030001', NULL, 'Indonesia', 'umum', '', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-01-18 04:24:13', '2026-01-18 04:24:13'),
-(77, 'RM202601180002', 'b', '', '2024-01-30', 1, 'Anak', 'P', '0987654321234567', NULL, 'Indonesia', 'umum', 'd', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-01-18 04:44:39', '2026-01-18 04:44:39'),
-(78, 'RM202601180003', 'b', '', '2024-01-30', 1, 'Anak', 'P', '0987654321234567', NULL, 'Indonesia', 'umum', 'd', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-01-18 04:57:47', '2026-01-18 04:57:47');
+(1, 'RM202601200001', 'Rofi\'ah Budi Nadia', 'fiah', '2003-01-07', 23, 'Dewasa', 'P', '3314014701030001', '', 'Indonesia', 'umum', '', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-01-20 02:38:53', '2026-01-21 13:47:54'),
+(2, 'RM202601200002', 'Leo', '', '2000-04-21', 25, 'Dewasa', 'L', '3314123456789098', NULL, 'Indonesia', 'karyawan swasta', '', 'sifud', 'sakit kepala', 'alkohol', 'Vaksinasi Umum/Infus Vitamin', '2026-01-20 16:23:09', '2026-01-22 08:15:19');
 
 -- --------------------------------------------------------
 
@@ -265,22 +253,8 @@ CREATE TABLE `patient_addresses` (
 --
 
 INSERT INTO `patient_addresses` (`id`, `patient_id`, `alamat`, `provinsi`, `kota`, `is_primary`) VALUES
-(31, 35, 'asddf', NULL, NULL, 1),
-(32, 36, 'salam', NULL, NULL, 1),
-(33, 38, 'Bandung - Jawa Barat', 'Jambi', 'Sungai Penuh', 1),
-(34, 64, 'Bandung - Jawa Barat', 'Jawa Tengah', 'Sragen', 1),
-(35, 65, 'Bandung - Jawa Barat', 'Jambi', 'Kerinci', 1),
-(36, 66, 'Bandung - Jawa Barat', 'Kepulauan Riau', 'Karimun', 1),
-(37, 67, 'Bandung - Jawa Barat', 'Kepulauan Riau', 'Batam', 1),
-(38, 68, 'Jl. Telekomunikasi No. 1, Terusan Buahbatu - Bojongsoang, Sukapura, Kec. Dayeuhkolot', 'Jawa Barat', 'Cimahi', 1),
-(39, 69, 'Jl. Telekomunikasi No. 1, Terusan Buahbatu - Bojongsoang, Sukapura, Kec. Dayeuhkolot', 'Jawa Barat', 'Cimahi', 1),
-(40, 70, 'Jl. Telekomunikasi No. 1, Terusan Buahbatu - Bojongsoang, Sukapura, Kec. Dayeuhkolot', 'Jawa Barat', 'Cimahi', 1),
-(41, 71, 'Jl. Telekomunikasi No. 1, Terusan Buahbatu - Bojongsoang, Sukapura, Kec. Dayeuhkolot', 'Jawa Barat', 'Cimahi', 1),
-(42, 72, 'Jl. Telekomunikasi No. 1, Terusan Buahbatu - Bojongsoang, Sukapura, Kec. Dayeuhkolot', 'Jawa Barat', 'Cimahi', 1),
-(43, 73, 'Jl. Telekomunikasi No. 1, Terusan Buahbatu - Bojongsoang, Sukapura, Kec. Dayeuhkolot', 'Jawa Barat', 'Cimahi', 1),
-(45, 75, 'Bandung - Jawa Barat', 'Jambi', 'Kerinci', 1),
-(47, 77, 'Jl. Telekomunikasi No. 1, Terusan Buahbatu - Bojongsoang, Sukapura, Kec. Dayeuhkolot', 'Jawa Barat', 'Cimahi', 1),
-(48, 78, 'Jl. Telekomunikasi No. 1, Terusan Buahbatu - Bojongsoang, Sukapura, Kec. Dayeuhkolot', 'Jawa Barat', 'Cimahi', 1);
+(74, 1, 'Salam, Rt.13, Saren, Kalijambe', 'Jawa Tengah', 'Sragen', 1),
+(75, 2, 'Bandung - Jawa Barat', 'Jawa Barat', 'Cimahi', 1);
 
 -- --------------------------------------------------------
 
@@ -300,22 +274,8 @@ CREATE TABLE `patient_emails` (
 --
 
 INSERT INTO `patient_emails` (`id`, `patient_id`, `email`, `is_primary`) VALUES
-(32, 35, 'rofiahbudi@gmail.com', 1),
-(33, 36, 'rofiahbudi@gmail.com', 1),
-(34, 38, 'rofiahbudi@gmail.com', 1),
-(35, 64, 'rofiahbudi@gmail.com', 1),
-(36, 65, 'rofiahbudi@gmail.com', 1),
-(37, 66, 'adsdascc@gmail', 1),
-(38, 67, 'adsdascc@gmail', 1),
-(39, 68, 'b@gmail.com', 1),
-(40, 69, 'b@gmail.com', 1),
-(41, 70, 'a@gmail.com', 1),
-(42, 71, 'b@gmail.com', 1),
-(43, 72, 'b@gmail.com', 1),
-(44, 73, 'b@gmail.com', 1),
-(46, 75, 'rofiahbudi@gmail.com', 1),
-(48, 77, 'b@gmail.com', 1),
-(49, 78, 'b@gmail.com', 1);
+(76, 1, 'rofiahbudi@gmail.com', 1),
+(77, 2, 'rangga@gmail.com', 1);
 
 -- --------------------------------------------------------
 
@@ -335,22 +295,8 @@ CREATE TABLE `patient_phones` (
 --
 
 INSERT INTO `patient_phones` (`id`, `patient_id`, `phone`, `is_primary`) VALUES
-(33, 35, '082225639375', 1),
-(34, 36, '082225639375', 1),
-(35, 38, '082225639375', 1),
-(36, 64, '085876923088', 1),
-(37, 65, '082225639375', 1),
-(38, 66, '9876543456765', 1),
-(39, 67, '9876543456765', 1),
-(40, 68, '08654324567', 1),
-(41, 69, '08654324567', 1),
-(42, 70, '08654324567', 1),
-(43, 71, '08654324567', 1),
-(44, 72, '08654324567', 1),
-(45, 73, '08654324567', 1),
-(47, 75, '082225639375', 1),
-(49, 77, '08654324567', 1),
-(50, 78, '08654324567', 1);
+(77, 1, '085876923088', 1),
+(78, 2, '085787652345', 1);
 
 -- --------------------------------------------------------
 
@@ -400,6 +346,29 @@ CREATE TABLE `reservations` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `staff`
+--
+
+CREATE TABLE `staff` (
+  `id` int(11) NOT NULL,
+  `nama_lengkap` varchar(150) NOT NULL,
+  `gelar` varchar(50) DEFAULT NULL,
+  `role` enum('dokter','perawat','admin') NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `staff`
+--
+
+INSERT INTO `staff` (`id`, `nama_lengkap`, `gelar`, `role`, `created_at`) VALUES
+(1, 'Anna Rahma', 'dr.', 'dokter', '2026-01-20 03:23:31'),
+(2, 'Budi Santoso', 'dr.', 'dokter', '2026-01-20 03:23:31'),
+(3, 'Dewi Lestari', 'dr.', 'dokter', '2026-01-20 03:23:31');
 
 -- --------------------------------------------------------
 
@@ -496,7 +465,8 @@ ALTER TABLE `bookings`
   ADD KEY `idx_waktu` (`waktu_booking`),
   ADD KEY `idx_tanggal_waktu` (`tanggal_booking`,`waktu_booking`),
   ADD KEY `idx_status` (`status`),
-  ADD KEY `idx_nomor_antrian` (`nomor_antrian`);
+  ADD KEY `idx_nomor_antrian` (`nomor_antrian`),
+  ADD KEY `fk_doctor_id` (`doctor_id`);
 
 --
 -- Indexes for table `booking_services`
@@ -504,6 +474,14 @@ ALTER TABLE `bookings`
 ALTER TABLE `booking_services`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_booking` (`booking_id`);
+
+--
+-- Indexes for table `booking_staff`
+--
+ALTER TABLE `booking_staff`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `booking_id` (`booking_id`),
+  ADD KEY `staff_id` (`staff_id`);
 
 --
 -- Indexes for table `jadwal_klinik`
@@ -539,7 +517,9 @@ ALTER TABLE `medical_records`
 ALTER TABLE `patients`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `no_rekam_medis` (`no_rekam_medis`),
-  ADD UNIQUE KEY `no_rekam_medis_2` (`no_rekam_medis`);
+  ADD UNIQUE KEY `no_rekam_medis_2` (`no_rekam_medis`),
+  ADD UNIQUE KEY `unique_nik` (`nik`),
+  ADD UNIQUE KEY `unique_paspor` (`paspor`);
 
 --
 -- Indexes for table `patient_addresses`
@@ -579,6 +559,12 @@ ALTER TABLE `reservations`
   ADD KEY `slot_id` (`slot_id`);
 
 --
+-- Indexes for table `staff`
+--
+ALTER TABLE `staff`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `time_slots`
 --
 ALTER TABLE `time_slots`
@@ -606,13 +592,19 @@ ALTER TABLE `vaccines`
 -- AUTO_INCREMENT for table `bookings`
 --
 ALTER TABLE `bookings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=80;
 
 --
 -- AUTO_INCREMENT for table `booking_services`
 --
 ALTER TABLE `booking_services`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+
+--
+-- AUTO_INCREMENT for table `booking_staff`
+--
+ALTER TABLE `booking_staff`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `jadwal_klinik`
@@ -624,7 +616,7 @@ ALTER TABLE `jadwal_klinik`
 -- AUTO_INCREMENT for table `jadwal_libur`
 --
 ALTER TABLE `jadwal_libur`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
 -- AUTO_INCREMENT for table `kipi_records`
@@ -642,25 +634,25 @@ ALTER TABLE `medical_records`
 -- AUTO_INCREMENT for table `patients`
 --
 ALTER TABLE `patients`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=79;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `patient_addresses`
 --
 ALTER TABLE `patient_addresses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=76;
 
 --
 -- AUTO_INCREMENT for table `patient_emails`
 --
 ALTER TABLE `patient_emails`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78;
 
 --
 -- AUTO_INCREMENT for table `patient_phones`
 --
 ALTER TABLE `patient_phones`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=79;
 
 --
 -- AUTO_INCREMENT for table `patient_services`
@@ -673,6 +665,12 @@ ALTER TABLE `patient_services`
 --
 ALTER TABLE `reservations`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `staff`
+--
+ALTER TABLE `staff`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `time_slots`
@@ -700,6 +698,7 @@ ALTER TABLE `vaccines`
 -- Constraints for table `bookings`
 --
 ALTER TABLE `bookings`
+  ADD CONSTRAINT `fk_doctor_id` FOREIGN KEY (`doctor_id`) REFERENCES `staff` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `fk_patient_id` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE;
 
 --
@@ -707,6 +706,13 @@ ALTER TABLE `bookings`
 --
 ALTER TABLE `booking_services`
   ADD CONSTRAINT `booking_services_ibfk_1` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `booking_staff`
+--
+ALTER TABLE `booking_staff`
+  ADD CONSTRAINT `booking_staff_ibfk_1` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `booking_staff_ibfk_2` FOREIGN KEY (`staff_id`) REFERENCES `staff` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `kipi_records`
