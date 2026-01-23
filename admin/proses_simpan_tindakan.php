@@ -103,14 +103,14 @@ try {
         created_at,
         jenis_vaksin, batch_vaksin, expired_vaksin,
         kedatangan_ke, kedatangan_selanjutnya)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
         $stmt = $conn->prepare($sql);
 
         $created_at = date("Y-m-d H:i:s");
 
         $stmt->bind_param(
-            "iissssdsiiisssii",
+            "iissssdsiiissssii",
             $booking_id,
             $patient_id,
             $anamnesis,
@@ -122,6 +122,7 @@ try {
             $respirasi,
             $nadi,
             $status,
+            $created_at,
             $jenis_vaksin,
             $batch_vaksin,
             $expired_vaksin,
