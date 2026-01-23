@@ -276,7 +276,9 @@ $total_weeks = ceil($total_days / 7);
             <!-- KIRI: NOMOR ANTRIAN -->
             <div class="now-number">
                 <div class="label">Nomor Antrian</div>
-                <div class="number"><?= htmlspecialchars($now_serving['nomor_antrian']) ?></div>
+                <div class="number">
+                    <?= htmlspecialchars($now_serving['nomor_antrian'] ?? '-') ?>
+                </div>
                 <div class="now-status">Sedang Dilayani</div>
             </div>
 

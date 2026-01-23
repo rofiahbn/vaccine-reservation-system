@@ -12,11 +12,9 @@ $sql = "
     JOIN patients p ON b.patient_id = p.id
     LEFT JOIN booking_services bs ON bs.booking_id = b.id
     WHERE DATE(b.tanggal_booking) = ?
-      AND b.status IN ('confirmed', 'pending')
+      AND b.status = 'confirmed'
     GROUP BY b.id
-    ORDER BY 
-        FIELD(b.status, 'confirmed', 'pending'),
-        b.waktu_booking ASC
+    ORDER BY b.waktu_booking ASC
     LIMIT 1
 ";
 

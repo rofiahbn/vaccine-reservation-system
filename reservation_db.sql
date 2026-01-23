@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 22, 2026 at 09:15 AM
+-- Generation Time: Jan 23, 2026 at 03:23 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -46,8 +46,10 @@ CREATE TABLE `bookings` (
 --
 
 INSERT INTO `bookings` (`id`, `patient_id`, `service_type`, `nomor_antrian`, `tanggal_booking`, `waktu_booking`, `status`, `catatan`, `created_at`, `updated_at`, `doctor_id`) VALUES
-(78, 1, 'In Clinic', '20260120-001', '2026-01-20', '09:00:00', 'confirmed', 'Pendaftaran online', '2026-01-20 09:38:53', '2026-01-22 08:29:22', 1),
-(79, 2, 'In Clinic', '20260121-001', '2026-01-21', '09:00:00', 'pending', 'Pendaftaran online', '2026-01-20 23:23:09', '2026-01-21 21:32:51', NULL);
+(78, 1, 'In Clinic', '20260120-001', '2026-01-23', '09:30:00', 'confirmed', 'Pendaftaran online', '2026-01-20 09:38:53', '2026-01-23 21:18:33', 1),
+(79, 2, 'In Clinic', '20260121-001', '2026-01-23', '09:00:00', 'confirmed', 'Pendaftaran online', '2026-01-20 23:23:09', '2026-01-23 21:21:20', NULL),
+(80, 3, 'In Clinic', '20260122-002', '2026-01-23', '11:00:00', 'pending', 'Pendaftaran online', '2026-01-22 15:53:09', '2026-01-23 21:10:50', NULL),
+(81, 4, 'In Clinic', '20260122-003', '2026-01-23', '10:30:00', 'pending', 'Pendaftaran online', '2026-01-22 17:17:05', '2026-01-23 21:11:03', NULL);
 
 -- --------------------------------------------------------
 
@@ -69,7 +71,10 @@ CREATE TABLE `booking_services` (
 INSERT INTO `booking_services` (`id`, `booking_id`, `nama_layanan`, `created_at`) VALUES
 (18, 78, 'Adacel (Sanofi)', '2026-01-20 09:38:53'),
 (19, 79, 'Campak (Biofarma)', '2026-01-20 23:23:09'),
-(20, 79, 'Swab Antigen COVID-19', '2026-01-20 23:23:09');
+(20, 79, 'Swab Antigen COVID-19', '2026-01-20 23:23:09'),
+(21, 80, 'Vitamin Badan Bugar', '2026-01-22 15:53:09'),
+(22, 80, 'Vitamin D3', '2026-01-22 15:53:09'),
+(23, 81, 'Pantoprazole 40 mg Vial', '2026-01-22 17:17:05');
 
 -- --------------------------------------------------------
 
@@ -89,7 +94,8 @@ CREATE TABLE `booking_staff` (
 --
 
 INSERT INTO `booking_staff` (`id`, `booking_id`, `staff_id`, `created_at`) VALUES
-(6, 78, 1, '2026-01-22 01:26:04');
+(11, 79, 1, '2026-01-23 14:18:21'),
+(12, 78, 2, '2026-01-23 14:18:33');
 
 -- --------------------------------------------------------
 
@@ -157,8 +163,7 @@ INSERT INTO `jadwal_libur` (`id`, `tanggal`, `keterangan`, `jenis`) VALUES
 (38, '2026-06-16', '1 Muharram 1448 H', 'nasional'),
 (39, '2026-08-17', 'Hari Proklamasi Kemerdekaan RI', 'nasional'),
 (40, '2026-08-25', 'Maulid Nabi Muhammad SAW', 'nasional'),
-(41, '2026-12-25', 'Kelahiran Yesus Kristus (Natal)', 'nasional'),
-(42, '2026-01-22', 'libur', 'nasional');
+(41, '2026-12-25', 'Kelahiran Yesus Kristus (Natal)', 'nasional');
 
 -- --------------------------------------------------------
 
@@ -175,6 +180,47 @@ CREATE TABLE `kipi_records` (
   `severity` enum('Ringan','Sedang','Berat') DEFAULT 'Ringan',
   `action_taken` text DEFAULT NULL,
   `notes` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `medical_actions`
+--
+
+CREATE TABLE `medical_actions` (
+  `id` int(11) NOT NULL,
+  `booking_id` int(11) NOT NULL,
+  `patient_id` int(11) NOT NULL,
+  `layanan` text DEFAULT NULL,
+  `tanggal_vaksinasi` date DEFAULT NULL,
+  `jenis_vaksin` varchar(100) DEFAULT NULL,
+  `batch_vaksin` varchar(100) DEFAULT NULL,
+  `expired_vaksin` date DEFAULT NULL,
+  `kedatangan_ke` int(11) DEFAULT NULL,
+  `kedatangan_selanjutnya` int(11) DEFAULT NULL,
+  `status` enum('Aktif','Selesai') DEFAULT 'Aktif',
+  `anamnesis` text DEFAULT NULL,
+  `pemeriksaan_fisik` text DEFAULT NULL,
+  `diagnosis` text DEFAULT NULL,
+  `tatalaksana` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `medical_letters`
+--
+
+CREATE TABLE `medical_letters` (
+  `id` int(11) NOT NULL,
+  `action_id` int(11) NOT NULL,
+  `jenis` enum('sehat','sakit','vaksin') DEFAULT NULL,
+  `tanggal` date DEFAULT NULL,
+  `dokter_id` int(11) DEFAULT NULL,
+  `posisi` varchar(100) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -231,7 +277,9 @@ CREATE TABLE `patients` (
 
 INSERT INTO `patients` (`id`, `no_rekam_medis`, `nama_lengkap`, `nama_panggilan`, `tanggal_lahir`, `usia`, `kategori_usia`, `jenis_kelamin`, `nik`, `paspor`, `kebangsaan`, `pekerjaan`, `nama_wali`, `riwayat_alergi`, `riwayat_penyakit`, `riwayat_obat`, `pelayanan`, `created_at`, `updated_at`) VALUES
 (1, 'RM202601200001', 'Rofi\'ah Budi Nadia', 'fiah', '2003-01-07', 23, 'Dewasa', 'P', '3314014701030001', '', 'Indonesia', 'umum', '', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-01-20 02:38:53', '2026-01-21 13:47:54'),
-(2, 'RM202601200002', 'Leo', '', '2000-04-21', 25, 'Dewasa', 'L', '3314123456789098', NULL, 'Indonesia', 'karyawan swasta', '', 'sifud', 'sakit kepala', 'alkohol', 'Vaksinasi Umum/Infus Vitamin', '2026-01-20 16:23:09', '2026-01-22 08:15:19');
+(2, 'RM202601200002', 'Leo', '', '2000-04-21', 25, 'Dewasa', 'L', '3314123456789098', NULL, 'Indonesia', 'karyawan swasta', '', 'sifud', 'sakit kepala', 'alkohol', 'Vaksinasi Umum/Infus Vitamin', '2026-01-20 16:23:09', '2026-01-22 08:15:19'),
+(3, 'RM202601220001', 'Dillon', '', '1999-01-28', 26, 'Dewasa', 'L', '3314567654890765', NULL, 'Indonesia', 'karyawan swasta', '', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-01-22 08:53:09', '2026-01-22 08:53:09'),
+(4, 'RM202601220002', 'Joya', '', '2002-06-19', 23, 'Dewasa', 'P', '3314565428790654', NULL, 'Indonesia', 'nganggur', '', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-01-22 10:17:05', '2026-01-22 10:17:05');
 
 -- --------------------------------------------------------
 
@@ -254,7 +302,9 @@ CREATE TABLE `patient_addresses` (
 
 INSERT INTO `patient_addresses` (`id`, `patient_id`, `alamat`, `provinsi`, `kota`, `is_primary`) VALUES
 (74, 1, 'Salam, Rt.13, Saren, Kalijambe', 'Jawa Tengah', 'Sragen', 1),
-(75, 2, 'Bandung - Jawa Barat', 'Jawa Barat', 'Cimahi', 1);
+(75, 2, 'Bandung - Jawa Barat', 'Jawa Barat', 'Cimahi', 1),
+(76, 3, 'cribon', 'Jawa Barat', 'Cirebon', 1),
+(77, 4, 'seattle', 'DKI Jakarta', 'Jakarta Utara', 1);
 
 -- --------------------------------------------------------
 
@@ -275,7 +325,9 @@ CREATE TABLE `patient_emails` (
 
 INSERT INTO `patient_emails` (`id`, `patient_id`, `email`, `is_primary`) VALUES
 (76, 1, 'rofiahbudi@gmail.com', 1),
-(77, 2, 'rangga@gmail.com', 1);
+(77, 2, 'rangga@gmail.com', 1),
+(78, 3, 'dillon@gmail.com', 1),
+(79, 4, 'joya@gmail.com', 1);
 
 -- --------------------------------------------------------
 
@@ -296,7 +348,9 @@ CREATE TABLE `patient_phones` (
 
 INSERT INTO `patient_phones` (`id`, `patient_id`, `phone`, `is_primary`) VALUES
 (77, 1, '085876923088', 1),
-(78, 2, '085787652345', 1);
+(78, 2, '085787652345', 1),
+(79, 3, '087654323456', 1),
+(80, 4, '087698764536', 1);
 
 -- --------------------------------------------------------
 
@@ -373,6 +427,37 @@ INSERT INTO `staff` (`id`, `nama_lengkap`, `gelar`, `role`, `created_at`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `surat`
+--
+
+CREATE TABLE `surat` (
+  `id` int(11) NOT NULL,
+  `booking_id` int(11) DEFAULT NULL,
+  `patient_id` int(11) DEFAULT NULL,
+  `jenis_surat` enum('sehat','sakit','vaksin') DEFAULT NULL,
+  `dokter_id` int(11) DEFAULT NULL,
+  `posisi` varchar(100) DEFAULT NULL,
+  `tanggal_surat` date DEFAULT NULL,
+  `lama_istirahat` int(11) DEFAULT NULL,
+  `tgl_awal` date DEFAULT NULL,
+  `tgl_akhir` date DEFAULT NULL,
+  `pf_lain` text DEFAULT NULL,
+  `jenis_vaksin` varchar(100) DEFAULT NULL,
+  `batch_vaksin` varchar(100) DEFAULT NULL,
+  `expired_vaksin` date DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `surat`
+--
+
+INSERT INTO `surat` (`id`, `booking_id`, `patient_id`, `jenis_surat`, `dokter_id`, `posisi`, `tanggal_surat`, `lama_istirahat`, `tgl_awal`, `tgl_akhir`, `pf_lain`, `jenis_vaksin`, `batch_vaksin`, `expired_vaksin`, `created_at`) VALUES
+(1, 78, 1, 'sakit', 1, 'Dokter Penanggung Jawab', '2026-01-23', 0, '0000-00-00', '0000-00-00', '', 'a', '123', '2026-01-31', '2026-01-23 08:46:51');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `time_slots`
 --
 
@@ -403,6 +488,40 @@ INSERT INTO `time_slots` (`id`, `slot_date`, `slot_time`, `max_capacity`, `curre
 (11, '2025-12-24', '14:00:00', 3, 0, 1),
 (12, '2025-12-24', '14:30:00', 3, 0, 1),
 (13, '2025-12-24', '15:00:00', 3, 0, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tindakan`
+--
+
+CREATE TABLE `tindakan` (
+  `id` int(11) NOT NULL,
+  `booking_id` int(11) DEFAULT NULL,
+  `patient_id` int(11) DEFAULT NULL,
+  `anamnesis` text DEFAULT NULL,
+  `pemeriksaan_fisik` text DEFAULT NULL,
+  `diagnosis` text DEFAULT NULL,
+  `tatalaksana` text DEFAULT NULL,
+  `suhu` decimal(4,1) DEFAULT NULL,
+  `tekanan_darah` varchar(10) DEFAULT NULL,
+  `respirasi` int(11) DEFAULT NULL,
+  `nadi` int(11) DEFAULT NULL,
+  `status` varchar(20) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `jenis_vaksin` varchar(100) DEFAULT NULL,
+  `batch_vaksin` varchar(100) DEFAULT NULL,
+  `expired_vaksin` date DEFAULT NULL,
+  `kedatangan_ke` int(11) DEFAULT NULL,
+  `kedatangan_selanjutnya` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `tindakan`
+--
+
+INSERT INTO `tindakan` (`id`, `booking_id`, `patient_id`, `anamnesis`, `pemeriksaan_fisik`, `diagnosis`, `tatalaksana`, `suhu`, `tekanan_darah`, `respirasi`, `nadi`, `status`, `created_at`, `jenis_vaksin`, `batch_vaksin`, `expired_vaksin`, `kedatangan_ke`, `kedatangan_selanjutnya`) VALUES
+(2, 78, 1, 'a', 's', 'd', 'f', 36.0, '120', 0, 0, '0', '2026-01-23 08:53:46', 'a', 'a', '2026-01-24', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -448,6 +567,21 @@ INSERT INTO `vaccines` (`id`, `vaccine_name`, `description`, `price`, `stock`, `
 (4, 'MMR', 'Vaksin Campak, Gondongan, Rubella', 250000.00, 30, 1, 12, '2025-12-24 06:40:17'),
 (5, 'Hepatitis B', 'Vaksin Hepatitis B', 200000.00, 40, 0, 100, '2025-12-24 06:40:17'),
 (6, 'DPT', 'Vaksin Difteri, Pertusis, Tetanus', 180000.00, 35, 0, 7, '2025-12-24 06:40:17');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `vital_signs`
+--
+
+CREATE TABLE `vital_signs` (
+  `id` int(11) NOT NULL,
+  `action_id` int(11) NOT NULL,
+  `suhu` decimal(4,1) DEFAULT NULL,
+  `tekanan_darah` varchar(20) DEFAULT NULL,
+  `respirasi` int(11) DEFAULT NULL,
+  `nadi` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Indexes for dumped tables
@@ -502,6 +636,22 @@ ALTER TABLE `kipi_records`
   ADD PRIMARY KEY (`id`),
   ADD KEY `reservation_id` (`reservation_id`),
   ADD KEY `patient_id` (`patient_id`);
+
+--
+-- Indexes for table `medical_actions`
+--
+ALTER TABLE `medical_actions`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `booking_id` (`booking_id`),
+  ADD KEY `patient_id` (`patient_id`);
+
+--
+-- Indexes for table `medical_letters`
+--
+ALTER TABLE `medical_letters`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `action_id` (`action_id`),
+  ADD KEY `dokter_id` (`dokter_id`);
 
 --
 -- Indexes for table `medical_records`
@@ -565,11 +715,23 @@ ALTER TABLE `staff`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `surat`
+--
+ALTER TABLE `surat`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `time_slots`
 --
 ALTER TABLE `time_slots`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `unique_slot` (`slot_date`,`slot_time`);
+
+--
+-- Indexes for table `tindakan`
+--
+ALTER TABLE `tindakan`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `vaccination_history`
@@ -585,6 +747,13 @@ ALTER TABLE `vaccines`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `vital_signs`
+--
+ALTER TABLE `vital_signs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `action_id` (`action_id`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -592,19 +761,19 @@ ALTER TABLE `vaccines`
 -- AUTO_INCREMENT for table `bookings`
 --
 ALTER TABLE `bookings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=80;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=82;
 
 --
 -- AUTO_INCREMENT for table `booking_services`
 --
 ALTER TABLE `booking_services`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `booking_staff`
 --
 ALTER TABLE `booking_staff`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `jadwal_klinik`
@@ -625,6 +794,18 @@ ALTER TABLE `kipi_records`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `medical_actions`
+--
+ALTER TABLE `medical_actions`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `medical_letters`
+--
+ALTER TABLE `medical_letters`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `medical_records`
 --
 ALTER TABLE `medical_records`
@@ -634,25 +815,25 @@ ALTER TABLE `medical_records`
 -- AUTO_INCREMENT for table `patients`
 --
 ALTER TABLE `patients`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `patient_addresses`
 --
 ALTER TABLE `patient_addresses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=76;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78;
 
 --
 -- AUTO_INCREMENT for table `patient_emails`
 --
 ALTER TABLE `patient_emails`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=80;
 
 --
 -- AUTO_INCREMENT for table `patient_phones`
 --
 ALTER TABLE `patient_phones`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=79;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
 
 --
 -- AUTO_INCREMENT for table `patient_services`
@@ -673,10 +854,22 @@ ALTER TABLE `staff`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
+-- AUTO_INCREMENT for table `surat`
+--
+ALTER TABLE `surat`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT for table `time_slots`
 --
 ALTER TABLE `time_slots`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+
+--
+-- AUTO_INCREMENT for table `tindakan`
+--
+ALTER TABLE `tindakan`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `vaccination_history`
@@ -689,6 +882,12 @@ ALTER TABLE `vaccination_history`
 --
 ALTER TABLE `vaccines`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `vital_signs`
+--
+ALTER TABLE `vital_signs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
@@ -720,6 +919,20 @@ ALTER TABLE `booking_staff`
 ALTER TABLE `kipi_records`
   ADD CONSTRAINT `kipi_records_ibfk_1` FOREIGN KEY (`reservation_id`) REFERENCES `reservations` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `kipi_records_ibfk_2` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `medical_actions`
+--
+ALTER TABLE `medical_actions`
+  ADD CONSTRAINT `medical_actions_ibfk_1` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`id`),
+  ADD CONSTRAINT `medical_actions_ibfk_2` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`);
+
+--
+-- Constraints for table `medical_letters`
+--
+ALTER TABLE `medical_letters`
+  ADD CONSTRAINT `medical_letters_ibfk_1` FOREIGN KEY (`action_id`) REFERENCES `medical_actions` (`id`),
+  ADD CONSTRAINT `medical_letters_ibfk_2` FOREIGN KEY (`dokter_id`) REFERENCES `staff` (`id`);
 
 --
 -- Constraints for table `medical_records`
@@ -759,6 +972,12 @@ ALTER TABLE `reservations`
 --
 ALTER TABLE `vaccination_history`
   ADD CONSTRAINT `vaccination_history_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `vital_signs`
+--
+ALTER TABLE `vital_signs`
+  ADD CONSTRAINT `vital_signs_ibfk_1` FOREIGN KEY (`action_id`) REFERENCES `medical_actions` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
