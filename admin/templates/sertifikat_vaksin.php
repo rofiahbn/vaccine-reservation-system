@@ -1,91 +1,124 @@
 <div class="surat-template">
 
-    <h2>
+    <h2 style="text-align:center;">
         IMMUNIZATION CERTIFICATE<br>
         <span style="font-size:14px; font-weight:normal;">SERTIFIKAT VAKSINASI</span>
     </h2>
 
     <p>
-        The undersigned doctor / Saya yang bertanda tangan di bawah ini:
+        The doctor assigned below :<br>
+        <i>Saya yang bertanda tangan di bawah ini :</i>
     </p>
 
-    <table>
+    <!-- DATA DOKTER -->
+    <table class="data-dokter">
         <tr>
-            <td class="label">Doctor Name / Nama Dokter</td>
-            <td class="separator">:</td>
-            <td class="value"><span id="pv_dokter"></span></td>
+            <td>Name<br><i>Nama</i></td>
+            <td>:</td>
+            <td><span id="pv_dokter"></span></td>
+        </tr>
+        <tr>
+            <td>Position<br><i>Jabatan</i></td>
+            <td>:</td>
+            <td>
+                Medical Doctor at Vaksinin Clinic<br>
+                <i>Dokter Klinik Vaksinin</i>
+            </td>
         </tr>
     </table>
 
-    <p>
-        Hereby certifies that / Dengan ini menerangkan bahwa:
+    <p style="margin-top:14px;">
+        Hereby confirmed that :<br>
+        <i>Dengan ini menyatakan bahwa :</i>
     </p>
 
-    <table>
+    <!-- DATA PASIEN -->
+    <table class="data-pasien">
         <tr>
-            <td class="label">Medical Record</td>
-            <td class="separator">:</td>
-            <td class="value"><span id="pv_rm"></span></td>
+            <td>Medical Record<br><i>No. Rekam Medis</i></td>
+            <td>:</td>
+            <td><span id="pv_rm"></span></td>
         </tr>
         <tr>
-            <td class="label">Name / Nama</td>
-            <td class="separator">:</td>
-            <td class="value"><span id="pv_nama"></span></td>
+            <td>Name<br><i>Nama</i></td>
+            <td>:</td>
+            <td><span id="pv_nama"></span></td>
         </tr>
         <tr>
-            <td class="label">Date of Birth</td>
-            <td class="separator">:</td>
-            <td class="value"><span id="pv_tgl_lahir"></span></td>
+            <td>Date of Birth<br><i>Tanggal Lahir</i></td>
+            <td>:</td>
+            <td>
+                <span id="pv_tgl_lahir"></span>
+            </td>
         </tr>
         <tr>
-            <td class="label">Gender / Jenis Kelamin</td>
-            <td class="separator">:</td>
-            <td class="value"><span id="pv_jk"></span></td>
+            <td>Gender<br><i>Jenis Kelamin</i></td>
+            <td>:</td>
+            <td>
+                <span id="pv_jk"></span>
+            </td>
         </tr>
         <tr>
-            <td class="label">ID Number / No. Identitas</td>
-            <td class="separator">:</td>
-            <td class="value"><span id="pv_identitas"></span></td>
+            <td>ID Number<br><i>No Identitas</i></td>
+            <td>:</td>
+            <td><span id="pv_identitas"></span></td>
         </tr>
     </table>
 
-    <p>
-        Has been immunized as detailed below / Telah menerima imunisasi dengan rincian sebagai berikut:
+    <p style="margin-top:14px;">
+        Has been immunized as mentioned below :<br>
+        <i>Telah dilakukan vaksinasi seperti yang disebutkan di bawah :</i>
     </p>
 
-    <table>
+    <!-- DATA VAKSINASI -->
+    <table class="data-vaksin">
         <tr>
-            <td class="label">Date of Vaccination</td>
-            <td class="separator">:</td>
-            <td class="value"><span id="pv_tgl_vaksin"></span></td>
+            <td>Date of Vaccination<br><i>Tanggal Vaksinasi</i></td>
+            <td>:</td>
+            <td>
+                <span id="pv_tgl_vaksin"></span>
+            </td>
         </tr>
         <tr>
-            <td class="label">Type of Vaccination</td>
-            <td class="separator">:</td>
-            <td class="value"><span id="pv_jenis_vaksin"></span></td>
+            <td>Type of Vaccination<br><i>Jenis Vaksinasi</i></td>
+            <td>:</td>
+            <td>
+                <span id="pv_jenis_vaksin"></span>
+            </td>
         </tr>
         <tr>
-            <td class="label">Vaccine Lot Number</td>
-            <td class="separator">:</td>
-            <td class="value"><span id="pv_batch"></span></td>
+            <td>Vaccine Lot No.<br><i>No. Batch Vaksin</i></td>
+            <td>:</td>
+            <td><span id="pv_batch"></span></td>
         </tr>
         <tr>
-            <td class="label">Vaccine Expiration Date</td>
-            <td class="separator">:</td>
-            <td class="value"><span id="pv_expired"></span></td>
+            <td>Vaccine Exp. Date<br><i>Tanggal Kadaluarsa Vaksin</i></td>
+            <td>:</td>
+            <td>
+                <span id="pv_expired"></span>
+            </td>
         </tr>
     </table>
 
-    <p class="closing">
-        This certificate is issued truthfully and may be used as required.<br>
-        Sertifikat ini diberikan dengan sebenarnya dan dapat dipergunakan sebagaimana mestinya.
+    <p style="margin-top:16px;">
+        Thus, this letter is made in accordance with the actual conditions and to be used properly.<br>
+        <i>Demikian hasil pemeriksaan ini dapat dipergunakan sebagaimana mestinya.</i>
     </p>
 
+    <!-- TANDA TANGAN -->
     <p class="ttd">
-        Tangerang Selatan, <span id="pv_tanggal_surat"></span><br><br><br>
+        South Tangerang, <span id="pv_tanggal_surat"></span><br>
+        <i>Tangerang Selatan, <span id="pv_tanggal_surat"></span></i><br><br><br>
 
         <b><span id="pv_dokter"></span></b><br>
-        Medical Doctor
+        SIP: <span id="pv_sip"></span>
     </p>
+
+    <!-- FOOTER KLINIK -->
+    <div class="footer-klinik">
+        <br>Ruko Sentra Menteng Blok MN 88 I, Tangerang Selatan, Banten | 
+            0821 3737 2757 / (021) 2221 4342 |
+            vaksinin.id@gmail.com / hellovaksinin@gmail.com
+    </div>
 
 </div>

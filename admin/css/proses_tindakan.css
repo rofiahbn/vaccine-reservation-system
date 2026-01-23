@@ -192,26 +192,157 @@ h1 {
     resize: vertical;
 }
 
-/* CHECKBOX SURAT */
-.detail-item label input[type="checkbox"] {
-    margin-right: 8px;
+/* PANEL CARD */
+.surat-control-panel {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    padding: 18px 18px 18px;
+    border-radius: 16px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+    margin-bottom: 24px;
 }
 
-.detail-item .checkbox-group {
+/* JUDUL PANEL */
+.panel-title {
     display: flex;
-    flex-direction: row;      /* horizontal */
-    gap: 32px;                /* jarak antar item */
     align-items: center;
-    margin-top: 8px;
-    flex-wrap: nowrap;        /* PENTING: jangan sampai turun baris */
+    gap: 10px;
+
+    font-size: 16px;
+    font-weight: 700;
+    color: #374151;
+
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
 }
 
-.checkbox-group label {
+.panel-title i {
+    color: #60a5fa;
+    font-size: 18px;
+}
+
+/* LABEL GROUP */
+.group-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 8px;
+    display: block;
+    padding-top: 10px;
+}
+
+/* =========================
+   RADIO MODERN STYLE
+========================= */
+
+.modern-radio {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.radio-card {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 8px;
-    white-space: nowrap;     /* teks tidak pecah */
+
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+
+    padding: 10px 14px;
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+/* sembunyikan radio asli */
+.radio-card input {
+    display: none;
+}
+
+/* teks */
+.radio-card span {
+    font-size: 14px;
+    color: #374151;
     font-weight: 500;
+}
+
+/* hover */
+.radio-card:hover {
+    background: #eef2ff;
+    border-color: #93c5fd;
+}
+
+/* aktif (checked) */
+.radio-card input:checked + span {
+    color: #1d4ed8;
+    font-weight: 600;
+}
+
+.radio-card:has(input:checked) {
+    background: #eff6ff;
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 2px rgba(96,165,250,0.15);
+}
+
+/* =========================
+   SELECT & INPUT MODERN
+========================= */
+
+.modern-select,
+.modern-input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    margin-top: 6px;
+
+    font-size: 14px;
+    color: #374151;
+    background: #fff;
+
+    transition: all 0.2s ease;
+}
+
+.modern-select:focus,
+.modern-input:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(96,165,250,0.2);
+    outline: none;
+}
+
+/* ================= ISTIRAHAT FORM ================= */
+
+.istirahat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px 16px;
+    margin-top: 10px;
+}
+
+.istirahat-item label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.istirahat-item input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+}
+
+.istirahat-item input:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(96,165,250,0.2);
+    outline: none;
 }
 
 /* BOX PREVIEW */
@@ -239,6 +370,12 @@ h1 {
     text-align: center;
     line-height: 1.6;
     opacity: 0.85;
+    display: flex;
+    flex-direction: column;
+    align-items: center;      /* tengah kiri-kanan */
+    justify-content: center;  /* tengah atas-bawah */
+
+    height: 100%; 
 }
 
 /* ================= ACTION BUTTONS ================= */
