@@ -8,6 +8,15 @@ if (!isset($_SESSION['booking_active'])) {
     $_SESSION['booking_active'] = true;
 }
 
+/* ===== AMBIL DATA SERVICES DARI DATABASE ===== */
+$services_data = [];
+
+$result = $conn->query("SELECT * FROM services ORDER BY kategori, nama_layanan ASC");
+
+while ($row = $result->fetch_assoc()) {
+    $services_data[] = $row;
+}
+
 // Ambil data peserta dari session (untuk multi participant)
 $participants = isset($_SESSION['participants']) ? $_SESSION['participants'] : [];
 $participant_count = count($participants);
@@ -31,6 +40,7 @@ $hari_awal = date('w', strtotime("$tahun-$bulan-01"));
 
 // Hari ini
 $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
+
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -454,6 +464,25 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
         const bulanNow = <?php echo $bulan; ?>;
         const tahunNow = <?php echo $tahun; ?>;
         const namaBulanNow = '<?php echo $nama_bulan[$bulan]; ?>';
+    </script>
+    
+    <script>
+        const rawServices = <?= json_encode($services_data) ?>;
+
+        // Susun otomatis per kategori
+        const productData = {};
+
+        rawServices.forEach(item => {
+            if (!productData[item.kategori]) {
+                productData[item.kategori] = [];
+            }
+
+            productData[item.kategori].push({
+                id: item.id,
+                name: item.nama_layanan,
+                price: item.harga
+            });
+        });
     </script>
     <script src="provinces.js"></script>
     <script src="script.js?v=<?php echo time(); ?>"></script>

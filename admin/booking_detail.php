@@ -11,7 +11,7 @@ if ($booking_id == 0) {
 }
 
 // Get booking detail
-$sql = "SELECT b.*, p.* 
+$sql = "SELECT b.*, p.*, b.payment_status
         FROM bookings b 
         JOIN patients p ON b.patient_id = p.id 
         WHERE b.id = ?";
@@ -68,6 +68,7 @@ $stmt_s = $conn->prepare($sql_services);
 $stmt_s->bind_param('i', $booking_id);
 $stmt_s->execute();
 $services = $stmt_s->get_result();
+
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -327,37 +328,50 @@ $services = $stmt_s->get_result();
 
                 <?php elseif ($booking['status'] == 'confirmed'): ?>
 
-                    <!-- MODE OPERASIONAL: SUDAH ADA DOKTER -->
+                    <?php if ($booking['payment_status'] == 'unpaid'): ?>
 
-                    <button class="btn-process"
-                            onclick="window.location.href='proses_tindakan.php?id=<?= $booking_id ?>'">
-                        Proses / Tindakan
-                    </button>
+                        <!-- BELUM BAYAR → MODE OPERASIONAL -->
 
-                    <button class="btn-print">
-                        Cetak Surat
-                    </button>
+                        <button class="btn-process"
+                                onclick="window.location.href='proses_tindakan.php?id=<?= $booking_id ?>'">
+                            Proses / Tindakan
+                        </button>
 
-                    <button type="button" class="btn-reschedule" onclick="openRescheduleModal()">
-                        <i class="fas fa-calendar-alt"></i> Reschedule
-                    </button>
+                        <button type="button" class="btn-reschedule" onclick="openRescheduleModal()">
+                            <i class="fas fa-calendar-alt"></i> Reschedule
+                        </button>
 
-                    <button id="btn-cancel" class="btn-cancel" 
-                            onclick="cancelBooking(this, <?= $booking_id ?>)">
-                        <i class="fas fa-times-circle"></i> Cancel Booking
-                    </button>
+                        <button id="btn-cancel" class="btn-cancel" 
+                                onclick="cancelBooking(this, <?= $booking_id ?>)">
+                            <i class="fas fa-times-circle"></i> Cancel Booking
+                        </button>
 
-                    <hr>
+                        <hr>
 
-                    <button class="btn-payment">
-                        Proses Pembayaran
-                    </button>
+                        <button class="btn-payment"
+                                onclick="window.location.href='pembayaran.php?id=<?= $booking_id ?>'">
+                            Proses Pembayaran
+                        </button>
 
-                    <button class="btn-finish"
-                            onclick="updateStatus(<?= $booking_id ?>, 'completed')">
-                        Selesai
-                    </button>
+                    <?php else: ?>
 
+                        <!-- SUDAH BAYAR → MODE ADMIN FINAL -->
+
+                        <button class="btn-payment"
+                                onclick="window.location.href='pembayaran.php?id=<?= $booking_id ?>'">
+                            Detail Pembayaran
+                        </button>
+
+                        <button class="btn-print">
+                            Cetak Surat
+                        </button>
+
+                        <button class="btn-finish"
+                                onclick="updateStatus(<?= $booking_id ?>, 'completed')">
+                            Selesai
+                        </button>
+
+                    <?php endif; ?>
 
                 <?php elseif ($booking['status'] == 'completed'): ?>
 
@@ -366,7 +380,8 @@ $services = $stmt_s->get_result();
                         Cetak Surat
                     </button>
 
-                    <button class="btn-payment" disabled style="opacity:0.6;">
+                    <button class="btn-payment"
+                            onclick="window.location.href='pembayaran.php?id=<?= $booking_id ?>'">
                         Pembayaran Selesai
                     </button>
 

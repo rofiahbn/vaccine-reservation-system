@@ -1,0 +1,531 @@
+/* ===============================
+   LAYOUT UTAMA
+================================ */
+.detail-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+    min-height: 50px;
+}
+
+.btn-back {
+    padding: 10px 20px;
+    background: white;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+    color: #374151;
+}
+
+.btn-back:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+}
+
+.detail-header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.btn-back {
+    padding: 10px 20px;
+    background: white;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+    color: #374151;
+}
+
+.btn-back:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+}
+
+.detail-header h1 {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 24px;
+    color: #2d3748;
+    font-weight: 600;
+    margin: 0;
+}
+
+.payment-layout {
+    display: flex;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+/* KIRI */
+.payment-left {
+    flex: 3;
+    background: #ffffff;
+    padding: 25px 30px;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* KANAN */
+.payment-right {
+    flex: 1.2;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+
+/* ===============================
+   TEXT & HEADER
+================================ */
+
+.payment-left h3 {
+    font-size: 20px;
+    margin-bottom: 15px;
+}
+
+.payment-left h4 {
+    margin-top: 25px;
+    margin-bottom: 10px;
+    font-size: 16px;
+    color: #444;
+}
+
+.payment-left p {
+    margin: 5px 0;
+    color: #333;
+    font-size: 14px;
+}
+
+
+/* ===============================
+   TABLE LAYANAN
+================================ */
+
+.payment-left table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 15px;
+}
+
+.payment-left th {
+    background: #f7f7f7;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+.payment-left td {
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+}
+
+.payment-left td:last-child,
+.payment-left th:last-child {
+    text-align: right;
+}
+
+
+/* ===============================
+   METODE PEMBAYARAN
+================================ */
+
+#metode_pembayaran {
+    width: 250px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    outline: none;
+}
+
+#metode_pembayaran:focus {
+    border-color: #ffb74d;
+}
+
+
+/* ===============================
+   CARD KANAN
+================================ */
+
+.card {
+    background: #ffffff;
+    padding: 20px 22px;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.card h4 {
+    margin-bottom: 14px;
+    font-size: 16px;
+    color: #222;
+    font-weight: 600;
+}
+
+.card p {
+    margin: 6px 0;
+    font-size: 14px;
+    color: #444;
+}
+
+.card hr {
+    margin: 15px 0;
+    border: none;
+    border-top: 1px solid #ddd;
+}
+
+.card h2 {
+    text-align: right;
+    color: #222;
+    font-size: 26px;
+    margin-top: 10px;
+}
+
+/* Card Status layout */
+.card:first-child {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Judul Status tetap kiri */
+.card:first-child h4 {
+    margin: 0;
+}
+
+/* ===============================
+   BADGE STATUS
+================================ */
+
+.badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.badge-warning {
+    background: #ffe0b2;
+    color: #e65100;
+}
+
+.badge-success {
+    background: #c8e6c9;
+    color: #2e7d32;
+}
+
+
+/* ===============================
+   BUTTON BAYAR
+================================ */
+
+.btn-bayar {
+    margin-top: 10px;
+    padding: 14px;
+    border-radius: 10px;
+    border: none;
+    background: #7bc96f;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-bayar:hover {
+    background: #66bb5a;
+}
+
+.btn-bayar:disabled {
+    background: #cfcfcf;
+    cursor: not-allowed;
+}
+
+
+/* ===============================
+   RESPONSIVE (BIAR AMAN)
+================================ */
+
+@media (max-width: 900px) {
+    .payment-layout {
+        flex-direction: column;
+    }
+
+    .payment-right {
+        width: 100%;
+    }
+}
+
+/* OVERLAY */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.45);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+/* BOX */
+.popup-box {
+    background: white;
+    width: 500px;
+    max-width: 90%;
+    padding: 35px 30px;
+    border-radius: 25px;
+    text-align: center;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+    animation: popupFade 0.3s ease;
+}
+
+/* JUDUL */
+.popup-box h2 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: #222;
+}
+
+/* DESKRIPSI */
+.popup-box p {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 25px;
+    line-height: 1.6;
+}
+
+/* CHECKBOX AREA */
+.popup-box label {
+    font-size: 16px;
+    margin: 0 15px;
+    color: #333;
+}
+
+/* BUTTON GROUP */
+.popup-box button {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 12px;
+    transition: 0.2s;
+}
+
+/* KONFIRMASI (BIRU) */
+.popup-box .btn-primary {
+    background: #bde9ff;
+    color: #333;
+}
+
+.popup-box .btn-primary:hover {
+    background: #9fddfa;
+}
+
+/* BATAL (MERAH MUDA) */
+.popup-box .btn-danger {
+    background: #ffc7c7;
+    color: #333;
+}
+
+.popup-box .btn-danger:hover {
+    background: #ffb1b1;
+}
+
+/* ANIMASI HALUS */
+@keyframes popupFade {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Panel kanan jadi relative */
+.payment-right {
+    position: relative;
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-height: 600px;          /* lebih tinggi biar tombol turun */
+    padding-bottom: 90px;      /* ruang khusus buat tombol */
+}
+
+/* Area tombol bayar */
+.pay-action {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Tombol besar hijau */
+.btn-bayar-big {
+    width: 100%;
+    padding: 14px 0;
+    background: #7ed957;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+}
+
+.btn-bayar-big:hover {
+    background: #6cc94f;
+    transform: translateY(-1px);
+}
+
+/* ===============================
+   TOTAL PEMBAYARAN STYLE
+================================ */
+
+.total-card {
+    font-size: 14px;
+}
+
+/* Baris biasa */
+.total-line {
+    display: grid;
+    grid-template-columns: 90px 10px 1fr;
+    margin: 6px 0;
+    align-items: center;
+    color: #444;
+}
+
+.total-line .label {
+    text-align: left;
+}
+
+.total-line .colon {
+    text-align: center;
+}
+
+.total-line .value {
+    text-align: right;
+    font-weight: 500;
+}
+
+/* TOTAL FINAL */
+.total-final-line {
+    display: grid;
+    grid-template-columns: 90px 10px 1fr;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.total-final-line .label {
+    font-weight: 600;
+}
+
+.total-final-line .colon {
+    text-align: center;
+    font-weight: 600;
+}
+
+.final-value {
+    text-align: right;
+    font-size: 26px;
+    font-weight: 700;
+    color: #222;
+}
+
+.btn-diskon {
+    margin-top: 6px;
+    padding: 6px 12px;
+    background: #ffd180;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-diskon:hover {
+    background: #ffca5c;
+}
+
+/* tombol X popup */
+.popup-close {
+    position: absolute;
+    top: 15px;
+    right: 18px;
+    background: none;
+    border: none;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #666;
+    transition: 0.2s;
+}
+
+.popup-close:hover {
+    color: #000;
+}
+
+/* tombol cetak pembayaran */
+.btn-cetak {
+    width: 100%;
+    padding: 12px 0;
+    background: #bde9ff;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1f2937;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: 0.2s;
+}
+
+.btn-cetak:hover {
+    background: #9fddfa;
+}
+
+/* tombol kirim invoice */
+.btn-invoice {
+    width: 100%;
+    padding: 12px 0;
+    background: #7ed957;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1f2937;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-invoice:hover {
+    background: #6cc94f;
+}

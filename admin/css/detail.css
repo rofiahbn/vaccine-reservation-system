@@ -27,12 +27,6 @@
     border-color: #9ca3af;
 }
 
-.detail-header h1 {
-    font-size: 24px;
-    color: #2d3748;
-    font-weight: 600;
-}
-
 .detail-header-left {
     display: flex;
     align-items: center;

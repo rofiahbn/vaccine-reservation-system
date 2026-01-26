@@ -209,20 +209,33 @@ try {
         
         $booking_id = mysqli_insert_id($conn);
 
-        // 9. INSERT KE TABLE BOOKING_SERVICES (Layanan yang dipilih)
+        // 9. INSERT KE TABLE BOOKING_SERVICES (Layanan yang dipilih + harga snapshot)
         if (!empty($p['selected_products']) && is_array($p['selected_products'])) {
-            $query_service = "INSERT INTO booking_services (booking_id, nama_layanan) VALUES (?, ?)";
+
+            $query_service = "INSERT INTO booking_services 
+                (booking_id, service_id, nama_layanan, harga) 
+                VALUES (?, ?, ?, ?)";
+
             $stmt_service = mysqli_prepare($conn, $query_service);
-            
+
             foreach ($p['selected_products'] as $product) {
-                $nama_layanan = $product['name'];
-                mysqli_stmt_bind_param($stmt_service, 'is', $booking_id, $nama_layanan);
-                
+
+                $service_id   = $product['id'];       // dari JS
+                $nama_layanan = $product['name'];     // dari JS
+                $harga        = $product['price'];    // dari JS
+
+                mysqli_stmt_bind_param($stmt_service, 'iisi', 
+                    $booking_id, 
+                    $service_id, 
+                    $nama_layanan, 
+                    $harga
+                );
+
                 if (!mysqli_stmt_execute($stmt_service)) {
                     throw new Exception("Gagal menyimpan layanan: " . mysqli_error($conn));
                 }
             }
-            
+
             mysqli_stmt_close($stmt_service);
         }
         

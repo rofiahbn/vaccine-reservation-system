@@ -3,6 +3,15 @@ session_start();
 include "config.php";
 include "calendar_helper.php";
 
+// ================== AMBIL DATA SERVICES ==================
+$services_data = [];
+
+$result = $conn->query("SELECT * FROM services ORDER BY kategori, nama_layanan ASC");
+
+while ($row = $result->fetch_assoc()) {
+    $services_data[] = $row;
+}
+
 // Set bulan dan tahun untuk kalender
 $bulan = isset($_GET['bulan']) ? intval($_GET['bulan']) : date('n');
 $tahun = isset($_GET['tahun']) ? intval($_GET['tahun']) : date('Y');
@@ -501,25 +510,26 @@ if (isset($errors) && count($errors) > 0) {
                         $today_date = date('Y-m-d');
 
                         for ($tgl = 1; $tgl <= $jumlah_hari; $tgl++) {
-                        $tanggal_full = sprintf('%04d-%02d-%02d', $tahun, $bulan, $tgl);
-                        $is_today = ($tanggal_full === $today_date);
+                            $tanggal_full = sprintf('%04d-%02d-%02d', $tahun, $bulan, $tgl);
+                            $is_today = ($tanggal_full === $today_date);
 
-                        // ❌ JIKA TANGGAL SUDAH LEWAT → DISABLE
-                        if ($tanggal_full < $today_date) {
-                            echo "<div class='day disabled past-date' title='Tanggal sudah lewat'>$tgl</div>";
-                            continue;
-                        }
+                            // ❌ JIKA TANGGAL SUDAH LEWAT → DISABLE
+                            if ($tanggal_full < $today_date) {
+                                echo "<div class='day disabled past-date' title='Tanggal sudah lewat'>$tgl</div>";
+                                continue;
+                            }
 
-                        // Cek status dari DB
-                        $status = checkDateStatus($conn, $tanggal_full);
-                        $class = getDateClass($status, $is_today);
-                        $title = getDateTitle($status);
-                        $clickable = isDateClickable($status);
+                            // Cek status dari DB
+                            $status = checkDateStatus($conn, $tanggal_full);
+                            $class = getDateClass($status, $is_today);
+                            $title = getDateTitle($status);
+                            $clickable = isDateClickable($status);
 
-                        if ($clickable) {
-                            echo "<div class='$class' onclick='selectDate(this, $tgl)' title='$title'>$tgl</div>";
-                        } else {
-                            echo "<div class='$class' title='$title'>$tgl</div>";
+                            if ($clickable) {
+                                echo "<div class='$class' onclick='selectDate(this, $tgl)' title='$title'>$tgl</div>";
+                            } else {
+                                echo "<div class='$class' title='$title'>$tgl</div>";
+                            }
                         }
                         ?>
                     </div>
@@ -651,6 +661,29 @@ if (isset($errors) && count($errors) > 0) {
         const bulanNow = <?php echo $bulan; ?>;
         const tahunNow = <?php echo $tahun; ?>;
         const namaBulanNow = '<?php echo $nama_bulan[$bulan]; ?>';
+    </script>
+    <script>
+    const editSelectedProducts = <?php 
+        echo json_encode($edit_data['selected_products'] ?? []); 
+    ?>;
+    </script>
+    <script>
+    const rawServices = <?= json_encode($services_data) ?>;
+
+    // Susun per kategori otomatis
+    const productData = {};
+
+    rawServices.forEach(item => {
+        if (!productData[item.kategori]) {
+            productData[item.kategori] = [];
+        }
+
+        productData[item.kategori].push({
+            id: item.id,
+            name: item.nama_layanan,
+            price: item.harga
+        });
+    });
     </script>
     <script src="provinces.js"></script>
     <script src="script.js"></script>
