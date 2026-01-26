@@ -321,6 +321,7 @@
     font-size: 16px;
     margin: 0 15px;
     color: #333;
+    justify-content: space-between;
 }
 
 /* BUTTON GROUP */
@@ -340,6 +341,9 @@
 .popup-box .btn-primary {
     background: #bde9ff;
     color: #333;
+    padding: 8px 18px;        /* ukuran lebih kecil */
+    font-size: 14px;         /* teks lebih kecil */
+    border-radius: 8px;
 }
 
 .popup-box .btn-primary:hover {
@@ -350,6 +354,9 @@
 .popup-box .btn-danger {
     background: #ffc7c7;
     color: #333;
+    padding: 8px 18px;        /* samakan ukuran */
+    font-size: 14px;
+    border-radius: 8px;
 }
 
 .popup-box .btn-danger:hover {

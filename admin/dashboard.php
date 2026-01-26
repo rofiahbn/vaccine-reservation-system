@@ -4,8 +4,55 @@ include "../config.php";
 
 // Get current date info
 $current_month = isset($_GET['month']) ? intval($_GET['month']) : date('n');
-$current_year = isset($_GET['year']) ? intval($_GET['year']) : date('Y');
-$current_week = isset($_GET['week']) ? intval($_GET['week']) : 1;
+$current_year  = isset($_GET['year']) ? intval($_GET['year']) : date('Y');
+
+$today = new DateTime();   // hari ini asli
+
+// kalau user belum pilih minggu → cari minggu sekarang
+if (!isset($_GET['week'])) {
+
+    // cari semua minggu dalam bulan ini (Senin - Minggu)
+    $weeks = [];
+
+    $firstDayOfMonth = new DateTime("$current_year-$current_month-01");
+    $firstMonday = clone $firstDayOfMonth;
+    $firstMonday->modify('monday this week');
+
+    $weekIndex = 1;
+
+    while (true) {
+        $weekStart = clone $firstMonday;
+        $weekStart->modify('+' . (($weekIndex - 1) * 7) . ' days');
+
+        $weekEnd = clone $weekStart;
+        $weekEnd->modify('+6 days');
+
+        // stop kalau minggu sudah full di bulan berikutnya
+        if ((int)$weekStart->format('m') > $current_month &&
+            (int)$weekEnd->format('m') > $current_month) {
+            break;
+        }
+
+        $weeks[] = [
+            'start' => clone $weekStart,
+            'end'   => clone $weekEnd
+        ];
+
+        $weekIndex++;
+    }
+
+    // tentukan hari ini masuk minggu ke berapa
+    $current_week = 1;
+    foreach ($weeks as $index => $w) {
+        if ($today >= $w['start'] && $today <= $w['end']) {
+            $current_week = $index + 1;
+            break;
+        }
+    }
+
+} else {
+    $current_week = intval($_GET['week']);
+}
 
 // Nama bulan
 $nama_bulan = [
@@ -15,8 +62,34 @@ $nama_bulan = [
 ];
 
 // Calculate week date range
-$start_date = ($current_week - 1) * 7 + 1;
-$end_date = min($start_date + 6, cal_days_in_month(CAL_GREGORIAN, $current_month, $current_year));
+// Ambil semua minggu dalam bulan (berdasarkan hari Senin)
+$weeks = [];
+
+$first_day = new DateTime("$current_year-$current_month-01");
+
+// mundur ke Senin pertama minggu itu
+$start = clone $first_day;
+$start->modify('monday this week');
+
+while (true) {
+    $week_start = clone $start;
+    $week_end   = clone $start;
+    $week_end->modify('+6 days');
+
+    // kalau minggu sudah lewat dari bulan, stop
+    if ((int)$week_start->format('m') > $current_month &&
+        (int)$week_end->format('m') > $current_month) {
+        break;
+    }
+
+    $weeks[] = [
+        'start' => $week_start->format('Y-m-d'),
+        'end'   => $week_end->format('Y-m-d'),
+        'label' => $week_start->format('d') . ' - ' . $week_end->format('d')
+    ];
+
+    $start->modify('+1 week');
+}
 
 // Get statistics for dashboard cards
 $today = date('Y-m-d');
@@ -85,26 +158,27 @@ $now_serving = $stmt->get_result()->fetch_assoc();
 
 $filter = isset($_GET['filter']) ? $_GET['filter'] : 'latest';
 
-$where = "";
+$where = "WHERE DATE(b.tanggal_booking) = '$today'";
 $order = "";
 
 if ($filter == 'pending') {
-    $where = "WHERE b.status = 'pending'";
+    $where = "WHERE b.status = 'pending' AND DATE(b.tanggal_booking) = '$today'";
     $order = "ORDER BY b.tanggal_booking ASC, b.waktu_booking ASC";
 } 
 elseif ($filter == 'confirmed') {
-    $where = "WHERE b.status = 'confirmed'";
+    $where = "WHERE b.status = 'confirmed' AND DATE(b.tanggal_booking) = '$today'";
     $order = "ORDER BY b.tanggal_booking ASC, b.waktu_booking ASC";
 }
 elseif ($filter == 'completed') {
-    $where = "WHERE b.status = 'completed'";
+    $where = "WHERE b.status = 'completed' AND DATE(b.tanggal_booking) = '$today'";
     $order = "ORDER BY b.tanggal_booking DESC, b.waktu_booking DESC";
 }
 elseif ($filter == 'cancelled') {
-    $where = "WHERE b.status = 'cancelled'";
+    $where = "WHERE b.status = 'cancelled' AND DATE(b.tanggal_booking) = '$today'";
     $order = "ORDER BY b.tanggal_booking DESC, b.waktu_booking DESC";
 }
 else { // latest
+    $where = "WHERE DATE(b.tanggal_booking) = '$today'";
     $order = "ORDER BY b.tanggal_booking DESC, b.waktu_booking DESC";
 }
 
@@ -125,8 +199,13 @@ $sql_all = "
 $all_bookings = $conn->query($sql_all);
 
 // Get bookings for calendar view (current week)
-$week_start = sprintf('%04d-%02d-%02d', $current_year, $current_month, $start_date);
-$week_end = sprintf('%04d-%02d-%02d', $current_year, $current_month, $end_date);
+// pastikan index minggu valid
+if (!isset($weeks[$current_week - 1])) {
+    $current_week = 1;
+}
+
+$week_start = $weeks[$current_week - 1]['start'];
+$week_end   = $weeks[$current_week - 1]['end'];
 
 $sql_bookings = "SELECT b.*, p.nama_lengkap 
                  FROM bookings b 
@@ -158,24 +237,6 @@ while ($row = $bookings_result->fetch_assoc()) {
 
 // DEBUG: Print entire grid
 echo "<!-- DEBUG GRID: " . print_r($bookings_grid, true) . " -->";
-
-// Get all bookings for list (latest first)
-$sql_all = "
-    SELECT 
-        b.*, 
-        p.nama_lengkap,
-        s.nama_lengkap AS dokter_nama,
-        s.gelar AS dokter_gelar
-    FROM bookings b
-    JOIN patients p ON b.patient_id = p.id
-    LEFT JOIN staff s ON b.doctor_id = s.id
-    ORDER BY 
-        b.tanggal_booking DESC,
-        b.waktu_booking DESC
-    LIMIT 50
-";
-
-$all_bookings = $conn->query($sql_all);
 
 // Calculate total weeks in current month
 $total_days = cal_days_in_month(CAL_GREGORIAN, $current_month, $current_year);
@@ -219,8 +280,13 @@ $total_weeks = ceil($total_days / 7);
 
     <!-- Main Content -->
     <div class="main-content">
-        <header class="page-header">
+        <header class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
             <h1>Kalender</h1>
+
+            <div class="today-info">
+                <div class="today-date" id="todayDate"></div>
+                <div class="today-time" id="todayTime"></div>
+            </div>
         </header>
 
         <!-- Dashboard Cards -->
@@ -326,11 +392,11 @@ $total_weeks = ceil($total_days / 7);
                         <?php endfor; ?>
                     </select>
                     <select id="weekSelect" onchange="changeWeek()">
-                        <?php for ($w = 1; $w <= $total_weeks; $w++): ?>
-                            <option value="<?php echo $w; ?>" <?php echo ($w == $current_week) ? 'selected' : ''; ?>>
-                                Minggu <?php echo $w; ?>
+                        <?php foreach ($weeks as $i => $w): ?>
+                            <option value="<?= $i+1 ?>" <?= (($i+1)==$current_week)?'selected':'' ?>>
+                                <?= "Minggu ".($i+1)." ({$w['label']})" ?>
                             </option>
-                        <?php endfor; ?>
+                        <?php endforeach; ?>
                     </select>
                 </div>
             </div>
@@ -486,12 +552,19 @@ $total_weeks = ceil($total_days / 7);
 
                         <td><?= htmlspecialchars($booking['service_type']) ?></td>
 
-                        <td><?= implode(', ', $service_names) ?></td>
+                        <td>
+                            <?php if (!empty($service_names)): ?>
+                                <?php foreach ($service_names as $prod): ?>
+                                    <div><?= htmlspecialchars($prod) ?></div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                -
+                            <?php endif; ?>
+                        </td>
 
                         <!-- WAKTU -->
                         <td>
-                            <?= date('d/m/Y', strtotime($booking['tanggal_booking'])) ?>
-                            - <?= substr($booking['waktu_booking'], 0, 5) ?> WIB
+                            <?= substr($booking['waktu_booking'], 0, 5) ?> WIB
                         </td>
 
                         <!-- DOKTER -->
@@ -548,6 +621,56 @@ $total_weeks = ceil($total_days / 7);
                 });
 
         });
+    </script>
+
+    <script>
+        function changeMonth() {
+            const month = document.getElementById('monthSelect').value;
+            const week  = document.getElementById('weekSelect').value;
+
+            // saat ganti bulan → reset ke minggu pertama
+            window.location.href = 
+                "dashboard.php?month=" + month + "&week=1";
+        }
+
+        function changeWeek() {
+            const month = document.getElementById('monthSelect').value;
+            const week  = document.getElementById('weekSelect').value;
+
+            window.location.href = 
+                "dashboard.php?month=" + month + "&week=" + week;
+        }
+
+        function updateDateTime() {
+            const now = new Date();
+
+            const days = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+            const months = [
+                "Januari","Februari","Maret","April","Mei","Juni",
+                "Juli","Agustus","September","Oktober","November","Desember"
+            ];
+
+            const dayName = days[now.getDay()];
+            const date = now.getDate();
+            const month = months[now.getMonth()];
+            const year = now.getFullYear();
+
+            const hours = String(now.getHours()).padStart(2,'0');
+            const minutes = String(now.getMinutes()).padStart(2,'0');
+            const seconds = String(now.getSeconds()).padStart(2,'0');
+
+            document.getElementById('todayDate').innerText =
+                `${dayName}, ${date} ${month} ${year}`;
+
+            document.getElementById('todayTime').innerText =
+                `${hours}:${minutes}:${seconds}`;
+        }
+
+        // jalankan pertama kali
+        updateDateTime();
+
+        // update tiap 1 detik
+        setInterval(updateDateTime, 1000);
         </script>
 
 </body>

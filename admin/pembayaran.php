@@ -21,9 +21,40 @@ $stmt->bind_param("i", $booking_id);
 $stmt->execute();
 $booking = $stmt->get_result()->fetch_assoc();
 
+// ambil data pembayaran terakhir jika sudah paid
+$sql_pay = "SELECT * FROM payments 
+            WHERE booking_id = ? 
+            AND status = 'paid' 
+            ORDER BY id DESC 
+            LIMIT 1";
+$stmt_pay = $conn->prepare($sql_pay);
+$stmt_pay->bind_param("i", $booking_id);
+$stmt_pay->execute();
+$payment = $stmt_pay->get_result()->fetch_assoc();
+
+/* Ambil no HP utama */
+$sql_phone = "SELECT phone FROM patient_phones 
+              WHERE patient_id = ? 
+              ORDER BY is_primary DESC 
+              LIMIT 1";
+$stmt_ph = $conn->prepare($sql_phone);
+$stmt_ph->bind_param("i", $booking['patient_id']);
+$stmt_ph->execute();
+$phone = $stmt_ph->get_result()->fetch_assoc()['phone'] ?? '-';
+
+/* Ambil alamat utama */
+$sql_addr = "SELECT * FROM patient_addresses 
+             WHERE patient_id = ? 
+             AND is_primary = 1 
+             LIMIT 1";
+$stmt_ad = $conn->prepare($sql_addr);
+$stmt_ad->bind_param("i", $booking['patient_id']);
+$stmt_ad->execute();
+$address = $stmt_ad->get_result()->fetch_assoc();
+
 /* Ambil layanan + harga */
 $sql_services = "
-    SELECT nama_layanan, harga 
+    SELECT nama_layanan, harga, diskon, diskon_tipe, total 
     FROM booking_services 
     WHERE booking_id = ?
 ";
@@ -31,6 +62,8 @@ $stmt_s = $conn->prepare($sql_services);
 $stmt_s->bind_param("i", $booking_id);
 $stmt_s->execute();
 $services = $stmt_s->get_result();
+
+$payment_status = $booking['payment_status'] ?? 'unpaid';
 
 /* Hitung subtotal */
 $subtotal = 0;
@@ -40,21 +73,35 @@ while ($row = $services->fetch_assoc()) {
 
     $row['jumlah'] = 1;
 
-    // DISKON DUMMY PER ITEM (nanti bisa dari DB / promo)
-    $row['diskon'] = 0;   // misal 10000 kalau mau test
+    // kalau sudah dibayar → ambil dari DB
+    if ($payment_status == 'paid') {
 
-    // total per item = harga - diskon
-    $row['total'] = ($row['harga'] - $row['diskon']) * $row['jumlah'];
+        $row['diskon'] = $row['diskon'] ?? 0;
+        $row['total']  = $row['total'] ?? $row['harga'];
 
-    $subtotal += $row['total'];
+    } else {
 
+        // MODE BELUM BAYAR (default)
+        $row['diskon'] = 0;
+        $row['total'] = $row['harga'];
+    }
+
+    $subtotal += $row['harga'];
     $data_services[] = $row;
 }
 
-$diskon = 0; // nanti bisa dinamis
-$total  = $subtotal - $diskon;
+if ($payment_status == 'paid' && $payment) {
 
-$payment_status = $booking['payment_status'] ?? 'unpaid';
+    $subtotal = $payment['subtotal'];
+    $diskon   = $payment['diskon'];
+    $total    = $payment['total'];
+
+} else {
+
+    $diskon = 0;
+    $total  = $subtotal;
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -88,7 +135,7 @@ $payment_status = $booking['payment_status'] ?? 'unpaid';
             <button onclick="window.location.href='booking_detail.php?id=<?= $booking_id ?>'" class="btn-back">
                 <i class="fas fa-arrow-left"></i> Kembali
             </button>
-            <h1>Proses Pembayaran</h1>
+            <h1><b>Proses Pembayaran</b></h1>
         </div>
 
     <div class="payment-layout">
@@ -98,7 +145,19 @@ $payment_status = $booking['payment_status'] ?? 'unpaid';
             <h3>Pembayaran</h3>
             <p><b>Nama Pasien :</b> <?= htmlspecialchars($booking['nama_lengkap']) ?></p>
             <p><b>No Rekam Medis :</b> <?= $booking['no_rekam_medis'] ?></p>
-            <p><b>No Antrian  :</b> <?= $booking['nomor_antrian'] ?></p>
+            <p><b>No Antrian :</b> <?= $booking['nomor_antrian'] ?></p>
+            <p><b>No HP :</b> <?= htmlspecialchars($phone) ?></p>
+
+            <?php if ($address): ?>
+                <p><b>Alamat :</b> 
+                    <?= htmlspecialchars($address['alamat']) ?>, 
+                    <?= htmlspecialchars($address['kota']) ?>, 
+                    <?= htmlspecialchars($address['provinsi']) ?>
+                </p>
+            <?php else: ?>
+                <p><b>Alamat :</b> -</p>
+            <?php endif; ?>
+            
             <p><b>Tanggal Pelayanan :</b> <?= date('d F Y', strtotime($booking['tanggal_booking'])) ?></p>
             <br><br>
 
@@ -122,13 +181,34 @@ $payment_status = $booking['payment_status'] ?? 'unpaid';
                     <!-- KOLOM DISKON (WAJIB DITUTUP) -->
                     <td id="diskon-<?= $i ?>">
                         <div style="text-align:center;">
-                            <div>0</div>
-                            <button 
-                                type="button" 
-                                class="btn-diskon" 
-                                onclick="openDiskon(<?= $i ?>, <?= $srv['harga'] ?>)">
-                                Tambahkan Diskon
-                            </button>
+
+                            <?php if ($payment_status == 'paid'): ?>
+
+                                <?php if ($srv['diskon'] > 0): ?>
+
+                                    <?php if ($srv['diskon_tipe'] == 'persen'): ?>
+                                        <div><?= round(($srv['diskon'] / $srv['harga']) * 100) ?>% (Rp <?= number_format($srv['diskon'],0,',','.') ?>)</div>
+                                    <?php else: ?>
+                                        <div>Rp <?= number_format($srv['diskon'],0,',','.') ?></div>
+                                    <?php endif; ?>
+
+                                <?php else: ?>
+                                    <div>-</div>
+                                <?php endif; ?>
+
+                            <?php else: ?>
+
+                                <!-- MODE BELUM BAYAR -->
+                                <div>0</div>
+                                <button 
+                                    type="button" 
+                                    class="btn-diskon" 
+                                    onclick="openDiskon(<?= $i ?>, <?= $srv['harga'] ?>)">
+                                    Tambahkan Diskon
+                                </button>
+
+                            <?php endif; ?>
+
                         </div>
                     </td>
 
@@ -230,9 +310,14 @@ $payment_status = $booking['payment_status'] ?? 'unpaid';
         </p>
 
         <form action="proses_bayar.php" method="GET">
-
+            
             <input type="hidden" name="id" value="<?= $booking_id ?>">
             <input type="hidden" name="metode" id="metodeInput">
+
+            <input type="hidden" name="subtotal" id="sendSubtotal">
+            <input type="hidden" name="diskon" id="sendDiskon">
+            <input type="hidden" name="total" id="sendTotal">
+            <input type="hidden" name="detail_diskon" id="sendDetailDiskon">
 
             <div style="margin:20px 0;">
                 <label>
@@ -327,10 +412,17 @@ function openBayar() {
         return;
     }
 
+    // ambil nilai panel kanan
+    document.getElementById('sendSubtotal').value = finalSubtotal;
+    document.getElementById('sendDiskon').value   = finalDiskon;
+    document.getElementById('sendTotal').value    = finalTotal;
+
+    // kirim detail diskon per item (JSON)
+    document.getElementById('sendDetailDiskon').value = JSON.stringify(diskonData);
+
     // isi metode ke hidden input
     document.getElementById('metodeInput').value = metode;
 
-    // tampilkan popup
     document.getElementById('popupBayar').style.display = 'flex';
 }
 
@@ -393,6 +485,7 @@ function applyDiskon() {
 
     // simpan ke diskonData
     diskonData[currentRow] = {
+        tipe: persenChecked ? 'persen' : 'nilai',
         persen: persen,
         nominal: diskon
     };
@@ -401,9 +494,19 @@ function applyDiskon() {
     const total = currentHarga - diskon;
 
     // update kolom diskon (TAMPIL PERSEN + NOMINAL)
+    let displayText = '';
+
+    if (persenChecked) {
+        // kalau tipe persen → tampil persen + nominal
+        displayText = `${persen}% (Rp ${diskon.toLocaleString()})`;
+    } else {
+        // kalau tipe nilai → tampil nominal aja
+        displayText = `Rp ${diskon.toLocaleString()}`;
+    }
+
     document.getElementById('diskon-' + currentRow).innerHTML = `
         <div style="text-align:center;">
-            <div>${persen}% (Rp ${diskon.toLocaleString()})</div>
+            <div>${displayText}</div>
             <button 
                 type="button" 
                 class="btn-diskon" 
@@ -424,12 +527,14 @@ function applyDiskon() {
     closeDiskonPopup();
 }
 
+let finalSubtotal = 0;
+let finalDiskon = 0;
+let finalTotal = 0;
+
 function updateTotalRightPanel() {
     const table = document.querySelector(".payment-left table");
     let subtotal = 0;
     let totalDiskon = 0;
-    let totalPersen = 0;
-    let itemCount = 0;
 
     // loop semua baris item
     for (let i = 1; i < table.rows.length; i++) {
@@ -441,31 +546,55 @@ function updateTotalRightPanel() {
 
         subtotal += harga;
 
-        // ambil diskon dari diskonData (BUKAN dari text table)
+        // ambil diskon dari diskonData
         const data = diskonData[i-1];
-
         if (data) {
             totalDiskon += data.nominal;
-            totalPersen += data.persen;
-            itemCount++;
         }
     }
 
-    const finalTotal = subtotal - totalDiskon;
+    finalSubtotal = subtotal;
+    finalDiskon   = totalDiskon;
+    finalTotal    = subtotal - totalDiskon;
 
-    // rata-rata persen (kalau ada)
-    let avgPersen = 0;
-    if (itemCount > 0) {
-        avgPersen = Math.round(totalPersen / itemCount);
+    // hitung persen TOTAL (BUKAN RATA-RATA)
+    let persenTotal = 0;
+    if (subtotal > 0 && totalDiskon > 0) {
+        persenTotal = Math.round((totalDiskon / subtotal) * 100);
     }
+
+    // cek apakah ADA diskon persen (baik dari data aktif ATAU dari kondisi logika)
+    let adaPersen = false;
+
+    for (let key in diskonData) {
+        if (diskonData[key].tipe === 'persen') {
+            adaPersen = true;
+            break;
+        }
+    }
+
+    // kalau subtotal & diskon ada, dan diskon bukan nol → boleh tampil persen
+    if (totalDiskon > 0 && subtotal > 0) {
+        adaPersen = true;
+    }
+
 
     // update tampilan kanan
     document.getElementById('subtotalText').innerText =
         "Rp " + subtotal.toLocaleString();
 
     if (totalDiskon > 0) {
-        document.getElementById('diskonText').innerText =
-            `${avgPersen}% (Rp ${totalDiskon.toLocaleString()})`;
+
+        if (adaPersen) {
+            // tampil persen TOTAL + nominal
+            document.getElementById('diskonText').innerText =
+                `${persenTotal}% (Rp ${totalDiskon.toLocaleString()})`;
+        } else {
+            // semua diskon nilai → tampil nominal saja
+            document.getElementById('diskonText').innerText =
+                `Rp ${totalDiskon.toLocaleString()}`;
+        }
+
     } else {
         document.getElementById('diskonText').innerText = "Rp 0";
     }

@@ -290,9 +290,24 @@ $services = $stmt_s->get_result();
                             <?php while($s = $staffs->fetch_assoc()): ?>
                                 <div class="staff-item" id="staff-<?= $s['id'] ?>">
                                     <span><?= htmlspecialchars($s['gelar'].' '.$s['nama_lengkap']); ?></span>
-                                    <button class="btn-delete-staff" onclick="removeStaff(<?= $booking_id ?>, <?= $s['id'] ?>)" title="Hapus">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
+
+                                    <?php if ($booking['status'] == 'confirmed' || $booking['payment_status'] == 'unpaid'): ?>
+                                        <!-- masih boleh hapus dokter -->
+                                        <button class="btn-delete-staff" 
+                                                onclick="removeStaff(<?= $booking_id ?>, <?= $s['id'] ?>)" 
+                                                title="Hapus">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    <?php else: ?>
+                                        <!-- sudah paid / completed → LOCK -->
+                                        <button class="btn-delete-staff" 
+                                                disabled 
+                                                title="Tidak bisa menghapus dokter karena pesanan sudah dibayar / selesai"
+                                                style="opacity:0.4; cursor:not-allowed;">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    <?php endif; ?>
+
                                 </div>
                             <?php endwhile; ?>
                         <?php else: ?>
@@ -300,9 +315,18 @@ $services = $stmt_s->get_result();
                         <?php endif; ?>
                     </div>
 
-                    <button class="btn-add-worker" onclick="openAddDoctorPopup()" <?= ($booking['status']=='pending') ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : '' ?>>
-                        <i class="fas fa-user-md"></i> Tambah Dokter
-                    </button>
+                    <?php
+                        $disable_add_dokter = 
+                            ($booking['status'] == 'pending') ||
+                            ($booking['status'] == 'completed') ||
+                            ($booking['payment_status'] == 'paid');
+                        ?>
+
+                        <button class="btn-add-worker" 
+                                onclick="openAddDoctorPopup()" 
+                                <?= $disable_add_dokter ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : '' ?>>
+                            <i class="fas fa-user-md"></i> Tambah Dokter
+                        </button>
                 </div>
 
                 <!-- Action Buttons -->
@@ -364,11 +388,6 @@ $services = $stmt_s->get_result();
 
                         <button class="btn-print">
                             Cetak Surat
-                        </button>
-
-                        <button class="btn-finish"
-                                onclick="updateStatus(<?= $booking_id ?>, 'completed')">
-                            Selesai
                         </button>
 
                     <?php endif; ?>

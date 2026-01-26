@@ -118,6 +118,7 @@ while ($srv = $services_result->fetch_assoc()) {
         <form action="update_booking.php" method="POST" class="edit-form">
             <input type="hidden" name="booking_id" value="<?php echo $booking_id; ?>">
             <input type="hidden" name="patient_id" value="<?php echo $booking['patient_id']; ?>">
+            <input type="hidden" name="status" value="<?php echo $booking['status']; ?>">
 
             <!-- Informasi Booking -->
             <div class="form-section">
@@ -138,15 +139,6 @@ while ($srv = $services_result->fetch_assoc()) {
                         <select name="service_type" required>
                             <option value="Home Service" <?php echo $booking['service_type'] == 'Home Service' ? 'selected' : ''; ?>>Home Service</option>
                             <option value="In Clinic" <?php echo $booking['service_type'] == 'In Clinic' ? 'selected' : ''; ?>>In Clinic</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Status <span class="required">*</span></label>
-                        <select name="status" required>
-                            <option value="pending" <?php echo $booking['status'] == 'pending' ? 'selected' : ''; ?>>Pending</option>
-                            <option value="confirmed" <?php echo $booking['status'] == 'confirmed' ? 'selected' : ''; ?>>Confirmed</option>
-                            <option value="cancelled" <?php echo $booking['status'] == 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
-                            <option value="completed" <?php echo $booking['status'] == 'completed' ? 'selected' : ''; ?>>Completed</option>
                         </select>
                     </div>
                 </div>

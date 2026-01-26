@@ -89,6 +89,24 @@ body {
     font-weight: 600;
 }
 
+.today-info {
+    text-align: right;
+}
+
+.today-date {
+    font-size: 14px;
+    color: #374151;
+    font-weight: 500;
+}
+
+.today-time {
+    font-size: 18px;
+    font-weight: 600;
+    color: #111827;
+    margin-top: 2px;
+}
+
+
 /* ===================================================
    DASHBOARD CARDS
 =================================================== */
