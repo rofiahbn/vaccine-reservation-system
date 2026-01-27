@@ -138,6 +138,15 @@ try {
         "message" => "Tindakan berhasil disimpan"
     ]);
 
+    // ================= TANDAI BOOKING SUDAH ADA TINDAKAN =================
+    $sql_flag = "UPDATE bookings 
+            SET tindakan_selesai = 1
+            WHERE id = ?";
+
+    $stmt_flag = $conn->prepare($sql_flag);
+    $stmt_flag->bind_param("i", $booking_id);
+    $stmt_flag->execute();
+
 } catch (Exception $e) {
 
     echo json_encode([

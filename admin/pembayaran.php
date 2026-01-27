@@ -21,6 +21,14 @@ $stmt->bind_param("i", $booking_id);
 $stmt->execute();
 $booking = $stmt->get_result()->fetch_assoc();
 
+if ($booking['tindakan_selesai'] == 0) {
+    echo "<script>
+        alert('Simpan tindakan terlebih dahulu sebelum melakukan pembayaran');
+        window.location.href = 'booking_detail.php?id=$booking_id';
+    </script>";
+    exit;
+}
+
 // ambil data pembayaran terakhir jika sudah paid
 $sql_pay = "SELECT * FROM payments 
             WHERE booking_id = ? 
@@ -553,44 +561,40 @@ function updateTotalRightPanel() {
         }
     }
 
-    finalSubtotal = subtotal;
-    finalDiskon   = totalDiskon;
-    finalTotal    = subtotal - totalDiskon;
+    const finalTotal = subtotal - totalDiskon;
 
-    // hitung persen TOTAL (BUKAN RATA-RATA)
-    let persenTotal = 0;
-    if (subtotal > 0 && totalDiskon > 0) {
-        persenTotal = Math.round((totalDiskon / subtotal) * 100);
-    }
-
-    // cek apakah ADA diskon persen (baik dari data aktif ATAU dari kondisi logika)
+    // cek apakah ADA diskon persen
     let adaPersen = false;
+    let totalPersen = 0;
+    let persenCount = 0;
 
     for (let key in diskonData) {
         if (diskonData[key].tipe === 'persen') {
             adaPersen = true;
-            break;
+            totalPersen += diskonData[key].persen;
+            persenCount++;
         }
     }
 
-    // kalau subtotal & diskon ada, dan diskon bukan nol → boleh tampil persen
-    if (totalDiskon > 0 && subtotal > 0) {
-        adaPersen = true;
+    // hitung persen tampilan (rata-rata persen item yg persen)
+    let persenTampil = 0;
+    if (adaPersen && persenCount > 0) {
+        persenTampil = Math.round(totalPersen / persenCount);
     }
 
-
-    // update tampilan kanan
+    // update subtotal
     document.getElementById('subtotalText').innerText =
         "Rp " + subtotal.toLocaleString();
 
+    // update diskon
     if (totalDiskon > 0) {
 
         if (adaPersen) {
-            // tampil persen TOTAL + nominal
+            // tampil persen + nominal
             document.getElementById('diskonText').innerText =
-                `${persenTotal}% (Rp ${totalDiskon.toLocaleString()})`;
+                `${persenTampil}% (Rp ${totalDiskon.toLocaleString()})`;
         } else {
-            // semua diskon nilai → tampil nominal saja
+            // SEMUA NILAI → tampil nominal saja
             document.getElementById('diskonText').innerText =
                 `Rp ${totalDiskon.toLocaleString()}`;
         }
@@ -599,6 +603,7 @@ function updateTotalRightPanel() {
         document.getElementById('diskonText').innerText = "Rp 0";
     }
 
+    // update total akhir
     document.getElementById('totalText').innerText =
         "Rp " + finalTotal.toLocaleString();
 }

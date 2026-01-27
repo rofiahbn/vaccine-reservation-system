@@ -11,7 +11,9 @@ if ($booking_id == 0) {
 }
 
 // Get booking detail
-$sql = "SELECT b.*, p.*, b.payment_status
+$sql = "SELECT b.*, p.*, 
+               b.payment_status,
+               b.tindakan_selesai
         FROM bookings b 
         JOIN patients p ON b.patient_id = p.id 
         WHERE b.id = ?";
@@ -372,10 +374,23 @@ $services = $stmt_s->get_result();
 
                         <hr>
 
-                        <button class="btn-payment"
-                                onclick="window.location.href='pembayaran.php?id=<?= $booking_id ?>'">
-                            Proses Pembayaran
-                        </button>
+                        <?php if ($booking['payment_status'] == 'unpaid' && $booking['tindakan_selesai'] == 1): ?>
+
+                            <button class="btn-payment"
+                                    onclick="window.location.href='pembayaran.php?id=<?= $booking_id ?>'">
+                                Proses Pembayaran
+                            </button>
+
+                        <?php elseif ($booking['payment_status'] == 'unpaid' && $booking['tindakan_selesai'] == 0): ?>
+
+                            <button class="btn-payment"
+                                    disabled
+                                    style="opacity:0.5; cursor:not-allowed;"
+                                    title="Simpan tindakan terlebih dahulu sebelum melakukan pembayaran">
+                                Proses Pembayaran
+                            </button>
+
+                        <?php endif; ?>
 
                     <?php else: ?>
 
