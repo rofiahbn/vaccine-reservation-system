@@ -2,6 +2,8 @@
 session_start();
 include "../config.php";
 
+date_default_timezone_set('Asia/Jakarta');
+
 $service_mode = isset($_GET['service']) ? $_GET['service'] : 'In Clinic';
 // default: in_clinic
 

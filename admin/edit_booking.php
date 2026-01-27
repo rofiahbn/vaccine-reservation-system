@@ -56,16 +56,26 @@ $stmt_a->bind_param('i', $booking['patient_id']);
 $stmt_a->execute();
 $address = $stmt_a->get_result()->fetch_assoc();
 
-// Get services
-$sql_services = "SELECT nama_layanan FROM booking_services WHERE booking_id = ?";
+// Get services (FULL DATA)
+$sql_services = "SELECT * FROM booking_services WHERE booking_id = ?";
 $stmt_s = $conn->prepare($sql_services);
 $stmt_s->bind_param('i', $booking_id);
 $stmt_s->execute();
 $services_result = $stmt_s->get_result();
-$selected_services = [];
+$services = [];
 while ($srv = $services_result->fetch_assoc()) {
-    $selected_services[] = $srv['nama_layanan'];
+    $services[] = $srv;
 }
+
+// Get master services
+$sql_master = "SELECT * FROM services ORDER BY kategori, nama_layanan";
+$result_master = $conn->query($sql_master);
+
+$master_services = [];
+while ($ms = $result_master->fetch_assoc()) {
+    $master_services[] = $ms;
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -141,7 +151,41 @@ while ($srv = $services_result->fetch_assoc()) {
                             <option value="In Clinic" <?php echo $booking['service_type'] == 'In Clinic' ? 'selected' : ''; ?>>In Clinic</option>
                         </select>
                     </div>
+
+                    <!-- DAFTAR LAYANAN -->
+                    <div class="form-group">
+                        <label>Layanan yang Dipilih <span class="required">*</span></label>
+
+                        <?php if (count($services) > 0): ?>
+                            <?php foreach ($services as $idx => $srv): ?>
+
+                                <input type="hidden" name="service_id[]" value="<?= $srv['id'] ?>">
+
+                                <select name="service_master_id[]" 
+                                        onchange="updateServiceName(this, <?= $idx ?>)"
+                                        required>
+                                    <option value="">-- Pilih Layanan --</option>
+                                    <?php foreach ($master_services as $ms): ?>
+                                        <option value="<?= $ms['id'] ?>"
+                                            <?= $ms['nama_layanan'] == $srv['nama_layanan'] ? 'selected' : '' ?>>
+                                            [<?= $ms['kategori'] ?>] <?= $ms['nama_layanan'] ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+
+                                <input type="hidden" 
+                                    name="nama_layanan[]" 
+                                    id="nama_layanan_<?= $idx ?>" 
+                                    value="<?= htmlspecialchars($srv['nama_layanan']) ?>">
+
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <input type="text" value="Belum ada layanan" disabled>
+                        <?php endif; ?>
+
+                    </div>
                 </div>
+
             </div>
 
             <!-- Data Pasien -->
@@ -312,6 +356,25 @@ while ($srv = $services_result->fetch_assoc()) {
             kotaSelect.disabled = false;
         });
     });
+
+    function updateService(select, idx) {
+        const selected = select.options[select.selectedIndex];
+        const nama = selected.textContent.trim();
+
+        // simpan nama layanan
+        document.getElementById("nama_layanan_" + idx).value = nama.replace(/\[.*?\]\s*/,''); 
+
+    }
+
+    function updateServiceName(select, idx) {
+        const nama = select.options[select.selectedIndex].textContent.trim();
+
+        // hilangkan prefix [kategori]
+        const cleanNama = nama.replace(/\[.*?\]\s*/,'');
+
+        document.getElementById("nama_layanan_" + idx).value = cleanNama;
+    }
+
     </script>
 
 </body>
