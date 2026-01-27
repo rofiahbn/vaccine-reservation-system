@@ -151,23 +151,52 @@ if ($payment_status == 'paid' && $payment) {
         <!-- KIRI -->
         <div class="payment-left">
             <h3>Pembayaran</h3>
-            <p><b>Nama Pasien :</b> <?= htmlspecialchars($booking['nama_lengkap']) ?></p>
-            <p><b>No Rekam Medis :</b> <?= $booking['no_rekam_medis'] ?></p>
-            <p><b>No Antrian :</b> <?= $booking['nomor_antrian'] ?></p>
-            <p><b>No HP :</b> <?= htmlspecialchars($phone) ?></p>
+            <div class="data-pasien">
+                <!-- Kolom Kiri -->
+                <span class="label"><b>Nama Pasien</b></span>
+                <span class="colon">:</span>
+                <span class="value"><?= htmlspecialchars($booking['nama_lengkap']) ?></span>
 
-            <?php if ($address): ?>
-                <p><b>Alamat :</b> 
-                    <?= htmlspecialchars($address['alamat']) ?>, 
-                    <?= htmlspecialchars($address['kota']) ?>, 
-                    <?= htmlspecialchars($address['provinsi']) ?>
-                </p>
-            <?php else: ?>
-                <p><b>Alamat :</b> -</p>
-            <?php endif; ?>
-            
-            <p><b>Tanggal Pelayanan :</b> <?= date('d F Y', strtotime($booking['tanggal_booking'])) ?></p>
-            <br><br>
+                <!-- Kolom Kanan -->
+                <span class="label"><b>No. Antrian</b></span>
+                <span class="colon">:</span>
+                <span class="value"><?= $booking['nomor_antrian'] ?></span>
+
+                <!-- Baris 2 -->
+                <span class="label"><b>Alamat</b></span>
+                <span class="colon">:</span>
+                <span class="value">
+                    <?php if ($address): ?>
+                        <?= htmlspecialchars($address['alamat']) ?>, 
+                        <?= htmlspecialchars($address['kota']) ?>, 
+                        <?= htmlspecialchars($address['provinsi']) ?>
+                    <?php else: ?>
+                        -
+                    <?php endif; ?>
+                </span>
+
+                <span class="label"><b>Tanggal</b></span>
+                <span class="colon">:</span>
+                <span class="value"><?= date('d F Y', strtotime($booking['tanggal_booking'])) ?></span>
+
+                <!-- Baris 3 -->
+                <span class="label"><b>No. Telpon</b></span>
+                <span class="colon">:</span>
+                <span class="value"><?= htmlspecialchars($phone) ?></span>
+
+                <span class="label"><b>Tanggal Jatuh Tempo</b></span>
+                <span class="colon">:</span>
+                <span class="value">-</span>
+
+                <!-- Baris 4 (hanya kiri) -->
+                <span class="label"></span>
+                <span class="colon"></span>
+                <span class="value"></span>
+
+                <span class="label"><b>Tanggal Pelayanan</b></span>
+                <span class="colon">:</span>
+                <span class="value"><?= date('d F Y', strtotime($booking['tanggal_booking'])) ?></span>
+            </div>
 
             <table border="1" width="100%" cellpadding="8">
                 <tr>
@@ -361,19 +390,16 @@ if ($payment_status == 'paid' && $payment) {
 
         <div class="diskon-form">
 
+            <!-- ✅ PERBAIKAN: pisahkan radio dan label -->
             <div class="diskon-row">
-                <label>
-                    <input type="radio" id="diskonPersen" name="tipeDiskon">
-                    Persen (%)
-                </label>
+                <input type="radio" id="diskonPersen" name="tipeDiskon">
+                <label for="diskonPersen">Persen (%)</label>
                 <input type="number" id="inputPersen" placeholder="1 - 100">
             </div>
 
             <div class="diskon-row">
-                <label>
-                    <input type="radio" id="diskonNilai" name="tipeDiskon">
-                    Nilai
-                </label>
+                <input type="radio" id="diskonNilai" name="tipeDiskon">
+                <label for="diskonNilai">Nilai</label>
                 <input type="number" id="inputNilai" placeholder="Rp">
             </div>
 

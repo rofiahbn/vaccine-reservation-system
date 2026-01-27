@@ -38,32 +38,24 @@ document.getElementById("btnCetakSurat").addEventListener("click", function () {
     // kirim isi surat (HTML preview)
     formData.append("html_surat", previewContent.innerHTML);
 
-    // ✅ PERBAIKAN: path relatif dari proses_tindakan.php (di folder admin/)
-    fetch("cetak_surat.php", {  // UBAH JADI cetak_surat.php (tanpa ../)
+    fetch("cetak_surat.php", {
         method: "POST",
         body: formData
     })
-    .then(res => res.text())
-    .then(text => {
-        console.log("Response mentah:", text);
-        
-        try {
-            const res = JSON.parse(text);
-            
-            if (res.success) {
-                // ✅ Path dari admin/ ke root
-                window.open("../" + res.file, "_blank");
-            } else {
-                alert("❌ Gagal cetak surat: " + res.message);
-            }
-        } catch (e) {
-            console.error("JSON parse error:", e);
-            console.error("Response:", text);
-            alert("Response bukan JSON valid. Cek console!");
+    .then(res => res.json())
+    .then(res => {
+        if (res.success) {
+            // ✅ PERBAIKAN PATH
+            window.open("../" + res.file, "_blank");
+            // Dari: admin/proses_tindakan.php
+            // Ke: uploads/surat/file.pdf
+            // Path: ../uploads/surat/file.pdf
+        } else {
+            alert("❌ Gagal cetak surat: " + res.message);
         }
     })
     .catch(err => {
-        console.error("Fetch error:", err);
+        console.error(err);
         alert("Terjadi kesalahan saat cetak surat");
     });
 

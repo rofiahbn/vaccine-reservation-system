@@ -117,7 +117,7 @@ $services = $stmt_s->get_result();
             </button>
             <h1>Detail Pesanan #<?php echo $booking['nomor_antrian']; ?></h1>
 
-            <?php if ($booking['status'] == 'completed' || $booking['payment_status'] == 'paid'): ?>
+            <?php if ($booking['status'] == 'completed' || $booking['status'] == 'cancelled' || $booking['payment_status'] == 'paid'): ?>
 
                 <!-- MODE TERKUNCI -->
                 <button class="btn-edit disabled"
@@ -308,7 +308,10 @@ $services = $stmt_s->get_result();
                                 <div class="staff-item" id="staff-<?= $s['id'] ?>">
                                     <span><?= htmlspecialchars($s['gelar'].' '.$s['nama_lengkap']); ?></span>
 
-                                    <?php if ($booking['status'] == 'confirmed' || $booking['payment_status'] == 'unpaid'): ?>
+                                    <?php if (
+                                        $booking['payment_status'] == 'unpaid' &&
+                                        !in_array($booking['status'], ['cancelled', 'completed'])
+                                    ): ?>
                                         <!-- masih boleh hapus dokter -->
                                         <button class="btn-delete-staff" 
                                                 onclick="removeStaff(<?= $booking_id ?>, <?= $s['id'] ?>)" 
@@ -316,10 +319,10 @@ $services = $stmt_s->get_result();
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     <?php else: ?>
-                                        <!-- sudah paid / completed → LOCK -->
+                                        <!-- sudah paid / cancelled / completed → LOCK -->
                                         <button class="btn-delete-staff" 
                                                 disabled 
-                                                title="Tidak bisa menghapus dokter karena pesanan sudah dibayar / selesai"
+                                                title="Tidak bisa menghapus dokter karena pesanan sudah dibayar / dibatalkan / selesai"
                                                 style="opacity:0.4; cursor:not-allowed;">
                                             <i class="fas fa-trash"></i>
                                         </button>
@@ -336,6 +339,7 @@ $services = $stmt_s->get_result();
                         $disable_add_dokter = 
                             ($booking['status'] == 'pending') ||
                             ($booking['status'] == 'completed') ||
+                            ($booking['status'] == 'cancelled') ||
                             ($booking['payment_status'] == 'paid');
                         ?>
 
@@ -425,7 +429,7 @@ $services = $stmt_s->get_result();
                 <?php elseif ($booking['status'] == 'completed'): ?>
 
                     <!-- MODE SELESAI -->
-                    <button class="btn-print">
+                    <button class="btn-print" onclick="openCetakSuratPopup()">
                         Cetak Surat
                     </button>
 
@@ -543,10 +547,34 @@ $services = $stmt_s->get_result();
         </div>
     </div>
 
+    <!-- Popup Cetak Surat -->
+<div id="popupCetakSurat" class="popup-cetak-surat">
+    <div class="popup-cetak-content">
+        <h3>Cetak Surat</h3>
+        <p>Pilih Surat yang akan dibuat</p>
+
+        <!-- List surat yang sudah dibuat (PRIORITAS UTAMA) -->
+        <div class="surat-list" id="suratList">
+            <div class="empty-surat">Memuat...</div>
+        </div>
+
+        <hr style="margin: 25px 0; border: none; border-top: 1px solid #e0e0e0;">
+
+        <!-- Tombol buat surat baru -->
+        <div class="popup-actions">
+            <button type="button" class="btn-batal-popup" onclick="closeCetakSuratPopup()">Batal</button>
+            <button type="button" class="btn-buat-baru" onclick="buatSuratBaru()">
+                <i class="fas fa-plus"></i> Buat Surat Baru
+            </button>
+        </div>
+    </div>
+</div>
+
     <script>
         const bookingId = <?= $booking_id ?>;
     </script>
     <script src="js/detail.js"></script>
     <script src="js/reschedule.js"></script>
+    <script src="js/cetak_surat_detail.js"></script>
 </body>
 </html>
