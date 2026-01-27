@@ -143,7 +143,7 @@ if ($payment_status == 'paid' && $payment) {
             <button onclick="window.location.href='booking_detail.php?id=<?= $booking_id ?>'" class="btn-back">
                 <i class="fas fa-arrow-left"></i> Kembali
             </button>
-            <h1><b>Proses Pembayaran</b></h1>
+            <h1>Proses Pembayaran</h1>
         </div>
 
     <div class="payment-layout">

@@ -80,6 +80,19 @@
     box-shadow: 0 4px 8px rgba(251, 172, 7, 0.3);
 }
 
+.btn-edit.disabled {
+    background: #e0e0e0;
+    color: #888;
+    border: 1px solid #ccc;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.btn-edit.disabled:hover {
+    background: #e0e0e0;
+    transform: none;
+    box-shadow: none;
+}
 
 /* TWO COLUMN LAYOUT */
 .detail-layout {
@@ -470,7 +483,7 @@
 
 .empty-text {
     color: #aaa;
-    font-style: itali
+    font-style: italic;
 }
 
 /* ===================================================

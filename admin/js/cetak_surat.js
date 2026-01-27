@@ -7,48 +7,64 @@ document.getElementById("btnCetakSurat").addEventListener("click", function () {
         return;
     }
 
-    // buka window baru khusus cetak
-    const printWindow = window.open("", "_blank", "width=900,height=650");
+    const jenisSurat = document.querySelector('input[name="surat"]:checked')?.value;
+    if (!jenisSurat) {
+        alert("⚠️ Pilih jenis surat dulu");
+        return;
+    }
 
-    printWindow.document.write(`
-        <html>
-        <head>
-            <title>Cetak Surat</title>
+    const formData = new FormData();
 
-            <!-- load css surat -->
-            <link rel="stylesheet" href="css/surat.css">
+    // kirim data utama
+    formData.append("booking_id", document.querySelector('input[name="booking_id"]').value);
+    formData.append("patient_id", document.querySelector('input[name="patient_id"]').value);
+    formData.append("jenis_surat", jenisSurat);
+    formData.append("dokter_id", document.querySelector('select[name="dokter_id"]').value);
+    formData.append("posisi", document.querySelector('input[name="posisi"]').value);
 
-            <style>
-                body {
-                    margin: 0;
-                    padding: 0;
-                }
+    // khusus surat sakit
+    formData.append("lama_istirahat", document.getElementById("input_lama")?.value || "");
+    formData.append("tgl_awal", document.getElementById("input_tgl_awal")?.value || "");
+    formData.append("tgl_akhir", document.getElementById("input_tgl_akhir")?.value || "");
 
-                /* paksa ukuran A4 */
-                @page {
-                    size: A4;
-                    margin: 0;
-                }
+    // khusus surat sehat
+    formData.append("pf_lain", document.getElementById("input_pf_lain")?.value || "");
 
-                /* hilangkan scale preview */
-                .surat-template {
-                    transform: scale(1) !important;
-                    margin: 0 auto;
-                }
-            </style>
-        </head>
-        <body>
-            ${previewContent.innerHTML}
-        </body>
-        </html>
-    `);
+    // data vaksin dari form tindakan
+    formData.append("jenis_vaksin", document.querySelector('input[name="jenis_vaksin"]').value || "");
+    formData.append("batch_vaksin", document.querySelector('input[name="batch_vaksin"]').value || "");
+    formData.append("expired_vaksin", document.querySelector('input[name="expired_vaksin"]').value || "");
 
-    printWindow.document.close();
+    // kirim isi surat (HTML preview)
+    formData.append("html_surat", previewContent.innerHTML);
 
-    // tunggu render dulu baru print
-    setTimeout(() => {
-        printWindow.focus();
-        printWindow.print();
-        // printWindow.close();  // aktifkan kalau mau auto close
-    }, 500);
+    // ✅ PERBAIKAN: path relatif dari proses_tindakan.php (di folder admin/)
+    fetch("cetak_surat.php", {  // UBAH JADI cetak_surat.php (tanpa ../)
+        method: "POST",
+        body: formData
+    })
+    .then(res => res.text())
+    .then(text => {
+        console.log("Response mentah:", text);
+        
+        try {
+            const res = JSON.parse(text);
+            
+            if (res.success) {
+                // ✅ Path dari admin/ ke root
+                window.open("../" + res.file, "_blank");
+            } else {
+                alert("❌ Gagal cetak surat: " + res.message);
+            }
+        } catch (e) {
+            console.error("JSON parse error:", e);
+            console.error("Response:", text);
+            alert("Response bukan JSON valid. Cek console!");
+        }
+    })
+    .catch(err => {
+        console.error("Fetch error:", err);
+        alert("Terjadi kesalahan saat cetak surat");
+    });
+
 });

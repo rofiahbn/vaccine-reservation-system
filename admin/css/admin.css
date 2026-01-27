@@ -106,6 +106,44 @@ body {
     margin-top: 2px;
 }
 
+.service-toggle {
+    display: flex;
+    background: #f0f0f0;
+    border-radius: 20px;
+    padding: 4px;
+}
+
+.toggle-btn {
+    border: none;
+    background: transparent;
+    padding: 6px 14px;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #555;
+    transition: 0.2s;
+}
+
+.toggle-btn.active {
+    background: #4CAF50;
+    color: white;
+}
+
+.toggle-btn:hover {
+    background: #ddd;
+}
+
+.page-header.home_service .toggle-btn.active {
+    background: #ff9f43;
+    color: white;
+    border-color: #ff9f43;
+}
+
+.page-header.in_clinic .toggle-btn.active {
+    background: #2ecc71;
+    color: white;
+    border-color: #2ecc71;
+}
 
 /* ===================================================
    DASHBOARD CARDS

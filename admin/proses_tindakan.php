@@ -384,7 +384,7 @@ $tanggal_surat_indo = formatTanggalIndo($tanggal_surat);
             <!-- BUTTON ACTION -->
             <div class="preview-actions">
 
-                <button class="btn-print-preview" id="btnCetakSurat">
+                <button type="button" class="btn-print-preview" id="btnCetakSurat">
                     Cetak Surat
                 </button>
 

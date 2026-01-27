@@ -2,6 +2,9 @@
 session_start();
 include "../config.php";
 
+$service_mode = isset($_GET['service']) ? $_GET['service'] : 'In Clinic';
+// default: in_clinic
+
 // Get current date info
 $current_month = isset($_GET['month']) ? intval($_GET['month']) : date('n');
 $current_year  = isset($_GET['year']) ? intval($_GET['year']) : date('Y');
@@ -95,9 +98,12 @@ while (true) {
 $today = date('Y-m-d');
 
 // Total layanan hari ini
-$sql_today = "SELECT COUNT(*) as total FROM bookings WHERE DATE(tanggal_booking) = ?";
+$sql_today = "SELECT COUNT(*) as total 
+              FROM bookings 
+              WHERE DATE(tanggal_booking) = ? 
+              AND service_type = ?";
 $stmt = $conn->prepare($sql_today);
-$stmt->bind_param('s', $today);
+$stmt->bind_param('ss', $today, $service_mode);
 $stmt->execute();
 $total_today = $stmt->get_result()->fetch_assoc()['total'];
 
@@ -105,9 +111,10 @@ $total_today = $stmt->get_result()->fetch_assoc()['total'];
 $sql_done = "SELECT COUNT(*) as total 
              FROM bookings 
              WHERE status = 'completed' 
-             AND DATE(tanggal_booking) = ?";
+             AND DATE(tanggal_booking) = ?
+             AND service_type = ?";
 $stmt = $conn->prepare($sql_done);
-$stmt->bind_param('s', $today);
+$stmt->bind_param('ss', $today, $service_mode);
 $stmt->execute();
 $total_done = $stmt->get_result()->fetch_assoc()['total'];
 
@@ -115,9 +122,10 @@ $total_done = $stmt->get_result()->fetch_assoc()['total'];
 $sql_cancelled = "SELECT COUNT(*) as total 
                   FROM bookings 
                   WHERE status = 'cancelled' 
-                  AND DATE(tanggal_booking) = ?";
+                  AND DATE(tanggal_booking) = ?
+                  AND service_type = ?";
 $stmt = $conn->prepare($sql_cancelled);
-$stmt->bind_param('s', $today);
+$stmt->bind_param('ss', $today, $service_mode);
 $stmt->execute();
 $total_cancelled = $stmt->get_result()->fetch_assoc()['total'];
 
@@ -125,9 +133,10 @@ $total_cancelled = $stmt->get_result()->fetch_assoc()['total'];
 $sql_pending = "SELECT COUNT(*) as total 
                 FROM bookings 
                 WHERE status = 'pending' 
-                AND DATE(tanggal_booking) = ?";
+                AND DATE(tanggal_booking) = ?
+                AND service_type = ?";
 $stmt = $conn->prepare($sql_pending);
-$stmt->bind_param('s', $today);
+$stmt->bind_param('ss', $today, $service_mode);
 $stmt->execute();
 $total_pending = $stmt->get_result()->fetch_assoc()['total'];
 
@@ -144,6 +153,7 @@ $sql_now_serving = "
     LEFT JOIN booking_services bs ON bs.booking_id = b.id
     WHERE DATE(b.tanggal_booking) = ?
       AND b.status IN ('confirmed', 'pending')
+      AND b.service_type = ?
     GROUP BY b.id
     ORDER BY 
         FIELD(b.status, 'confirmed', 'pending'),
@@ -152,33 +162,42 @@ $sql_now_serving = "
 ";
 
 $stmt = $conn->prepare($sql_now_serving);
-$stmt->bind_param('s', $today);
+$stmt->bind_param('ss', $today, $service_mode);
 $stmt->execute();
 $now_serving = $stmt->get_result()->fetch_assoc();
 
 $filter = isset($_GET['filter']) ? $_GET['filter'] : 'latest';
 
-$where = "WHERE DATE(b.tanggal_booking) = '$today'";
+$where = "WHERE DATE(b.tanggal_booking) = ? AND b.service_type = ?";
 $order = "";
 
 if ($filter == 'pending') {
-    $where = "WHERE b.status = 'pending' AND DATE(b.tanggal_booking) = '$today'";
+    $where = "WHERE b.status = 'pending' 
+              AND DATE(b.tanggal_booking) = ? 
+              AND b.service_type = ?";
     $order = "ORDER BY b.tanggal_booking ASC, b.waktu_booking ASC";
 } 
 elseif ($filter == 'confirmed') {
-    $where = "WHERE b.status = 'confirmed' AND DATE(b.tanggal_booking) = '$today'";
+    $where = "WHERE b.status = 'confirmed' 
+              AND DATE(b.tanggal_booking) = ? 
+              AND b.service_type = ?";
     $order = "ORDER BY b.tanggal_booking ASC, b.waktu_booking ASC";
 }
 elseif ($filter == 'completed') {
-    $where = "WHERE b.status = 'completed' AND DATE(b.tanggal_booking) = '$today'";
+    $where = "WHERE b.status = 'completed' 
+              AND DATE(b.tanggal_booking) = ? 
+              AND b.service_type = ?";
     $order = "ORDER BY b.tanggal_booking DESC, b.waktu_booking DESC";
 }
 elseif ($filter == 'cancelled') {
-    $where = "WHERE b.status = 'cancelled' AND DATE(b.tanggal_booking) = '$today'";
+    $where = "WHERE b.status = 'cancelled' 
+              AND DATE(b.tanggal_booking) = ? 
+              AND b.service_type = ?";
     $order = "ORDER BY b.tanggal_booking DESC, b.waktu_booking DESC";
 }
-else { // latest
-    $where = "WHERE DATE(b.tanggal_booking) = '$today'";
+else {
+    $where = "WHERE DATE(b.tanggal_booking) = ? 
+              AND b.service_type = ?";
     $order = "ORDER BY b.tanggal_booking DESC, b.waktu_booking DESC";
 }
 
@@ -196,7 +215,10 @@ $sql_all = "
     LIMIT 50
 ";
 
-$all_bookings = $conn->query($sql_all);
+$stmt_all = $conn->prepare($sql_all);
+$stmt_all->bind_param('ss', $today, $service_mode);
+$stmt_all->execute();
+$all_bookings = $stmt_all->get_result();
 
 // Get bookings for calendar view (current week)
 // pastikan index minggu valid
@@ -211,9 +233,10 @@ $sql_bookings = "SELECT b.*, p.nama_lengkap
                  FROM bookings b 
                  JOIN patients p ON b.patient_id = p.id 
                  WHERE b.tanggal_booking BETWEEN ? AND ?
+                 AND b.service_type = ?
                  ORDER BY b.tanggal_booking, b.waktu_booking";
 $stmt_bookings = $conn->prepare($sql_bookings);
-$stmt_bookings->bind_param('ss', $week_start, $week_end);
+$stmt_bookings->bind_param('sss', $week_start, $week_end, $service_mode);
 $stmt_bookings->execute();
 $bookings_result = $stmt_bookings->get_result();
 
@@ -280,12 +303,39 @@ $total_weeks = ceil($total_days / 7);
 
     <!-- Main Content -->
     <div class="main-content">
-        <header class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
-            <h1>Kalender</h1>
+        <header class="page-header <?= ($service_mode == 'Home Service') ? 'home_service' : 'in_clinic' ?>"
+        style="display:flex; justify-content:space-between; align-items:center;">
+            <h1>
+                Kalender 
+                <?php if ($service_mode == 'Home Service'): ?>
+                    <span style="font-size:14px; color:#ff7a00;">(Home Service)</span>
+                <?php else: ?>
+                    <span style="font-size:14px; color:#2ecc71;">(In Clinic)</span>
+                <?php endif; ?>
+            </h1>
 
-            <div class="today-info">
-                <div class="today-date" id="todayDate"></div>
-                <div class="today-time" id="todayTime"></div>
+            <div style="display:flex; align-items:center; gap:20px;">
+
+                <!-- TOGGLE SERVICE -->
+                <div class="service-toggle">
+                    <button 
+                        onclick="switchService('In Clinic')" 
+                        class="toggle-btn <?= $service_mode=='In Clinic'?'active':'' ?>">
+                        In Clinic
+                    </button>
+
+                    <button 
+                        onclick="switchService('Home Service')" 
+                        class="toggle-btn <?= $service_mode=='Home Service'?'active':'' ?>">
+                        Home Service
+                    </button>
+                </div>
+
+                <!-- TANGGAL & JAM -->
+                <div class="today-info">
+                    <div class="today-date" id="todayDate"></div>
+                    <div class="today-time" id="todayTime"></div>
+                </div>
             </div>
         </header>
 
@@ -336,16 +386,17 @@ $total_weeks = ceil($total_days / 7);
             </div>
         </div>
 
-        <?php if ($now_serving): ?>
         <div class="now-serving-card">
 
             <!-- KIRI: NOMOR ANTRIAN -->
             <div class="now-number">
                 <div class="label">Nomor Antrian</div>
                 <div class="number">
-                    <?= htmlspecialchars($now_serving['nomor_antrian'] ?? '-') ?>
+                    <?= $now_serving ? htmlspecialchars($now_serving['nomor_antrian']) : '-' ?>
                 </div>
-                <div class="now-status">Sedang Dilayani</div>
+                <div class="now-status">
+                    <?= $now_serving ? 'Sedang Dilayani' : 'Belum ada pasien hari ini' ?>
+                </div>
             </div>
 
             <!-- GARIS PEMISAH -->
@@ -356,7 +407,9 @@ $total_weeks = ceil($total_days / 7);
                 <div class="info-row">
                     <i class="fas fa-user"></i>
                     <span class="info-label">Nama :</span>
-                    <span class="info-value"><?= htmlspecialchars($now_serving['nama_lengkap']) ?></span>
+                    <span class="info-value">
+                        <?= $now_serving ? htmlspecialchars($now_serving['nama_lengkap']) : '-' ?>
+                    </span>
                 </div>
             </div>
 
@@ -367,7 +420,7 @@ $total_weeks = ceil($total_days / 7);
                     <span class="info-label">Layanan :</span>
                 </div>
                 <div class="service-list">
-                    <?= $now_serving['layanan'] ?>
+                    <?= $now_serving ? $now_serving['layanan'] : '<span style="color:#999;">-</span>' ?>
                 </div>
             </div>
 
@@ -376,8 +429,6 @@ $total_weeks = ceil($total_days / 7);
                 <i class="fas fa-sync-alt"></i>
             </div>
         </div>
-        <?php endif; ?>
-
 
         <!-- Booking View -->
         <div class="booking-view">
@@ -624,21 +675,29 @@ $total_weeks = ceil($total_days / 7);
     </script>
 
     <script>
-        function changeMonth() {
-            const month = document.getElementById('monthSelect').value;
-            const week  = document.getElementById('weekSelect').value;
+        function switchService(mode) {
+            const month = document.getElementById('monthSelect')?.value || '<?= $current_month ?>';
+            const week  = document.getElementById('weekSelect')?.value || '<?= $current_week ?>';
 
-            // saat ganti bulan → reset ke minggu pertama
             window.location.href = 
-                "dashboard.php?month=" + month + "&week=1";
+                "dashboard.php?service=" + mode + "&month=" + month + "&week=" + week;
+        }
+
+        function switchService(mode) {
+            const month = document.getElementById('monthSelect')?.value || '<?= $current_month ?>';
+            const week  = document.getElementById('weekSelect')?.value || '<?= $current_week ?>';
+
+            window.location.href = 
+                "dashboard.php?service=" + mode + "&month=" + month + "&week=" + week;
         }
 
         function changeWeek() {
             const month = document.getElementById('monthSelect').value;
             const week  = document.getElementById('weekSelect').value;
+            const service = "<?= $service_mode ?>";
 
             window.location.href = 
-                "dashboard.php?month=" + month + "&week=" + week;
+                "dashboard.php?service=" + service + "&month=" + month + "&week=" + week;
         }
 
         function updateDateTime() {

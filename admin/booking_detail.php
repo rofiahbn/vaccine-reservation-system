@@ -117,9 +117,24 @@ $services = $stmt_s->get_result();
             </button>
             <h1>Detail Pesanan #<?php echo $booking['nomor_antrian']; ?></h1>
 
-            <button class="btn-edit" onclick="editBooking(<?php echo $booking_id; ?>)">
-                <i class="fas fa-edit"></i> Edit
-            </button>
+            <?php if ($booking['status'] == 'completed' || $booking['payment_status'] == 'paid'): ?>
+
+                <!-- MODE TERKUNCI -->
+                <button class="btn-edit disabled"
+                        disabled
+                        title="Data sudah selesai, tidak bisa diedit">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+
+            <?php else: ?>
+
+                <!-- MODE NORMAL -->
+                <button class="btn-edit" onclick="editBooking(<?php echo $booking_id; ?>)">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+
+            <?php endif; ?>
+
         </div>
 
         <div class="detail-layout">
