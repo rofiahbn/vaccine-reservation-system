@@ -308,6 +308,11 @@
     justify-content: center;
     align-items: center;
     z-index: 9999;
+    pointer-events: none;
+}
+
+.popup-overlay[style*="display: flex"] {
+    pointer-events: auto; /* aktif kalau tampil */
 }
 
 /* BOX */
@@ -320,6 +325,7 @@
     text-align: center;
     box-shadow: 0 15px 40px rgba(0,0,0,0.25);
     animation: popupFade 0.3s ease;
+    pointer-events: auto;
 }
 
 /* JUDUL */

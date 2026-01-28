@@ -62,7 +62,7 @@ $address = $stmt_ad->get_result()->fetch_assoc();
 
 /* Ambil layanan + harga */
 $sql_services = "
-    SELECT nama_layanan, harga, diskon, diskon_tipe, total 
+    SELECT id, nama_layanan, harga, diskon, diskon_tipe, total 
     FROM booking_services 
     WHERE booking_id = ?
 ";
@@ -253,7 +253,9 @@ if ($payment_status == 'paid' && $payment) {
                     <td id="total-<?= $i ?>">
                         Rp <?= number_format($srv['total'],0,',','.') ?>
                     </td>
+                    <input type="hidden" name="service_id[]" value="<?= $srv['id'] ?>">
                 </tr>
+
                 <?php endforeach; ?>
 
             </table>
@@ -346,7 +348,7 @@ if ($payment_status == 'paid' && $payment) {
             “Konfirmasi Pembayaran” untuk melanjutkan
         </p>
 
-        <form action="proses_bayar.php" method="GET">
+        <form action="proses_bayar.php" method="POST">
             
             <input type="hidden" name="id" value="<?= $booking_id ?>">
             <input type="hidden" name="metode" id="metodeInput">
@@ -519,8 +521,9 @@ function applyDiskon() {
 
     // simpan ke diskonData
     diskonData[currentRow] = {
+        service_id: document.querySelectorAll('input[name="service_id[]"]')[currentRow].value,
         tipe: persenChecked ? 'persen' : 'nilai',
-        persen: persen,
+        persen: persenChecked ? persen : 0,   // 🔥 TAMBAH INI
         nominal: diskon
     };
 
@@ -587,7 +590,9 @@ function updateTotalRightPanel() {
         }
     }
 
-    const finalTotal = subtotal - totalDiskon;
+    finalSubtotal = subtotal;
+    finalDiskon   = totalDiskon;
+    finalTotal    = subtotal - totalDiskon;
 
     // cek apakah ADA diskon persen
     let adaPersen = false;
@@ -639,6 +644,8 @@ function closeDiskonPopup() {
 }
 
 function openPopupSelesai() {
+    document.getElementById('popupBayar').style.display = 'none';
+    document.getElementById('popupDiskon').style.display = 'none';
     document.getElementById('popupSelesai').style.display = 'flex';
 }
 
@@ -651,6 +658,16 @@ function kirimInvoice() {
     // nanti bisa diarahkan ke file kirim_invoice.php
 }
 
+function closeAllPopups() {
+    document.querySelectorAll('.popup-overlay').forEach(popup => {
+        popup.style.display = 'none';
+        popup.style.pointerEvents = 'none';
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    updateTotalRightPanel();
+});
 </script>
 
 <?php if ($payment_status == 'paid' && isset($_GET['success'])): ?>

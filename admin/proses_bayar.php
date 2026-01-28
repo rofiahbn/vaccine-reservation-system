@@ -2,32 +2,52 @@
 session_start();
 include "../config.php";
 
-$booking_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
-$metode     = $_GET['metode'] ?? '';
+$booking_id = intval($_POST['id'] ?? 0);
+$metode     = $_POST['metode'] ?? '';
 
-$subtotal   = isset($_GET['subtotal']) ? intval($_GET['subtotal']) : 0;
-$diskon     = isset($_GET['diskon']) ? intval($_GET['diskon']) : 0;
-$total      = isset($_GET['total']) ? intval($_GET['total']) : 0;
+$subtotal = intval($_POST['subtotal'] ?? 0);
+$diskon   = intval($_POST['diskon'] ?? 0);
+$total    = intval($_POST['total'] ?? 0);
 
-$detail_diskon = $_GET['detail_diskon'] ?? '{}';
+$detail_diskon = $_POST['detail_diskon'] ?? '{}';
 $diskonItems = json_decode($detail_diskon, true);
 
-if ($booking_id == 0 || empty($metode) || $total <= 0) {
-    echo "Data pembayaran tidak valid";
-    exit;
+$diskon_tipe = 'nilai'; // default
+// diskon_tipe di payments hanya untuk display summary invoice
+// detail per item tetap di booking_services
+
+foreach ($diskonItems as $d) {
+    if ($d['tipe'] === 'persen') {
+        $diskon_tipe = 'persen';
+        break;
+    }
+}
+
+if (
+    $booking_id <= 0 ||
+    !in_array($metode, ['tunai','transfer','qris']) ||
+    $subtotal <= 0 ||
+    $total <= 0 ||
+    $total > $subtotal
+) {
+    die("Data pembayaran tidak valid");
 }
 
 /* Simpan ke tabel payments */
 $sql_pay = "INSERT INTO payments 
-            (booking_id, metode, subtotal, diskon, total, status)
-            VALUES (?, ?, ?, ?, ?, 'paid')";
+    (booking_id, metode, subtotal, diskon, diskon_tipe, total, status)
+    VALUES (?, ?, ?, ?, ?, ?, 'paid')";
 
 $stmt_p = $conn->prepare($sql_pay);
-if (!$stmt_p) {
-    die("SQL Error INSERT PAYMENT: " . $conn->error);
-}
-
-$stmt_p->bind_param("isiii", $booking_id, $metode, $subtotal, $diskon, $total);
+$stmt_p->bind_param(
+    "isissi",
+    $booking_id,
+    $metode,
+    $subtotal,
+    $diskon,
+    $diskon_tipe,
+    $total
+);
 $stmt_p->execute();
 
 /* Update status booking */
@@ -49,45 +69,34 @@ $stmt_u->execute();
 
 if (!empty($diskonItems)) {
 
-    foreach ($diskonItems as $index => $data) {
+    foreach ($diskonItems as $data) {
 
-        // ambil layanan sesuai urutan
+        $service_id = intval($data['service_id']);
+        $diskonNominal = intval($data['nominal']);
+        $tipeDiskon = $data['tipe'];
+
         $q = $conn->prepare("
-            SELECT id, harga 
+            SELECT harga 
             FROM booking_services 
-            WHERE booking_id = ? 
-            ORDER BY id ASC 
-            LIMIT 1 OFFSET ?
+            WHERE id = ? AND booking_id = ?
         ");
-        $q->bind_param("ii", $booking_id, $index);
+        $q->bind_param("ii", $service_id, $booking_id);
         $q->execute();
         $srv = $q->get_result()->fetch_assoc();
 
         if ($srv) {
+            $totalItem = $srv['harga'] - $diskonNominal;
 
-            $diskonNominal = $data['nominal'];
-            $tipeDiskon    = $data['tipe'];
-            $totalItem     = $srv['harga'] - $diskonNominal;
-
-            // update ke booking_services
             $up = $conn->prepare("
                 UPDATE booking_services 
-                SET 
-                    diskon = ?, 
-                    diskon_tipe = ?, 
-                    total = ?
+                SET diskon = ?, diskon_tipe = ?, total = ?
                 WHERE id = ?
             ");
-            $up->bind_param(
-                "isii", 
-                $diskonNominal, 
-                $tipeDiskon, 
-                $totalItem, 
-                $srv['id']
-            );
+            $up->bind_param("isii", $diskonNominal, $tipeDiskon, $totalItem, $service_id);
             $up->execute();
         }
     }
+
 }
 
 /* Redirect balik ke halaman pembayaran */
