@@ -50,19 +50,27 @@ $jam_buka = $jadwal['jam_buka'];  // Format: HH:MM:SS
 $jam_tutup = $jadwal['jam_tutup']; // Format: HH:MM:SS
 
 // 3. AMBIL SEMUA BOOKING YANG SUDAH ADA DI TANGGAL INI
-$query_booking = "SELECT waktu_booking FROM bookings WHERE tanggal_booking = '$tanggal'AND status IN ('pending','confirmed')";
+$query_booking = "SELECT waktu_booking, service_type FROM bookings WHERE tanggal_booking = '$tanggal'AND status IN ('pending','confirmed')";
 $result_booking = mysqli_query($conn, $query_booking);
 
 $booked_slots = [];
+$booked_home_service = [];
+
 while ($row = mysqli_fetch_assoc($result_booking)) {
-    // Format waktu ke HH:MM (tanpa detik)
     $waktu = substr($row['waktu_booking'], 0, 5);
-    $booked_slots[] = $waktu;
+
+    if ($row['service_type'] === 'in_clinic') {
+        // Hanya in_clinic yang menutup slot klinik
+        $booked_slots[] = $waktu;
+    } else if ($row['service_type'] === 'home_service') {
+        // Home service dicatat tapi tidak menutup slot
+        $booked_home_service[] = $waktu;
+    }
 }
 
 // 4. GENERATE ALL AVAILABLE SLOTS
 // Jam operasional: 09:00 - 19:30
-// Interval: 5 menit
+// Interval: 15 menit
 // 1 slot = 1 booking
 
 // Parse jam buka dan tutup
