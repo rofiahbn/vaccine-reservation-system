@@ -1,4 +1,14 @@
 <div class="surat-template">
+    <!-- HEADER KOP SURAT -->
+    
+    <div class="orange-bar"></div>
+    <div class="header-surat">
+        <div class="header-left">
+            <img src="vaksinin-logo-bw.png" alt="Logo Klinik">
+        </div>
+    </div>
+
+    <hr class="line-header">
 
     <h2 style="text-align:center;">SURAT KETERANGAN SAKIT</h2>
 

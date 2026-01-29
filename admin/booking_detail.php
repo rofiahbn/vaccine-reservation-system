@@ -534,10 +534,30 @@ $services = $stmt_s->get_result();
                 <select class="doctorSelect">
                     <option value="">-- Pilih Dokter --</option>
                     <?php
-                    $staff_result = $conn->query("SELECT id, nama_lengkap, gelar FROM staff ORDER BY nama_lengkap ASC");
+                    $staff_result = $conn->query("
+                        SELECT id, nama_lengkap, gelar, role 
+                        FROM staff 
+                        ORDER BY nama_lengkap ASC
+                    ");
                     while ($staff = $staff_result->fetch_assoc()) {
-                        echo '<option value="'.$staff['id'].'">'.htmlspecialchars($staff['gelar'].' '.$staff['nama_lengkap']).'</option>';
+
+                        $nama = $staff['nama_lengkap'];
+                        $gelar = $staff['gelar'];
+                        $role = $staff['role'];
+
+                        // Gabung gelar + nama
+                        $label = trim($gelar . ' ' . $nama);
+
+                        // Tambah role kalau ada
+                        if (!empty($role)) {
+                            $label .= ' (' . $role . ')';
+                        }
+
+                        echo '<option value="'.$staff['id'].'">'
+                            . htmlspecialchars($label)
+                            . '</option>';
                     }
+
                     ?>
                 </select>
             </div>

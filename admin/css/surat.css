@@ -19,6 +19,26 @@
     z-index: 1; 
 }
 
+/* HEADER SURAT */
+.orange-bar {
+    width: 100%;
+    height: 18px;
+    background: #f5a623 !important;   /* warna oranye Vaksinin */
+    margin-bottom: 10px;
+}
+
+.header-surat {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin-bottom: 10px;
+}
+
+.header-left img {
+    width: 80px;
+    margin-right: 15px;
+}
+
 /* JUDUL */
 .surat-template h2 {
     text-align: center;

@@ -71,6 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
         setText("pv_identitas", PV_IDENTITAS);
         setText("pv_tgl_vaksin", formatTanggal(PV_TGL_VAKSIN));
         setText("pv_dokter", namaDokter);
+        setText("pv_sip", PV_SIP);
         
         // ================= ISTIRAHAT (SURAT SAKIT) =================
         const lama = document.getElementById("input_lama")?.value;

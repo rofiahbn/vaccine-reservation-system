@@ -660,3 +660,122 @@
 .btn-invoice:hover {
     background: #6cc94f;
 }
+
+/* Popup Kirim Invoice */
+.popup-kirim-invoice {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.popup-kirim-invoice.active {
+    display: flex;
+}
+
+.popup-kirim-content {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    max-width: 450px;
+    width: 90%;
+    box-shadow: 0 5px 30px rgba(0,0,0,0.3);
+}
+
+.popup-kirim-content h2 {
+    margin-bottom: 10px;
+    text-align: center;
+    font-size: 24px;
+}
+
+.popup-kirim-content > p {
+    text-align: center;
+    color: #666;
+    margin-bottom: 25px;
+}
+
+.checkbox-group {
+    margin: 20px 0;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.checkbox-item:hover {
+    border-color: #4A90E2;
+    background: #f0f7ff;
+}
+
+.checkbox-item input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+    cursor: pointer;
+}
+
+.checkbox-item label {
+    flex: 1;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.checkbox-item .contact-info {
+    font-size: 13px;
+    color: #666;
+    margin-top: 4px;
+}
+
+.popup-kirim-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.popup-kirim-actions button {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-kirim-invoice {
+    background: #4A90E2;
+    color: white;
+}
+
+.btn-kirim-invoice:hover {
+    background: #357ABD;
+}
+
+.btn-kirim-invoice:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.btn-batal-kirim {
+    background: #e0e0e0;
+    color: #333;
+}
+
+.btn-batal-kirim:hover {
+    background: #d0d0d0;
+}

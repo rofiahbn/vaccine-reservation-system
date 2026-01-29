@@ -433,6 +433,55 @@ if ($payment_status == 'paid' && $payment) {
     </div>
 </div>
 
+<!-- Popup Kirim Invoice -->
+<div id="popupKirimInvoice" class="popup-kirim-invoice">
+    <div class="popup-kirim-content">
+        <h2>Kirim Invoice</h2>
+        <p>Pilih metode pengiriman invoice ke pasien</p>
+
+        <div class="checkbox-group">
+            <div class="checkbox-item" onclick="toggleCheckbox('invoice_email')">
+                <input type="checkbox" id="invoice_email" name="invoice_email">
+                <div>
+                    <label for="invoice_email">Email</label>
+                    <div class="contact-info" id="emailInfo">
+                        <?php 
+                        $sql_email = "SELECT email FROM patient_emails 
+                                      WHERE patient_id = ? 
+                                      ORDER BY is_primary DESC 
+                                      LIMIT 1";
+                        $stmt_em = $conn->prepare($sql_email);
+                        $stmt_em->bind_param("i", $booking['patient_id']);
+                        $stmt_em->execute();
+                        $email_data = $stmt_em->get_result()->fetch_assoc();
+                        echo $email_data ? htmlspecialchars($email_data['email']) : 'Email tidak terdaftar';
+                        ?>
+                    </div>
+                </div>
+            </div>
+
+            <div class="checkbox-item" onclick="toggleCheckbox('invoice_wa')">
+                <input type="checkbox" id="invoice_wa" name="invoice_wa">
+                <div>
+                    <label for="invoice_wa">WhatsApp</label>
+                    <div class="contact-info" id="waInfo">
+                        <?php echo htmlspecialchars($phone); ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="popup-kirim-actions">
+            <button type="button" class="btn-batal-kirim" onclick="closeKirimInvoicePopup()">
+                Batal
+            </button>
+            <button type="button" class="btn-kirim-invoice" id="btnKirimInvoice" onclick="kirimInvoiceSubmit()" disabled>
+                Kirim Invoice
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
 let currentRow = null;
 let currentHarga = 0;
@@ -678,9 +727,71 @@ function cetakPembayaran() {
     window.open('cetak_pembayaran.php?id=<?= $booking_id ?>', '_blank');
 }
 
+// Buka popup kirim invoice
 function kirimInvoice() {
-    alert("Invoice berhasil dikirim ulang ke email / WhatsApp pasien");
-    // nanti bisa diarahkan ke file kirim_invoice.php
+    document.getElementById('popupKirimInvoice').classList.add('active');
+}
+
+// Tutup popup kirim invoice
+function closeKirimInvoicePopup() {
+    document.getElementById('popupKirimInvoice').classList.remove('active');
+    
+    // Reset checkbox
+    document.getElementById('invoice_email').checked = false;
+    document.getElementById('invoice_wa').checked = false;
+    
+    updateKirimInvoiceButton();
+}
+
+// Toggle checkbox saat klik div
+function toggleCheckbox(id) {
+    const checkbox = document.getElementById(id);
+    checkbox.checked = !checkbox.checked;
+    updateKirimInvoiceButton();
+}
+
+// Update status tombol kirim
+function updateKirimInvoiceButton() {
+    const emailChecked = document.getElementById('invoice_email').checked;
+    const waChecked = document.getElementById('invoice_wa').checked;
+    const btn = document.getElementById('btnKirimInvoice');
+    
+    if (emailChecked || waChecked) {
+        btn.disabled = false;
+    } else {
+        btn.disabled = true;
+    }
+}
+
+// Event listener untuk checkbox
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('invoice_email').addEventListener('change', updateKirimInvoiceButton);
+    document.getElementById('invoice_wa').addEventListener('change', updateKirimInvoiceButton);
+});
+
+// Submit kirim invoice
+function kirimInvoiceSubmit() {
+    const emailChecked = document.getElementById('invoice_email').checked;
+    const waChecked = document.getElementById('invoice_wa').checked;
+    
+    if (!emailChecked && !waChecked) {
+        alert('Pilih minimal satu metode pengiriman');
+        return;
+    }
+    
+    // Build URL dengan parameter
+    let url = 'kirim_invoice.php?id=<?= $booking_id ?>';
+    
+    if (emailChecked) {
+        url += '&email=1';
+    }
+    
+    if (waChecked) {
+        url += '&wa=1';
+    }
+    
+    // Redirect ke kirim_invoice.php
+    window.location.href = url;
 }
 
 function closeAllPopups() {

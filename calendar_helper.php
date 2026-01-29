@@ -60,7 +60,12 @@ function checkDateStatus($conn, $tanggal) {
     $total_slots = floor(($end_time - $start_time) / $interval) + 1;
     
     // Hitung berapa slot yang sudah di-booking
-    $query_booking = "SELECT COUNT(*) as total FROM bookings WHERE tanggal_booking = ?";
+    $query_booking = "
+        SELECT COUNT(*) as total 
+        FROM bookings 
+        WHERE tanggal_booking = ?
+        AND status IN ('pending', 'confirmed')
+    ";
     $stmt = mysqli_prepare($conn, $query_booking);
     mysqli_stmt_bind_param($stmt, 's', $tanggal);
     mysqli_stmt_execute($stmt);

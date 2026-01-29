@@ -74,7 +74,7 @@ $services = $stmt_s->get_result();
 
 /* Ambil dokter */
 $sql_staff = "
-SELECT s.id, s.nama_lengkap, s.gelar
+SELECT s.id, s.nama_lengkap, s.gelar, s.sip
 FROM booking_staff bs
 JOIN staff s ON bs.staff_id = s.id
 WHERE bs.booking_id = ?
@@ -83,6 +83,13 @@ $stmt_d = $conn->prepare($sql_staff);
 $stmt_d->bind_param("i", $booking_id);
 $stmt_d->execute();
 $dokters = $stmt_d->get_result();
+
+$dokter_default = null;
+if ($dokters->num_rows > 0) {
+    $dokters->data_seek(0);
+    $dokter_default = $dokters->fetch_assoc();
+    $dokters->data_seek(0); // balikin pointer biar select tetap jalan
+}
 
 $tanggal_surat = date("Y-m-d");
 $tanggal_surat_indo = formatTanggalIndo($tanggal_surat);
@@ -418,7 +425,8 @@ $tanggal_surat_indo = formatTanggalIndo($tanggal_surat);
         const PV_JK = "<?= $booking['jenis_kelamin'] ?>";
         const PV_IDENTITAS = "<?= $booking['nik'] ?: $booking['paspor'] ?>";
         const PV_TGL_VAKSIN = "<?= $booking['tanggal_booking'] ?>";
-        const PV_DOKTER = "";
+        const PV_DOKTER = "<?= addslashes(($dokter_default['gelar'] ?? '') . ' ' . ($dokter_default['nama_lengkap'] ?? '')) ?>";
+        const PV_SIP = "<?= $dokter_default['sip'] ?? '-' ?>";
         const PV_TANGGAL_SURAT = "<?= $tanggal_surat_indo ?>";
     </script>
 

@@ -50,7 +50,7 @@ $jam_buka = $jadwal['jam_buka'];  // Format: HH:MM:SS
 $jam_tutup = $jadwal['jam_tutup']; // Format: HH:MM:SS
 
 // 3. AMBIL SEMUA BOOKING YANG SUDAH ADA DI TANGGAL INI
-$query_booking = "SELECT waktu_booking FROM bookings WHERE tanggal_booking = '$tanggal'";
+$query_booking = "SELECT waktu_booking FROM bookings WHERE tanggal_booking = '$tanggal'AND status IN ('pending','confirmed')";
 $result_booking = mysqli_query($conn, $query_booking);
 
 $booked_slots = [];
