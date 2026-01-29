@@ -93,7 +93,7 @@ if ($email && $send_email) {
         $mail->Host       = 'smtp.gmail.com';
         $mail->SMTPAuth   = true;
         $mail->Username   = 'rofiah9a@gmail.com';      // ⚠️ GANTI INI
-        $mail->Password   = 'hkht bgbo rftx dpws';    // ⚠️ GANTI INI (16 karakter dari Google)
+        $mail->Password   = 'xxxx xxxx xxxx xxxx';    // ⚠️ GANTI INI (16 karakter dari Google)
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = 587;
         
