@@ -583,16 +583,41 @@ function updateTotalRightPanel() {
 
         subtotal += harga;
 
-        // ambil diskon dari diskonData
-        const data = diskonData[i-1];
-        if (data) {
-            totalDiskon += data.nominal;
-        }
+        const cellDiskonText = row.cells[4].innerText;
+
+        //Ekstrak persentase (angka sebelum %)
+        const diskonPersenText = cellDiskonText.match(/(\d+)%/)?.[1] || "0";
+
+        //Ekstrak nilai rupiah (angka di dalam parentheses setelah Rp)
+        const diskonText = cellDiskonText.match(/Rp\s*([\d.,]+)/)?.[1] || "0";
+
+        //Hapus titik jika ada (format Indonesia: 20.400)
+        const diskonTextClean = diskonText.replace(/\./g, '');
+
+        //Konversi ke number
+        const diskonPersenNumber = parseInt(diskonPersenText) || 0;
+        const diskonNumber = parseInt(diskonTextClean) || 0;
+        
+        totalDiskon += diskonNumber;
+    }
+
+    const persentaseDiskonAktual = subtotal > 0 ?
+    (totalDiskon / subtotal) * 100 : 0;
+
+    let formattedPersen;
+    const roundedPersen = Math.round(persentaseDiskonAktual * 100) / 100;
+
+    if (roundedPersen % 1 === 0) {
+        formattedPersen = Math.round(roundedPersen) + '%';
+    } else {
+        formattedPersen = '-' + roundedPersen.toFixed(2) + '%';
     }
 
     finalSubtotal = subtotal;
     finalDiskon   = totalDiskon;
     finalTotal    = subtotal - totalDiskon;
+
+    console.log(persentaseDiskonAktual);
 
     // cek apakah ADA diskon persen
     let adaPersen = false;
@@ -620,10 +645,10 @@ function updateTotalRightPanel() {
     // update diskon
     if (totalDiskon > 0) {
 
-        if (adaPersen) {
+        if (persentaseDiskonAktual > 0 && adaPersen) {
             // tampil persen + nominal
             document.getElementById('diskonText').innerText =
-                `${persenTampil}% (Rp ${totalDiskon.toLocaleString()})`;
+                `${formattedPersen} (Rp ${totalDiskon.toLocaleString()})`;
         } else {
             // SEMUA NILAI → tampil nominal saja
             document.getElementById('diskonText').innerText =

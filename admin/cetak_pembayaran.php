@@ -106,6 +106,8 @@ foreach ($data_services as $srv) {
     $grand_total += $srv['total'];
 }
 
+$diskon_final_nominal = $subtotal - $grand_total;
+
 // Convert logo ke base64
 $logo_path = __DIR__ . '/vaksinin-logo-bw.png';
 $logo_base64 = '';
@@ -405,6 +407,12 @@ foreach ($data_services as $srv) {
             </tr>';
 }
 
+if ($diskon_final_nominal > 0) {
+    $diskon_final_text = 'Rp. ' . number_format($diskon_final_nominal, 0, ',', '.');
+} else {
+    $diskon_final_text = '-';
+}
+
 $html .= '
             <tr class="empty-row">
                 <td colspan="6">&nbsp;</td>
@@ -427,22 +435,7 @@ $html .= '
                 <tr>
                     <td><strong>Diskon Final</strong></td>
                     <td>:</td>
-                    <td>
-                    ';
-
-                    if ($payment['diskon'] > 0) {
-                        if ($payment['diskon_tipe'] === 'persen') {
-                            $html .= $payment['diskon'] . '%';
-                        } else {
-                            $html .= 'Rp. ' . number_format($payment['diskon'], 0, ',', '.');
-                        }
-                    } else {
-                        $html .= '-';
-                    }
-
-                    $html .= '
-                    </td>
-
+                    <td>' . $diskon_final_text . '</td>
                 </tr>
                 <tr class="total-row">
                     <td><strong>Total</strong></td>
