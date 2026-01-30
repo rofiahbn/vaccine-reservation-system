@@ -288,9 +288,9 @@ $total_weeks = ceil($total_days / 7);
                 <i class="fas fa-th-large"></i>
                 <span>Dashboard</span>
             </a>
-            <a href="#" class="nav-item">
-                <i class="fas fa-calendar-alt"></i>
-                <span>Kalender</span>
+            <a href="products.php" class="nav-item">
+                <i class="fas fa-capsules"></i>
+                <span>Produk</span>
             </a>
             <a href="#" class="nav-item">
                 <i class="fas fa-users"></i>
