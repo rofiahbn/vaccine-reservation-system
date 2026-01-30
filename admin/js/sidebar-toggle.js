@@ -46,6 +46,32 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+function toggleSubmenu(el) {
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar.classList.contains('collapsed')) return;
+
+    const submenu = el.nextElementSibling;
+
+    el.classList.toggle('open');
+    submenu.classList.toggle('open');
+}
+
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.classList.toggle('collapsed');
+
+    // kalau sidebar collapse → tutup semua submenu
+    if (sidebar.classList.contains('collapsed')) {
+        document.querySelectorAll('.submenu').forEach(menu => {
+            menu.classList.remove('open');
+        });
+
+        document.querySelectorAll('.nav-item.has-submenu').forEach(item => {
+            item.classList.remove('open');
+        });
+    }
+}
+
 // Optional: Auto-collapse on small screens
 function checkScreenSize() {
     const sidebar = document.querySelector('.sidebar');

@@ -4,6 +4,8 @@ include "../config.php";
 
 date_default_timezone_set('Asia/Jakarta');
 
+$current_page = basename($_SERVER['PHP_SELF']);
+
 // Get filter parameters
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $kategori_filter = isset($_GET['kategori']) ? $_GET['kategori'] : '';
@@ -69,10 +71,28 @@ $categories_result = $conn->query($sql_categories);
                 <i class="fas fa-th-large"></i>
                 <span>Dashboard</span>
             </a>
-            <a href="products.php" class="nav-item active">
-                <i class="fas fa-capsules"></i>
-                <span>Produk</span>
-            </a>
+            <a href="javascript:void(0)" 
+                class="nav-item has-submenu 
+                <?= in_array($current_page, ['products.php','products_pelayanan.php']) ? 'active open' : '' ?>" 
+                onclick="toggleSubmenu(this)">
+                    <i class="fas fa-capsules"></i>
+                    <span>Produk</span>
+                    <i class="fas fa-chevron-down arrow"></i>
+                </a>
+            <ul class="submenu <?= in_array($current_page, ['products.php','products_pelayanan.php']) ? 'open' : '' ?>">
+                <li>
+                    <a href="products.php" 
+                    class="<?= $current_page == 'products.php' ? 'active' : '' ?>">
+                    Vaksin
+                    </a>
+                </li>
+                <li>
+                    <a href="products_pelayanan.php" 
+                    class="<?= $current_page == 'products_pelayanan.php' ? 'active' : '' ?>">
+                    Pelayanan
+                    </a>
+                </li>
+            </ul>
             <a href="#" class="nav-item">
                 <i class="fas fa-users"></i>
                 <span>Pasien</span>
