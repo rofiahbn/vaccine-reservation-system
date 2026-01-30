@@ -15,61 +15,6 @@ body {
 }
 
 /* ===================================================
-   SIDEBAR
-=================================================== */
-.sidebar {
-    width: 220px;
-    background: #3b3a3d;
-    color: white;
-    padding: 20px 0;
-    position: fixed;
-    height: 100vh;
-    left: 0;
-    top: 0;
-}
-
-.sidebar .logo {
-    padding: 0 20px 30px;
-    text-align: center;
-}
-
-.sidebar .logo img {
-    max-width: 120px;
-    border-radius: 8px;
-}
-
-.nav-menu {
-    padding: 0;
-}
-
-.nav-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 20px;
-    color: #cbd5e0;
-    text-decoration: none;
-    transition: all 0.3s;
-    font-size: 15px;
-}
-
-.nav-item:hover {
-    background: #374151;
-    color: white;
-}
-
-.nav-item.active {
-    background: #fbac07;
-    color: white;
-    border-left: 4px solid #f59e0b;
-}
-
-.nav-item i {
-    font-size: 18px;
-    width: 20px;
-}
-
-/* ===================================================
    MAIN CONTENT
 =================================================== */
 .main-content {

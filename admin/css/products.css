@@ -212,6 +212,7 @@
     font-weight: 500;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
     transition: all 0.3s ease;
     flex: 1;
@@ -234,6 +235,7 @@
     font-weight: 500;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
     transition: all 0.3s ease;
     flex: 1;

@@ -18,10 +18,12 @@ $nama_lengkap    = $_POST['nama_lengkap'];
 $nama_panggilan  = $_POST['nama_panggilan'];
 $tanggal_lahir   = $_POST['tanggal_lahir'];
 $jenis_kelamin   = $_POST['jenis_kelamin'];
-$nik             = $_POST['nik'];
-$paspor          = $_POST['paspor'];
-$kebangsaan      = $_POST['kebangsaan'];
-$pekerjaan       = $_POST['pekerjaan'];
+
+// PERBAIKAN: Ubah string kosong jadi NULL untuk field UNIQUE
+$nik             = !empty($_POST['nik']) ? $_POST['nik'] : null;
+$paspor          = !empty($_POST['paspor']) ? $_POST['paspor'] : null;
+$kebangsaan      = !empty($_POST['kebangsaan']) ? $_POST['kebangsaan'] : null;
+$pekerjaan       = !empty($_POST['pekerjaan']) ? $_POST['pekerjaan'] : null;
 
 $email           = $_POST['email'];
 $phone           = $_POST['phone'];
@@ -34,18 +36,24 @@ $waktu_booking   = $_POST['waktu_booking'];
 $service_type    = $_POST['service_type'];
 $status          = $_POST['status'];
 
-$riwayat_alergi   = $_POST['riwayat_alergi'] ?? '';
-$riwayat_penyakit = $_POST['riwayat_penyakit'] ?? '';
-$riwayat_obat     = $_POST['riwayat_obat'] ?? '';
+$riwayat_alergi   = !empty($_POST['riwayat_alergi']) ? $_POST['riwayat_alergi'] : null;
+$riwayat_penyakit = !empty($_POST['riwayat_penyakit']) ? $_POST['riwayat_penyakit'] : null;
+$riwayat_obat     = !empty($_POST['riwayat_obat']) ? $_POST['riwayat_obat'] : null;
 
 // ============================
 // UPDATE TABLE patients
 // ============================
+// hitung usia
+$usia = date('Y') - date('Y', strtotime($tanggal_lahir));
+$kategori_usia = ($usia < 18) ? 'Anak' : 'Dewasa';
+
 $stmt = $conn->prepare("
     UPDATE patients SET
         nama_lengkap = ?, 
         nama_panggilan = ?, 
         tanggal_lahir = ?, 
+        usia = ?,
+        kategori_usia = ?,
         jenis_kelamin = ?, 
         nik = ?, 
         paspor = ?, 
@@ -53,14 +61,22 @@ $stmt = $conn->prepare("
         pekerjaan = ?,
         riwayat_alergi = ?, 
         riwayat_penyakit = ?, 
-        riwayat_obat = ?
+        riwayat_obat = ?,
+        pelayanan = ?
     WHERE id = ?
 ");
+
+if (!$stmt) {
+    die("Error prepare: " . $conn->error);
+}
+
 $stmt->bind_param(
-    "sssssssssssi",
+    "sssissssssssssi",
     $nama_lengkap,
     $nama_panggilan,
     $tanggal_lahir,
+    $usia,
+    $kategori_usia,
     $jenis_kelamin,
     $nik,
     $paspor,
@@ -69,9 +85,14 @@ $stmt->bind_param(
     $riwayat_alergi,
     $riwayat_penyakit,
     $riwayat_obat,
+    $service_type,   // pelayanan = home service / in clinic
     $patient_id
 );
-$stmt->execute();
+
+if (!$stmt->execute()) {
+    die("Error execute patients: " . $stmt->error . "<br>Patient ID: " . $patient_id);
+}
+
 $stmt->close();
 
 // ============================
@@ -147,18 +168,47 @@ if ($res_check->num_rows > 0) {
 $stmt_check->close();
 
 // ============================
-// UPDATE patient_addresses
+// UPDATE / INSERT patient_addresses
 // ============================
-$stmt = $conn->prepare("
-    UPDATE patient_addresses SET 
-        alamat = ?, 
-        provinsi = ?, 
-        kota = ? 
-    WHERE patient_id = ? AND is_primary = 1
+
+$stmt_check = $conn->prepare("
+    SELECT id FROM patient_addresses 
+    WHERE patient_id = ? AND is_primary = 1 
+    LIMIT 1
 ");
-$stmt->bind_param("sssi", $alamat, $provinsi, $kota, $patient_id);
-$stmt->execute();
-$stmt->close();
+$stmt_check->bind_param("i", $patient_id);
+$stmt_check->execute();
+$res_check = $stmt_check->get_result();
+
+if ($res_check->num_rows > 0) {
+
+    // SUDAH ADA → UPDATE
+    $stmt = $conn->prepare("
+        UPDATE patient_addresses SET 
+            alamat = ?, 
+            provinsi = ?, 
+            kota = ? 
+        WHERE patient_id = ? AND is_primary = 1
+    ");
+    $stmt->bind_param("sssi", $alamat, $provinsi, $kota, $patient_id);
+    $stmt->execute();
+    $stmt->close();
+
+} else {
+
+    // BELUM ADA → INSERT
+    $stmt = $conn->prepare("
+        INSERT INTO patient_addresses 
+        (patient_id, alamat, provinsi, kota, is_primary)
+        VALUES (?, ?, ?, ?, 1)
+    ");
+    $stmt->bind_param("isss", $patient_id, $alamat, $provinsi, $kota);
+    $stmt->execute();
+    $stmt->close();
+
+}
+
+$stmt_check->close();
 
 // ============================
 // UPDATE bookings

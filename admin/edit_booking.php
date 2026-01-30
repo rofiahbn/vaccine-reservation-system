@@ -86,22 +86,24 @@ while ($ms = $result_master->fetch_assoc()) {
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="css/detail.css">
     <link rel="stylesheet" href="css/edit.css">
+    <link rel="stylesheet" href="css/sidebar-toggle.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="logo">
-            <img src="vaksinin-logo.png" alt="Vaksinin">
+            <img src="vaksinin-logo.png" alt="Vaksinin" class="logo-full">
+            <img src="v-logo.png" alt="V" class="logo-icon">
         </div>
         <nav class="nav-menu">
             <a href="dashboard.php" class="nav-item">
                 <i class="fas fa-th-large"></i>
                 <span>Dashboard</span>
             </a>
-            <a href="#" class="nav-item">
-                <i class="fas fa-calendar-alt"></i>
-                <span>Kalender</span>
+            <a href="products.php" class="nav-item">
+                <i class="fas fa-capsules"></i>
+                <span>Produk</span>
             </a>
             <a href="#" class="nav-item">
                 <i class="fas fa-users"></i>
@@ -112,6 +114,12 @@ while ($ms = $result_master->fetch_assoc()) {
                 <span>Pengaturan</span>
             </a>
         </nav>
+        <div class="sidebar-footer">
+            <a href="#" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
     </div>
 
     <!-- Main Content -->
@@ -376,6 +384,6 @@ while ($ms = $result_master->fetch_assoc()) {
     }
 
     </script>
-
+    <script src="js/sidebar-toggle.js"></script>
 </body>
 </html>

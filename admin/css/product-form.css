@@ -349,3 +349,30 @@
 .alert i {
     font-size: 20px;
 }
+
+/* Sidebar Footer */
+.sidebar-footer {
+    margin-top: auto;
+    padding: 20px;
+}
+
+.logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.3s;
+}
+
+.logout-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.required {
+    color: #e53935;
+    margin-left: 3px;
+    font-weight: bold;
+}

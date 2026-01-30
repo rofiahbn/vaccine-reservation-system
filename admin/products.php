@@ -54,13 +54,15 @@ $categories_result = $conn->query($sql_categories);
     <title>Produk - Vaksinin</title>
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="css/products.css">
+    <link rel="stylesheet" href="css/sidebar-toggle.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="logo">
-            <img src="vaksinin-logo.png" alt="Vaksinin">
+            <img src="vaksinin-logo.png" alt="Vaksinin" class="logo-full">
+            <img src="v-logo.png" alt="V" class="logo-icon">
         </div>
         <nav class="nav-menu">
             <a href="dashboard.php" class="nav-item">
@@ -91,7 +93,7 @@ $categories_result = $conn->query($sql_categories);
     <!-- Main Content -->
     <div class="main-content">
         <header class="page-header">
-            <h1>Produk : Vaksin</h1>
+            <h1>Produk</h1>
             <div class="header-actions">
                 <button class="btn-add-product" onclick="location.href='add_product.php'">
                     <i class="fas fa-plus"></i> Tambah Produk
@@ -126,19 +128,38 @@ $categories_result = $conn->query($sql_categories);
                             $jenis = strtolower($product['jenis'] ?? '');
                             $kategori = strtolower($product['kategori'] ?? '');
                             $nama = strtolower($product['nama_layanan'] ?? '');
-                            
-                            // Tentukan icon berdasarkan jenis atau kategori
-                            if (strpos($jenis, 'vaksin') !== false || 
+
+                            // Tentukan icon berdasarkan jenis / nama / kategori
+                            if (
+                                strpos($jenis, 'vaksin') !== false ||
                                 strpos($nama, 'vaksin') !== false ||
-                                strpos($kategori, 'anak') !== false || 
-                                strpos($kategori, 'dewasa') !== false): ?>
+                                strpos($kategori, 'vaksinasi') !== false
+                            ): ?>
                                 <i class="fas fa-syringe"></i>
-                            <?php elseif (strpos($jenis, 'vitamin') !== false || 
-                                          strpos($nama, 'vitamin') !== false ||
-                                          strpos($kategori, 'vitamin') !== false): ?>
+
+                            <?php elseif (
+                                strpos($kategori, 'paket kesehatan') !== false
+                            ): ?>
+                                <i class="fas fa-briefcase-medical"></i>
+
+                            <?php elseif (
+                                strpos($jenis, 'vitamin') !== false ||
+                                strpos($nama, 'vitamin') !== false ||
+                                strpos($kategori, 'vitamin') !== false
+                            ): ?>
                                 <i class="fas fa-pills"></i>
-                            <?php elseif (strpos($jenis, 'obat') !== false): ?>
+
+                            <?php elseif (
+                                strpos($jenis, 'obat') !== false ||
+                                strpos($kategori, 'obat') !== false
+                            ): ?>
                                 <i class="fas fa-prescription-bottle"></i>
+
+                            <?php elseif (
+                                strpos($kategori, 'swab') !== false
+                            ): ?>
+                                <i class="fas fa-vial"></i>
+
                             <?php else: ?>
                                 <i class="fas fa-capsules"></i>
                             <?php endif; ?>
@@ -155,7 +176,7 @@ $categories_result = $conn->query($sql_categories);
                             <div class="product-details">
                                 <?php if (!empty($product['jenis'])): ?>
                                 <div class="detail-row">
-                                    <span class="detail-label">Bentuk</span>
+                                    <span class="detail-label">Jenis</span>
                                     <span class="detail-separator">:</span>
                                     <span class="detail-value"><?= htmlspecialchars($product['jenis']) ?></span>
                                 </div>
@@ -177,7 +198,7 @@ $categories_result = $conn->query($sql_categories);
 
                                 <div class="detail-row">
                                     <span class="detail-label">Harga Standard :</span>
-                                    <span class="detail-separator"></span>
+                                    <span class="detail-separator">:</span>
                                     <span class="detail-value price">Rp <?= number_format($product['harga'], 0, ',', '.') ?></span>
                                 </div>
 
@@ -199,7 +220,7 @@ $categories_result = $conn->query($sql_categories);
 
                                 <div class="detail-row">
                                     <span class="detail-label">Stock Tersedia :</span>
-                                    <span class="detail-separator"></span>
+                                    <span class="detail-separator">:</span>
                                     <?php 
                                     $current_stock = isset($product['stock']) ? intval($product['stock']) : 0;
                                     $low_stock_threshold = isset($product['low_stock']) ? intval($product['low_stock']) : 10;
@@ -259,7 +280,28 @@ $categories_result = $conn->query($sql_categories);
             <?php endif; ?>
         </div>
     </div>
+    <script>
+        let searchTimeout;
 
+        function handleSearch() {
+            clearTimeout(searchTimeout);
+
+            searchTimeout = setTimeout(() => {
+                const search = document.getElementById('searchInput').value;
+                const kategori = document.getElementById('kategoriFilter').value;
+
+                window.location.href = `products.php?search=${encodeURIComponent(search)}&kategori=${encodeURIComponent(kategori)}`;
+            }, 500); // 0.5 detik
+        }
+
+        function handleFilter() {
+            const search = document.getElementById('searchInput').value;
+            const kategori = document.getElementById('kategoriFilter').value;
+
+            window.location.href = `products.php?search=${encodeURIComponent(search)}&kategori=${encodeURIComponent(kategori)}`;
+        }
+        </script>          
     <script src="js/products.js"></script>
+    <script src="js/sidebar-toggle.js"></script>
 </body>
 </html>

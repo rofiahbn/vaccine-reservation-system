@@ -59,10 +59,10 @@ $booked_home_service = [];
 while ($row = mysqli_fetch_assoc($result_booking)) {
     $waktu = substr($row['waktu_booking'], 0, 5);
 
-    if ($row['service_type'] === 'in_clinic') {
+    if ($row['service_type'] === 'In Clinic') {
         // Hanya in_clinic yang menutup slot klinik
         $booked_slots[] = $waktu;
-    } else if ($row['service_type'] === 'home_service') {
+    } else if ($row['service_type'] === 'Home Service') {
         // Home service dicatat tapi tidak menutup slot
         $booked_home_service[] = $waktu;
     }

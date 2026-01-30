@@ -275,13 +275,15 @@ $total_weeks = ceil($total_days / 7);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Vaksinin</title>
     <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/sidebar-toggle.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="logo">
-            <img src="vaksinin-logo.png" alt="Vaksinin">
+            <img src="vaksinin-logo.png" alt="Vaksinin" class="logo-full">
+            <img src="v-logo.png" alt="V" class="logo-icon">
         </div>
         <nav class="nav-menu">
             <a href="dashboard.php" class="nav-item active">
@@ -301,6 +303,12 @@ $total_weeks = ceil($total_days / 7);
                 <span>Pengaturan</span>
             </a>
         </nav>
+        <div class="sidebar-footer">
+            <a href="#" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
     </div>
 
     <!-- Main Content -->
@@ -733,6 +741,6 @@ $total_weeks = ceil($total_days / 7);
         // update tiap 1 detik
         setInterval(updateDateTime, 1000);
         </script>
-
+        <script src="js/sidebar-toggle.js"></script>
 </body>
 </html>

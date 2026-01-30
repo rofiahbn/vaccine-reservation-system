@@ -104,6 +104,7 @@ $tanggal_surat_indo = formatTanggalIndo($tanggal_surat);
 
 <link rel="stylesheet" href="css/proses_tindakan.css">
 <link rel="stylesheet" href="css/surat.css">
+<link rel="stylesheet" href="css/sidebar-toggle.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
@@ -112,14 +113,33 @@ $tanggal_surat_indo = formatTanggalIndo($tanggal_surat);
 <!-- ================= SIDEBAR ================= -->
 <div class="sidebar">
     <div class="logo">
-        <img src="vaksinin-logo.png" alt="Vaksinin">
+        <img src="vaksinin-logo.png" alt="Vaksinin" class="logo-full">
+        <img src="v-logo.png" alt="V" class="logo-icon">
     </div>
     <nav class="nav-menu">
-        <a href="dashboard.php" class="nav-item">
-            <i class="fas fa-th-large"></i>
-            <span>Dashboard</span>
-        </a>
-    </nav>
+            <a href="dashboard.php" class="nav-item">
+                <i class="fas fa-th-large"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="products.php" class="nav-item">
+                <i class="fas fa-capsules"></i>
+                <span>Produk</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-users"></i>
+                <span>Pasien</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Pengaturan</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="#" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
 </div>
 
 <!-- ================= MAIN CONTENT ================= -->
@@ -433,6 +453,6 @@ $tanggal_surat_indo = formatTanggalIndo($tanggal_surat);
     <script src="js/preview_surat.js"></script>
     <script src="js/simpan_tindakan.js"></script>
     <script src="js/cetak_surat.js"></script>                        
-
+    <script src="js/sidebar-toggle.js"></script>                        
 </body>
 </html>

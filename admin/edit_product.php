@@ -35,20 +35,22 @@ $product = $result->fetch_assoc();
     <title>Edit Produk - Vaksinin</title>
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="css/product-form.css">
+    <link rel="stylesheet" href="css/sidebar-toggle.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="logo">
-            <img src="vaksinin-logo.png" alt="Vaksinin">
+            <img src="vaksinin-logo.png" alt="Vaksinin" class="logo-full">
+            <img src="v-logo.png" alt="V" class="logo-icon">
         </div>
         <nav class="nav-menu">
             <a href="dashboard.php" class="nav-item">
                 <i class="fas fa-th-large"></i>
                 <span>Dashboard</span>
             </a>
-            <a href="products.php" class="nav-item active">
+            <a href="products.php" class="nav-item">
                 <i class="fas fa-capsules"></i>
                 <span>Produk</span>
             </a>
@@ -87,7 +89,7 @@ $product = $result->fetch_assoc();
                 <div class="image-upload-section">
                     <div class="upload-box" id="uploadBox">
                         <?php if (!empty($product['image_path'])): ?>
-                            <img id="imagePreview" src="<?= htmlspecialchars($product['image_path']) ?>" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                            <img id="imagePreview" src="../<?= htmlspecialchars($product['image_path']) ?>" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
                         <?php else: ?>
                             <div class="upload-placeholder" id="uploadPlaceholder">
                                 <i class="fas fa-cloud-upload-alt"></i>
@@ -111,19 +113,22 @@ $product = $result->fetch_assoc();
                         <input type="hidden" name="image_data" id="imageData">
 
                         <div class="form-group">
-                            <label>Pilih Jenis</label>
+                            <label>Jenis Produk<span class="required">*</span></label>
                             <select name="jenis" id="jenis" required>
-                                <option value="">Vaksin</option>
-                                <option value="Vaksin" <?= ($product['jenis'] ?? '') == 'Vaksin' ? 'selected' : '' ?>>Vaksin</option>
-                                <option value="Obat" <?= ($product['jenis'] ?? '') == 'Obat' ? 'selected' : '' ?>>Obat</option>
-                                <option value="Vitamin" <?= ($product['jenis'] ?? '') == 'Vitamin' ? 'selected' : '' ?>>Vitamin</option>
-                                <option value="Alat Kesehatan" <?= ($product['jenis'] ?? '') == 'Alat Kesehatan' ? 'selected' : '' ?>>Alat Kesehatan</option>
+                                <option value="">Pilih Jenis</option>
+                                <option value="Injeksi" <?= ($product['jenis'] ?? '') == 'Injeksi' ? 'selected' : '' ?>>Injeksi</option>
+                                <option value="Tablet" <?= ($product['jenis'] ?? '') == 'Tablet' ? 'selected' : '' ?>>Tablet</option>
+                                <option value="Kapsul" <?= ($product['jenis'] ?? '') == 'Kapsul' ? 'selected' : '' ?>>Kapsul</option>
+                                <option value="Sirup" <?= ($product['jenis'] ?? '') == 'Sirup' ? 'selected' : '' ?>>Sirup</option>
+                                <option value="Spray" <?= ($product['jenis'] ?? '') == 'Spray' ? 'selected' : '' ?>>Spray</option>
+                                <option value="Tetes" <?= ($product['jenis'] ?? '') == 'Tetes' ? 'selected' : '' ?>>Tetes</option>
+                                <option value="Alat" <?= ($product['jenis'] ?? '') == 'Alat' ? 'selected' : '' ?>>Alat</option>
                             </select>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label>Nama Vaksin</label>
+                                <label>Nama Vaksin<span class="required">*</span></label>
                                 <input type="text" name="nama_layanan" placeholder="Nama" value="<?= htmlspecialchars($product['nama_layanan']) ?>" required>
                             </div>
                             <div class="form-group">
@@ -134,8 +139,15 @@ $product = $result->fetch_assoc();
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label>Kategori</label>
-                                <input type="text" name="kategori" placeholder="Kategori" value="<?= htmlspecialchars($product['kategori']) ?>" required>
+                                <label>Kategori<span class="required">*</span></label>
+                                <select name="kategori" id="kategori" required>
+                                    <option value="">Pilih Kategori</option>
+                                    <option value="Vaksinasi" <?= ($product['kategori'] ?? '') == 'Vaksinasi' ? 'selected' : '' ?>>Vaksinasi</option>
+                                    <option value="Paket Kesehatan" <?= ($product['kategori'] ?? '') == 'Paket Kesehatan' ? 'selected' : '' ?>>Paket Kesehatan</option>
+                                    <option value="Vitamin" <?= ($product['kategori'] ?? '') == 'Vitamin' ? 'selected' : '' ?>>Vitamin</option>
+                                    <option value="Obat" <?= ($product['kategori'] ?? '') == 'Obat' ? 'selected' : '' ?>>Obat</option>
+                                    <option value="Swab" <?= ($product['kategori'] ?? '') == 'Swab' ? 'selected' : '' ?>>Swab</option>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label>Batch Number</label>
@@ -145,7 +157,7 @@ $product = $result->fetch_assoc();
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label>Harga Standard</label>
+                                <label>Harga Standard<span class="required">*</span></label>
                                 <input type="number" name="harga" placeholder="Harga" value="<?= htmlspecialchars($product['harga']) ?>" required>
                             </div>
                             <div class="form-group">
@@ -180,6 +192,7 @@ $product = $result->fetch_assoc();
         </div>
     </div>
 
-    <script src="js/product-form.js"></script>
+    <script src="js/products.js"></script>
+    <script src="js/sidebar-toggle.js"></script>
 </body>
 </html>

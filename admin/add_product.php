@@ -13,20 +13,22 @@ date_default_timezone_set('Asia/Jakarta');
     <title>Tambah Produk - Vaksinin</title>
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="css/product-form.css">
+    <link rel="stylesheet" href="css/sidebar-toggle.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="logo">
-            <img src="vaksinin-logo.png" alt="Vaksinin">
+            <img src="vaksinin-logo.png" alt="Vaksinin" class="logo-full">
+            <img src="v-logo.png" alt="V" class="logo-icon">
         </div>
         <nav class="nav-menu">
             <a href="dashboard.php" class="nav-item">
                 <i class="fas fa-th-large"></i>
                 <span>Dashboard</span>
             </a>
-            <a href="products.php" class="nav-item active">
+            <a href="products.php" class="nav-item">
                 <i class="fas fa-capsules"></i>
                 <span>Produk</span>
             </a>
@@ -84,23 +86,26 @@ date_default_timezone_set('Asia/Jakarta');
                         <input type="hidden" name="image_data" id="imageData">
 
                         <div class="form-group">
-                            <label>Pilih Jenis</label>
+                            <label>Pilih Jenis<span class="required">*</span></label>
                             <select name="jenis" id="jenis" required>
-                                <option value="">Vaksin</option>
-                                <option value="Vaksin">Vaksin</option>
-                                <option value="Obat">Obat</option>
-                                <option value="Vitamin">Vitamin</option>
-                                <option value="Alat Kesehatan">Alat Kesehatan</option>
+                                <option value="">Pilih Jenis</option>
+                                <option value="Injeksi">Injeksi</option>
+                                <option value="Tablet">Tablet</option>
+                                <option value="Kapsul">Kapsul</option>
+                                <option value="Sirup">Sirup</option>
+                                <option value="Spray">Spray</option>
+                                <option value="Tetes">Tetes</option>
+                                <option value="Alat">Alat</option>
                             </select>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label>Nama Vaksin</label>
+                                <label>Nama Vaksin<span class="required">*</span></label>
                                 <input type="text" name="nama_layanan" placeholder="Nama" required>
                             </div>
                             <div class="form-group">
-                                <label>Expired</label>
+                                <label>Expired<span class="required">*</span></label>
                                 <input type="date" name="expired_date" placeholder="Expired">
                             </div>
                         </div>
@@ -108,7 +113,14 @@ date_default_timezone_set('Asia/Jakarta');
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Kategori</label>
-                                <input type="text" name="kategori" placeholder="Kategori" required>
+                                <select name="kategori" id="kategori" required>
+                                    <option value="">Pilih Kategori</option>
+                                    <option value="Vaksinasi">Vaksinasi</option>
+                                    <option value="Paket Kesehatan">Paket Kesehatan</option>
+                                    <option value="Vitamin">Vitamin</option>
+                                    <option value="Obat">Obat</option>
+                                    <option value="Swab">Swab</option>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label>Batch Number</label>
@@ -118,7 +130,7 @@ date_default_timezone_set('Asia/Jakarta');
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label>Harga Standard</label>
+                                <label>Harga Standard<span class="required">*</span></label>
                                 <input type="number" name="harga" placeholder="Harga" required>
                             </div>
                             <div class="form-group">
@@ -153,6 +165,7 @@ date_default_timezone_set('Asia/Jakarta');
         </div>
     </div>
 
-    <script src="js/product-form.js"></script>
+    <script src="js/products.js"></script>
+    <script src="js/sidebar-toggle.js"></script>
 </body>
 </html>
