@@ -97,6 +97,11 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
 
         <form id="registrationForm" method="POST" action="save_booking.php">
 
+            <!-- HIDDEN INPUT (FIELD YANG TIDAK DITAMPILKAN) -->
+            <input type="hidden" name="nama_panggilan" value="">
+            <input type="hidden" name="kebangsaan" value="Indonesia">
+            <input type="hidden" name="pekerjaan" value="">
+
             <!-- PILIH TIPE LAYANAN -->
             <div class="form-section">
                 <div class="form-group">
@@ -233,22 +238,18 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
                 </div>
 
                 <div class="row">
+                    <!--
                     <div class="form-group">
                         <label>Nama Panggilan</label>
                         <input type="text" name="nama_panggilan" placeholder="Nama Panggilan">
                     </div>
+                    -->
 
                     <div class="form-group">
                         <label>Tanggal Lahir <span class="required">*</span></label>
                         <input type="date" name="tanggal_lahir" id="tanggalLahir" required onchange="hitungUsia()">
                     </div>
-                </div>
 
-                <div class="info-box" id="usiaInfo" style="display:none;">
-                    Usia: <strong id="usiaText">-</strong> tahun (<span id="kategoriText">-</span>)
-                </div>
-                
-                <div class="row">
                     <div class="form-group">
                         <label>Jenis Kelamin <span class="required">*</span></label>
                         <div class="radio-group">
@@ -262,6 +263,10 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
                     </div>
                 </div>
 
+                <div class="info-box" id="usiaInfo" style="display:none;">
+                    Usia: <strong id="usiaText">-</strong> tahun (<span id="kategoriText">-</span>)
+                </div>
+
                 <!-- IDENTITAS DINAMIS -->
                 <div class="row">
                     <div class="form-group" id="fieldNIK">
@@ -273,12 +278,18 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
                         <label>No. Paspor <span class="required" id="pasporRequired">*</span></label>
                         <input type="text" name="paspor" id="inputPaspor" placeholder="Nomor Paspor">
                     </div>
+
+                    <div class="form-group" id="fieldNamaWali" style="display:none;">
+                        <label>Nama Wali <span class="required">*</span></label>
+                        <input type="text" name="nama_wali" id="inputNamaWali" placeholder="Nama orang tua/wali">
+                    </div>
                 </div>
 
+                <!--
                 <div class="row">
                     <div class="form-group">
                         <label>Kebangsaan</label>
-                        <input type="text" name="kebangsaan" value="Indonesia" placeholder="Kebangsaan">
+                        <input type="text" name="kebangsaan" placeholder="Kebangsaan">
                     </div>
                     
                     <div class="form-group">
@@ -286,11 +297,7 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
                         <input type="text" name="pekerjaan" placeholder="Pekerjaan saat ini">
                     </div>
                 </div>
-
-                <div class="form-group" id="fieldNamaWali" style="display:none;">
-                    <label>Nama Wali <span class="required">*</span></label>
-                    <input type="text" name="nama_wali" id="inputNamaWali" placeholder="Nama orang tua/wali">
-                </div>
+                -->
             </div>
 
             <!-- KONTAK -->

@@ -1,3 +1,8 @@
+h1 {
+    color: #EDE4C2;
+    margin-bottom: 10px;
+    font-size: 24px;
+}
 .success-container {
     max-width: 800px;
     margin: 0 auto;
@@ -185,12 +190,12 @@
 }
 
 .btn-print {
-    background: #6366f1;
-    color: white;
+    background: #16a34a; /* green-600 */
+    color: #fff;
 }
 
 .btn-print:hover {
-    background: #4f46e5;
+    background: #15803d; /* green-700 */
 }
 
 .btn-home {

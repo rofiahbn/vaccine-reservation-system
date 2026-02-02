@@ -74,7 +74,7 @@ function formatTanggalIndonesia($tanggal) {
             <div class="success-icon">
                 <i class="fas fa-check-circle"></i>
             </div>
-            <h1>Pendaftaran Berhasil!</h1>
+            <h1 class="success-title">Pendaftaran Berhasil!</h1>
             <p>Terima kasih telah mendaftar. Booking Anda telah dikonfirmasi.</p>
         </div>
 

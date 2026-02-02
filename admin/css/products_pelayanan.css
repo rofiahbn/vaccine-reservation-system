@@ -1,0 +1,62 @@
+.products-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.product-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    gap: 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.06);
+}
+
+.product-icon {
+    font-size: 32px;
+    color: #4caf50;
+}
+
+.product-content h3 {
+    margin: 6px 0;
+}
+
+.badge {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+.badge-pelayanan {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.badge-paket {
+    background: #fff3e0;
+    color: #ef6c00;
+}
+
+.product-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+.product-actions button {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+}
+
+.product-actions .danger {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.empty-state {
+    text-align: center;
+    color: #777;
+}

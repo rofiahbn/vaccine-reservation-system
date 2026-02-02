@@ -465,3 +465,21 @@
         grid-template-columns: 120px 10px 1fr;
     }
 }
+
+.badge {
+    display: inline-block;
+    margin: 6px 0;
+    padding: 4px 10px;
+    font-size: 12px;
+    border-radius: 12px;
+}
+
+.badge-pelayanan {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.badge-paket {
+    background: #fff3e0;
+    color: #ef6c00;
+}

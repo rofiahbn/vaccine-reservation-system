@@ -1,0 +1,288 @@
+/* ===============================
+   CONTAINER
+================================ */
+.form-container {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.06);
+}
+
+.form-layout {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 32px;
+    align-items: stretch;
+}
+
+.page-header-form {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.back-button {
+    width: 40px;
+    height: 40px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.back-button:hover {
+    background: #f5f5f5;
+    border-color: #FFA500;
+    color: #FFA500;
+}
+
+.page-header-form h1 {
+    flex: 1;
+    text-align: center;
+    margin: 0;
+    font-size: 24px;
+    color: #333;
+}
+
+/* Image Upload Section */
+.image-upload-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.upload-box {
+    width: 100%;
+    height: 300px;
+    background: #f8f9fa;
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.upload-box:hover {
+    border-color: #FFA500;
+    background: #fff5e6;
+}
+
+.upload-placeholder {
+    text-align: center;
+    color: #999;
+}
+
+.upload-placeholder i {
+    font-size: 48px;
+    margin-bottom: 10px;
+    color: #ccc;
+}
+
+.upload-placeholder p {
+    font-size: 14px;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.image-info h3 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #111827;
+}
+
+.image-info textarea {
+    width: 100%;
+    height: 160px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    padding: 12px;
+    font-size: 14px;
+    resize: none;
+}
+
+/* ===============================
+   RIGHT : FORM
+================================ */
+.form-section {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.form-group input,
+.form-group select {
+    height: 44px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    padding: 0 14px;
+    font-size: 14px;
+}
+
+/* ===============================
+   ROW
+================================ */
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.form-row.three {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+/* Submit Button */
+.btn-submit {
+    width: 100%;
+    padding: 15px;
+    background: #FFA500;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.btn-submit:hover {
+    background: #FF8C00;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 165, 0, 0.3);
+}
+
+.btn-submit:active {
+    transform: translateY(0);
+}
+
+.submit-bottom {
+    margin-top: auto;
+}
+
+/* ===============================
+   UTIL
+================================ */
+.required {
+    color: red;
+}
+
+/* ===============================
+   RESPONSIVE
+================================ */
+
+/* TABLET */
+@media (max-width: 1024px) {
+    .form-layout {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .upload-box {
+        height: 260px;
+    }
+
+    .page-header-form h1 {
+        font-size: 22px;
+    }
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+
+    .form-container {
+        padding: 20px;
+        border-radius: 12px;
+    }
+
+    .page-header-form {
+        gap: 10px;
+    }
+
+    .page-header-form h1 {
+        font-size: 20px;
+        text-align: left;
+    }
+
+    .back-button {
+        width: 36px;
+        height: 36px;
+    }
+
+    /* upload */
+    .upload-box {
+        height: 220px;
+    }
+
+    .upload-placeholder i {
+        font-size: 36px;
+    }
+
+    /* FORM ROW JADI 1 KOLOM */
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .form-row.three {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group input,
+    .form-group select {
+        height: 42px;
+        font-size: 14px;
+    }
+
+    .btn-submit {
+        font-size: 15px;
+        padding: 14px;
+    }
+}
+
+/* HP KECIL */
+@media (max-width: 480px) {
+
+    .form-container {
+        padding: 16px;
+    }
+
+    .image-info textarea {
+        height: 140px;
+    }
+
+    .page-header-form h1 {
+        font-size: 18px;
+    }
+
+    .upload-box {
+        height: 200px;
+    }
+}

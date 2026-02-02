@@ -15,6 +15,9 @@ $where_conditions = [];
 $params = [];
 $types = '';
 
+// WAJIB: filter khusus vaksin
+$where_conditions[] = "product_category = 'vaksin'";
+
 if (!empty($search)) {
     $where_conditions[] = "nama_layanan LIKE ?";
     $params[] = "%$search%";
@@ -293,9 +296,6 @@ $categories_result = $conn->query($sql_categories);
                         <i class="fas fa-capsules"></i>
                     </div>
                     <h3>Belum ada Vaksin</h3>
-                    <button class="btn-add-product" onclick="location.href='add_product.php'">
-                        Tambahkan Vaksin
-                    </button>
                 </div>
             <?php endif; ?>
         </div>
