@@ -162,7 +162,7 @@ while ($ms = $result_master->fetch_assoc()) {
 
                     <!-- DAFTAR LAYANAN -->
                     <div class="form-group">
-                        <label>Layanan yang Dipilih <span class="required">*</span></label>
+                        <label>Pesanan yang Dipilih <span class="required">*</span></label>
 
                         <?php if (count($services) > 0): ?>
                             <?php foreach ($services as $idx => $srv): ?>
