@@ -264,6 +264,19 @@ if (isset($errors) && count($errors) > 0) {
         </div>
         <?php endif; ?>
 
+        <!-- Search Section -->
+        <div class="search-section">
+            <h2>Cari dan Temukan Datamu</h2>
+            <p>Cukup masukkan nama dan NIK Anda. Jika sudah pernah mendaftar, sistem akan menemukan data Anda secara otomatis agar proses lebih cepat dan praktis</p>
+            
+            <div class="search-simple">
+                <input type="text" id="searchName" class="search-input-main" placeholder="Nama">
+                <input type="text" id="searchNIK" class="search-input-main" placeholder="NIK">
+                <button type="button" class="btn-search-main" onclick="searchPatient()">Cari</button>
+            </div>
+            <div id="searchResults" style="display:none;"></div>
+        </div>
+
         <?php if ($is_edit_mode): ?>
             <h1><i class="fas fa-edit"></i> Edit Data Peserta</h1>
             <p class="subtitle">Perbarui data peserta yang sudah ada</p>

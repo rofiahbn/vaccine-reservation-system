@@ -100,7 +100,7 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
             <!-- PILIH TIPE LAYANAN -->
             <div class="form-section">
                 <div class="form-group">
-                    <label>Tipe Layanan <span class="required">*</span></label>
+                    <label>Lokasi Layanan <span class="required">*</span></label>
                     <div class="radio-group">
                         <label class="radio-card">
                             <input type="radio" name="service_type" value="In Clinic" checked required>
@@ -134,6 +134,95 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
                 </div>
 
                 <input type="hidden" name="is_umroh" id="isUmroh" value="0">
+            </div>
+
+            <!-- KALENDER BOOKING -->
+            <div class="form-section">
+                <h2 class="section-title">Pilih Jadwal</h2>
+
+                <div class="calendar-wrapper">
+                    <div class="calendar-header">
+                        <button type="button" onclick="prevMonth()">&lt;</button>
+                        <h2><?php echo $nama_bulan[$bulan] . ' ' . $tahun; ?></h2>
+                        <button type="button" onclick="nextMonth()">&gt;</button>
+                    </div>
+
+                    <div class="calendar-days">
+                        <div class="day-header">M</div>
+                        <div class="day-header">S</div>
+                        <div class="day-header">S</div>
+                        <div class="day-header">R</div>
+                        <div class="day-header">K</div>
+                        <div class="day-header">J</div>
+                        <div class="day-header">S</div>
+
+                        <?php
+                        // Kosongkan hari sebelum tanggal 1
+                        for ($i = 0; $i < $hari_awal; $i++) {
+                            echo '<div class="day empty"></div>';
+                        }
+
+                        // Tampilkan tanggal
+                        $today_date = date('Y-m-d');
+
+                        for ($tgl = 1; $tgl <= $jumlah_hari; $tgl++) {
+                        $tanggal_full = sprintf('%04d-%02d-%02d', $tahun, $bulan, $tgl);
+                        $is_today = ($tanggal_full === $today_date);
+
+                        // ❌ JIKA TANGGAL SUDAH LEWAT → DISABLE
+                        if ($tanggal_full < $today_date) {
+                            echo "<div class='day disabled past-date' title='Tanggal sudah lewat'>$tgl</div>";
+                            continue;
+                        }
+
+                        // Cek status dari DB
+                        $status = checkDateStatus($conn, $tanggal_full);
+                        $class = getDateClass($status, $is_today);
+                        $title = getDateTitle($status);
+                        $clickable = isDateClickable($status);
+
+                        if ($clickable) {
+                            echo "<div class='$class' onclick='selectDate(this, $tgl)' title='$title'>$tgl</div>";
+                        } else {
+                            echo "<div class='$class' title='$title'>$tgl</div>";
+                        }
+                    }
+
+                        ?>
+                    </div>
+
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-box tersedia"></div>
+                            <span>Tersedia</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-box penuh"></div>
+                            <span>Jadwal Penuh</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-box holiday"></div>
+                            <span>Libur</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-box closed"></div>
+                            <span>Tutup</span>
+                        </div>
+                    </div>
+                </div>
+
+                <input type="hidden" name="tanggal_booking" id="selectedDate" value="">
+                
+                <div class="selected-date" id="dateDisplay" style="display:none;">
+                    Tanggal yang dipilih: <strong id="dateText"></strong>
+                </div>
+
+                <input type="hidden" name="waktu_booking" id="selectedTime">
+
+                <div class="time-slots" id="timeSlots" style="display:none;">
+                    <h3>Pilih Jam</h3>
+                    <div class="slots-container" id="slotsContainer"></div>
+                </div>
             </div>
 
             <!-- DATA DIRI -->
@@ -269,7 +358,7 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
             
             <!-- PILIH PRODUK/LAYANAN -->
             <div class="form-section">
-                <h2 class="section-title">Pilih Layanan Tambahan</h2>
+                <h2 class="section-title">Pilih Pesanan</h2>
                 <p class="subtitle">Pilih opsi layanan yang ingin Anda pesan</p>
                 
                 <!-- Selected Products Badge -->
@@ -296,95 +385,7 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
                 </div>
             </div>
 
-            <!-- KALENDER BOOKING -->
-            <div class="form-section">
-                <h2 class="section-title">Pilih Jadwal</h2>
-
-                <div class="calendar-wrapper">
-                    <div class="calendar-header">
-                        <button type="button" onclick="prevMonth()">&lt;</button>
-                        <h2><?php echo $nama_bulan[$bulan] . ' ' . $tahun; ?></h2>
-                        <button type="button" onclick="nextMonth()">&gt;</button>
-                    </div>
-
-                    <div class="calendar-days">
-                        <div class="day-header">M</div>
-                        <div class="day-header">S</div>
-                        <div class="day-header">S</div>
-                        <div class="day-header">R</div>
-                        <div class="day-header">K</div>
-                        <div class="day-header">J</div>
-                        <div class="day-header">S</div>
-
-                        <?php
-                        // Kosongkan hari sebelum tanggal 1
-                        for ($i = 0; $i < $hari_awal; $i++) {
-                            echo '<div class="day empty"></div>';
-                        }
-
-                        // Tampilkan tanggal
-                        $today_date = date('Y-m-d');
-
-                        for ($tgl = 1; $tgl <= $jumlah_hari; $tgl++) {
-                        $tanggal_full = sprintf('%04d-%02d-%02d', $tahun, $bulan, $tgl);
-                        $is_today = ($tanggal_full === $today_date);
-
-                        // ❌ JIKA TANGGAL SUDAH LEWAT → DISABLE
-                        if ($tanggal_full < $today_date) {
-                            echo "<div class='day disabled past-date' title='Tanggal sudah lewat'>$tgl</div>";
-                            continue;
-                        }
-
-                        // Cek status dari DB
-                        $status = checkDateStatus($conn, $tanggal_full);
-                        $class = getDateClass($status, $is_today);
-                        $title = getDateTitle($status);
-                        $clickable = isDateClickable($status);
-
-                        if ($clickable) {
-                            echo "<div class='$class' onclick='selectDate(this, $tgl)' title='$title'>$tgl</div>";
-                        } else {
-                            echo "<div class='$class' title='$title'>$tgl</div>";
-                        }
-                    }
-
-                        ?>
-                    </div>
-
-                    <div class="legend">
-                        <div class="legend-item">
-                            <div class="legend-box tersedia"></div>
-                            <span>Tersedia</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-box penuh"></div>
-                            <span>Jadwal Penuh</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-box holiday"></div>
-                            <span>Libur</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-box closed"></div>
-                            <span>Tutup</span>
-                        </div>
-                    </div>
-                </div>
-
-                <input type="hidden" name="tanggal_booking" id="selectedDate" value="">
-                
-                <div class="selected-date" id="dateDisplay" style="display:none;">
-                    Tanggal yang dipilih: <strong id="dateText"></strong>
-                </div>
-
-                <input type="hidden" name="waktu_booking" id="selectedTime">
-
-                <div class="time-slots" id="timeSlots" style="display:none;">
-                    <h3>Pilih Jam</h3>
-                    <div class="slots-container" id="slotsContainer"></div>
-                </div>
-            </div>
-
+            
             <!-- BUTTONS -->
             <div class="form-actions">
                 <button type="submit" name="action" value="add_more" class="btn btn-secondary" id="btnTambahPeserta" disabled>

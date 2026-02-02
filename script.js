@@ -57,24 +57,30 @@ function updateFormByService() {
 }
 
 // ==================== HITUNG USIA ====================
+// ==================== HITUNG USIA ====================
 function hitungUsia() {
     const inputTanggal = document.getElementById('tanggalLahir');
-    
-    if (!inputTanggal || !inputTanggal.value) {
-        return;
-    }
+    if (!inputTanggal || !inputTanggal.value) return;
 
     const lahir = new Date(inputTanggal.value);
     const today = new Date();
 
-    let usia = today.getFullYear() - lahir.getFullYear();
-    const bulan = today.getMonth() - lahir.getMonth();
+    let tahun = today.getFullYear() - lahir.getFullYear();
+    let bulan = today.getMonth() - lahir.getMonth();
 
-    if (bulan < 0 || (bulan === 0 && today.getDate() < lahir.getDate())) {
-        usia--;
+    // kalau tanggal hari ini < tanggal lahir, bulan dikurangi 1
+    if (today.getDate() < lahir.getDate()) {
+        bulan--;
     }
 
-    const kategori = usia < 18 ? 'Anak-anak' : 'Dewasa';
+    // kalau bulan negatif, kurangi tahun dan tambah 12 bulan
+    if (bulan < 0) {
+        tahun--;
+        bulan += 12;
+    }
+
+    // kategori berdasarkan tahun
+    const kategori = tahun < 18 ? 'Anak-anak' : 'Dewasa';
 
     const usiaText = document.getElementById('usiaText');
     const kategoriText = document.getElementById('kategoriText');
@@ -82,12 +88,13 @@ function hitungUsia() {
     const fieldNamaWali = document.getElementById('fieldNamaWali');
     const inputNamaWali = document.getElementById('inputNamaWali');
 
-    if (usiaText) usiaText.textContent = usia;
+    // tampilkan usia format: "23 tahun 2 bulan"
+    if (usiaText) usiaText.textContent = `${tahun} tahun ${bulan} bulan`;
     if (kategoriText) kategoriText.textContent = kategori;
     if (usiaInfo) usiaInfo.style.display = 'block';
 
     // Show Nama Wali jika anak-anak
-    if (usia < 18) {
+    if (tahun < 18) {
         fieldNamaWali.style.display = 'block';
         inputNamaWali.required = true;
     } else {
