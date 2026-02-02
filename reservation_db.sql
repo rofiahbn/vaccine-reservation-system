@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.1
+-- version 5.2.2
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Jan 29, 2026 at 02:40 AM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.0.30
+-- Host: localhost:3306
+-- Generation Time: Feb 02, 2026 at 08:17 AM
+-- Server version: 8.4.3
+-- PHP Version: 8.3.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -28,19 +28,19 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `bookings` (
-  `id` int(11) NOT NULL,
-  `patient_id` int(11) NOT NULL,
-  `service_type` enum('Home Service','In Clinic') NOT NULL,
-  `nomor_antrian` varchar(20) NOT NULL,
+  `id` int NOT NULL,
+  `patient_id` int NOT NULL,
+  `service_type` enum('Home Service','In Clinic') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nomor_antrian` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
   `tanggal_booking` date NOT NULL,
   `waktu_booking` time NOT NULL,
-  `status` enum('pending','confirmed','completed','cancelled') DEFAULT 'pending',
-  `catatan` text DEFAULT NULL,
+  `status` enum('pending','confirmed','completed','cancelled') COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
+  `catatan` text COLLATE utf8mb4_unicode_ci,
   `created_at` datetime NOT NULL,
-  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `doctor_id` int(11) DEFAULT NULL,
-  `payment_status` enum('unpaid','paid') DEFAULT 'unpaid',
-  `tindakan_selesai` tinyint(1) DEFAULT 0
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `doctor_id` int DEFAULT NULL,
+  `payment_status` enum('unpaid','paid') COLLATE utf8mb4_unicode_ci DEFAULT 'unpaid',
+  `tindakan_selesai` tinyint(1) DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -55,7 +55,8 @@ INSERT INTO `bookings` (`id`, `patient_id`, `service_type`, `nomor_antrian`, `ta
 (82, 5, 'In Clinic', '20260126-001', '2026-01-26', '10:45:00', 'completed', 'Pendaftaran online', '2026-01-26 09:42:15', '2026-01-28 00:26:50', NULL, 'paid', 1),
 (83, 1, 'In Clinic', '20260127-001', '2026-01-27', '09:15:00', 'confirmed', 'Pendaftaran online', '2026-01-26 09:56:30', '2026-01-27 12:45:38', NULL, 'unpaid', 1),
 (84, 6, 'In Clinic', '20260126-002', '2026-01-26', '14:30:00', 'completed', 'Pendaftaran online', '2026-01-26 09:56:30', '2026-01-29 02:17:28', NULL, 'paid', 1),
-(85, 2, 'In Clinic', '20260126-003', '2026-01-26', '11:15:00', 'cancelled', 'Pendaftaran online', '2026-01-26 16:04:53', '2026-01-26 17:15:52', NULL, 'unpaid', 0);
+(85, 2, 'In Clinic', '20260126-003', '2026-01-26', '11:15:00', 'cancelled', 'Pendaftaran online', '2026-01-26 16:04:53', '2026-01-26 17:15:52', NULL, 'unpaid', 0),
+(86, 1, 'In Clinic', '20260202-001', '2026-02-02', '09:00:00', 'pending', 'Pendaftaran online', '2026-02-02 14:47:44', '2026-02-02 14:47:44', NULL, 'unpaid', 0);
 
 -- --------------------------------------------------------
 
@@ -64,15 +65,15 @@ INSERT INTO `bookings` (`id`, `patient_id`, `service_type`, `nomor_antrian`, `ta
 --
 
 CREATE TABLE `booking_services` (
-  `id` int(11) NOT NULL,
-  `booking_id` int(11) NOT NULL,
-  `nama_layanan` varchar(100) NOT NULL,
-  `created_at` datetime DEFAULT current_timestamp(),
-  `service_id` int(11) DEFAULT NULL,
-  `harga` int(11) DEFAULT 0,
-  `diskon` int(11) DEFAULT 0,
-  `diskon_tipe` enum('persen','nilai') DEFAULT 'nilai',
-  `total` int(11) DEFAULT 0
+  `id` int NOT NULL,
+  `booking_id` int NOT NULL,
+  `nama_layanan` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `service_id` int DEFAULT NULL,
+  `harga` int DEFAULT '0',
+  `diskon` int DEFAULT '0',
+  `diskon_tipe` enum('persen','nilai') COLLATE utf8mb4_unicode_ci DEFAULT 'nilai',
+  `total` int DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -89,7 +90,8 @@ INSERT INTO `booking_services` (`id`, `booking_id`, `nama_layanan`, `created_at`
 (24, 82, 'Pantoprazole 40 mg Vial', '2026-01-26 09:42:15', 73, 120000, 20400, 'persen', 99600),
 (25, 83, 'Avaxim 160 (Sanofi)', '2026-01-26 09:56:30', 3, 100000, 0, 'nilai', 0),
 (26, 84, 'Paracetamol 1 g Fl', '2026-01-26 09:56:30', 74, 80000, 18400, 'persen', 61600),
-(28, 85, 'Adacel (Sanofi)', '2026-01-26 16:04:53', 1, 350000, 0, 'nilai', 0);
+(28, 85, 'Adacel (Sanofi)', '2026-01-26 16:04:53', 1, 350000, 0, 'nilai', 0),
+(29, 86, 'Pantoprazole 40 mg Vial', '2026-02-02 14:47:44', 73, 120000, 0, 'nilai', 0);
 
 -- --------------------------------------------------------
 
@@ -98,10 +100,10 @@ INSERT INTO `booking_services` (`id`, `booking_id`, `nama_layanan`, `created_at`
 --
 
 CREATE TABLE `booking_staff` (
-  `id` int(11) NOT NULL,
-  `booking_id` int(11) NOT NULL,
-  `staff_id` int(11) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `id` int NOT NULL,
+  `booking_id` int NOT NULL,
+  `staff_id` int NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -123,11 +125,11 @@ INSERT INTO `booking_staff` (`id`, `booking_id`, `staff_id`, `created_at`) VALUE
 --
 
 CREATE TABLE `jadwal_klinik` (
-  `id` int(11) NOT NULL,
-  `hari_week` int(11) DEFAULT NULL COMMENT '1=Minggu, 2=Senin, ..., 7=Sabtu',
+  `id` int NOT NULL,
+  `hari_week` int DEFAULT NULL COMMENT '1=Minggu, 2=Senin, ..., 7=Sabtu',
   `jam_buka` time DEFAULT NULL,
   `jam_tutup` time DEFAULT NULL,
-  `status` enum('buka','tutup') DEFAULT 'buka'
+  `status` enum('buka','tutup') COLLATE utf8mb4_general_ci DEFAULT 'buka'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -149,10 +151,10 @@ INSERT INTO `jadwal_klinik` (`id`, `hari_week`, `jam_buka`, `jam_tutup`, `status
 --
 
 CREATE TABLE `jadwal_libur` (
-  `id` int(11) NOT NULL,
+  `id` int NOT NULL,
   `tanggal` date DEFAULT NULL,
-  `keterangan` varchar(255) DEFAULT NULL,
-  `jenis` enum('nasional','khusus','minggu') DEFAULT 'nasional'
+  `keterangan` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `jenis` enum('nasional','khusus','minggu') COLLATE utf8mb4_general_ci DEFAULT 'nasional'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -191,15 +193,15 @@ INSERT INTO `jadwal_libur` (`id`, `tanggal`, `keterangan`, `jenis`) VALUES
 --
 
 CREATE TABLE `kipi_records` (
-  `id` int(11) NOT NULL,
-  `reservation_id` int(11) NOT NULL,
-  `patient_id` int(11) NOT NULL,
+  `id` int NOT NULL,
+  `reservation_id` int NOT NULL,
+  `patient_id` int NOT NULL,
   `kipi_date` date NOT NULL,
-  `symptoms` text DEFAULT NULL,
-  `severity` enum('Ringan','Sedang','Berat') DEFAULT 'Ringan',
-  `action_taken` text DEFAULT NULL,
-  `notes` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `symptoms` text COLLATE utf8mb4_general_ci,
+  `severity` enum('Ringan','Sedang','Berat') COLLATE utf8mb4_general_ci DEFAULT 'Ringan',
+  `action_taken` text COLLATE utf8mb4_general_ci,
+  `notes` text COLLATE utf8mb4_general_ci,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -209,22 +211,22 @@ CREATE TABLE `kipi_records` (
 --
 
 CREATE TABLE `medical_actions` (
-  `id` int(11) NOT NULL,
-  `booking_id` int(11) NOT NULL,
-  `patient_id` int(11) NOT NULL,
-  `layanan` text DEFAULT NULL,
+  `id` int NOT NULL,
+  `booking_id` int NOT NULL,
+  `patient_id` int NOT NULL,
+  `layanan` text COLLATE utf8mb4_general_ci,
   `tanggal_vaksinasi` date DEFAULT NULL,
-  `jenis_vaksin` varchar(100) DEFAULT NULL,
-  `batch_vaksin` varchar(100) DEFAULT NULL,
+  `jenis_vaksin` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `batch_vaksin` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `expired_vaksin` date DEFAULT NULL,
-  `kedatangan_ke` int(11) DEFAULT NULL,
-  `kedatangan_selanjutnya` int(11) DEFAULT NULL,
-  `status` enum('Aktif','Selesai') DEFAULT 'Aktif',
-  `anamnesis` text DEFAULT NULL,
-  `pemeriksaan_fisik` text DEFAULT NULL,
-  `diagnosis` text DEFAULT NULL,
-  `tatalaksana` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `kedatangan_ke` int DEFAULT NULL,
+  `kedatangan_selanjutnya` int DEFAULT NULL,
+  `status` enum('Aktif','Selesai') COLLATE utf8mb4_general_ci DEFAULT 'Aktif',
+  `anamnesis` text COLLATE utf8mb4_general_ci,
+  `pemeriksaan_fisik` text COLLATE utf8mb4_general_ci,
+  `diagnosis` text COLLATE utf8mb4_general_ci,
+  `tatalaksana` text COLLATE utf8mb4_general_ci,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -234,13 +236,13 @@ CREATE TABLE `medical_actions` (
 --
 
 CREATE TABLE `medical_letters` (
-  `id` int(11) NOT NULL,
-  `action_id` int(11) NOT NULL,
-  `jenis` enum('sehat','sakit','vaksin') DEFAULT NULL,
+  `id` int NOT NULL,
+  `action_id` int NOT NULL,
+  `jenis` enum('sehat','sakit','vaksin') COLLATE utf8mb4_general_ci DEFAULT NULL,
   `tanggal` date DEFAULT NULL,
-  `dokter_id` int(11) DEFAULT NULL,
-  `posisi` varchar(100) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `dokter_id` int DEFAULT NULL,
+  `posisi` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -250,16 +252,16 @@ CREATE TABLE `medical_letters` (
 --
 
 CREATE TABLE `medical_records` (
-  `id` int(11) NOT NULL,
-  `patient_id` int(11) NOT NULL,
-  `reservation_id` int(11) DEFAULT NULL,
+  `id` int NOT NULL,
+  `patient_id` int NOT NULL,
+  `reservation_id` int DEFAULT NULL,
   `record_date` datetime NOT NULL,
-  `keluhan` text DEFAULT NULL,
-  `diagnosis` text DEFAULT NULL,
-  `treatment` text DEFAULT NULL,
-  `notes` text DEFAULT NULL,
-  `doctor_name` varchar(100) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `keluhan` text COLLATE utf8mb4_general_ci,
+  `diagnosis` text COLLATE utf8mb4_general_ci,
+  `treatment` text COLLATE utf8mb4_general_ci,
+  `notes` text COLLATE utf8mb4_general_ci,
+  `doctor_name` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -269,25 +271,25 @@ CREATE TABLE `medical_records` (
 --
 
 CREATE TABLE `patients` (
-  `id` int(11) NOT NULL,
-  `no_rekam_medis` varchar(20) NOT NULL,
-  `nama_lengkap` varchar(100) NOT NULL,
-  `nama_panggilan` varchar(50) DEFAULT NULL,
+  `id` int NOT NULL,
+  `no_rekam_medis` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `nama_lengkap` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `nama_panggilan` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `tanggal_lahir` date NOT NULL,
-  `usia` int(11) DEFAULT NULL,
-  `kategori_usia` enum('Anak','Dewasa') NOT NULL,
-  `jenis_kelamin` enum('L','P') NOT NULL,
-  `nik` varchar(16) DEFAULT NULL,
-  `paspor` varchar(20) DEFAULT NULL,
-  `kebangsaan` varchar(50) DEFAULT 'Indonesia',
-  `pekerjaan` varchar(100) DEFAULT NULL,
-  `nama_wali` varchar(100) DEFAULT NULL,
-  `riwayat_alergi` text DEFAULT NULL,
-  `riwayat_penyakit` text DEFAULT NULL,
-  `riwayat_obat` text DEFAULT NULL,
-  `pelayanan` varchar(50) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `usia` int DEFAULT NULL,
+  `kategori_usia` enum('Anak','Dewasa') COLLATE utf8mb4_general_ci NOT NULL,
+  `jenis_kelamin` enum('L','P') COLLATE utf8mb4_general_ci NOT NULL,
+  `nik` varchar(16) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `paspor` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `kebangsaan` varchar(50) COLLATE utf8mb4_general_ci DEFAULT 'Indonesia',
+  `pekerjaan` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `nama_wali` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `riwayat_alergi` text COLLATE utf8mb4_general_ci,
+  `riwayat_penyakit` text COLLATE utf8mb4_general_ci,
+  `riwayat_obat` text COLLATE utf8mb4_general_ci,
+  `pelayanan` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -309,12 +311,12 @@ INSERT INTO `patients` (`id`, `no_rekam_medis`, `nama_lengkap`, `nama_panggilan`
 --
 
 CREATE TABLE `patient_addresses` (
-  `id` int(11) NOT NULL,
-  `patient_id` int(11) NOT NULL,
-  `alamat` text NOT NULL,
-  `provinsi` varchar(100) DEFAULT NULL,
-  `kota` varchar(100) DEFAULT NULL,
-  `is_primary` tinyint(1) DEFAULT 0
+  `id` int NOT NULL,
+  `patient_id` int NOT NULL,
+  `alamat` text COLLATE utf8mb4_general_ci NOT NULL,
+  `provinsi` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `kota` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `is_primary` tinyint(1) DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -328,7 +330,8 @@ INSERT INTO `patient_addresses` (`id`, `patient_id`, `alamat`, `provinsi`, `kota
 (77, 4, 'seattle', 'DKI Jakarta', 'Jakarta Utara', 1),
 (78, 5, 'los angeles', 'Jawa Barat', 'Cimahi', 1),
 (79, 1, 'Salam, Rt.13, Saren, Kalijambe', 'Jawa Barat', 'Bandung', 1),
-(81, 2, 'Bandung - Jawa Barat', 'Jawa Barat', 'Subang', 1);
+(81, 2, 'Bandung - Jawa Barat', 'Jawa Barat', 'Subang', 1),
+(82, 1, 'Salam, Rt.13, Saren, Kalijambe', 'Jawa Tengah', 'Kudus', 1);
 
 -- --------------------------------------------------------
 
@@ -337,10 +340,10 @@ INSERT INTO `patient_addresses` (`id`, `patient_id`, `alamat`, `provinsi`, `kota
 --
 
 CREATE TABLE `patient_emails` (
-  `id` int(11) NOT NULL,
-  `patient_id` int(11) NOT NULL,
-  `email` varchar(100) NOT NULL,
-  `is_primary` tinyint(1) DEFAULT 0
+  `id` int NOT NULL,
+  `patient_id` int NOT NULL,
+  `email` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `is_primary` tinyint(1) DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -353,7 +356,8 @@ INSERT INTO `patient_emails` (`id`, `patient_id`, `email`, `is_primary`) VALUES
 (80, 5, 'paul@gmail.com', 1),
 (81, 1, 'rofiahbudi@gmail.com', 1),
 (82, 6, 'adsdascc@gmail', 1),
-(83, 2, 'leo@gmail.com', 1);
+(83, 2, 'leo@gmail.com', 1),
+(84, 1, 'rofiahbudi@gmail.com', 1);
 
 -- --------------------------------------------------------
 
@@ -362,10 +366,10 @@ INSERT INTO `patient_emails` (`id`, `patient_id`, `email`, `is_primary`) VALUES
 --
 
 CREATE TABLE `patient_phones` (
-  `id` int(11) NOT NULL,
-  `patient_id` int(11) NOT NULL,
-  `phone` varchar(20) NOT NULL,
-  `is_primary` tinyint(1) DEFAULT 0
+  `id` int NOT NULL,
+  `patient_id` int NOT NULL,
+  `phone` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `is_primary` tinyint(1) DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -379,7 +383,8 @@ INSERT INTO `patient_phones` (`id`, `patient_id`, `phone`, `is_primary`) VALUES
 (81, 5, '087654323456', 1),
 (82, 1, '085876923088', 1),
 (83, 6, '9876543456765', 1),
-(84, 2, '098765678987', 1);
+(84, 2, '098765678987', 1),
+(85, 1, '085876923088', 1);
 
 -- --------------------------------------------------------
 
@@ -388,11 +393,11 @@ INSERT INTO `patient_phones` (`id`, `patient_id`, `phone`, `is_primary`) VALUES
 --
 
 CREATE TABLE `patient_services` (
-  `id` int(11) NOT NULL,
-  `patient_id` int(11) NOT NULL,
-  `service_type` enum('Vaksin','Vitamin','Antigen','PCR','Obat') DEFAULT NULL,
-  `service_name` varchar(255) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `id` int NOT NULL,
+  `patient_id` int NOT NULL,
+  `service_type` enum('Vaksin','Vitamin','Antigen','PCR','Obat') COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `service_name` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -413,15 +418,15 @@ INSERT INTO `patient_services` (`id`, `patient_id`, `service_type`, `service_nam
 --
 
 CREATE TABLE `payments` (
-  `id` int(11) NOT NULL,
-  `booking_id` int(11) NOT NULL,
-  `metode` varchar(50) DEFAULT NULL,
-  `subtotal` int(11) DEFAULT NULL,
-  `diskon` int(11) DEFAULT 0,
-  `diskon_tipe` enum('persen','nilai') DEFAULT NULL,
-  `total` int(11) DEFAULT NULL,
-  `status` enum('unpaid','paid') DEFAULT 'paid',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `id` int NOT NULL,
+  `booking_id` int NOT NULL,
+  `metode` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `subtotal` int DEFAULT NULL,
+  `diskon` int DEFAULT '0',
+  `diskon_tipe` enum('persen','nilai') COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `total` int DEFAULT NULL,
+  `status` enum('unpaid','paid') COLLATE utf8mb4_general_ci DEFAULT 'paid',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -452,21 +457,21 @@ INSERT INTO `payments` (`id`, `booking_id`, `metode`, `subtotal`, `diskon`, `dis
 --
 
 CREATE TABLE `reservations` (
-  `id` int(11) NOT NULL,
-  `reservation_code` varchar(20) NOT NULL,
-  `patient_id` int(11) NOT NULL,
-  `vaccine_id` int(11) NOT NULL,
-  `slot_id` int(11) NOT NULL,
+  `id` int NOT NULL,
+  `reservation_code` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `patient_id` int NOT NULL,
+  `vaccine_id` int NOT NULL,
+  `slot_id` int NOT NULL,
   `reservation_date` date NOT NULL,
   `reservation_time` time NOT NULL,
-  `status` enum('Pending','Confirmed','Completed','Cancelled','Rescheduled') DEFAULT 'Pending',
-  `total_price` decimal(10,2) DEFAULT 0.00,
-  `payment_status` enum('Unpaid','Paid') DEFAULT 'Unpaid',
-  `notes` text DEFAULT NULL,
-  `reminder_h_minus_1` tinyint(1) DEFAULT 0,
-  `reminder_h_plus_1` tinyint(1) DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `status` enum('Pending','Confirmed','Completed','Cancelled','Rescheduled') COLLATE utf8mb4_general_ci DEFAULT 'Pending',
+  `total_price` decimal(10,2) DEFAULT '0.00',
+  `payment_status` enum('Unpaid','Paid') COLLATE utf8mb4_general_ci DEFAULT 'Unpaid',
+  `notes` text COLLATE utf8mb4_general_ci,
+  `reminder_h_minus_1` tinyint(1) DEFAULT '0',
+  `reminder_h_plus_1` tinyint(1) DEFAULT '0',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -476,11 +481,11 @@ CREATE TABLE `reservations` (
 --
 
 CREATE TABLE `services` (
-  `id` int(11) NOT NULL,
-  `kategori` varchar(100) DEFAULT NULL,
-  `nama_layanan` varchar(255) DEFAULT NULL,
-  `harga` int(11) DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `id` int NOT NULL,
+  `kategori` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `nama_layanan` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `harga` int DEFAULT '0',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -572,21 +577,22 @@ INSERT INTO `services` (`id`, `kategori`, `nama_layanan`, `harga`, `created_at`)
 --
 
 CREATE TABLE `staff` (
-  `id` int(11) NOT NULL,
-  `nama_lengkap` varchar(150) NOT NULL,
-  `gelar` varchar(50) DEFAULT NULL,
-  `role` enum('dokter','perawat','admin') NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `id` int NOT NULL,
+  `nama_lengkap` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
+  `gelar` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `sip` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `role` enum('dokter','perawat','admin') COLLATE utf8mb4_general_ci NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `staff`
 --
 
-INSERT INTO `staff` (`id`, `nama_lengkap`, `gelar`, `role`, `created_at`) VALUES
-(1, 'Anna Rahma', 'dr.', 'dokter', '2026-01-20 03:23:31'),
-(2, 'Budi Santoso', 'dr.', 'dokter', '2026-01-20 03:23:31'),
-(3, 'Dewi Lestari', 'dr.', 'dokter', '2026-01-20 03:23:31');
+INSERT INTO `staff` (`id`, `nama_lengkap`, `gelar`, `sip`, `role`, `created_at`) VALUES
+(1, 'Anna Rahma', 'dr.', '123/SIP/2024', 'dokter', '2026-01-20 03:23:31'),
+(2, 'Budi Santoso', 'dr.', NULL, 'dokter', '2026-01-20 03:23:31'),
+(3, 'Dewi Lestari', 'dr.', NULL, 'dokter', '2026-01-20 03:23:31');
 
 -- --------------------------------------------------------
 
@@ -595,22 +601,22 @@ INSERT INTO `staff` (`id`, `nama_lengkap`, `gelar`, `role`, `created_at`) VALUES
 --
 
 CREATE TABLE `surat` (
-  `id` int(11) NOT NULL,
-  `booking_id` int(11) DEFAULT NULL,
-  `patient_id` int(11) DEFAULT NULL,
-  `jenis_surat` enum('sehat','sakit','vaksin') DEFAULT NULL,
-  `dokter_id` int(11) DEFAULT NULL,
-  `posisi` varchar(100) DEFAULT NULL,
+  `id` int NOT NULL,
+  `booking_id` int DEFAULT NULL,
+  `patient_id` int DEFAULT NULL,
+  `jenis_surat` enum('sehat','sakit','vaksin') COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `dokter_id` int DEFAULT NULL,
+  `posisi` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `tanggal_surat` date DEFAULT NULL,
-  `lama_istirahat` int(11) DEFAULT NULL,
+  `lama_istirahat` int DEFAULT NULL,
   `tgl_awal` date DEFAULT NULL,
   `tgl_akhir` date DEFAULT NULL,
-  `pf_lain` text DEFAULT NULL,
-  `jenis_vaksin` varchar(100) DEFAULT NULL,
-  `batch_vaksin` varchar(100) DEFAULT NULL,
+  `pf_lain` text COLLATE utf8mb4_general_ci,
+  `jenis_vaksin` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `batch_vaksin` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `expired_vaksin` date DEFAULT NULL,
-  `file_pdf` varchar(255) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `file_pdf` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -631,12 +637,12 @@ INSERT INTO `surat` (`id`, `booking_id`, `patient_id`, `jenis_surat`, `dokter_id
 --
 
 CREATE TABLE `time_slots` (
-  `id` int(11) NOT NULL,
+  `id` int NOT NULL,
   `slot_date` date NOT NULL,
   `slot_time` time NOT NULL,
-  `max_capacity` int(11) DEFAULT 3,
-  `current_booking` int(11) DEFAULT 0,
-  `is_active` tinyint(1) DEFAULT 1
+  `max_capacity` int DEFAULT '3',
+  `current_booking` int DEFAULT '0',
+  `is_active` tinyint(1) DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -665,24 +671,24 @@ INSERT INTO `time_slots` (`id`, `slot_date`, `slot_time`, `max_capacity`, `curre
 --
 
 CREATE TABLE `tindakan` (
-  `id` int(11) NOT NULL,
-  `booking_id` int(11) DEFAULT NULL,
-  `patient_id` int(11) DEFAULT NULL,
-  `anamnesis` text DEFAULT NULL,
-  `pemeriksaan_fisik` text DEFAULT NULL,
-  `diagnosis` text DEFAULT NULL,
-  `tatalaksana` text DEFAULT NULL,
+  `id` int NOT NULL,
+  `booking_id` int DEFAULT NULL,
+  `patient_id` int DEFAULT NULL,
+  `anamnesis` text COLLATE utf8mb4_general_ci,
+  `pemeriksaan_fisik` text COLLATE utf8mb4_general_ci,
+  `diagnosis` text COLLATE utf8mb4_general_ci,
+  `tatalaksana` text COLLATE utf8mb4_general_ci,
   `suhu` decimal(4,1) DEFAULT NULL,
-  `tekanan_darah` varchar(10) DEFAULT NULL,
-  `respirasi` int(11) DEFAULT NULL,
-  `nadi` int(11) DEFAULT NULL,
-  `status` varchar(20) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `jenis_vaksin` varchar(100) DEFAULT NULL,
-  `batch_vaksin` varchar(100) DEFAULT NULL,
+  `tekanan_darah` varchar(10) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `respirasi` int DEFAULT NULL,
+  `nadi` int DEFAULT NULL,
+  `status` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `jenis_vaksin` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `batch_vaksin` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `expired_vaksin` date DEFAULT NULL,
-  `kedatangan_ke` int(11) DEFAULT NULL,
-  `kedatangan_selanjutnya` int(11) DEFAULT NULL
+  `kedatangan_ke` int DEFAULT NULL,
+  `kedatangan_selanjutnya` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -703,13 +709,13 @@ INSERT INTO `tindakan` (`id`, `booking_id`, `patient_id`, `anamnesis`, `pemeriks
 --
 
 CREATE TABLE `vaccination_history` (
-  `id` int(11) NOT NULL,
-  `patient_id` int(11) NOT NULL,
-  `vaccine_name` varchar(100) NOT NULL,
+  `id` int NOT NULL,
+  `patient_id` int NOT NULL,
+  `vaccine_name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
   `vaccination_date` date NOT NULL,
-  `location` varchar(200) DEFAULT NULL,
-  `batch_number` varchar(50) DEFAULT NULL,
-  `notes` text DEFAULT NULL
+  `location` varchar(200) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `batch_number` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `notes` text COLLATE utf8mb4_general_ci
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -719,14 +725,14 @@ CREATE TABLE `vaccination_history` (
 --
 
 CREATE TABLE `vaccines` (
-  `id` int(11) NOT NULL,
-  `vaccine_name` varchar(100) NOT NULL,
-  `description` text DEFAULT NULL,
-  `price` decimal(10,2) DEFAULT 0.00,
-  `stock` int(11) DEFAULT 0,
-  `min_age` int(11) DEFAULT 0,
-  `max_age` int(11) DEFAULT 100,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `id` int NOT NULL,
+  `vaccine_name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text COLLATE utf8mb4_general_ci,
+  `price` decimal(10,2) DEFAULT '0.00',
+  `stock` int DEFAULT '0',
+  `min_age` int DEFAULT '0',
+  `max_age` int DEFAULT '100',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -748,12 +754,12 @@ INSERT INTO `vaccines` (`id`, `vaccine_name`, `description`, `price`, `stock`, `
 --
 
 CREATE TABLE `vital_signs` (
-  `id` int(11) NOT NULL,
-  `action_id` int(11) NOT NULL,
+  `id` int NOT NULL,
+  `action_id` int NOT NULL,
   `suhu` decimal(4,1) DEFAULT NULL,
-  `tekanan_darah` varchar(20) DEFAULT NULL,
-  `respirasi` int(11) DEFAULT NULL,
-  `nadi` int(11) DEFAULT NULL
+  `tekanan_darah` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `respirasi` int DEFAULT NULL,
+  `nadi` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -947,145 +953,145 @@ ALTER TABLE `vital_signs`
 -- AUTO_INCREMENT for table `bookings`
 --
 ALTER TABLE `bookings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=86;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=87;
 
 --
 -- AUTO_INCREMENT for table `booking_services`
 --
 ALTER TABLE `booking_services`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT for table `booking_staff`
 --
 ALTER TABLE `booking_staff`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `jadwal_klinik`
 --
 ALTER TABLE `jadwal_klinik`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `jadwal_libur`
 --
 ALTER TABLE `jadwal_libur`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
 -- AUTO_INCREMENT for table `kipi_records`
 --
 ALTER TABLE `kipi_records`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `medical_actions`
 --
 ALTER TABLE `medical_actions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `medical_letters`
 --
 ALTER TABLE `medical_letters`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `medical_records`
 --
 ALTER TABLE `medical_records`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `patients`
 --
 ALTER TABLE `patients`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `patient_addresses`
 --
 ALTER TABLE `patient_addresses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=82;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=83;
 
 --
 -- AUTO_INCREMENT for table `patient_emails`
 --
 ALTER TABLE `patient_emails`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=84;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=85;
 
 --
 -- AUTO_INCREMENT for table `patient_phones`
 --
 ALTER TABLE `patient_phones`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=85;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=86;
 
 --
 -- AUTO_INCREMENT for table `patient_services`
 --
 ALTER TABLE `patient_services`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `payments`
 --
 ALTER TABLE `payments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `reservations`
 --
 ALTER TABLE `reservations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `services`
 --
 ALTER TABLE `services`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78;
 
 --
 -- AUTO_INCREMENT for table `staff`
 --
 ALTER TABLE `staff`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `surat`
 --
 ALTER TABLE `surat`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `time_slots`
 --
 ALTER TABLE `time_slots`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `tindakan`
 --
 ALTER TABLE `tindakan`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `vaccination_history`
 --
 ALTER TABLE `vaccination_history`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `vaccines`
 --
 ALTER TABLE `vaccines`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `vital_signs`
 --
 ALTER TABLE `vital_signs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
