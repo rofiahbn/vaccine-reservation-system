@@ -119,16 +119,11 @@ function formatTanggalIndonesia($tanggal) {
                     <div class="booking-detail-item">
                         <i class="fas fa-calendar-day"></i>
                         <div>
-                            <strong>Tanggal</strong>
-                            <span><?php echo formatTanggalIndonesia($booking['tanggal_booking']); ?></span>
-                        </div>
-                    </div>
-                    
-                    <div class="booking-detail-item">
-                        <i class="fas fa-clock"></i>
-                        <div>
-                            <strong>Jam</strong>
-                            <span><?php echo htmlspecialchars($booking['waktu_booking']); ?> WIB</span>
+                            <strong>Tanggal & Jam</strong>
+                            <span>
+                                <?php echo formatTanggalIndonesia($booking['tanggal_booking']); ?><br>
+                                <?php echo htmlspecialchars($booking['waktu_booking']); ?> WIB
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -139,11 +134,28 @@ function formatTanggalIndonesia($tanggal) {
         <div class="important-notes">
             <h3><i class="fas fa-exclamation-triangle"></i> Hal yang Perlu Diperhatikan:</h3>
             <ul>
-                <li>Harap datang <strong>15 menit lebih awal</strong> dari waktu yang telah ditentukan</li>
-                <li>Bawa <strong>KTP/Identitas asli</strong> dan <strong>nomor antrian</strong> Anda</li>
-                <li>Jika membawa anak-anak, bawa <strong>Kartu Keluarga</strong> atau <strong>Akta Kelahiran</strong></li>
-                <li>Jika berhalangan hadir, silakan hubungi klinik untuk reschedule</li>
-                <li>Untuk informasi lebih lanjut, hubungi: <strong>082137372757</strong> (WhatsApp) atau <strong>021-22214342</strong></li>
+                <li>Harap datang sesuai jadwal yang telah ditentukan.</li>
+                <li>
+                    Bawa <strong>KTP</strong> dan <strong>Paspor</strong> 
+                    (jika untuk vaksinasi umroh/luar negeri) beserta 
+                    <strong>nomor antrian</strong> Anda.
+                </li>
+                <li>
+                    Jika membawa anak-anak, bawa 
+                    <strong>Kartu Keluarga</strong> atau <strong>KIA</strong>.
+                </li>
+                <li>
+                    Jika memiliki buku/kartu vaksinasi sebelumnya, mohon dibawa.
+                </li>
+                <li>
+                    Jika berhalangan hadir, silakan hubungi klinik untuk 
+                    <strong>reschedule</strong> atau <strong>pembatalan</strong>.
+                </li>
+                <li>
+                    Untuk informasi lebih lanjut, hubungi 
+                    <strong>082137372757</strong> (WhatsApp) atau 
+                    <strong>021-22214342</strong>.
+                </li>
             </ul>
         </div>
 
