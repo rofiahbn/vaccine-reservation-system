@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Feb 02, 2026 at 08:17 AM
+-- Generation Time: Feb 03, 2026 at 01:52 AM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.30
 
@@ -56,7 +56,12 @@ INSERT INTO `bookings` (`id`, `patient_id`, `service_type`, `nomor_antrian`, `ta
 (83, 1, 'In Clinic', '20260127-001', '2026-01-27', '09:15:00', 'confirmed', 'Pendaftaran online', '2026-01-26 09:56:30', '2026-01-27 12:45:38', NULL, 'unpaid', 1),
 (84, 6, 'In Clinic', '20260126-002', '2026-01-26', '14:30:00', 'completed', 'Pendaftaran online', '2026-01-26 09:56:30', '2026-01-29 02:17:28', NULL, 'paid', 1),
 (85, 2, 'In Clinic', '20260126-003', '2026-01-26', '11:15:00', 'cancelled', 'Pendaftaran online', '2026-01-26 16:04:53', '2026-01-26 17:15:52', NULL, 'unpaid', 0),
-(86, 1, 'In Clinic', '20260202-001', '2026-02-02', '09:00:00', 'pending', 'Pendaftaran online', '2026-02-02 14:47:44', '2026-02-02 14:47:44', NULL, 'unpaid', 0);
+(86, 1, 'In Clinic', '20260202-001', '2026-02-02', '09:00:00', 'pending', 'Pendaftaran online', '2026-02-02 14:47:44', '2026-02-02 14:47:44', NULL, 'unpaid', 0),
+(87, 1, 'In Clinic', '20260218-001', '2026-02-18', '09:30:00', 'pending', 'Pendaftaran online', '2026-02-02 16:43:28', '2026-02-02 16:43:28', NULL, 'unpaid', 0),
+(88, 2, 'In Clinic', '20260211-001', '2026-02-11', '09:00:00', 'pending', 'Pendaftaran online', '2026-02-02 16:43:28', '2026-02-02 16:43:28', NULL, 'unpaid', 0),
+(89, 2, 'In Clinic', '20260218-002', '2026-02-18', '09:45:00', 'pending', 'Pendaftaran online', '2026-02-02 16:49:15', '2026-02-02 16:49:15', NULL, 'unpaid', 0),
+(90, 7, 'In Clinic', '20260204-001', '2026-02-04', '09:15:00', 'pending', 'Pendaftaran online', '2026-02-02 16:58:32', '2026-02-02 16:58:32', NULL, 'unpaid', 0),
+(91, 8, 'In Clinic', '20260203-001', '2026-02-03', '09:30:00', 'pending', 'Pendaftaran online', '2026-02-02 20:03:33', '2026-02-02 20:03:33', NULL, 'unpaid', 0);
 
 -- --------------------------------------------------------
 
@@ -91,7 +96,13 @@ INSERT INTO `booking_services` (`id`, `booking_id`, `nama_layanan`, `created_at`
 (25, 83, 'Avaxim 160 (Sanofi)', '2026-01-26 09:56:30', 3, 100000, 0, 'nilai', 0),
 (26, 84, 'Paracetamol 1 g Fl', '2026-01-26 09:56:30', 74, 80000, 18400, 'persen', 61600),
 (28, 85, 'Adacel (Sanofi)', '2026-01-26 16:04:53', 1, 350000, 0, 'nilai', 0),
-(29, 86, 'Pantoprazole 40 mg Vial', '2026-02-02 14:47:44', 73, 120000, 0, 'nilai', 0);
+(29, 86, 'Pantoprazole 40 mg Vial', '2026-02-02 14:47:44', 73, 120000, 0, 'nilai', 0),
+(30, 87, 'Swab Antigen COVID-19', '2026-02-02 16:43:28', 76, 100000, 0, 'nilai', 0),
+(31, 88, 'Suntik Vitamin C', '2026-02-02 16:43:28', 61, 200000, 0, 'nilai', 0),
+(32, 89, 'Adacel (Sanofi)', '2026-02-02 16:49:15', 1, 350000, 0, 'nilai', 0),
+(33, 89, 'Fluarix Tetra (GSK)', '2026-02-02 16:49:15', 14, 450000, 0, 'nilai', 0),
+(34, 90, 'Medical Check Up Lengkap', '2026-02-02 16:58:32', 54, 1500000, 0, 'nilai', 0),
+(35, 91, 'Konsultasi Dokter Umum', '2026-02-02 20:03:33', 80, 75000, 0, 'nilai', 0);
 
 -- --------------------------------------------------------
 
@@ -302,7 +313,9 @@ INSERT INTO `patients` (`id`, `no_rekam_medis`, `nama_lengkap`, `nama_panggilan`
 (3, 'RM202601220001', 'Dillon', '', '1999-01-28', 26, 'Dewasa', 'L', '3314567654890765', NULL, 'Indonesia', 'karyawan swasta', '', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-01-22 08:53:09', '2026-01-22 08:53:09'),
 (4, 'RM202601220002', 'Joya', '', '2002-06-19', 23, 'Dewasa', 'P', '3314565428790654', NULL, 'Indonesia', 'nganggur', '', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-01-22 10:17:05', '2026-01-22 10:17:05'),
 (5, 'RM202601260001', 'paul klein', 'ul', '1988-04-30', 37, 'Dewasa', 'L', '3314567238769076', NULL, 'Amerika', 'singer', '', 'ga', 'gd', 'gd', 'Vaksinasi Umum/Infus Vitamin', '2026-01-26 02:42:15', '2026-01-26 02:42:15'),
-(6, 'RM202601260002', 'dorami', 'do', '2021-07-07', 4, 'Anak', 'P', '3314562765438976', NULL, 'Indonesia', 'pelajar', 'p', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-01-26 02:56:30', '2026-01-26 02:56:30');
+(6, 'RM202601260002', 'dorami', 'do', '2021-07-07', 4, 'Anak', 'P', '3314562765438976', NULL, 'Indonesia', 'pelajar', 'p', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-01-26 02:56:30', '2026-01-26 02:56:30'),
+(7, 'RM202602020001', 'lorem', '', '1997-11-13', 28, 'Dewasa', 'L', '3314323456547689', NULL, 'Indonesia', '', '', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-02-02 09:58:32', '2026-02-02 09:58:32'),
+(8, 'RM202602020002', 'Eloise', '', '2008-11-19', 17, 'Anak', 'P', '3312324354657687', NULL, 'Indonesia', '', 'violet', '-', '-', '-', 'Vaksinasi Umum/Infus Vitamin', '2026-02-02 13:03:33', '2026-02-02 13:03:33');
 
 -- --------------------------------------------------------
 
@@ -331,7 +344,12 @@ INSERT INTO `patient_addresses` (`id`, `patient_id`, `alamat`, `provinsi`, `kota
 (78, 5, 'los angeles', 'Jawa Barat', 'Cimahi', 1),
 (79, 1, 'Salam, Rt.13, Saren, Kalijambe', 'Jawa Barat', 'Bandung', 1),
 (81, 2, 'Bandung - Jawa Barat', 'Jawa Barat', 'Subang', 1),
-(82, 1, 'Salam, Rt.13, Saren, Kalijambe', 'Jawa Tengah', 'Kudus', 1);
+(82, 1, 'Salam, Rt.13, Saren, Kalijambe', 'Jawa Tengah', 'Kudus', 1),
+(83, 1, 'Bandung - Jawa Barat', 'Jawa Tengah', 'Pekalongan', 1),
+(84, 2, 'Salam, Rt.13, Saren, Kalijambe', 'Jawa Barat', 'Majalengka', 1),
+(85, 2, 'Bandung - Jawa Barat', 'Jawa Tengah', 'Pekalongan', 1),
+(86, 7, 'Jl. Telekomunikasi No. 1, Terusan Buahbatu - Bojongsoang, Sukapura, Kec. Dayeuhkolot', 'Jawa Barat', 'Pangandaran', 1),
+(87, 8, 'jl. london', 'Riau', 'Rokan Hulu', 1);
 
 -- --------------------------------------------------------
 
@@ -357,7 +375,12 @@ INSERT INTO `patient_emails` (`id`, `patient_id`, `email`, `is_primary`) VALUES
 (81, 1, 'rofiahbudi@gmail.com', 1),
 (82, 6, 'adsdascc@gmail', 1),
 (83, 2, 'leo@gmail.com', 1),
-(84, 1, 'rofiahbudi@gmail.com', 1);
+(84, 1, 'rofiahbudi@gmail.com', 1),
+(85, 1, 'rofiahbudi@gmail.com', 1),
+(86, 2, 'rofiah9a@gmail.com', 1),
+(87, 2, 'leo@gmail.com', 1),
+(88, 7, 'lorem@gmail.com', 1),
+(89, 8, 'eloise@gmail.com', 1);
 
 -- --------------------------------------------------------
 
@@ -384,7 +407,12 @@ INSERT INTO `patient_phones` (`id`, `patient_id`, `phone`, `is_primary`) VALUES
 (82, 1, '085876923088', 1),
 (83, 6, '9876543456765', 1),
 (84, 2, '098765678987', 1),
-(85, 1, '085876923088', 1);
+(85, 1, '085876923088', 1),
+(86, 1, '085876923088', 1),
+(87, 2, '085876923087', 1),
+(88, 2, '085876923087', 1),
+(89, 7, '098767687609', 1),
+(90, 8, '098765457890', 1);
 
 -- --------------------------------------------------------
 
@@ -485,90 +513,130 @@ CREATE TABLE `services` (
   `kategori` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `nama_layanan` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `harga` int DEFAULT '0',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+  `harga_special` int DEFAULT NULL,
+  `harga_diskon` int DEFAULT NULL,
+  `periode_diskon` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `deskripsi` text COLLATE utf8mb4_general_ci,
+  `image` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `product_category` enum('vaksin','pelayanan','paket') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'vaksin',
+  `kode_paket` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `jenis` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `durasi_layanan` int DEFAULT NULL,
+  `expired_date` date DEFAULT NULL,
+  `batch_number` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `stock` int DEFAULT '0',
+  `low_stock` int DEFAULT '10'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `services`
 --
 
-INSERT INTO `services` (`id`, `kategori`, `nama_layanan`, `harga`, `created_at`) VALUES
-(1, 'Vaksinasi', 'Adacel (Sanofi)', 350000, '2026-01-26 02:22:01'),
-(2, 'Vaksinasi', 'Arexvy (GSK)', 750000, '2026-01-26 02:22:01'),
-(3, 'Vaksinasi', 'Avaxim 160 (Sanofi)', 400000, '2026-01-26 02:22:01'),
-(4, 'Vaksinasi', 'Avaxim 80 (Sanofi)', 300000, '2026-01-26 02:22:01'),
-(5, 'Vaksinasi', 'BCG (Biofarma)', 150000, '2026-01-26 02:22:01'),
-(6, 'Vaksinasi', 'Boostrix (GSK)', 350000, '2026-01-26 02:22:01'),
-(7, 'Vaksinasi', 'bOPV Polio (Biofarma)', 120000, '2026-01-26 02:22:01'),
-(8, 'Vaksinasi', 'Campak (Biofarma)', 130000, '2026-01-26 02:22:01'),
-(9, 'Vaksinasi', 'Cervarix (GSK)', 800000, '2026-01-26 02:22:01'),
-(10, 'Vaksinasi', 'Engerix B 10mcg (GSK)', 200000, '2026-01-26 02:22:01'),
-(11, 'Vaksinasi', 'Engerix B 20mcg (GSK)', 300000, '2026-01-26 02:22:01'),
-(12, 'Vaksinasi', 'Euvax B Adult (Sanofi)', 250000, '2026-01-26 02:22:01'),
-(13, 'Vaksinasi', 'Euvax B Pediatric (Sanofi)', 200000, '2026-01-26 02:22:01'),
-(14, 'Vaksinasi', 'Fluarix Tetra (GSK)', 450000, '2026-01-26 02:22:01'),
-(15, 'Vaksinasi', 'Formening (Mersi)', 300000, '2026-01-26 02:22:01'),
-(16, 'Vaksinasi', 'Gardasil (MSD)', 2500000, '2026-01-26 02:22:01'),
-(17, 'Vaksinasi', 'Gardasil 9 (MSD)', 3500000, '2026-01-26 02:22:01'),
-(18, 'Vaksinasi', 'Havrix 1440 (GSK)', 500000, '2026-01-26 02:22:01'),
-(19, 'Vaksinasi', 'Havrix 720 (GSK)', 350000, '2026-01-26 02:22:01'),
-(20, 'Vaksinasi', 'Hepatitis B Dewasa (Biofarma)', 200000, '2026-01-26 02:22:01'),
-(21, 'Vaksinasi', 'Hexaxim (Sanofi)', 850000, '2026-01-26 02:22:01'),
-(22, 'Vaksinasi', 'Imojev (Sanofi)', 600000, '2026-01-26 02:22:01'),
-(23, 'Vaksinasi', 'Infanrix Hexa (GSK)', 900000, '2026-01-26 02:22:01'),
-(24, 'Vaksinasi', 'Influvac Tetra (Abbott)', 400000, '2026-01-26 02:22:01'),
-(25, 'Vaksinasi', 'Inlive (Sinovac)', 300000, '2026-01-26 02:22:01'),
-(26, 'Vaksinasi', 'IPV (Biofarma)', 250000, '2026-01-26 02:22:01'),
-(27, 'Vaksinasi', 'MMR II (MSD)', 450000, '2026-01-26 02:22:01'),
-(28, 'Vaksinasi', 'MR (Biofarma)', 200000, '2026-01-26 02:22:01'),
-(29, 'Vaksinasi', 'Menactra (Sanofi)', 800000, '2026-01-26 02:22:01'),
-(30, 'Vaksinasi', 'Menivax (Biofarma)', 350000, '2026-01-26 02:22:01'),
-(31, 'Vaksinasi', 'Menquadfi (Sanofi)', 900000, '2026-01-26 02:22:01'),
-(32, 'Vaksinasi', 'Pneumovax 23 (MSD)', 1000000, '2026-01-26 02:22:01'),
-(33, 'Vaksinasi', 'Prevenar 13 (Pfizer)', 1200000, '2026-01-26 02:22:01'),
-(34, 'Vaksinasi', 'Prevenar 20 (Pfizer)', 1500000, '2026-01-26 02:22:01'),
-(35, 'Vaksinasi', 'Proquad (MSD)', 950000, '2026-01-26 02:22:01'),
-(36, 'Vaksinasi', 'Qdenga (Takeda)', 650000, '2026-01-26 02:22:01'),
-(37, 'Vaksinasi', 'Rotarix (GSK)', 350000, '2026-01-26 02:22:01'),
-(38, 'Vaksinasi', 'Rotateq (MSD)', 400000, '2026-01-26 02:22:01'),
-(39, 'Vaksinasi', 'Shingrix (GSK)', 2500000, '2026-01-26 02:22:01'),
-(40, 'Vaksinasi', 'Stamaril (Sanofi)', 500000, '2026-01-26 02:22:01'),
-(41, 'Vaksinasi', 'Synflorix (GSK)', 850000, '2026-01-26 02:22:01'),
-(42, 'Vaksinasi', 'Tetraxim (Sanofi)', 450000, '2026-01-26 02:22:01'),
-(43, 'Vaksinasi', 'Twinrix (GSK)', 750000, '2026-01-26 02:22:01'),
-(44, 'Vaksinasi', 'Typhim Vi (Sanofi)', 400000, '2026-01-26 02:22:01'),
-(45, 'Vaksinasi', 'Varivax (MSD)', 700000, '2026-01-26 02:22:01'),
-(46, 'Vaksinasi', 'Vaxigrip Tetra (Sanofi)', 450000, '2026-01-26 02:22:01'),
-(47, 'Vaksinasi', 'Vaxneuvance (MSD)', 1300000, '2026-01-26 02:22:01'),
-(48, 'Vaksinasi', 'Vecon Adult (Biofarma)', 300000, '2026-01-26 02:22:01'),
-(49, 'Vaksinasi', 'Verorab (Sanofi)', 600000, '2026-01-26 02:22:01'),
-(50, 'Vaksinasi', 'Vivaxim (Sanofi)', 550000, '2026-01-26 02:22:01'),
-(52, 'Paket Kesehatan', 'Telekonsultasi', 150000, '2026-01-26 02:22:01'),
-(53, 'Paket Kesehatan', 'Pemeriksaan Dokter', 250000, '2026-01-26 02:22:01'),
-(54, 'Paket Kesehatan', 'Medical Check Up Lengkap', 1500000, '2026-01-26 02:22:01'),
-(55, 'Paket Kesehatan', 'Medical Check Up Standard', 800000, '2026-01-26 02:22:01'),
-(56, 'Paket Kesehatan', 'Pemeriksaan Asam Urat', 150000, '2026-01-26 02:22:01'),
-(57, 'Paket Kesehatan', 'Pemeriksaan Gula Darah', 120000, '2026-01-26 02:22:01'),
-(58, 'Paket Kesehatan', 'Pemeriksaan Kolesterol', 180000, '2026-01-26 02:22:01'),
-(59, 'Vitamin', 'Vitamin B Complex', 120000, '2026-01-26 02:22:01'),
-(60, 'Vitamin', 'Vitamin D3', 150000, '2026-01-26 02:22:01'),
-(61, 'Vitamin', 'Suntik Vitamin C', 200000, '2026-01-26 02:22:01'),
-(62, 'Vitamin', 'Vitamin Badan Bugar', 180000, '2026-01-26 02:22:01'),
-(63, 'Vitamin', 'Vitamin Bugar Kinclong', 220000, '2026-01-26 02:22:01'),
-(64, 'Vitamin', 'Vitamin Jeruk Segar', 170000, '2026-01-26 02:22:01'),
-(65, 'Vitamin', 'Vitamin Remaja Abadi', 250000, '2026-01-26 02:22:01'),
-(66, 'Vitamin', 'Vitamin Segar Bugar', 160000, '2026-01-26 02:22:01'),
-(67, 'Vitamin', 'Vitamin Segar Kinclong', 210000, '2026-01-26 02:22:01'),
-(68, 'Vitamin', 'Vitamin Sultan', 300000, '2026-01-26 02:22:01'),
-(69, 'Vitamin', 'Vitamin Segar Bugar Ekstra', 230000, '2026-01-26 02:22:01'),
-(70, 'Vitamin', 'Vitamin Sultan +', 350000, '2026-01-26 02:22:01'),
-(71, 'Vitamin', 'Vitamin Badan Bugar Ekstra', 240000, '2026-01-26 02:22:01'),
-(72, 'Vitamin', 'Vitamin Jeruk Segar Ekstra', 220000, '2026-01-26 02:22:01'),
-(73, 'Obat', 'Pantoprazole 40 mg Vial', 120000, '2026-01-26 02:22:01'),
-(74, 'Obat', 'Paracetamol 1 g Fl', 80000, '2026-01-26 02:22:01'),
-(75, 'Obat', 'Tuberculin PPD RT 23 SSI', 250000, '2026-01-26 02:22:01'),
-(76, 'Swab', 'Swab Antigen COVID-19', 100000, '2026-01-26 02:22:01'),
-(77, 'Swab', 'Swab PCR COVID-19', 350000, '2026-01-26 02:22:01');
+INSERT INTO `services` (`id`, `kategori`, `nama_layanan`, `harga`, `harga_special`, `harga_diskon`, `periode_diskon`, `deskripsi`, `image`, `created_at`, `product_category`, `kode_paket`, `jenis`, `durasi_layanan`, `expired_date`, `batch_number`, `stock`, `low_stock`) VALUES
+(1, 'Vaksinasi', 'Adacel (Sanofi)', 350000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(2, 'Vaksinasi', 'Arexvy (GSK)', 750000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(3, 'Vaksinasi', 'Avaxim 160 (Sanofi)', 400000, NULL, NULL, '', 'lorem ipsum', NULL, '2026-01-26 02:22:01', 'vaksin', NULL, 'Tablet', NULL, NULL, '', 0, 10),
+(4, 'Vaksinasi', 'Avaxim 80 (Sanofi)', 300000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(5, 'Vaksinasi', 'BCG (Biofarma)', 150000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(6, 'Vaksinasi', 'Boostrix (GSK)', 350000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(7, 'Vaksinasi', 'bOPV Polio (Biofarma)', 120000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(8, 'Vaksinasi', 'Campak (Biofarma)', 130000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(9, 'Vaksinasi', 'Cervarix (GSK)', 800000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(10, 'Vaksinasi', 'Engerix B 10mcg (GSK)', 200000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(11, 'Vaksinasi', 'Engerix B 20mcg (GSK)', 300000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(12, 'Vaksinasi', 'Euvax B Adult (Sanofi)', 250000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(13, 'Vaksinasi', 'Euvax B Pediatric (Sanofi)', 200000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(14, 'Vaksinasi', 'Fluarix Tetra (GSK)', 450000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(15, 'Vaksinasi', 'Formening (Mersi)', 300000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(16, 'Vaksinasi', 'Gardasil (MSD)', 2500000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(17, 'Vaksinasi', 'Gardasil 9 (MSD)', 3500000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(18, 'Vaksinasi', 'Havrix 1440 (GSK)', 500000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(19, 'Vaksinasi', 'Havrix 720 (GSK)', 350000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(20, 'Vaksinasi', 'Hepatitis B Dewasa (Biofarma)', 200000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(21, 'Vaksinasi', 'Hexaxim (Sanofi)', 850000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(22, 'Vaksinasi', 'Imojev (Sanofi)', 600000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(23, 'Vaksinasi', 'Infanrix Hexa (GSK)', 900000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(24, 'Vaksinasi', 'Influvac Tetra (Abbott)', 400000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(25, 'Vaksinasi', 'Inlive (Sinovac)', 300000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(26, 'Vaksinasi', 'IPV (Biofarma)', 250000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(27, 'Vaksinasi', 'MMR II (MSD)', 450000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(28, 'Vaksinasi', 'MR (Biofarma)', 200000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(29, 'Vaksinasi', 'Menactra (Sanofi)', 800000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(30, 'Vaksinasi', 'Menivax (Biofarma)', 350000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(31, 'Vaksinasi', 'Menquadfi (Sanofi)', 900000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(32, 'Vaksinasi', 'Pneumovax 23 (MSD)', 1000000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(33, 'Vaksinasi', 'Prevenar 13 (Pfizer)', 1200000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(34, 'Vaksinasi', 'Prevenar 20 (Pfizer)', 1500000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(35, 'Vaksinasi', 'Proquad (MSD)', 950000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(36, 'Vaksinasi', 'Qdenga (Takeda)', 650000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(37, 'Vaksinasi', 'Rotarix (GSK)', 350000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(38, 'Vaksinasi', 'Rotateq (MSD)', 400000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(39, 'Vaksinasi', 'Shingrix (GSK)', 2500000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(40, 'Vaksinasi', 'Stamaril (Sanofi)', 500000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(41, 'Vaksinasi', 'Synflorix (GSK)', 850000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(42, 'Vaksinasi', 'Tetraxim (Sanofi)', 450000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(43, 'Vaksinasi', 'Twinrix (GSK)', 750000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(44, 'Vaksinasi', 'Typhim Vi (Sanofi)', 400000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(45, 'Vaksinasi', 'Varivax (MSD)', 700000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(46, 'Vaksinasi', 'Vaxigrip Tetra (Sanofi)', 450000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(47, 'Vaksinasi', 'Vaxneuvance (MSD)', 1300000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(48, 'Vaksinasi', 'Vecon Adult (Biofarma)', 300000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(49, 'Vaksinasi', 'Verorab (Sanofi)', 600000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(50, 'Vaksinasi', 'Vivaxim (Sanofi)', 550000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(52, 'Paket Kesehatan', 'Telekonsultasi', 150000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(53, 'Paket Kesehatan', 'Pemeriksaan Dokter', 250000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(54, 'Paket Kesehatan', 'Medical Check Up Lengkap', 1500000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(55, 'Paket Kesehatan', 'Medical Check Up Standard', 800000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(56, 'Paket Kesehatan', 'Pemeriksaan Asam Urat', 150000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(57, 'Paket Kesehatan', 'Pemeriksaan Gula Darah', 120000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(58, 'Paket Kesehatan', 'Pemeriksaan Kolesterol', 180000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(59, 'Vitamin', 'Vitamin B Complex', 120000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(60, 'Vitamin', 'Vitamin D3', 150000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(61, 'Vitamin', 'Suntik Vitamin C', 200000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(62, 'Vitamin', 'Vitamin Badan Bugar', 180000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(63, 'Vitamin', 'Vitamin Bugar Kinclong', 220000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(64, 'Vitamin', 'Vitamin Jeruk Segar', 170000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(65, 'Vitamin', 'Vitamin Remaja Abadi', 250000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(66, 'Vitamin', 'Vitamin Segar Bugar', 160000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(67, 'Vitamin', 'Vitamin Segar Kinclong', 210000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(68, 'Vitamin', 'Vitamin Sultan', 300000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(69, 'Vitamin', 'Vitamin Segar Bugar Ekstra', 230000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(70, 'Vitamin', 'Vitamin Sultan +', 350000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(71, 'Vitamin', 'Vitamin Badan Bugar Ekstra', 240000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(72, 'Vitamin', 'Vitamin Jeruk Segar Ekstra', 220000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(73, 'Obat', 'Pantoprazole 40 mg Vial', 120000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(74, 'Obat', 'Paracetamol 1 g Fl', 80000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(75, 'Obat', 'Tuberculin PPD RT 23 SSI', 250000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(76, 'Swab', 'Swab Antigen COVID-19', 100000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(77, 'Swab', 'Swab PCR COVID-19', 350000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
+(78, 'Vaksinasi', 'Vaksin Hepatitis B', 950000, NULL, NULL, NULL, 'Vaksin untuk mencegah infeksi Hepatitis B.', NULL, '2026-02-02 10:42:55', 'vaksin', NULL, 'Injeksi', NULL, '2026-12-31', 'HB-2025-001', 0, 10),
+(79, 'Vaksinasi', 'Vaksin Influenza', 350000, 300000, 50000, 'Januari - februari 2026', 'Vaksin influenza untuk perlindungan musiman.', NULL, '2026-02-02 10:42:55', 'vaksin', NULL, 'Injeksi', NULL, '2026-10-15', 'FLU-2025-009', 25, 10),
+(80, 'Layanan Klinik', 'Konsultasi Dokter Umum', 75000, NULL, NULL, NULL, 'Konsultasi langsung dengan dokter umum di klinik.', NULL, '2026-02-02 10:43:25', 'pelayanan', NULL, 'Layanan', NULL, NULL, NULL, 0, 10),
+(81, 'Layanan Klinik', 'Tes Antigen', 45000, NULL, NULL, NULL, 'Pemeriksaan COVID-19 menggunakan metode antigen.', NULL, '2026-02-02 10:43:25', 'pelayanan', NULL, 'Layanan', NULL, NULL, NULL, 0, 10),
+(82, 'Paket Kesehatan', 'Paket Medical Check Up Dasar', 150000, NULL, NULL, NULL, 'Paket pemeriksaan kesehatan dasar meliputi beberapa layanan.', NULL, '2026-02-02 10:43:47', 'paket', NULL, 'Paket', NULL, NULL, NULL, 0, 10);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `service_package_items`
+--
+
+CREATE TABLE `service_package_items` (
+  `id` int NOT NULL,
+  `package_id` int NOT NULL,
+  `service_id` int NOT NULL,
+  `quantity` int DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `service_package_items`
+--
+
+INSERT INTO `service_package_items` (`id`, `package_id`, `service_id`, `quantity`, `created_at`) VALUES
+(1, 10, 3, 1, '2026-02-02 10:57:47'),
+(2, 10, 5, 1, '2026-02-02 10:57:47');
 
 -- --------------------------------------------------------
 
@@ -901,6 +969,14 @@ ALTER TABLE `services`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `service_package_items`
+--
+ALTER TABLE `service_package_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `package_id` (`package_id`),
+  ADD KEY `service_id` (`service_id`);
+
+--
 -- Indexes for table `staff`
 --
 ALTER TABLE `staff`
@@ -953,13 +1029,13 @@ ALTER TABLE `vital_signs`
 -- AUTO_INCREMENT for table `bookings`
 --
 ALTER TABLE `bookings`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=87;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=92;
 
 --
 -- AUTO_INCREMENT for table `booking_services`
 --
 ALTER TABLE `booking_services`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT for table `booking_staff`
@@ -1007,25 +1083,25 @@ ALTER TABLE `medical_records`
 -- AUTO_INCREMENT for table `patients`
 --
 ALTER TABLE `patients`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `patient_addresses`
 --
 ALTER TABLE `patient_addresses`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=83;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=88;
 
 --
 -- AUTO_INCREMENT for table `patient_emails`
 --
 ALTER TABLE `patient_emails`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=85;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=90;
 
 --
 -- AUTO_INCREMENT for table `patient_phones`
 --
 ALTER TABLE `patient_phones`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=86;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=91;
 
 --
 -- AUTO_INCREMENT for table `patient_services`
@@ -1049,7 +1125,13 @@ ALTER TABLE `reservations`
 -- AUTO_INCREMENT for table `services`
 --
 ALTER TABLE `services`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=83;
+
+--
+-- AUTO_INCREMENT for table `service_package_items`
+--
+ALTER TABLE `service_package_items`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `staff`
@@ -1176,6 +1258,13 @@ ALTER TABLE `reservations`
   ADD CONSTRAINT `reservations_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `reservations_ibfk_2` FOREIGN KEY (`vaccine_id`) REFERENCES `vaccines` (`id`),
   ADD CONSTRAINT `reservations_ibfk_3` FOREIGN KEY (`slot_id`) REFERENCES `time_slots` (`id`);
+
+--
+-- Constraints for table `service_package_items`
+--
+ALTER TABLE `service_package_items`
+  ADD CONSTRAINT `service_package_items_ibfk_1` FOREIGN KEY (`package_id`) REFERENCES `services` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `service_package_items_ibfk_2` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `vaccination_history`
