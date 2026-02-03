@@ -2,11 +2,13 @@
 header('Content-Type: application/json');
 include "config.php";
 
+date_default_timezone_set('Asia/Jakarta');
+
 // Ambil tanggal dari parameter
 $tanggal = isset($_GET['tanggal']) ? $_GET['tanggal'] : '';
 
-if (empty($tanggal)) {
-    echo json_encode(['success' => false, 'message' => 'Tanggal tidak valid']);
+if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $tanggal)) {
+    echo json_encode(['success'=>false,'message'=>'Format tanggal salah']);
     exit;
 }
 
@@ -50,21 +52,39 @@ $jam_buka = $jadwal['jam_buka'];  // Format: HH:MM:SS
 $jam_tutup = $jadwal['jam_tutup']; // Format: HH:MM:SS
 
 // 3. AMBIL SEMUA BOOKING YANG SUDAH ADA DI TANGGAL INI
-$query_booking = "SELECT waktu_booking, service_type FROM bookings WHERE tanggal_booking = '$tanggal'AND status IN ('pending','confirmed')";
+$query_booking = "
+SELECT 
+    waktu_booking,
+    service_type,
+    COUNT(*) as total
+FROM bookings 
+WHERE tanggal_booking = '$tanggal'
+AND status IN ('pending','confirmed')
+AND parent_id IS NULL
+GROUP BY waktu_booking, service_type
+";
+
 $result_booking = mysqli_query($conn, $query_booking);
 
+if (!$result_booking) {
+   echo json_encode(['success'=>false,'message'=>'Database error']);
+   exit;
+}
+
+$max_slot = 5;
+
 $booked_slots = [];
-$booked_home_service = [];
 
 while ($row = mysqli_fetch_assoc($result_booking)) {
+
     $waktu = substr($row['waktu_booking'], 0, 5);
 
     if ($row['service_type'] === 'In Clinic') {
-        // Hanya in_clinic yang menutup slot klinik
-        $booked_slots[] = $waktu;
-    } else if ($row['service_type'] === 'Home Service') {
-        // Home service dicatat tapi tidak menutup slot
-        $booked_home_service[] = $waktu;
+
+        if ($row['total'] >= 1) {
+            $booked_slots[] = $waktu;
+        }
+
     }
 }
 
@@ -80,10 +100,10 @@ list($tutup_hour, $tutup_min) = explode(':', $jam_tutup);
 $start_time = intval($buka_hour) * 60 + intval($buka_min);
 $end_time = intval($tutup_hour) * 60 + intval($tutup_min);
 
-$interval = 15; // 5 menit per slot
+$interval = 15; // 15 menit per slot
 
 $all_slots = [];
-for ($time = $start_time; $time <= $end_time; $time += $interval) {
+for ($time = $start_time; $time < $end_time; $time += $interval) {
     $hour = floor($time / 60);
     $minute = $time % 60;
     

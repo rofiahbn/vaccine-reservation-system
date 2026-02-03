@@ -13,11 +13,47 @@ $participants = $_SESSION['participants'];
 $success_bookings = [];
 $failed_bookings = [];
 
+// ===== CEK SLOT SEKALI UNTUK SEMUA PESERTA =====
+$first = $participants[0];
+$jumlahPesertaBaru = count($participants);
+
+// Hitung booking existing di slot
+$query_check = "SELECT COUNT(*) as total 
+               FROM bookings 
+               WHERE tanggal_booking = ? 
+               AND waktu_booking = ?
+               AND parent_id IS NULL";
+
+$stmt_check = mysqli_prepare($conn, $query_check);
+mysqli_stmt_bind_param($stmt_check, 'ss', 
+    $first['tanggal_booking'], 
+    $first['waktu_booking']
+);
+
+mysqli_stmt_execute($stmt_check);
+$result_check = mysqli_stmt_get_result($stmt_check);
+$row_check = mysqli_fetch_assoc($result_check);
+
+$max_slot = 5;
+
+$parent_booking_id = null;
+$nomor_antrian_parent = null;
+
 // Start transaction
 mysqli_begin_transaction($conn);
 
 try {
+
+    if (($row_check['total'] + 1) > $max_slot) {
+        throw new Exception("Slot tanggal "
+            . $first['tanggal_booking']
+            . " jam "
+            . $first['waktu_booking']
+            . " sudah penuh. Silakan pilih jadwal lain.");
+    }
+
     foreach ($participants as $index => $p) {
+        // Jika slot melebihi kapasitas
         // 1. GENERATE NOMOR REKAM MEDIS
         // GENERATE NOMOR REKAM MEDIS UNIK
             $prefix_rm = 'RM' . date('Ymd');
@@ -155,46 +191,51 @@ try {
             throw new Exception("Gagal menyimpan alamat: " . mysqli_error($conn));
         }
         
-        // 6. CEK SLOT MASIH TERSEDIA
-        $query_check = "SELECT COUNT(*) as total FROM bookings 
-                       WHERE tanggal_booking = ? AND waktu_booking = ?";
-        $stmt_check = mysqli_prepare($conn, $query_check);
-        mysqli_stmt_bind_param($stmt_check, 'ss', $p['tanggal_booking'], $p['waktu_booking']);
-        mysqli_stmt_execute($stmt_check);
-        $result_check = mysqli_stmt_get_result($stmt_check);
-        $row_check = mysqli_fetch_assoc($result_check);
-        
-        if ($row_check['total'] > 0) {
-            throw new Exception("Slot tanggal " . $p['tanggal_booking'] . " jam " . $p['waktu_booking'] . " sudah penuh. Silakan pilih jadwal lain.");
-        }
-        
         // 7. GENERATE NOMOR ANTRIAN
-        // Format: YYYYMMDD-001, YYYYMMDD-002, dst
-        $tanggal_booking = $p['tanggal_booking'];
-        $prefix_antrian = date('Ymd', strtotime($tanggal_booking));
-        
-        $query_antrian = "SELECT MAX(CAST(SUBSTRING(nomor_antrian, 10) AS UNSIGNED)) as max_no 
-                         FROM bookings 
-                         WHERE tanggal_booking = ?";
-        $stmt_antrian = mysqli_prepare($conn, $query_antrian);
-        mysqli_stmt_bind_param($stmt_antrian, 's', $tanggal_booking);
-        mysqli_stmt_execute($stmt_antrian);
-        $result_antrian = mysqli_stmt_get_result($stmt_antrian);
-        $row_antrian = mysqli_fetch_assoc($result_antrian);
-        
-        $next_no = ($row_antrian['max_no'] ?? 0) + 1;
-        $nomor_antrian = $prefix_antrian . '-' . str_pad($next_no, 3, '0', STR_PAD_LEFT);
+        if ($parent_booking_id === null) {
+
+            // peserta pertama → generate nomor antrian
+            $tanggal_booking = $p['tanggal_booking'];
+            $prefix_antrian = date('Ymd', strtotime($tanggal_booking));
+
+            $query_antrian = "SELECT MAX(CAST(SUBSTRING(nomor_antrian, 10) AS UNSIGNED)) as max_no 
+                            FROM bookings 
+                            WHERE tanggal_booking = ?
+                            FOR UPDATE";
+
+            $stmt_antrian = mysqli_prepare($conn, $query_antrian);
+            mysqli_stmt_bind_param($stmt_antrian, 's', $tanggal_booking);
+            mysqli_stmt_execute($stmt_antrian);
+
+            $result_antrian = mysqli_stmt_get_result($stmt_antrian);
+            $row_antrian = mysqli_fetch_assoc($result_antrian);
+
+            $next_no = ($row_antrian['max_no'] ?? 0) + 1;
+            $nomor_antrian = $prefix_antrian . '-' . str_pad($next_no, 3, '0', STR_PAD_LEFT);
+
+        } else {
+
+            // peserta berikutnya ikut parent
+            $nomor_antrian = $nomor_antrian_parent;
+        }
+
         
         // 8. INSERT KE TABLE BOOKINGS
         $status = 'pending'; // Status awal
         $catatan = 'Pendaftaran online';
         
         $query_booking = "INSERT INTO bookings 
-                 (patient_id, service_type, nomor_antrian, tanggal_booking, waktu_booking, status, catatan, created_at, updated_at)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
+            (patient_id, parent_id, service_type, nomor_antrian, tanggal_booking, waktu_booking, status, catatan, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
         $stmt_booking = mysqli_prepare($conn, $query_booking);
-        mysqli_stmt_bind_param($stmt_booking, 'issssss',
+
+        $parent_id = ($parent_booking_id === null)
+            ? null
+            : $parent_booking_id;
+
+        mysqli_stmt_bind_param($stmt_booking, 'iissssss',
             $patient_id,
+            $parent_id,
             $p['service_type'], 
             $nomor_antrian,
             $p['tanggal_booking'],
@@ -208,6 +249,11 @@ try {
         }
         
         $booking_id = mysqli_insert_id($conn);
+
+        if ($parent_booking_id === null) {
+            $parent_booking_id = $booking_id;
+            $nomor_antrian_parent = $nomor_antrian;
+        }
 
         // 9. INSERT KE TABLE BOOKING_SERVICES (Layanan yang dipilih + harga snapshot)
         if (!empty($p['selected_products']) && is_array($p['selected_products'])) {

@@ -46,22 +46,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validasi data
     $errors = [];
     
-    $service_type = $_POST['service_type'] ?? '';
-    $pelayanan = $_POST['pelayanan'] ?? '';
+    $first = $_SESSION['participants'][0];
+
+    $service_type = $first['service_type'];
+    $pelayanan = $first['pelayanan'];
+    $tanggal_booking = $first['tanggal_booking'];
+    $waktu_booking = $first['waktu_booking'];
+
     $nama_lengkap = $_POST['nama_lengkap'] ?? '';
     $tanggal_lahir = $_POST['tanggal_lahir'] ?? '';
     $jenis_kelamin = $_POST['jenis_kelamin'] ?? '';
-    $tanggal_booking = $_POST['tanggal_booking'] ?? '';
-    $waktu_booking = $_POST['waktu_booking'] ?? '';
     $action = $_POST['action'] ?? ''; // 'add_more' atau 'finish'
-    
-    if (empty($service_type)) $errors[] = 'Tipe layanan harus dipilih';
-    if (empty($pelayanan)) $errors[] = 'Pelayanan harus dipilih';
+
+    // ===== Batasi maksimal 5 peserta =====
+    if (isset($_SESSION['participants']) && count($_SESSION['participants']) >= 5) {
+        $errors[] = 'Maksimal 5 peserta dalam satu antrian';
+    }
+
     if (empty($nama_lengkap)) $errors[] = 'Nama lengkap harus diisi';
     if (empty($tanggal_lahir)) $errors[] = 'Tanggal lahir harus diisi';
     if (empty($jenis_kelamin)) $errors[] = 'Jenis kelamin harus dipilih';
-    if (empty($tanggal_booking)) $errors[] = 'Tanggal booking harus dipilih';
-    if (empty($waktu_booking)) $errors[] = 'Waktu booking harus dipilih';
     
     // Validasi identitas sesuai layanan
     if ($pelayanan === 'Umroh/Haji/Luar Negeri') {
@@ -290,32 +294,44 @@ if (isset($errors) && count($errors) > 0) {
             <p class="subtitle">Isi dan lengkapi data peserta tambahan</p>
         <?php endif; ?>
 
-        <form id="addParticipantForm" method="POST" action="">
+        <?php if(isset($_SESSION['participants'][0])): 
+            $first = $_SESSION['participants'][0];
+        ?>
 
-            <!-- PILIH TIPE LAYANAN -->
-            <div class="form-section">
-                <div class="form-group">
-                    <label>Tipe Layanan <span class="required">*</span></label>
-                    <div class="radio-group">
-                        <label class="radio-card">
-                            <input type="radio" name="service_type" value="In Clinic" checked required>
-                            <div class="radio-card-content">
-                                <i class="fas fa-hospital"></i>
-                                <strong>In Clinic</strong>
-                                <small>Kunjungi klinik kami</small>
-                            </div>
-                        </label>
-                        <label class="radio-card">
-                            <input type="radio" name="service_type" value="Home Service" required>
-                            <div class="radio-card-content">
-                                <i class="fas fa-home"></i>
-                                <strong>Home Service</strong>
-                                <small>Layanan ke rumah Anda</small>
-                            </div>
-                        </label>
-                    </div>
-                </div>
+        <?php 
+        $tgl = new DateTime($first['tanggal_booking']);
+        ?>
+
+        <div class="booking-info-banner">
+
+            <div class="booking-info-title">
+                Antrian yang dipilih
             </div>
+
+            <div class="booking-info-item">
+                <i class="fas fa-calendar-day"></i>
+                <span><?= $tgl->format('d F Y'); ?></span>
+            </div>
+
+            <div class="booking-info-item">
+                <i class="fas fa-clock"></i>
+                <span><?= $first['waktu_booking']; ?> WIB</span>
+            </div>
+
+            <div class="booking-info-item">
+                <i class="fas fa-stethoscope"></i>
+                <span><?= $first['service_type']; ?></span>
+            </div>
+
+        </div>
+
+        <?php endif; ?>
+
+        <form id="addParticipantForm" method="POST" action="">
+            <!-- HIDDEN INPUT CONSISTENT WITH ORDER PAGE -->
+            <input type="hidden" name="nama_panggilan" value="<?= htmlspecialchars($edit_data['nama_panggilan'] ?? '') ?>">
+            <input type="hidden" name="kebangsaan" value="<?= htmlspecialchars($edit_data['kebangsaan'] ?? 'Indonesia') ?>">
+            <input type="hidden" name="pekerjaan" value="<?= htmlspecialchars($edit_data['pekerjaan'] ?? '') ?>">
             
             <!-- PILIH LAYANAN DULU -->
             <div class="form-section">
@@ -337,22 +353,18 @@ if (isset($errors) && count($errors) > 0) {
                 </div>
 
                 <div class="row">
+                    <!--
                     <div class="form-group">
                         <label>Nama Panggilan</label>
                         <input type="text" name="nama_panggilan" placeholder="Nama Panggilan" value="<?php echo htmlspecialchars($edit_data['nama_panggilan'] ?? ''); ?>">
                     </div>
+                    -->
 
                     <div class="form-group">
                         <label>Tanggal Lahir <span class="required">*</span></label>
                         <input type="date" name="tanggal_lahir" id="tanggalLahir" required onchange="hitungUsia()" value="<?php echo htmlspecialchars($edit_data['tanggal_lahir'] ?? ''); ?>">
                     </div>
-                </div>
 
-                <div class="info-box" id="usiaInfo" style="display:none;">
-                    Usia: <strong id="usiaText">-</strong> tahun (<span id="kategoriText">-</span>)
-                </div>
-                
-                <div class="row">
                     <div class="form-group">
                         <label>Jenis Kelamin <span class="required">*</span></label>
                         <div class="radio-group">
@@ -365,6 +377,10 @@ if (isset($errors) && count($errors) > 0) {
                         </div>
                     </div>
                 </div>
+
+                    <div class="info-box" id="usiaInfo" style="display:none;">
+                        Usia: <strong id="usiaText">-</strong> tahun (<span id="kategoriText">-</span>)
+                    </div>
 
                 <!-- IDENTITAS DINAMIS -->
                 <div class="row">
@@ -379,6 +395,7 @@ if (isset($errors) && count($errors) > 0) {
                     </div>
                 </div>
 
+                <!--
                 <div class="row">
                     <div class="form-group">
                         <label>Kebangsaan</label>
@@ -390,6 +407,7 @@ if (isset($errors) && count($errors) > 0) {
                         <input type="text" name="pekerjaan" placeholder="Pekerjaan saat ini" value="<?php echo htmlspecialchars($edit_data['pekerjaan'] ?? ''); ?>">
                     </div>
                 </div>
+                -->
 
                 <div class="form-group" id="fieldNamaWali" style="display:none;">
                     <label>Nama Wali <span class="required">*</span></label>
@@ -399,6 +417,10 @@ if (isset($errors) && count($errors) > 0) {
 
             <!-- KONTAK -->
             <div class="form-section">
+                <label>
+                    <input type="checkbox" id="copyContact">
+                    Gunakan data kontak peserta pertama
+                </label>
                 <div class="form-group">
                     <label>Email <span class="required">*</span></label>
                     <input type="email" name="emails[]" required placeholder="contoh@email.com" value="<?php echo htmlspecialchars($edit_data['emails'][0] ?? ''); ?>">
@@ -493,94 +515,6 @@ if (isset($errors) && count($errors) > 0) {
                 </div>
             </div>
 
-            <!-- KALENDER BOOKING -->
-            <div class="form-section">
-                <h2 class="section-title">Pilih Jadwal untuk Peserta Ini</h2>
-                
-                <div class="calendar-wrapper">
-                    <div class="calendar-header">
-                        <button type="button" onclick="prevMonth()">&lt;</button>
-                        <h2><?php echo $nama_bulan[$bulan] . ' ' . $tahun; ?></h2>
-                        <button type="button" onclick="nextMonth()">&gt;</button>
-                    </div>
-
-                    <div class="calendar-days">
-                        <div class="day-header">M</div>
-                        <div class="day-header">S</div>
-                        <div class="day-header">S</div>
-                        <div class="day-header">R</div>
-                        <div class="day-header">K</div>
-                        <div class="day-header">J</div>
-                        <div class="day-header">S</div>
-
-                        <?php
-                        // Kosongkan hari sebelum tanggal 1
-                        for ($i = 0; $i < $hari_awal; $i++) {
-                            echo '<div class="day empty"></div>';
-                        }
-
-                        // Tampilkan tanggal
-                        $today_date = date('Y-m-d');
-
-                        for ($tgl = 1; $tgl <= $jumlah_hari; $tgl++) {
-                            $tanggal_full = sprintf('%04d-%02d-%02d', $tahun, $bulan, $tgl);
-                            $is_today = ($tanggal_full === $today_date);
-
-                            // ❌ JIKA TANGGAL SUDAH LEWAT → DISABLE
-                            if ($tanggal_full < $today_date) {
-                                echo "<div class='day disabled past-date' title='Tanggal sudah lewat'>$tgl</div>";
-                                continue;
-                            }
-
-                            // Cek status dari DB
-                            $status = checkDateStatus($conn, $tanggal_full);
-                            $class = getDateClass($status, $is_today);
-                            $title = getDateTitle($status);
-                            $clickable = isDateClickable($status);
-
-                            if ($clickable) {
-                                echo "<div class='$class' onclick='selectDate(this, $tgl)' title='$title'>$tgl</div>";
-                            } else {
-                                echo "<div class='$class' title='$title'>$tgl</div>";
-                            }
-                        }
-                        ?>
-                    </div>
-
-                    <div class="legend">
-                        <div class="legend-item">
-                            <div class="legend-box tersedia"></div>
-                            <span>Tersedia</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-box penuh"></div>
-                            <span>Jadwal Penuh</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-box holiday"></div>
-                            <span>Libur</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-box closed"></div>
-                            <span>Tutup</span>
-                        </div>
-                    </div>
-                </div>
-
-                <input type="hidden" name="tanggal_booking" id="selectedDate" value="">
-                
-                <div class="selected-date" id="dateDisplay" style="display:none;">
-                    Tanggal yang dipilih: <strong id="dateText"></strong>
-                </div>
-
-                <input type="hidden" name="waktu_booking" id="selectedTime">
-
-                <div class="time-slots" id="timeSlots" style="display:none;">
-                    <h3>Pilih Jam</h3>
-                    <div class="slots-container" id="slotsContainer"></div>
-                </div>
-            </div>
-
             <!-- BUTTONS -->
             <div class="form-actions">
                 <?php if ($is_edit_mode): ?>
@@ -596,11 +530,17 @@ if (isset($errors) && count($errors) > 0) {
                         <i class="fas fa-arrow-left"></i> Kembali ke Konfirmasi
                     </button>
                     
-                    <button type="submit" name="action" value="add_more" class="btn btn-secondary" id="btnAddMore" disabled>
+                    <button 
+                        type="submit" 
+                        name="action" 
+                        value="add_more"
+                        <?= (isset($_SESSION['participants']) && count($_SESSION['participants']) >= 5) ? 'disabled' : '' ?>
+                        class="btn btn-secondary" 
+                        id="btnAddMore">
                         <i class="fas fa-user-plus"></i> Tambah Peserta Lagi
                     </button>
                     
-                    <button type="submit" name="action" value="finish" class="btn btn-primary" id="btnFinish" disabled>
+                    <button type="submit" name="action" value="finish" class="btn btn-primary" id="btnFinish">
                         <i class="fas fa-check"></i> Selesai
                     </button>
                 <?php endif; ?>
@@ -716,6 +656,25 @@ if (isset($errors) && count($errors) > 0) {
                 window.location.href = 'cancel_edit.php';
             }
         }
+
+    document.getElementById('copyContact')?.addEventListener('change', function() {
+
+        if (this.checked) {
+
+            fetch('get_first_participant.php')
+            .then(res => res.json())
+            .then(data => {
+
+                document.querySelector('input[name="emails[]"]').value = data.email;
+                document.querySelector('input[name="phones[]"]').value = data.phone;
+                document.querySelector('textarea[name="alamat"]').value = data.alamat;
+
+                document.getElementById('provinsiSelect').value = data.provinsi;
+                loadKota(data.provinsi, data.kota);
+
+            });
+        }
+    });
     </script>
 </body>
 </html>

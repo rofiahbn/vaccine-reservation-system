@@ -95,10 +95,38 @@ $participant_data = [
     'waktu_booking' => $waktu_booking
 ];
 
+if (!empty($_SESSION['participants'])) {
+
+    $first = $_SESSION['participants'][0];
+
+    // Lock jadwal
+    if (
+        $participant_data['tanggal_booking'] !== $first['tanggal_booking'] ||
+        $participant_data['waktu_booking'] !== $first['waktu_booking']
+    ) {
+        $_SESSION['error_message'] = 'Semua peserta harus memiliki jadwal yang sama.';
+        header('Location: add_participant.php');
+        exit;
+    }
+
+    // Lock service type
+    if ($participant_data['service_type'] !== $first['service_type']) {
+        $_SESSION['error_message'] = 'Semua peserta harus menggunakan tipe layanan yang sama.';
+        header('Location: add_participant.php');
+        exit;
+    }
+}
+
 // ========== SIMPAN SELECTED PRODUCTS KE PARTICIPANT DATA ==========
 if (isset($_POST['selected_products']) && !empty($_POST['selected_products'])) {
     $selected_products = json_decode($_POST['selected_products'], true);
+
+    if (!is_array($selected_products)) {
+        $selected_products = [];
+    }
+
     $participant_data['selected_products'] = $selected_products;
+
 } else {
     $participant_data['selected_products'] = [];
 }

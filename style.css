@@ -864,3 +864,73 @@ textarea {
         padding: 6px 10px;
     }
 }
+
+#emailContainer,
+#phoneContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.input-group input {
+    flex: 1;
+}
+
+.input-group button {
+    background: #ff5c5c;
+    border: none;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: 0.2s;
+}
+
+.input-group button:hover {
+    background: #e04848;
+}
+
+.form-group .btn-secondary {
+    margin-top: 8px;
+    font-size: 13px;
+    padding: 6px 12px;
+}
+
+.booking-info-banner {
+    background: #e0f2fe;
+    border-left: 4px solid #0284c7;
+    padding: 16px 18px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.booking-info-title {
+    width: 100%;
+    font-weight: 700;
+    color: #0c4a6e;
+    margin-bottom: 5px;
+}
+
+.booking-info-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.booking-info-item i {
+    color: #0284c7;
+    font-size: 16px;
+}

@@ -9,6 +9,9 @@ if (!isset($_SESSION['participants']) || empty($_SESSION['participants'])) {
 
 $participants = $_SESSION['participants'];
 $total_peserta = count($participants);
+
+$firstBooking = $participants[0];
+
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -69,6 +72,32 @@ $total_peserta = count($participants);
         <div style="background: #e0f2fe; border-left: 4px solid #0284c7; padding: 15px; border-radius: 8px; margin-bottom: 30px;">
             <strong><i class="fas fa-info-circle" style="color: #0284c7;"></i> Total Peserta:</strong> 
             <span style="font-size: 18px; font-weight: 700; color: #0c4a6e;"><?php echo $total_peserta; ?> orang</span>
+        </div>
+
+        <div class="booking-schedule" style="margin-bottom:30px;">
+            <h3><i class="fas fa-calendar-check"></i> Jadwal Booking</h3>
+
+            <div class="schedule-info">
+                <div class="schedule-item">
+                    <i class="fas fa-calendar-day"></i>
+                    <span>
+                        <?php 
+                        $booking_date = new DateTime($firstBooking['tanggal_booking']);
+                        echo $booking_date->format('d F Y'); 
+                        ?>
+                    </span>
+                </div>
+
+                <div class="schedule-item">
+                    <i class="fas fa-clock"></i>
+                    <span><?= $firstBooking['waktu_booking']; ?> WIB</span>
+                </div>
+
+                <div class="schedule-item">
+                    <i class="fas fa-stethoscope"></i>
+                    <span><?= htmlspecialchars($firstBooking['service_type']); ?></span>
+                </div>
+            </div>
         </div>
 
         <?php foreach ($participants as $index => $p): ?>
@@ -182,31 +211,6 @@ $total_peserta = count($participants);
                             <?php echo htmlspecialchars($p['kota']); ?>, 
                             <?php echo htmlspecialchars($p['provinsi']); ?>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="booking-schedule">
-                <h4><i class="fas fa-calendar-check"></i> Jadwal Booking</h4>
-                <div class="schedule-info">
-                    <div class="schedule-item">
-                        <i class="fas fa-calendar-day"></i>
-                        <span>
-                            <?php 
-                            $booking_date = new DateTime($p['tanggal_booking']);
-                            echo $booking_date->format('d F Y'); 
-                            ?>
-                        </span>
-                    </div>
-                    <div class="schedule-item">
-                        <i class="fas fa-clock"></i>
-                        <span><?php echo $p['waktu_booking']; ?> WIB</span>
-                    </div>
-                    <div class="schedule-item">
-                        <i class="fas fa-stethoscope"></i>
-                        <span>
-                            <?php echo htmlspecialchars($p['service_type'] ?? '-'); ?>
-                        </span>
                     </div>
                 </div>
             </div>

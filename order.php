@@ -302,14 +302,34 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
 
             <!-- KONTAK -->
             <div class="form-section">
+                <!-- EMAIL -->
                 <div class="form-group">
                     <label>Email <span class="required">*</span></label>
-                    <input type="email" name="emails[]" required placeholder="contoh@email.com">
+
+                    <div id="emailContainer">
+                        <div class="input-group">
+                            <input type="email" name="emails[]" required placeholder="contoh@email.com">
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="addEmail()" class="btn btn-secondary">
+                        + Tambah Email
+                    </button>
                 </div>
-                
+
+                <!-- NOMOR HP -->
                 <div class="form-group">
                     <label>Nomor HP <span class="required">*</span></label>
-                    <input type="tel" name="phones[]" required placeholder="08123456789">
+
+                    <div id="phoneContainer">
+                        <div class="input-group">
+                            <input type="tel" name="phones[]" required placeholder="08123456789">
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="addPhone()" class="btn btn-secondary">
+                        + Tambah Nomor HP
+                    </button>
                 </div>
                 
                 <div class="form-group">
@@ -320,7 +340,7 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
                 <div class="row">
                     <div class="form-group">
                         <label>Provinsi <span class="required">*</span></label>
-                        <select name="provinsi" id="provinsiSelect" required onchange="loadKota()">
+                        <select name="provinsi" id="provinsiSelect" required onchange="loadKota(this.value)">
                             <option value="">-- Pilih Provinsi --</option>
                         </select>
                     </div>

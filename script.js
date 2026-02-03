@@ -57,7 +57,6 @@ function updateFormByService() {
 }
 
 // ==================== HITUNG USIA ====================
-// ==================== HITUNG USIA ====================
 function hitungUsia() {
     const inputTanggal = document.getElementById('tanggalLahir');
     if (!inputTanggal || !inputTanggal.value) return;
@@ -192,19 +191,45 @@ function fillPatientData(patientId) {
                 document.getElementById('inputNamaWali').value = p.nama_wali || '';
                 
                 // Kontak
-                // Kontak (SINGLE, bukan array)
-                if (data.email) {
-                    const emailInput = document.querySelector('input[name="email"]');
-                    if (emailInput) {
-                        emailInput.value = data.email;
-                    }
+                // ===== EMAIL =====
+                if (data.emails && data.emails.length > 0) {
+                    const container = document.getElementById("emailContainer");
+                    container.innerHTML = "";
+
+                    data.emails.forEach(email => {
+                        const div = document.createElement("div");
+                        div.classList.add("input-group");
+
+                        div.innerHTML = `
+                            <input type="email" name="emails[]" value="${email}">
+                            <button type="button" onclick="this.parentElement.remove()">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        `;
+
+                        container.appendChild(div);
+                    });
                 }
 
-                if (data.phone) {
-                    const phoneInput = document.querySelector('input[name="phone"]');
-                    if (phoneInput) {
-                        phoneInput.value = data.phone;
-                    }
+
+                // ===== PHONE =====
+                if (data.phones && data.phones.length > 0) {
+                    const container = document.getElementById("phoneContainer");
+                    container.innerHTML = "";
+
+                    data.phones.forEach(phone => {
+                        const div = document.createElement("div");
+                        div.classList.add("input-group");
+
+                        div.innerHTML = `
+                            <input type="tel" name="phones[]" value="${phone}">
+                            <button type="button" onclick="this.parentElement.remove()">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        `;
+
+                        container.appendChild(div);
+                    });
                 }
                 
                 if (data.address) {
@@ -213,7 +238,11 @@ function fillPatientData(patientId) {
                     // Set provinsi dulu
                     if (data.address.provinsi) {
                         document.getElementById('provinsiSelect').value = data.address.provinsi;
-                        loadKota(); // Load kota sesuai provinsi
+
+                        loadKota(
+                            data.address.provinsi,
+                            data.address.kota
+                        );
                         
                         // Set kota setelah kota ter-load
                         setTimeout(() => {
@@ -478,37 +507,36 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-
-    function prevMonth() {
-    let bulan = bulanNow;
-    let tahun = tahunNow;
-
-    bulan--;
-    if (bulan < 1) {
-        bulan = 12;
-        tahun--;
-    }
-
-    // Redirect dengan parameter GET
-    window.location.href = `?bulan=${bulan}&tahun=${tahun}`;
-}
-
-function nextMonth() {
-    let bulan = bulanNow;
-    let tahun = tahunNow;
-
-    bulan++;
-    if (bulan > 12) {
-        bulan = 1;
-        tahun++;
-    }
-
-    // Redirect dengan parameter GET
-    window.location.href = `?bulan=${bulan}&tahun=${tahun}`;
-}
-    
-    // Load provinsi saat halaman load
-    if (typeof loadProvinsi === 'function') {
-        loadProvinsi();
-    }
 });
+
+function addEmail() {
+    const container = document.getElementById("emailContainer");
+
+    const div = document.createElement("div");
+    div.classList.add("input-group");
+
+    div.innerHTML = `
+        <input type="email" name="emails[]" placeholder="contoh@email.com">
+        <button type="button" onclick="this.parentElement.remove()">
+            <i class="fas fa-trash"></i>
+        </button>
+    `;
+
+    container.appendChild(div);
+}
+
+function addPhone() {
+    const container = document.getElementById("phoneContainer");
+
+    const div = document.createElement("div");
+    div.classList.add("input-group");
+
+    div.innerHTML = `
+        <input type="tel" name="phones[]" placeholder="08123456789">
+        <button type="button" onclick="this.parentElement.remove()">
+            <i class="fas fa-trash"></i>
+        </button>
+    `;
+
+    container.appendChild(div);
+}
