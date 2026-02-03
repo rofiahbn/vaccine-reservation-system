@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Feb 03, 2026 at 01:52 AM
+-- Generation Time: Feb 03, 2026 at 01:57 PM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.30
 
@@ -29,6 +29,7 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `bookings` (
   `id` int NOT NULL,
+  `parent_id` int DEFAULT NULL,
   `patient_id` int NOT NULL,
   `service_type` enum('Home Service','In Clinic') COLLATE utf8mb4_unicode_ci NOT NULL,
   `nomor_antrian` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -47,21 +48,27 @@ CREATE TABLE `bookings` (
 -- Dumping data for table `bookings`
 --
 
-INSERT INTO `bookings` (`id`, `patient_id`, `service_type`, `nomor_antrian`, `tanggal_booking`, `waktu_booking`, `status`, `catatan`, `created_at`, `updated_at`, `doctor_id`, `payment_status`, `tindakan_selesai`) VALUES
-(78, 1, 'In Clinic', '20260120-001', '2026-01-23', '09:30:00', 'confirmed', 'Pendaftaran online', '2026-01-20 09:38:53', '2026-01-26 13:37:47', 1, 'unpaid', 0),
-(79, 2, 'In Clinic', '20260121-001', '2026-01-23', '09:00:00', 'cancelled', 'Pendaftaran online', '2026-01-20 23:23:09', '2026-01-23 21:33:47', NULL, 'unpaid', 0),
-(80, 3, 'In Clinic', '20260122-002', '2026-01-23', '11:00:00', 'confirmed', 'Pendaftaran online', '2026-01-22 15:53:09', '2026-01-23 21:36:03', NULL, 'unpaid', 0),
-(81, 4, 'In Clinic', '20260122-003', '2026-01-23', '11:30:00', 'pending', 'Pendaftaran online', '2026-01-22 17:17:05', '2026-01-23 21:35:47', NULL, 'unpaid', 0),
-(82, 5, 'In Clinic', '20260126-001', '2026-01-26', '10:45:00', 'completed', 'Pendaftaran online', '2026-01-26 09:42:15', '2026-01-28 00:26:50', NULL, 'paid', 1),
-(83, 1, 'In Clinic', '20260127-001', '2026-01-27', '09:15:00', 'confirmed', 'Pendaftaran online', '2026-01-26 09:56:30', '2026-01-27 12:45:38', NULL, 'unpaid', 1),
-(84, 6, 'In Clinic', '20260126-002', '2026-01-26', '14:30:00', 'completed', 'Pendaftaran online', '2026-01-26 09:56:30', '2026-01-29 02:17:28', NULL, 'paid', 1),
-(85, 2, 'In Clinic', '20260126-003', '2026-01-26', '11:15:00', 'cancelled', 'Pendaftaran online', '2026-01-26 16:04:53', '2026-01-26 17:15:52', NULL, 'unpaid', 0),
-(86, 1, 'In Clinic', '20260202-001', '2026-02-02', '09:00:00', 'pending', 'Pendaftaran online', '2026-02-02 14:47:44', '2026-02-02 14:47:44', NULL, 'unpaid', 0),
-(87, 1, 'In Clinic', '20260218-001', '2026-02-18', '09:30:00', 'pending', 'Pendaftaran online', '2026-02-02 16:43:28', '2026-02-02 16:43:28', NULL, 'unpaid', 0),
-(88, 2, 'In Clinic', '20260211-001', '2026-02-11', '09:00:00', 'pending', 'Pendaftaran online', '2026-02-02 16:43:28', '2026-02-02 16:43:28', NULL, 'unpaid', 0),
-(89, 2, 'In Clinic', '20260218-002', '2026-02-18', '09:45:00', 'pending', 'Pendaftaran online', '2026-02-02 16:49:15', '2026-02-02 16:49:15', NULL, 'unpaid', 0),
-(90, 7, 'In Clinic', '20260204-001', '2026-02-04', '09:15:00', 'pending', 'Pendaftaran online', '2026-02-02 16:58:32', '2026-02-02 16:58:32', NULL, 'unpaid', 0),
-(91, 8, 'In Clinic', '20260203-001', '2026-02-03', '09:30:00', 'pending', 'Pendaftaran online', '2026-02-02 20:03:33', '2026-02-02 20:03:33', NULL, 'unpaid', 0);
+INSERT INTO `bookings` (`id`, `parent_id`, `patient_id`, `service_type`, `nomor_antrian`, `tanggal_booking`, `waktu_booking`, `status`, `catatan`, `created_at`, `updated_at`, `doctor_id`, `payment_status`, `tindakan_selesai`) VALUES
+(78, NULL, 1, 'In Clinic', '20260120-001', '2026-01-23', '09:30:00', 'confirmed', 'Pendaftaran online', '2026-01-20 09:38:53', '2026-01-26 13:37:47', 1, 'unpaid', 0),
+(79, NULL, 2, 'In Clinic', '20260121-001', '2026-01-23', '09:00:00', 'cancelled', 'Pendaftaran online', '2026-01-20 23:23:09', '2026-01-23 21:33:47', NULL, 'unpaid', 0),
+(80, NULL, 3, 'In Clinic', '20260122-002', '2026-01-23', '11:00:00', 'confirmed', 'Pendaftaran online', '2026-01-22 15:53:09', '2026-01-23 21:36:03', NULL, 'unpaid', 0),
+(81, NULL, 4, 'In Clinic', '20260122-003', '2026-01-23', '11:30:00', 'pending', 'Pendaftaran online', '2026-01-22 17:17:05', '2026-01-23 21:35:47', NULL, 'unpaid', 0),
+(82, NULL, 5, 'In Clinic', '20260126-001', '2026-01-26', '10:45:00', 'completed', 'Pendaftaran online', '2026-01-26 09:42:15', '2026-01-28 00:26:50', NULL, 'paid', 1),
+(83, NULL, 1, 'In Clinic', '20260127-001', '2026-01-27', '09:15:00', 'confirmed', 'Pendaftaran online', '2026-01-26 09:56:30', '2026-01-27 12:45:38', NULL, 'unpaid', 1),
+(84, NULL, 6, 'In Clinic', '20260126-002', '2026-01-26', '14:30:00', 'completed', 'Pendaftaran online', '2026-01-26 09:56:30', '2026-01-29 02:17:28', NULL, 'paid', 1),
+(85, NULL, 2, 'In Clinic', '20260126-003', '2026-01-26', '11:15:00', 'cancelled', 'Pendaftaran online', '2026-01-26 16:04:53', '2026-01-26 17:15:52', NULL, 'unpaid', 0),
+(86, NULL, 1, 'In Clinic', '20260202-001', '2026-02-02', '09:00:00', 'pending', 'Pendaftaran online', '2026-02-02 14:47:44', '2026-02-02 14:47:44', NULL, 'unpaid', 0),
+(87, NULL, 1, 'In Clinic', '20260218-001', '2026-02-18', '09:30:00', 'pending', 'Pendaftaran online', '2026-02-02 16:43:28', '2026-02-02 16:43:28', NULL, 'unpaid', 0),
+(88, NULL, 2, 'In Clinic', '20260211-001', '2026-02-11', '09:00:00', 'pending', 'Pendaftaran online', '2026-02-02 16:43:28', '2026-02-02 16:43:28', NULL, 'unpaid', 0),
+(89, NULL, 2, 'In Clinic', '20260218-002', '2026-02-18', '09:45:00', 'pending', 'Pendaftaran online', '2026-02-02 16:49:15', '2026-02-02 16:49:15', NULL, 'unpaid', 0),
+(90, NULL, 7, 'In Clinic', '20260204-001', '2026-02-04', '09:15:00', 'pending', 'Pendaftaran online', '2026-02-02 16:58:32', '2026-02-02 16:58:32', NULL, 'unpaid', 0),
+(91, NULL, 8, 'In Clinic', '20260203-001', '2026-02-03', '09:30:00', 'pending', 'Pendaftaran online', '2026-02-02 20:03:33', '2026-02-02 20:03:33', NULL, 'unpaid', 0),
+(99, NULL, 2, 'In Clinic', '20260204-002', '2026-02-04', '09:30:00', 'pending', 'Pendaftaran online', '2026-02-03 16:34:16', '2026-02-03 16:34:16', NULL, 'unpaid', 0),
+(100, 99, 13, 'In Clinic', '20260204-002', '2026-02-04', '09:30:00', 'pending', 'Pendaftaran online', '2026-02-03 16:34:16', '2026-02-03 16:34:16', NULL, 'unpaid', 0),
+(101, 99, 14, 'In Clinic', '20260204-002', '2026-02-04', '09:30:00', 'pending', 'Pendaftaran online', '2026-02-03 16:34:16', '2026-02-03 16:34:16', NULL, 'unpaid', 0),
+(102, NULL, 1, 'In Clinic', '20260204-003', '2026-02-04', '09:45:00', 'pending', 'Pendaftaran online', '2026-02-03 17:22:18', '2026-02-03 17:22:18', NULL, 'unpaid', 0),
+(103, 102, 15, 'In Clinic', '20260204-003', '2026-02-04', '09:45:00', 'pending', 'Pendaftaran online', '2026-02-03 17:22:18', '2026-02-03 17:22:18', NULL, 'unpaid', 0),
+(104, 102, 16, 'In Clinic', '20260204-003', '2026-02-04', '09:45:00', 'pending', 'Pendaftaran online', '2026-02-03 17:22:18', '2026-02-03 17:22:18', NULL, 'unpaid', 0);
 
 -- --------------------------------------------------------
 
@@ -102,7 +109,14 @@ INSERT INTO `booking_services` (`id`, `booking_id`, `nama_layanan`, `created_at`
 (32, 89, 'Adacel (Sanofi)', '2026-02-02 16:49:15', 1, 350000, 0, 'nilai', 0),
 (33, 89, 'Fluarix Tetra (GSK)', '2026-02-02 16:49:15', 14, 450000, 0, 'nilai', 0),
 (34, 90, 'Medical Check Up Lengkap', '2026-02-02 16:58:32', 54, 1500000, 0, 'nilai', 0),
-(35, 91, 'Konsultasi Dokter Umum', '2026-02-02 20:03:33', 80, 75000, 0, 'nilai', 0);
+(35, 91, 'Konsultasi Dokter Umum', '2026-02-02 20:03:33', 80, 75000, 0, 'nilai', 0),
+(36, 100, 'Konsultasi Dokter Umum', '2026-02-03 16:34:16', 80, 75000, 0, 'nilai', 0),
+(37, 101, 'Suntik Vitamin C', '2026-02-03 16:34:16', 61, 200000, 0, 'nilai', 0),
+(38, 102, 'Swab Antigen COVID-19', '2026-02-03 17:22:18', 76, 100000, 0, 'nilai', 0),
+(39, 103, 'Paracetamol 1 g Fl', '2026-02-03 17:22:18', 74, 80000, 0, 'nilai', 0),
+(40, 103, 'Swab PCR COVID-19', '2026-02-03 17:22:18', 77, 350000, 0, 'nilai', 0),
+(41, 104, 'Hepatitis B Dewasa (Biofarma)', '2026-02-03 17:22:18', 20, 200000, 0, 'nilai', 0),
+(42, 104, 'Vecon Adult (Biofarma)', '2026-02-03 17:22:18', 48, 300000, 0, 'nilai', 0);
 
 -- --------------------------------------------------------
 
@@ -315,7 +329,11 @@ INSERT INTO `patients` (`id`, `no_rekam_medis`, `nama_lengkap`, `nama_panggilan`
 (5, 'RM202601260001', 'paul klein', 'ul', '1988-04-30', 37, 'Dewasa', 'L', '3314567238769076', NULL, 'Amerika', 'singer', '', 'ga', 'gd', 'gd', 'Vaksinasi Umum/Infus Vitamin', '2026-01-26 02:42:15', '2026-01-26 02:42:15'),
 (6, 'RM202601260002', 'dorami', 'do', '2021-07-07', 4, 'Anak', 'P', '3314562765438976', NULL, 'Indonesia', 'pelajar', 'p', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-01-26 02:56:30', '2026-01-26 02:56:30'),
 (7, 'RM202602020001', 'lorem', '', '1997-11-13', 28, 'Dewasa', 'L', '3314323456547689', NULL, 'Indonesia', '', '', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-02-02 09:58:32', '2026-02-02 09:58:32'),
-(8, 'RM202602020002', 'Eloise', '', '2008-11-19', 17, 'Anak', 'P', '3312324354657687', NULL, 'Indonesia', '', 'violet', '-', '-', '-', 'Vaksinasi Umum/Infus Vitamin', '2026-02-02 13:03:33', '2026-02-02 13:03:33');
+(8, 'RM202602020002', 'Eloise', '', '2008-11-19', 17, 'Anak', 'P', '3312324354657687', NULL, 'Indonesia', '', 'violet', '-', '-', '-', 'Vaksinasi Umum/Infus Vitamin', '2026-02-02 13:03:33', '2026-02-02 13:03:33'),
+(13, 'RM202602030001', 'Leo', '', '2000-04-21', 25, 'Dewasa', 'L', NULL, '0987656787654321', 'Indonesia', 'karyawan swasta', '', 'sifud', 'sakit kepala', 'alkohol', 'Umroh/Haji/Luar Negeri', '2026-02-03 09:34:16', '2026-02-03 09:34:16'),
+(14, 'RM202602030002', 'weni', '', '1995-06-13', 30, 'Dewasa', 'P', '0989878765436782', NULL, 'Indonesia', '', '', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-02-03 09:34:16', '2026-02-03 09:34:16'),
+(15, 'RM202602030003', 'Joe', '', '2014-03-06', 11, 'Anak', 'L', '0987654323456765', NULL, 'Indonesia', '', 'p', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-02-03 10:22:18', '2026-02-03 10:22:18'),
+(16, 'RM202602030004', 'Tiarae', '', '2002-02-28', 23, 'Dewasa', 'P', '1234256347652879', NULL, 'Indonesia', '', '', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-02-03 10:22:18', '2026-02-03 10:22:18');
 
 -- --------------------------------------------------------
 
@@ -349,7 +367,13 @@ INSERT INTO `patient_addresses` (`id`, `patient_id`, `alamat`, `provinsi`, `kota
 (84, 2, 'Salam, Rt.13, Saren, Kalijambe', 'Jawa Barat', 'Majalengka', 1),
 (85, 2, 'Bandung - Jawa Barat', 'Jawa Tengah', 'Pekalongan', 1),
 (86, 7, 'Jl. Telekomunikasi No. 1, Terusan Buahbatu - Bojongsoang, Sukapura, Kec. Dayeuhkolot', 'Jawa Barat', 'Pangandaran', 1),
-(87, 8, 'jl. london', 'Riau', 'Rokan Hulu', 1);
+(87, 8, 'jl. london', 'Riau', 'Rokan Hulu', 1),
+(96, 2, 'Bandung - Jawa Barat', 'Aceh', 'Aceh Jaya', 1),
+(97, 13, 'Bandung - Jawa Barat', 'Sumatera Barat', 'Solok Selatan', 1),
+(98, 14, 'Bandung - Jawa Barat', 'Aceh', 'Aceh Jaya', 1),
+(99, 1, 'Salam, Rt.13, Saren, Kalijambe', 'Jawa Barat', 'Bandung', 1),
+(100, 15, 'Salam, Rt.13, Saren, Kalijambe', 'Jawa Barat', 'Bandung', 1),
+(101, 16, 'Salam, Rt.13, Saren, Kalijambe', 'Jawa Barat', 'Bandung', 1);
 
 -- --------------------------------------------------------
 
@@ -380,7 +404,15 @@ INSERT INTO `patient_emails` (`id`, `patient_id`, `email`, `is_primary`) VALUES
 (86, 2, 'rofiah9a@gmail.com', 1),
 (87, 2, 'leo@gmail.com', 1),
 (88, 7, 'lorem@gmail.com', 1),
-(89, 8, 'eloise@gmail.com', 1);
+(89, 8, 'eloise@gmail.com', 1),
+(98, 2, 'rofiahbudi@gmail.com', 1),
+(99, 13, 'rofiahbudi@gmail.com', 1),
+(100, 14, 'rofiahbudi@gmail.com', 1),
+(101, 1, 'rofiahbudi@gmail.com', 1),
+(102, 1, 'rofiahbudi@gmail.com', 0),
+(103, 1, 'rofiahbudi@gmail.com', 0),
+(104, 15, 'rofiahbudi@gmail.com', 1),
+(105, 16, 'rofiahbudi@gmail.com', 1);
 
 -- --------------------------------------------------------
 
@@ -412,7 +444,15 @@ INSERT INTO `patient_phones` (`id`, `patient_id`, `phone`, `is_primary`) VALUES
 (87, 2, '085876923087', 1),
 (88, 2, '085876923087', 1),
 (89, 7, '098767687609', 1),
-(90, 8, '098765457890', 1);
+(90, 8, '098765457890', 1),
+(99, 2, '085876923088', 1),
+(100, 13, '085876923088', 1),
+(101, 14, '085876923088', 1),
+(102, 1, '085876923088', 1),
+(103, 1, '085876923088', 0),
+(104, 1, '085876923088', 0),
+(105, 15, '085876923088', 1),
+(106, 16, '085876923088', 1);
 
 -- --------------------------------------------------------
 
@@ -839,8 +879,6 @@ CREATE TABLE `vital_signs` (
 --
 ALTER TABLE `bookings`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `nomor_antrian` (`nomor_antrian`),
-  ADD UNIQUE KEY `unique_slot` (`tanggal_booking`,`waktu_booking`),
   ADD KEY `idx_patient` (`patient_id`),
   ADD KEY `idx_tanggal` (`tanggal_booking`),
   ADD KEY `idx_waktu` (`waktu_booking`),
@@ -1029,13 +1067,13 @@ ALTER TABLE `vital_signs`
 -- AUTO_INCREMENT for table `bookings`
 --
 ALTER TABLE `bookings`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=92;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=105;
 
 --
 -- AUTO_INCREMENT for table `booking_services`
 --
 ALTER TABLE `booking_services`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
 -- AUTO_INCREMENT for table `booking_staff`
@@ -1083,25 +1121,25 @@ ALTER TABLE `medical_records`
 -- AUTO_INCREMENT for table `patients`
 --
 ALTER TABLE `patients`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `patient_addresses`
 --
 ALTER TABLE `patient_addresses`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=88;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=102;
 
 --
 -- AUTO_INCREMENT for table `patient_emails`
 --
 ALTER TABLE `patient_emails`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=90;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=106;
 
 --
 -- AUTO_INCREMENT for table `patient_phones`
 --
 ALTER TABLE `patient_phones`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=91;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=107;
 
 --
 -- AUTO_INCREMENT for table `patient_services`
