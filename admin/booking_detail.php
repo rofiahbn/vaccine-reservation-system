@@ -449,7 +449,7 @@ $disable_accept = ($booking['status'] !== 'pending');
                 <!-- Tenaga Kerja -->
                 <div class="side-card">
                     <div class="side-header">
-                        <h3>Tenaga Kerja</h3>
+                        <h3>Tenaga Kesehatan</h3>
                     </div>
 
                     <div class="side-body">
@@ -496,7 +496,7 @@ $disable_accept = ($booking['status'] !== 'pending');
                         <button class="btn-add-worker" 
                                 onclick="openAddDoctorPopup()" 
                                 <?= $disable_add_dokter ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : '' ?>>
-                            <i class="fas fa-user-md"></i> Tambah Dokter
+                            <i class="fas fa-user-md"></i> Tambah Nakes
                         </button>
                 </div>
 

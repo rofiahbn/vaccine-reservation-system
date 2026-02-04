@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Feb 03, 2026 at 01:57 PM
+-- Generation Time: Feb 04, 2026 at 03:08 PM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.30
 
@@ -61,14 +61,18 @@ INSERT INTO `bookings` (`id`, `parent_id`, `patient_id`, `service_type`, `nomor_
 (87, NULL, 1, 'In Clinic', '20260218-001', '2026-02-18', '09:30:00', 'pending', 'Pendaftaran online', '2026-02-02 16:43:28', '2026-02-02 16:43:28', NULL, 'unpaid', 0),
 (88, NULL, 2, 'In Clinic', '20260211-001', '2026-02-11', '09:00:00', 'pending', 'Pendaftaran online', '2026-02-02 16:43:28', '2026-02-02 16:43:28', NULL, 'unpaid', 0),
 (89, NULL, 2, 'In Clinic', '20260218-002', '2026-02-18', '09:45:00', 'pending', 'Pendaftaran online', '2026-02-02 16:49:15', '2026-02-02 16:49:15', NULL, 'unpaid', 0),
-(90, NULL, 7, 'In Clinic', '20260204-001', '2026-02-04', '09:15:00', 'pending', 'Pendaftaran online', '2026-02-02 16:58:32', '2026-02-02 16:58:32', NULL, 'unpaid', 0),
+(90, NULL, 7, 'In Clinic', '20260204-001', '2026-02-04', '09:15:00', 'cancelled', 'Pendaftaran online', '2026-02-02 16:58:32', '2026-02-04 11:32:43', NULL, 'unpaid', 0),
 (91, NULL, 8, 'In Clinic', '20260203-001', '2026-02-03', '09:30:00', 'pending', 'Pendaftaran online', '2026-02-02 20:03:33', '2026-02-02 20:03:33', NULL, 'unpaid', 0),
-(99, NULL, 2, 'In Clinic', '20260204-002', '2026-02-04', '09:30:00', 'pending', 'Pendaftaran online', '2026-02-03 16:34:16', '2026-02-03 16:34:16', NULL, 'unpaid', 0),
-(100, 99, 13, 'In Clinic', '20260204-002', '2026-02-04', '09:30:00', 'pending', 'Pendaftaran online', '2026-02-03 16:34:16', '2026-02-03 16:34:16', NULL, 'unpaid', 0),
-(101, 99, 14, 'In Clinic', '20260204-002', '2026-02-04', '09:30:00', 'pending', 'Pendaftaran online', '2026-02-03 16:34:16', '2026-02-03 16:34:16', NULL, 'unpaid', 0),
+(99, NULL, 2, 'In Clinic', '20260204-002', '2026-02-04', '09:30:00', 'confirmed', 'Pendaftaran online', '2026-02-03 16:34:16', '2026-02-04 20:11:42', NULL, 'unpaid', 1),
+(101, 99, 14, 'In Clinic', '20260204-002', '2026-02-04', '09:30:00', 'pending', 'Pendaftaran online', '2026-02-03 16:34:16', '2026-02-04 20:26:56', NULL, 'unpaid', 1),
 (102, NULL, 1, 'In Clinic', '20260204-003', '2026-02-04', '09:45:00', 'pending', 'Pendaftaran online', '2026-02-03 17:22:18', '2026-02-03 17:22:18', NULL, 'unpaid', 0),
 (103, 102, 15, 'In Clinic', '20260204-003', '2026-02-04', '09:45:00', 'pending', 'Pendaftaran online', '2026-02-03 17:22:18', '2026-02-03 17:22:18', NULL, 'unpaid', 0),
-(104, 102, 16, 'In Clinic', '20260204-003', '2026-02-04', '09:45:00', 'pending', 'Pendaftaran online', '2026-02-03 17:22:18', '2026-02-03 17:22:18', NULL, 'unpaid', 0);
+(104, 102, 16, 'In Clinic', '20260204-003', '2026-02-04', '09:45:00', 'pending', 'Pendaftaran online', '2026-02-03 17:22:18', '2026-02-03 17:22:18', NULL, 'unpaid', 0),
+(105, NULL, 17, 'In Clinic', '20260204-004', '2026-02-04', '14:45:00', 'pending', 'Pendaftaran online', '2026-02-04 13:50:51', '2026-02-04 13:50:51', NULL, 'unpaid', 0),
+(106, 105, 2, 'In Clinic', '20260204-004', '2026-02-04', '14:45:00', 'pending', 'Pendaftaran online', '2026-02-04 13:50:51', '2026-02-04 13:50:51', NULL, 'unpaid', 0),
+(107, 105, 18, 'In Clinic', '20260204-004', '2026-02-04', '14:45:00', 'pending', 'Pendaftaran online', '2026-02-04 13:50:51', '2026-02-04 13:50:51', NULL, 'unpaid', 0),
+(108, NULL, 19, 'In Clinic', '20260204-005', '2026-02-04', '10:15:00', 'pending', 'Pendaftaran online', '2026-02-04 14:33:59', '2026-02-04 14:33:59', NULL, 'unpaid', 0),
+(109, 108, 20, 'In Clinic', '20260204-005', '2026-02-04', '10:15:00', 'pending', 'Pendaftaran online', '2026-02-04 14:33:59', '2026-02-04 14:33:59', NULL, 'unpaid', 0);
 
 -- --------------------------------------------------------
 
@@ -78,7 +82,9 @@ INSERT INTO `bookings` (`id`, `parent_id`, `patient_id`, `service_type`, `nomor_
 
 CREATE TABLE `booking_services` (
   `id` int NOT NULL,
+  `parent_booking_id` int DEFAULT NULL,
   `booking_id` int NOT NULL,
+  `patient_id` int DEFAULT NULL,
   `nama_layanan` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `service_id` int DEFAULT NULL,
@@ -92,31 +98,36 @@ CREATE TABLE `booking_services` (
 -- Dumping data for table `booking_services`
 --
 
-INSERT INTO `booking_services` (`id`, `booking_id`, `nama_layanan`, `created_at`, `service_id`, `harga`, `diskon`, `diskon_tipe`, `total`) VALUES
-(18, 78, 'Adacel (Sanofi)', '2026-01-20 09:38:53', NULL, 0, 0, 'nilai', 0),
-(19, 79, 'Campak (Biofarma)', '2026-01-20 23:23:09', NULL, 0, 0, 'nilai', 0),
-(20, 79, 'Swab Antigen COVID-19', '2026-01-20 23:23:09', NULL, 0, 0, 'nilai', 0),
-(21, 80, 'Vitamin Badan Bugar', '2026-01-22 15:53:09', NULL, 0, 0, 'nilai', 0),
-(22, 80, 'Vitamin D3', '2026-01-22 15:53:09', NULL, 0, 0, 'nilai', 0),
-(23, 81, 'Pantoprazole 40 mg Vial', '2026-01-22 17:17:05', NULL, 0, 0, 'nilai', 0),
-(24, 82, 'Pantoprazole 40 mg Vial', '2026-01-26 09:42:15', 73, 120000, 20400, 'persen', 99600),
-(25, 83, 'Avaxim 160 (Sanofi)', '2026-01-26 09:56:30', 3, 100000, 0, 'nilai', 0),
-(26, 84, 'Paracetamol 1 g Fl', '2026-01-26 09:56:30', 74, 80000, 18400, 'persen', 61600),
-(28, 85, 'Adacel (Sanofi)', '2026-01-26 16:04:53', 1, 350000, 0, 'nilai', 0),
-(29, 86, 'Pantoprazole 40 mg Vial', '2026-02-02 14:47:44', 73, 120000, 0, 'nilai', 0),
-(30, 87, 'Swab Antigen COVID-19', '2026-02-02 16:43:28', 76, 100000, 0, 'nilai', 0),
-(31, 88, 'Suntik Vitamin C', '2026-02-02 16:43:28', 61, 200000, 0, 'nilai', 0),
-(32, 89, 'Adacel (Sanofi)', '2026-02-02 16:49:15', 1, 350000, 0, 'nilai', 0),
-(33, 89, 'Fluarix Tetra (GSK)', '2026-02-02 16:49:15', 14, 450000, 0, 'nilai', 0),
-(34, 90, 'Medical Check Up Lengkap', '2026-02-02 16:58:32', 54, 1500000, 0, 'nilai', 0),
-(35, 91, 'Konsultasi Dokter Umum', '2026-02-02 20:03:33', 80, 75000, 0, 'nilai', 0),
-(36, 100, 'Konsultasi Dokter Umum', '2026-02-03 16:34:16', 80, 75000, 0, 'nilai', 0),
-(37, 101, 'Suntik Vitamin C', '2026-02-03 16:34:16', 61, 200000, 0, 'nilai', 0),
-(38, 102, 'Swab Antigen COVID-19', '2026-02-03 17:22:18', 76, 100000, 0, 'nilai', 0),
-(39, 103, 'Paracetamol 1 g Fl', '2026-02-03 17:22:18', 74, 80000, 0, 'nilai', 0),
-(40, 103, 'Swab PCR COVID-19', '2026-02-03 17:22:18', 77, 350000, 0, 'nilai', 0),
-(41, 104, 'Hepatitis B Dewasa (Biofarma)', '2026-02-03 17:22:18', 20, 200000, 0, 'nilai', 0),
-(42, 104, 'Vecon Adult (Biofarma)', '2026-02-03 17:22:18', 48, 300000, 0, 'nilai', 0);
+INSERT INTO `booking_services` (`id`, `parent_booking_id`, `booking_id`, `patient_id`, `nama_layanan`, `created_at`, `service_id`, `harga`, `diskon`, `diskon_tipe`, `total`) VALUES
+(18, 78, 78, 1, 'Adacel (Sanofi)', '2026-01-20 09:38:53', NULL, 0, 0, 'nilai', 0),
+(19, 79, 79, 2, 'Campak (Biofarma)', '2026-01-20 23:23:09', NULL, 0, 0, 'nilai', 0),
+(20, 79, 79, 2, 'Swab Antigen COVID-19', '2026-01-20 23:23:09', NULL, 0, 0, 'nilai', 0),
+(21, 80, 80, 3, 'Vitamin Badan Bugar', '2026-01-22 15:53:09', NULL, 0, 0, 'nilai', 0),
+(22, 80, 80, 3, 'Vitamin D3', '2026-01-22 15:53:09', NULL, 0, 0, 'nilai', 0),
+(23, 81, 81, 4, 'Pantoprazole 40 mg Vial', '2026-01-22 17:17:05', NULL, 0, 0, 'nilai', 0),
+(24, 82, 82, 5, 'Pantoprazole 40 mg Vial', '2026-01-26 09:42:15', 73, 120000, 20400, 'persen', 99600),
+(25, 83, 83, 1, 'Avaxim 160 (Sanofi)', '2026-01-26 09:56:30', 3, 100000, 0, 'nilai', 0),
+(26, 84, 84, 6, 'Paracetamol 1 g Fl', '2026-01-26 09:56:30', 74, 80000, 18400, 'persen', 61600),
+(28, 85, 85, 2, 'Adacel (Sanofi)', '2026-01-26 16:04:53', 1, 350000, 0, 'nilai', 0),
+(29, 86, 86, 1, 'Pantoprazole 40 mg Vial', '2026-02-02 14:47:44', 73, 120000, 0, 'nilai', 0),
+(30, 87, 87, 1, 'Swab Antigen COVID-19', '2026-02-02 16:43:28', 76, 100000, 0, 'nilai', 0),
+(31, 88, 88, 2, 'Suntik Vitamin C', '2026-02-02 16:43:28', 61, 200000, 0, 'nilai', 0),
+(32, 89, 89, 2, 'Adacel (Sanofi)', '2026-02-02 16:49:15', 1, 350000, 0, 'nilai', 0),
+(33, 89, 89, 2, 'Fluarix Tetra (GSK)', '2026-02-02 16:49:15', 14, 450000, 0, 'nilai', 0),
+(34, 90, 90, 7, 'Medical Check Up Lengkap', '2026-02-02 16:58:32', 54, 1500000, 0, 'nilai', 0),
+(35, 91, 91, 8, 'Konsultasi Dokter Umum', '2026-02-02 20:03:33', 80, 75000, 0, 'nilai', 0),
+(36, 99, 99, 2, 'Konsultasi Dokter Umum', '2026-02-03 16:34:16', 80, 75000, 0, 'nilai', 0),
+(37, 99, 101, 14, 'Suntik Vitamin C', '2026-02-03 16:34:16', 61, 200000, 0, 'nilai', 0),
+(38, 102, 102, 1, 'Swab Antigen COVID-19', '2026-02-03 17:22:18', 76, 100000, 0, 'nilai', 0),
+(39, 102, 103, 15, 'Paracetamol 1 g Fl', '2026-02-03 17:22:18', 74, 80000, 0, 'nilai', 0),
+(40, 102, 103, 15, 'Swab PCR COVID-19', '2026-02-03 17:22:18', 77, 350000, 0, 'nilai', 0),
+(41, 102, 104, 16, 'Hepatitis B Dewasa (Biofarma)', '2026-02-03 17:22:18', 20, 200000, 0, 'nilai', 0),
+(42, 102, 104, 16, 'Vecon Adult (Biofarma)', '2026-02-03 17:22:18', 48, 300000, 0, 'nilai', 0),
+(43, 105, 105, 17, 'Tuberculin PPD RT 23 SSI', '2026-02-04 13:50:51', 75, 250000, 0, 'nilai', 0),
+(44, 105, 106, 2, 'Adacel (Sanofi)', '2026-02-04 13:50:51', 1, 350000, 0, 'nilai', 0),
+(45, 105, 107, 18, 'bOPV Polio (Biofarma)', '2026-02-04 13:50:51', 7, 120000, 0, 'nilai', 0),
+(46, 108, 108, 19, 'Suntik Vitamin C', '2026-02-04 14:33:59', 61, 200000, 0, 'nilai', 0),
+(47, 108, 109, 20, 'BCG (Biofarma)', '2026-02-04 14:33:59', 5, 150000, 0, 'nilai', 0);
 
 -- --------------------------------------------------------
 
@@ -141,7 +152,8 @@ INSERT INTO `booking_staff` (`id`, `booking_id`, `staff_id`, `created_at`) VALUE
 (19, 85, 2, '2026-01-26 09:08:23'),
 (20, 83, 1, '2026-01-26 09:59:41'),
 (21, 84, 1, '2026-01-26 11:32:06'),
-(22, 82, 2, '2026-01-26 18:11:53');
+(22, 82, 2, '2026-01-26 18:11:53'),
+(23, 99, 1, '2026-02-04 12:04:37');
 
 -- --------------------------------------------------------
 
@@ -322,8 +334,8 @@ CREATE TABLE `patients` (
 --
 
 INSERT INTO `patients` (`id`, `no_rekam_medis`, `nama_lengkap`, `nama_panggilan`, `tanggal_lahir`, `usia`, `kategori_usia`, `jenis_kelamin`, `nik`, `paspor`, `kebangsaan`, `pekerjaan`, `nama_wali`, `riwayat_alergi`, `riwayat_penyakit`, `riwayat_obat`, `pelayanan`, `created_at`, `updated_at`) VALUES
-(1, 'RM202601200001', 'Rofi\'ah Budi Nadia', 'fiah', '2003-01-07', 23, 'Dewasa', 'P', '3314014701030001', '', 'Indonesia', 'umum', '', 'gaada', '-', '', 'Vaksinasi Umum/Infus Vitamin', '2026-01-20 02:38:53', '2026-01-27 18:34:17'),
-(2, 'RM202601200002', 'Leo', '', '2000-04-21', 25, 'Dewasa', 'L', '3314123456789098', NULL, 'Indonesia', 'karyawan swasta', '', 'sifud', 'sakit kepala', 'alkohol', 'Vaksinasi Umum/Infus Vitamin', '2026-01-20 16:23:09', '2026-01-22 08:15:19'),
+(1, 'RM202601200001', 'Rofi\'ah Budi Nadia', 'fiah', '2003-01-07', 23, 'Dewasa', 'P', '3314014701030001', NULL, 'Indonesia', 'umum', '', 'gaada', 'gerd', NULL, 'In Clinic', '2026-01-20 02:38:53', '2026-02-04 11:55:20'),
+(2, 'RM202601200002', 'Leo', '', '2000-04-21', 26, 'Dewasa', 'L', '3314123456789098', NULL, 'Indonesia', 'karyawan swasta', '', 'sifud', 'sakit kepala', 'alkohol', 'In Clinic', '2026-01-20 16:23:09', '2026-02-04 13:28:01'),
 (3, 'RM202601220001', 'Dillon', '', '1999-01-28', 26, 'Dewasa', 'L', '3314567654890765', NULL, 'Indonesia', 'karyawan swasta', '', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-01-22 08:53:09', '2026-01-22 08:53:09'),
 (4, 'RM202601220002', 'Joya', '', '2002-06-19', 23, 'Dewasa', 'P', '3314565428790654', NULL, 'Indonesia', 'nganggur', '', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-01-22 10:17:05', '2026-01-22 10:17:05'),
 (5, 'RM202601260001', 'paul klein', 'ul', '1988-04-30', 37, 'Dewasa', 'L', '3314567238769076', NULL, 'Amerika', 'singer', '', 'ga', 'gd', 'gd', 'Vaksinasi Umum/Infus Vitamin', '2026-01-26 02:42:15', '2026-01-26 02:42:15'),
@@ -331,9 +343,13 @@ INSERT INTO `patients` (`id`, `no_rekam_medis`, `nama_lengkap`, `nama_panggilan`
 (7, 'RM202602020001', 'lorem', '', '1997-11-13', 28, 'Dewasa', 'L', '3314323456547689', NULL, 'Indonesia', '', '', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-02-02 09:58:32', '2026-02-02 09:58:32'),
 (8, 'RM202602020002', 'Eloise', '', '2008-11-19', 17, 'Anak', 'P', '3312324354657687', NULL, 'Indonesia', '', 'violet', '-', '-', '-', 'Vaksinasi Umum/Infus Vitamin', '2026-02-02 13:03:33', '2026-02-02 13:03:33'),
 (13, 'RM202602030001', 'Leo', '', '2000-04-21', 25, 'Dewasa', 'L', NULL, '0987656787654321', 'Indonesia', 'karyawan swasta', '', 'sifud', 'sakit kepala', 'alkohol', 'Umroh/Haji/Luar Negeri', '2026-02-03 09:34:16', '2026-02-03 09:34:16'),
-(14, 'RM202602030002', 'weni', '', '1995-06-13', 30, 'Dewasa', 'P', '0989878765436782', NULL, 'Indonesia', '', '', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-02-03 09:34:16', '2026-02-03 09:34:16'),
+(14, 'RM202602030002', 'weni', '', '1995-06-13', 31, 'Dewasa', 'P', '0989878765436782', NULL, 'Indonesia', NULL, '', NULL, NULL, NULL, 'In Clinic', '2026-02-03 09:34:16', '2026-02-04 11:17:26'),
 (15, 'RM202602030003', 'Joe', '', '2014-03-06', 11, 'Anak', 'L', '0987654323456765', NULL, 'Indonesia', '', 'p', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-02-03 10:22:18', '2026-02-03 10:22:18'),
-(16, 'RM202602030004', 'Tiarae', '', '2002-02-28', 23, 'Dewasa', 'P', '1234256347652879', NULL, 'Indonesia', '', '', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-02-03 10:22:18', '2026-02-03 10:22:18');
+(16, 'RM202602030004', 'Tiarae', '', '2002-02-28', 23, 'Dewasa', 'P', '1234256347652879', NULL, 'Indonesia', '', '', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-02-03 10:22:18', '2026-02-03 10:22:18'),
+(17, 'RM202602040001', 'Marcellino', '', '2004-07-08', 21, 'Dewasa', 'L', '1234567898765678', NULL, 'Indonesia', '', '', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-02-04 06:50:51', '2026-02-04 06:50:51'),
+(18, 'RM202602040002', 'Gilbert', '', '2003-07-10', 22, 'Dewasa', 'L', '9876543234567899', NULL, 'Indonesia', '', '', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-02-04 06:50:51', '2026-02-04 06:50:51'),
+(19, 'RM202602040003', 'Febrina N', '', '2004-03-03', 21, 'Dewasa', 'P', '1234543245678987', NULL, 'Indonesia', '', '', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-02-04 07:33:59', '2026-02-04 07:33:59'),
+(20, 'RM202602040004', 'Riza P', '', '2003-03-06', 22, 'Dewasa', 'L', '1233432154367654', NULL, 'Indonesia', '', '', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-02-04 07:33:59', '2026-02-04 07:33:59');
 
 -- --------------------------------------------------------
 
@@ -361,19 +377,24 @@ INSERT INTO `patient_addresses` (`id`, `patient_id`, `alamat`, `provinsi`, `kota
 (77, 4, 'seattle', 'DKI Jakarta', 'Jakarta Utara', 1),
 (78, 5, 'los angeles', 'Jawa Barat', 'Cimahi', 1),
 (79, 1, 'Salam, Rt.13, Saren, Kalijambe', 'Jawa Barat', 'Bandung', 1),
-(81, 2, 'Bandung - Jawa Barat', 'Jawa Barat', 'Subang', 1),
-(82, 1, 'Salam, Rt.13, Saren, Kalijambe', 'Jawa Tengah', 'Kudus', 1),
-(83, 1, 'Bandung - Jawa Barat', 'Jawa Tengah', 'Pekalongan', 1),
-(84, 2, 'Salam, Rt.13, Saren, Kalijambe', 'Jawa Barat', 'Majalengka', 1),
-(85, 2, 'Bandung - Jawa Barat', 'Jawa Tengah', 'Pekalongan', 1),
+(81, 2, 'Bandung - Jawa Barat', 'Jawa Barat', 'Cimahi', 1),
+(82, 1, 'Salam, Rt.13, Saren, Kalijambe', 'Jawa Barat', 'Bandung', 1),
+(83, 1, 'Salam, Rt.13, Saren, Kalijambe', 'Jawa Barat', 'Bandung', 1),
+(84, 2, 'Bandung - Jawa Barat', 'Jawa Barat', 'Cimahi', 1),
+(85, 2, 'Bandung - Jawa Barat', 'Jawa Barat', 'Cimahi', 1),
 (86, 7, 'Jl. Telekomunikasi No. 1, Terusan Buahbatu - Bojongsoang, Sukapura, Kec. Dayeuhkolot', 'Jawa Barat', 'Pangandaran', 1),
 (87, 8, 'jl. london', 'Riau', 'Rokan Hulu', 1),
-(96, 2, 'Bandung - Jawa Barat', 'Aceh', 'Aceh Jaya', 1),
+(96, 2, 'Bandung - Jawa Barat', 'Jawa Barat', 'Cimahi', 1),
 (97, 13, 'Bandung - Jawa Barat', 'Sumatera Barat', 'Solok Selatan', 1),
-(98, 14, 'Bandung - Jawa Barat', 'Aceh', 'Aceh Jaya', 1),
+(98, 14, 'Bandung - Jawa Barat', 'Aceh', 'Aceh Barat Daya', 1),
 (99, 1, 'Salam, Rt.13, Saren, Kalijambe', 'Jawa Barat', 'Bandung', 1),
 (100, 15, 'Salam, Rt.13, Saren, Kalijambe', 'Jawa Barat', 'Bandung', 1),
-(101, 16, 'Salam, Rt.13, Saren, Kalijambe', 'Jawa Barat', 'Bandung', 1);
+(101, 16, 'Salam, Rt.13, Saren, Kalijambe', 'Jawa Barat', 'Bandung', 1),
+(102, 17, 'Jl. Umayah 1', 'Jawa Timur', 'Nganjuk', 1),
+(103, 2, 'Bandung - Jawa Barat', 'Jawa Barat', 'Cimahi', 1),
+(104, 18, 'Jl. Umayah 1', 'Jawa Timur', 'Nganjuk', 1),
+(105, 19, 'Jl. Telekomunikasi No. 1, Terusan Buahbatu - Bojongsoang, Sukapura, Kec. Dayeuhkolot', 'Jawa Barat', 'Subang', 1),
+(106, 20, 'Jl. Telekomunikasi No. 1, Terusan Buahbatu - Bojongsoang, Sukapura, Kec. Dayeuhkolot', 'Jawa Barat', 'Subang', 1);
 
 -- --------------------------------------------------------
 
@@ -399,20 +420,16 @@ INSERT INTO `patient_emails` (`id`, `patient_id`, `email`, `is_primary`) VALUES
 (81, 1, 'rofiahbudi@gmail.com', 1),
 (82, 6, 'adsdascc@gmail', 1),
 (83, 2, 'leo@gmail.com', 1),
-(84, 1, 'rofiahbudi@gmail.com', 1),
-(85, 1, 'rofiahbudi@gmail.com', 1),
-(86, 2, 'rofiah9a@gmail.com', 1),
-(87, 2, 'leo@gmail.com', 1),
 (88, 7, 'lorem@gmail.com', 1),
 (89, 8, 'eloise@gmail.com', 1),
-(98, 2, 'rofiahbudi@gmail.com', 1),
 (99, 13, 'rofiahbudi@gmail.com', 1),
 (100, 14, 'rofiahbudi@gmail.com', 1),
-(101, 1, 'rofiahbudi@gmail.com', 1),
-(102, 1, 'rofiahbudi@gmail.com', 0),
-(103, 1, 'rofiahbudi@gmail.com', 0),
 (104, 15, 'rofiahbudi@gmail.com', 1),
-(105, 16, 'rofiahbudi@gmail.com', 1);
+(105, 16, 'rofiahbudi@gmail.com', 1),
+(106, 17, 'marcel@gmail.com', 1),
+(108, 18, 'marcel@gmail.com', 1),
+(109, 19, 'feb@gmail.com', 1),
+(110, 20, 'feb@gmail.com', 1);
 
 -- --------------------------------------------------------
 
@@ -436,23 +453,18 @@ INSERT INTO `patient_phones` (`id`, `patient_id`, `phone`, `is_primary`) VALUES
 (79, 3, '087654323456', 1),
 (80, 4, '087698764536', 1),
 (81, 5, '087654323456', 1),
-(82, 1, '085876923088', 1),
 (83, 6, '9876543456765', 1),
-(84, 2, '098765678987', 1),
 (85, 1, '085876923088', 1),
-(86, 1, '085876923088', 1),
-(87, 2, '085876923087', 1),
-(88, 2, '085876923087', 1),
 (89, 7, '098767687609', 1),
 (90, 8, '098765457890', 1),
-(99, 2, '085876923088', 1),
 (100, 13, '085876923088', 1),
 (101, 14, '085876923088', 1),
-(102, 1, '085876923088', 1),
-(103, 1, '085876923088', 0),
-(104, 1, '085876923088', 0),
 (105, 15, '085876923088', 1),
-(106, 16, '085876923088', 1);
+(106, 16, '085876923088', 1),
+(107, 17, '098765678765', 1),
+(109, 18, '098765678765', 1),
+(110, 19, '087987898765', 1),
+(111, 20, '087987898765', 1);
 
 -- --------------------------------------------------------
 
@@ -736,7 +748,8 @@ INSERT INTO `surat` (`id`, `booking_id`, `patient_id`, `jenis_surat`, `dokter_id
 (2, 83, 1, 'vaksin', 1, 'Dokter Penanggung Jawab', '2026-01-27', NULL, NULL, NULL, NULL, 'a', 'a', '2026-01-24', 'surat_1769533341_83.pdf', '2026-01-27 17:02:21'),
 (3, 83, 1, 'sehat', 1, 'Dokter Penanggung Jawab', '2026-01-27', NULL, NULL, NULL, NULL, 'a', 'a', '2026-01-24', 'surat_1769533378_83.pdf', '2026-01-27 17:02:58'),
 (4, 82, 5, 'sehat', 2, 'Dokter Penanggung Jawab', '2026-01-27', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'surat_1769534100_82.pdf', '2026-01-27 17:15:00'),
-(5, 82, 5, 'sakit', 2, 'Dokter Penanggung Jawab', '2026-01-27', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'surat_1769534233_82.pdf', '2026-01-27 17:17:13');
+(5, 82, 5, 'sakit', 2, 'Dokter Penanggung Jawab', '2026-01-27', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'surat_1769534233_82.pdf', '2026-01-27 17:17:13'),
+(6, 99, 2, 'vaksin', 1, 'Dokter Penanggung Jawab', '2026-02-04', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'surat_1770211743_99.pdf', '2026-02-04 13:29:03');
 
 -- --------------------------------------------------------
 
@@ -808,7 +821,9 @@ INSERT INTO `tindakan` (`id`, `booking_id`, `patient_id`, `anamnesis`, `pemeriks
 (3, 80, 3, 'p', 'p', 'p', 'p', 30.0, '', 0, 0, '0', '2026-01-23 08:53:39', '', '', NULL, 1, 1),
 (4, 83, 1, 'a', 'a', 'a', 'a', 36.0, '120', 0, 0, '0', '2026-01-26 04:00:59', 'a', 'a', '2026-01-24', 1, 1),
 (5, 84, 6, 'a', 'b', 'c', 'd', 36.0, '', 0, 0, '0', '2026-01-26 11:46:42', '', '', NULL, 1, 1),
-(6, 82, 5, 'a', '', '', '', NULL, '', 0, 0, '0', '2026-01-27 11:26:50', '', '', NULL, 1, 1);
+(6, 82, 5, 'a', '', '', '', NULL, '', 0, 0, '0', '2026-01-27 11:26:50', '', '', NULL, 1, 1),
+(7, 99, 2, '', 'a', '', '', NULL, '', 0, 0, '0', '2026-02-04 07:11:42', '', '', NULL, 0, 0),
+(8, 101, 14, '', 'b', '', '', NULL, '', 0, 0, '0', '2026-02-04 07:26:56', '', '', NULL, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -1067,19 +1082,19 @@ ALTER TABLE `vital_signs`
 -- AUTO_INCREMENT for table `bookings`
 --
 ALTER TABLE `bookings`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=105;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=110;
 
 --
 -- AUTO_INCREMENT for table `booking_services`
 --
 ALTER TABLE `booking_services`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
 
 --
 -- AUTO_INCREMENT for table `booking_staff`
 --
 ALTER TABLE `booking_staff`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `jadwal_klinik`
@@ -1121,25 +1136,25 @@ ALTER TABLE `medical_records`
 -- AUTO_INCREMENT for table `patients`
 --
 ALTER TABLE `patients`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `patient_addresses`
 --
 ALTER TABLE `patient_addresses`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=102;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=107;
 
 --
 -- AUTO_INCREMENT for table `patient_emails`
 --
 ALTER TABLE `patient_emails`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=106;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=111;
 
 --
 -- AUTO_INCREMENT for table `patient_phones`
 --
 ALTER TABLE `patient_phones`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=107;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=112;
 
 --
 -- AUTO_INCREMENT for table `patient_services`
@@ -1181,7 +1196,7 @@ ALTER TABLE `staff`
 -- AUTO_INCREMENT for table `surat`
 --
 ALTER TABLE `surat`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `time_slots`
@@ -1193,7 +1208,7 @@ ALTER TABLE `time_slots`
 -- AUTO_INCREMENT for table `tindakan`
 --
 ALTER TABLE `tindakan`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `vaccination_history`
