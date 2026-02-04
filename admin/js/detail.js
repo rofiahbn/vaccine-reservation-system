@@ -133,24 +133,31 @@ function cancelBooking(button, bookingId) {
     });
 }
 
-function showParticipant(index){
+let activeParticipantIndex = 0;
 
-    currentParticipantIndex = index;
+function showParticipant(index) {
+    activeParticipantIndex = index;
 
-    document.querySelectorAll('.participant-panel').forEach(p => {
-        p.classList.remove('active');
-    });
+    document.querySelectorAll('.participant-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.participant-tab').forEach(t => t.classList.remove('active'));
 
     document.getElementById('participant-' + index).classList.add('active');
-
-    document.querySelectorAll('.participant-tab').forEach(t => {
-        t.classList.remove('active');
-    });
-
     document.querySelectorAll('.participant-tab')[index].classList.add('active');
 }
 
-
 function addParticipant() {
     alert("Fitur tambah peserta nanti kita buat 😄");
+}
+
+function editBooking() {
+
+    const activePanel = document.querySelector('.participant-panel.active');
+
+    if (!activePanel) return;
+
+    const bookingId = activePanel.dataset.bookingId;
+    const patientId = activePanel.dataset.patientId;
+
+    window.location.href =
+        `edit_booking.php?booking_id=${bookingId}&patient_id=${patientId}`;
 }

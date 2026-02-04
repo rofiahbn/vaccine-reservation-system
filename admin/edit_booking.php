@@ -2,22 +2,26 @@
 session_start();
 include "../config.php";
 
-// Get booking ID
-$booking_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+$booking_id = intval($_GET['booking_id'] ?? 0);
+$patient_id = intval($_GET['patient_id'] ?? 0);
 
-if ($booking_id == 0) {
+if ($booking_id == 0 || $patient_id == 0) {
     header('Location: dashboard.php');
     exit;
 }
 
-// Get booking detail
-$sql = "SELECT b.*, p.* 
-        FROM bookings b 
-        JOIN patients p ON b.patient_id = p.id 
-        WHERE b.id = ?";
+/* Ambil booking + patient */
+$sql = "
+SELECT b.*, p.*
+FROM bookings b
+JOIN patients p ON b.patient_id = p.id
+WHERE b.id = ? AND p.id = ?
+";
+
 $stmt = $conn->prepare($sql);
-$stmt->bind_param('i', $booking_id);
+$stmt->bind_param("ii", $booking_id, $patient_id);
 $stmt->execute();
+
 $result = $stmt->get_result();
 
 if ($result->num_rows == 0) {

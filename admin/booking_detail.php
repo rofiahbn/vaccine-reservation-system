@@ -25,7 +25,13 @@ if ($row_parent && $row_parent['parent_id']) {
 
 /* 🔥 Ambil semua peserta */
 $sql = "
-SELECT b.*, p.*
+SELECT 
+    b.id AS booking_id,
+    b.*,
+
+    p.id AS patient_id,
+    p.*
+
 FROM bookings b
 JOIN patients p ON b.patient_id = p.id
 WHERE b.id = ? OR b.parent_id = ?
@@ -129,7 +135,7 @@ $disable_accept = ($booking['status'] !== 'pending');
             <?php else: ?>
 
                 <!-- MODE NORMAL -->
-                <button class="btn-edit" onclick="editBooking(<?php echo $booking_id; ?>)">
+                <button class="btn-edit" onclick="editBooking()">
                     <i class="fas fa-edit"></i> Edit
                 </button>
 
@@ -216,7 +222,9 @@ $disable_accept = ($booking['status'] !== 'pending');
                 <?php foreach ($participants as $index => $p): ?>
 
                 <div class="participant-panel <?= $index == 0 ? 'active' : '' ?>" 
-                    id="participant-<?= $index ?>">
+                    id="participant-<?= $index ?>"
+                    data-booking-id="<?= $p['id'] ?>"
+                    data-patient-id="<?= $p['patient_id'] ?>">
 
                     <div class="detail-section">
                         <h2><i class="fas fa-user"></i> Data Pasien</h2>
@@ -353,7 +361,10 @@ $disable_accept = ($booking['status'] !== 'pending');
                         ";
 
                         $stmt_srv = $conn->prepare($sql_srv);
-                        $stmt_srv->bind_param("ii", $booking_id, $p['patient_id']);
+                        $stmt_srv->bind_param("ii", 
+                            $p['booking_id'],
+                            $p['patient_id']
+                        );
                         $stmt_srv->execute();
                         $services = $stmt_srv->get_result();
                         ?>
@@ -702,7 +713,11 @@ $disable_accept = ($booking['status'] !== 'pending');
 </div>
 
     <script>
-        const bookingId = <?= $booking_id ?>;
+    const bookingId = <?= $booking_id ?>;
+
+    const participants = <?= json_encode(
+        array_map(fn($p) => $p['patient_id'], $participants)
+    ) ?>;
     </script>
     <script src="js/detail.js"></script>
     <script src="js/reschedule.js"></script>

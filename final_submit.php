@@ -271,12 +271,12 @@ try {
             $harga        = $product['price'];
 
             mysqli_stmt_bind_param($stmt_service, 'iiisi', 
-                $parent_booking_id,     
-                $patient_id,     
-                $service_id,
-                $nama_layanan,
-                $harga
-            );
+            $booking_id,   // ← CHILD BOOKING
+            $patient_id,
+            $service_id,
+            $nama_layanan,
+            $harga
+        );
 
             mysqli_stmt_execute($stmt_service);
         }

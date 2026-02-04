@@ -203,7 +203,7 @@ if ($now_serving) {
     ";
 
     $stmt_s = $conn->prepare($sql_services);
-    $stmt_s->bind_param("ii", $booking_id, $booking_id);
+    $stmt_s->bind_param("ii", $parent_id, $parent_id);
     $stmt_s->execute();
 
     $result_s = $stmt_s->get_result();
@@ -707,9 +707,15 @@ $total_weeks = ceil($total_days / 7);
 
                         <?php
                         // Get services for this booking
-                        $sql_services = "SELECT nama_layanan FROM booking_services WHERE booking_id = ?";
+                        $sql_services = "
+                            SELECT bs.nama_layanan
+                            FROM booking_services bs
+                            JOIN bookings b ON bs.booking_id = b.id
+                            WHERE b.id = ?
+                            OR b.parent_id = ?
+                        ";
                         $stmt_s = $conn->prepare($sql_services);
-                        $stmt_s->bind_param('i', $booking_id);
+                        $stmt_s->bind_param('ii', $booking_id, $booking_id);
                         $stmt_s->execute();
                         $services = $stmt_s->get_result();
                         $service_names = [];
