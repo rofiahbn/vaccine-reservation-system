@@ -2,10 +2,9 @@
 session_start();
 include "../config.php";
 
-$parent_booking_id = intval($_GET['booking_id'] ?? 0);  // Ini parent booking ID
+$parent_booking_id = intval($_GET['booking_id'] ?? 0);
 $patient_id = intval($_GET['patient_id'] ?? 0);
 
-// DEBUG: Tambahkan logging
 error_log("edit_booking.php - Parent Booking ID: $parent_booking_id, Patient ID: $patient_id");
 
 if ($parent_booking_id == 0 || $patient_id == 0) {
@@ -39,30 +38,28 @@ if ($result->num_rows == 0) {
 }
 
 $booking = $result->fetch_assoc();
-
-// Gunakan booking_record_id untuk update nanti
 $booking_record_id = $booking['booking_record_id'];
 
-// Get emails
-$sql_emails = "SELECT email FROM patient_emails WHERE patient_id = ? ORDER BY is_primary DESC";
+// Get ALL emails
+$sql_emails = "SELECT id, email, is_primary FROM patient_emails WHERE patient_id = ? ORDER BY is_primary DESC, id ASC";
 $stmt_e = $conn->prepare($sql_emails);
 $stmt_e->bind_param('i', $booking['patient_id']);
 $stmt_e->execute();
 $emails_result = $stmt_e->get_result();
 $emails = [];
 while ($e = $emails_result->fetch_assoc()) {
-    $emails[] = $e['email'];
+    $emails[] = $e;
 }
 
-// Get phones
-$sql_phones = "SELECT phone FROM patient_phones WHERE patient_id = ? ORDER BY is_primary DESC";
+// Get ALL phones
+$sql_phones = "SELECT id, phone, is_primary FROM patient_phones WHERE patient_id = ? ORDER BY is_primary DESC, id ASC";
 $stmt_p = $conn->prepare($sql_phones);
 $stmt_p->bind_param('i', $booking['patient_id']);
 $stmt_p->execute();
 $phones_result = $stmt_p->get_result();
 $phones = [];
 while ($p = $phones_result->fetch_assoc()) {
-    $phones[] = $p['phone'];
+    $phones[] = $p;
 }
 
 // Get address
@@ -73,9 +70,9 @@ $stmt_a->execute();
 $address = $stmt_a->get_result()->fetch_assoc();
 
 // Get services (FULL DATA)
-$sql_services = "SELECT * FROM booking_services WHERE booking_id = ?";
+$sql_services = "SELECT * FROM booking_services WHERE booking_id = ? AND patient_id = ?";
 $stmt_s = $conn->prepare($sql_services);
-$stmt_s->bind_param('i', $booking_record_id);
+$stmt_s->bind_param('ii', $booking_record_id, $booking['patient_id']);
 $stmt_s->execute();
 $services_result = $stmt_s->get_result();
 $services = [];
@@ -149,8 +146,9 @@ while ($ms = $result_master->fetch_assoc()) {
             </div>
         </div>
 
-        <form action="update_booking.php" method="POST" class="edit-form">
+        <form action="update_booking.php" method="POST" class="edit-form" id="editForm">
             <input type="hidden" name="booking_id" value="<?php echo $booking_record_id; ?>">
+            <input type="hidden" name="parent_booking_id" value="<?php echo $parent_booking_id; ?>">
             <input type="hidden" name="patient_id" value="<?php echo $booking['patient_id']; ?>">
             <input type="hidden" name="status" value="<?php echo $booking['status']; ?>">
 
@@ -175,41 +173,82 @@ while ($ms = $result_master->fetch_assoc()) {
                             <option value="In Clinic" <?php echo $booking['service_type'] == 'In Clinic' ? 'selected' : ''; ?>>In Clinic</option>
                         </select>
                     </div>
-
-                    <!-- DAFTAR LAYANAN -->
-                    <div class="form-group">
-                        <label>Pesanan yang Dipilih <span class="required">*</span></label>
-
-                        <?php if (count($services) > 0): ?>
-                            <?php foreach ($services as $idx => $srv): ?>
-
-                                <input type="hidden" name="service_id[]" value="<?= $srv['id'] ?>">
-
-                                <select name="service_master_id[]" 
-                                        onchange="updateServiceName(this, <?= $idx ?>)"
-                                        required>
-                                    <option value="">-- Pilih Layanan --</option>
-                                    <?php foreach ($master_services as $ms): ?>
-                                        <option value="<?= $ms['id'] ?>"
-                                            <?= $ms['id'] == $srv['service_id'] ? 'selected' : '' ?>>
-                                            [<?= $ms['kategori'] ?>] <?= $ms['nama_layanan'] ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-
-                                <input type="hidden" 
-                                    name="nama_layanan[]" 
-                                    id="nama_layanan_<?= $idx ?>" 
-                                    value="<?= htmlspecialchars($srv['nama_layanan']) ?>">
-
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <input type="text" value="Belum ada layanan" disabled>
-                        <?php endif; ?>
-
-                    </div>
                 </div>
 
+                <!-- DAFTAR LAYANAN dengan Add/Delete -->
+                <div class="form-group">
+                    <label>Pesanan yang Dipilih <span class="required">*</span></label>
+                    
+                    <div id="servicesContainer">
+                        <?php if (count($services) > 0): ?>
+                            <?php foreach ($services as $idx => $srv): ?>
+                                <div class="service-item-wrapper" data-service-index="<?= $idx ?>">
+                                    <div class="dynamic-field-group">
+                                        <!-- Hidden field untuk ID service (untuk update) -->
+                                        <input type="hidden" name="service_db_id[]" value="<?= $srv['id'] ?>">
+                                        
+                                        <select name="service_master_id[]" 
+                                                onchange="updateServiceName(this, <?= $idx ?>)"
+                                                required>
+                                            <option value="">-- Pilih Layanan --</option>
+                                            <?php foreach ($master_services as $ms): ?>
+                                                <option value="<?= $ms['id'] ?>"
+                                                    data-name="<?= htmlspecialchars($ms['nama_layanan']) ?>"
+                                                    <?= $ms['id'] == $srv['service_id'] ? 'selected' : '' ?>>
+                                                    [<?= $ms['kategori'] ?>] <?= $ms['nama_layanan'] ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+
+                                        <input type="hidden" 
+                                            name="nama_layanan[]" 
+                                            id="nama_layanan_<?= $idx ?>" 
+                                            value="<?= htmlspecialchars($srv['nama_layanan']) ?>">
+
+                                        <button type="button" 
+                                                class="btn-remove-field" 
+                                                onclick="removeService(this)"
+                                                <?= count($services) <= 1 ? 'disabled title="Minimal harus ada 1 layanan"' : '' ?>>
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="service-item-wrapper" data-service-index="0">
+                                <div class="dynamic-field-group">
+                                    <input type="hidden" name="service_db_id[]" value="new">
+                                    
+                                    <select name="service_master_id[]" 
+                                            onchange="updateServiceName(this, 0)"
+                                            required>
+                                        <option value="">-- Pilih Layanan --</option>
+                                        <?php foreach ($master_services as $ms): ?>
+                                            <option value="<?= $ms['id'] ?>"
+                                                data-name="<?= htmlspecialchars($ms['nama_layanan']) ?>">
+                                                [<?= $ms['kategori'] ?>] <?= $ms['nama_layanan'] ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+
+                                    <input type="hidden" name="nama_layanan[]" id="nama_layanan_0" value="">
+
+                                    <button type="button" 
+                                            class="btn-remove-field" 
+                                            onclick="removeService(this)"
+                                            disabled 
+                                            title="Minimal harus ada 1 layanan">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <button type="button" class="btn-add-field" onclick="addService()">
+                        <i class="fas fa-plus"></i> Tambah Layanan
+                    </button>
+                </div>
             </div>
 
             <!-- Data Pasien -->
@@ -263,16 +302,102 @@ while ($ms = $result_master->fetch_assoc()) {
             <!-- Kontak -->
             <div class="form-section">
                 <h3><i class="fas fa-phone"></i> Kontak</h3>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Email <span class="required">*</span></label>
-                        <input type="email" name="email" value="<?php echo htmlspecialchars($emails[0] ?? ''); ?>" required>
+                
+                <!-- EMAIL dengan Add/Delete -->
+                <div class="form-group">
+                    <label>Email <span class="required">*</span></label>
+                    
+                    <div id="emailsContainer">
+                        <?php if (count($emails) > 0): ?>
+                            <?php foreach ($emails as $idx => $e): ?>
+                                <div class="dynamic-field-group">
+                                    <input type="hidden" name="email_db_id[]" value="<?= $e['id'] ?>">
+                                    <input type="hidden" name="email_is_primary[]" value="<?= $e['is_primary'] ?>">
+                                    
+                                    <input type="email" 
+                                           name="email[]" 
+                                           value="<?= htmlspecialchars($e['email']) ?>" 
+                                           placeholder="email@example.com"
+                                           required>
+                                    
+                                    <?php if ($e['is_primary']): ?>
+                                        <span class="primary-badge">Primary</span>
+                                    <?php endif; ?>
+                                    
+                                    <button type="button" 
+                                            class="btn-remove-field" 
+                                            onclick="removeEmail(this)"
+                                            <?= count($emails) <= 1 ? 'disabled title="Minimal harus ada 1 email"' : '' ?>>
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="dynamic-field-group">
+                                <input type="hidden" name="email_db_id[]" value="new">
+                                <input type="hidden" name="email_is_primary[]" value="1">
+                                <input type="email" name="email[]" placeholder="email@example.com" required>
+                                <span class="primary-badge">Primary</span>
+                                <button type="button" class="btn-remove-field" onclick="removeEmail(this)" disabled title="Minimal harus ada 1 email">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        <?php endif; ?>
                     </div>
-                    <div class="form-group">
-                        <label>Nomor HP <span class="required">*</span></label>
-                        <input type="tel" name="phone" value="<?php echo htmlspecialchars($phones[0] ?? ''); ?>" required>
-                    </div>
+                    
+                    <button type="button" class="btn-add-field" onclick="addEmail()">
+                        <i class="fas fa-plus"></i> Tambah Email
+                    </button>
                 </div>
+
+                <!-- PHONE dengan Add/Delete -->
+                <div class="form-group">
+                    <label>Nomor HP <span class="required">*</span></label>
+                    
+                    <div id="phonesContainer">
+                        <?php if (count($phones) > 0): ?>
+                            <?php foreach ($phones as $idx => $ph): ?>
+                                <div class="dynamic-field-group">
+                                    <input type="hidden" name="phone_db_id[]" value="<?= $ph['id'] ?>">
+                                    <input type="hidden" name="phone_is_primary[]" value="<?= $ph['is_primary'] ?>">
+                                    
+                                    <input type="tel" 
+                                           name="phone[]" 
+                                           value="<?= htmlspecialchars($ph['phone']) ?>" 
+                                           placeholder="08xxxxxxxxxx"
+                                           required>
+                                    
+                                    <?php if ($ph['is_primary']): ?>
+                                        <span class="primary-badge">Primary</span>
+                                    <?php endif; ?>
+                                    
+                                    <button type="button" 
+                                            class="btn-remove-field" 
+                                            onclick="removePhone(this)"
+                                            <?= count($phones) <= 1 ? 'disabled title="Minimal harus ada 1 nomor HP"' : '' ?>>
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="dynamic-field-group">
+                                <input type="hidden" name="phone_db_id[]" value="new">
+                                <input type="hidden" name="phone_is_primary[]" value="1">
+                                <input type="tel" name="phone[]" placeholder="08xxxxxxxxxx" required>
+                                <span class="primary-badge">Primary</span>
+                                <button type="button" class="btn-remove-field" onclick="removePhone(this)" disabled title="Minimal harus ada 1 nomor HP">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <button type="button" class="btn-add-field" onclick="addPhone()">
+                        <i class="fas fa-plus"></i> Tambah Nomor HP
+                    </button>
+                </div>
+
+                <!-- ADDRESS -->
                 <div class="form-group">
                     <label>Alamat</label>
                     <textarea name="alamat"><?php echo htmlspecialchars($address['alamat'] ?? ''); ?></textarea>
@@ -287,7 +412,6 @@ while ($ms = $result_master->fetch_assoc()) {
                         <select name="provinsi" id="provinsiSelect" required>
                             <option value="">-- Pilih Provinsi --</option>
                         </select>
-                        
                     </div>
 
                     <div class="form-group">
@@ -295,7 +419,6 @@ while ($ms = $result_master->fetch_assoc()) {
                         <select name="kota" id="kotaSelect" required>
                             <option value="">-- Pilih Kota --</option>
                         </select>
-                        
                     </div>
                 </div>
             </div>
@@ -319,7 +442,7 @@ while ($ms = $result_master->fetch_assoc()) {
 
             <!-- Form Actions -->
             <div class="form-actions">
-                <button type="button" class="btn-cancel-edit" onclick="window.location.href='booking_detail.php?id=<?php echo $booking_id; ?>'">
+                <button type="button" class="btn-cancel-edit" onclick="window.location.href='booking_detail.php?id=<?php echo $parent_booking_id; ?>'">
                     <i class="fas fa-times"></i> Batal
                 </button>
                 <button type="submit" class="btn-save">
@@ -331,6 +454,13 @@ while ($ms = $result_master->fetch_assoc()) {
 
     <script src="../provinces.js"></script>
     <script>
+    // GLOBAL VARIABLES
+    let serviceIndex = <?= count($services) ?>;
+    const masterServices = <?= json_encode($master_services) ?>;
+
+    // ================================
+    // PROVINCE & CITY HANDLING
+    // ================================
     document.addEventListener('DOMContentLoaded', function () {
         const provSelect = document.getElementById('provinsiSelect');
         const kotaSelect = document.getElementById('kotaSelect');
@@ -381,24 +511,165 @@ while ($ms = $result_master->fetch_assoc()) {
         });
     });
 
-    function updateService(select, idx) {
-        const selected = select.options[select.selectedIndex];
-        const nama = selected.textContent.trim();
-
-        // simpan nama layanan
-        document.getElementById("nama_layanan_" + idx).value = nama.replace(/\[.*?\]\s*/,''); 
-
-    }
-
+    // ================================
+    // SERVICE FUNCTIONS
+    // ================================
     function updateServiceName(select, idx) {
-        const nama = select.options[select.selectedIndex].textContent.trim();
-
-        // hilangkan prefix [kategori]
-        const cleanNama = nama.replace(/\[.*?\]\s*/,'');
-
-        document.getElementById("nama_layanan_" + idx).value = cleanNama;
+        const selectedOption = select.options[select.selectedIndex];
+        const nama = selectedOption.getAttribute('data-name') || '';
+        document.getElementById("nama_layanan_" + idx).value = nama;
     }
 
+    function addService() {
+        const container = document.getElementById('servicesContainer');
+        const newIndex = serviceIndex++;
+        
+        const wrapper = document.createElement('div');
+        wrapper.className = 'service-item-wrapper';
+        wrapper.setAttribute('data-service-index', newIndex);
+        
+        let optionsHTML = '<option value="">-- Pilih Layanan --</option>';
+        masterServices.forEach(ms => {
+            optionsHTML += `<option value="${ms.id}" data-name="${escapeHtml(ms.nama_layanan)}">[${ms.kategori}] ${escapeHtml(ms.nama_layanan)}</option>`;
+        });
+        
+        wrapper.innerHTML = `
+            <div class="dynamic-field-group">
+                <input type="hidden" name="service_db_id[]" value="new">
+                <select name="service_master_id[]" onchange="updateServiceName(this, ${newIndex})" required>
+                    ${optionsHTML}
+                </select>
+                <input type="hidden" name="nama_layanan[]" id="nama_layanan_${newIndex}" value="">
+                <button type="button" class="btn-remove-field" onclick="removeService(this)">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+        
+        container.appendChild(wrapper);
+        updateServiceButtons();
+    }
+
+    function removeService(button) {
+        const wrapper = button.closest('.service-item-wrapper');
+        wrapper.remove();
+        updateServiceButtons();
+    }
+
+    function updateServiceButtons() {
+        const services = document.querySelectorAll('#servicesContainer .service-item-wrapper');
+        const buttons = document.querySelectorAll('#servicesContainer .btn-remove-field');
+        
+        buttons.forEach(btn => {
+            if (services.length <= 1) {
+                btn.disabled = true;
+                btn.title = 'Minimal harus ada 1 layanan';
+            } else {
+                btn.disabled = false;
+                btn.title = '';
+            }
+        });
+    }
+
+    // ================================
+    // EMAIL FUNCTIONS
+    // ================================
+    function addEmail() {
+        const container = document.getElementById('emailsContainer');
+        
+        const div = document.createElement('div');
+        div.className = 'dynamic-field-group';
+        div.innerHTML = `
+            <input type="hidden" name="email_db_id[]" value="new">
+            <input type="hidden" name="email_is_primary[]" value="0">
+            <input type="email" name="email[]" placeholder="email@example.com" required>
+            <button type="button" class="btn-remove-field" onclick="removeEmail(this)">
+                <i class="fas fa-trash"></i>
+            </button>
+        `;
+        
+        container.appendChild(div);
+        updateEmailButtons();
+    }
+
+    function removeEmail(button) {
+        const group = button.closest('.dynamic-field-group');
+        group.remove();
+        updateEmailButtons();
+    }
+
+    function updateEmailButtons() {
+        const emails = document.querySelectorAll('#emailsContainer .dynamic-field-group');
+        const buttons = document.querySelectorAll('#emailsContainer .btn-remove-field');
+        
+        buttons.forEach(btn => {
+            if (emails.length <= 1) {
+                btn.disabled = true;
+                btn.title = 'Minimal harus ada 1 email';
+            } else {
+                btn.disabled = false;
+                btn.title = '';
+            }
+        });
+    }
+
+    // ================================
+    // PHONE FUNCTIONS
+    // ================================
+    function addPhone() {
+        const container = document.getElementById('phonesContainer');
+        
+        const div = document.createElement('div');
+        div.className = 'dynamic-field-group';
+        div.innerHTML = `
+            <input type="hidden" name="phone_db_id[]" value="new">
+            <input type="hidden" name="phone_is_primary[]" value="0">
+            <input type="tel" name="phone[]" placeholder="08xxxxxxxxxx" required>
+            <button type="button" class="btn-remove-field" onclick="removePhone(this)">
+                <i class="fas fa-trash"></i>
+            </button>
+        `;
+        
+        container.appendChild(div);
+        updatePhoneButtons();
+    }
+
+    function removePhone(button) {
+        const group = button.closest('.dynamic-field-group');
+        group.remove();
+        updatePhoneButtons();
+    }
+
+    function updatePhoneButtons() {
+        const phones = document.querySelectorAll('#phonesContainer .dynamic-field-group');
+        const buttons = document.querySelectorAll('#phonesContainer .btn-remove-field');
+        
+        buttons.forEach(btn => {
+            if (phones.length <= 1) {
+                btn.disabled = true;
+                btn.title = 'Minimal harus ada 1 nomor HP';
+            } else {
+                btn.disabled = false;
+                btn.title = '';
+            }
+        });
+    }
+
+    // ================================
+    // HELPER FUNCTIONS
+    // ================================
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Initialize button states
+    document.addEventListener('DOMContentLoaded', function() {
+        updateServiceButtons();
+        updateEmailButtons();
+        updatePhoneButtons();
+    });
     </script>
     <script src="js/sidebar-toggle.js"></script>
 </body>

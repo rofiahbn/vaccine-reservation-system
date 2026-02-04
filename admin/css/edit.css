@@ -109,3 +109,104 @@
             color: #ef4444;
         }
         
+/* Style untuk dynamic fields */
+        .dynamic-field-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        
+        .dynamic-field-group input,
+        .dynamic-field-group select {
+            flex: 1;
+        }
+        
+        .btn-remove-field {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 40px;
+        }
+        
+        .btn-remove-field:hover {
+            background: #c82333;
+        }
+        
+        .btn-remove-field:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        
+        .btn-add-field {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .btn-add-field:hover {
+            background: #218838;
+        }
+        
+        .service-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .service-item-header h4 {
+            margin: 0;
+            color: #495057;
+            font-size: 14px;
+        }
+        
+        .primary-badge {
+            background: #007bff;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        
+/* Styling untuk form-group yang berisi service container */
+.form-group > label {
+    display: block;
+    font-size: 14px;
+    color: #374151;
+    font-weight: 500;
+    margin-bottom: 12px;
+}
+
+/* Responsive untuk mobile */
+@media (max-width: 768px) {
+    .service-input-group {
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch;
+    }
+    
+    .btn-delete-service {
+        width: 100%;
+        height: 40px;
+        margin-top: 5px;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
