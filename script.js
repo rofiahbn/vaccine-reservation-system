@@ -54,6 +54,28 @@ function updateFormByService() {
         inputNIK.required = false;
         inputPaspor.required = false;
     }
+
+    // ===== UPDATE FLAG UMROH KE URL =====
+    const isUmroh = layanan === 'Umroh/Haji/Luar Negeri' ? 1 : 0;
+
+    const url = new URL(window.location.href);
+
+    // ambil nilai sekarang di URL
+    const currentUmroh = url.searchParams.get("is_umroh");
+    const currentLayanan = decodeURIComponent(url.searchParams.get("layanan") || "");
+
+    // update hidden input
+    document.getElementById("isUmroh").value = isUmroh;
+
+    // hanya reload kalau memang berubah
+    if (currentUmroh != isUmroh || currentLayanan != layanan) {
+
+        url.searchParams.set("is_umroh", isUmroh);
+        url.searchParams.set("layanan", layanan);
+
+        window.location.href = url.toString();
+    }
+
 }
 
 // ==================== HITUNG USIA ====================
@@ -319,6 +341,15 @@ function prevMonth() {
 }
 
 function nextMonth() {
+
+    const params = new URLSearchParams(window.location.search);
+    const isUmroh = params.get("is_umroh") == "1";
+
+    if (isUmroh) {
+        alert("Untuk layanan Umroh/Haji hanya dapat memilih maksimal 7 hari ke depan.");
+        return;
+    }
+
     let bulan = bulanNow;
     let tahun = tahunNow;
 
@@ -328,7 +359,6 @@ function nextMonth() {
         tahun++;
     }
 
-    // Redirect dengan parameter GET
     window.location.href = `?bulan=${bulan}&tahun=${tahun}`;
 }
 
@@ -540,3 +570,7 @@ function addPhone() {
 
     container.appendChild(div);
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    updateFormByService();
+});

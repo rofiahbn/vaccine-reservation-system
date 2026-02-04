@@ -308,3 +308,8 @@ h2 {
     pointer-events: none;
 }
 
+.day.umroh-limit {
+    background: #f2f2f2;
+    color: #aaa;
+    cursor: not-allowed;
+}

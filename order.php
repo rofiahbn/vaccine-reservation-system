@@ -41,6 +41,12 @@ $hari_awal = date('w', strtotime("$tahun-$bulan-01"));
 // Hari ini
 $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
 
+/* ===== CEK LAYANAN UMROH ===== */
+$is_umroh_selected = isset($_GET['is_umroh']) && $_GET['is_umroh'] == 1;
+
+$today = new DateTime();
+$limit_umroh = (clone $today)->modify('+7 days');
+
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -131,14 +137,28 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
             <div class="form-section">
                 <div class="form-group">
                     <label>Pilih Layanan <span class="required">*</span></label>
+                    <?php
+                    $selected_layanan = $_GET['layanan'] ?? '';
+                    ?>
+
                     <select name="pelayanan" id="pelayananSelect" required onchange="updateFormByService()">
                         <option value="">-- Pilih Layanan --</option>
-                        <option value="Umroh/Haji/Luar Negeri">Layanan Umroh/Haji/Luar Negeri</option>
-                        <option value="Vaksinasi Umum/Infus Vitamin">Layanan Vaksinasi Umum/Infus Vitamin</option>
+
+                        <option value="Umroh/Haji/Luar Negeri"
+                            <?= $selected_layanan == "Umroh/Haji/Luar Negeri" ? "selected" : "" ?>>
+                            Layanan Umroh/Haji/Luar Negeri
+                        </option>
+
+                        <option value="Vaksinasi Umum/Infus Vitamin"
+                            <?= $selected_layanan == "Vaksinasi Umum/Infus Vitamin" ? "selected" : "" ?>>
+                            Layanan Vaksinasi Umum/Infus Vitamin
+                        </option>
                     </select>
                 </div>
 
-                <input type="hidden" name="is_umroh" id="isUmroh" value="0">
+                <input type="hidden" name="is_umroh" id="isUmroh"
+                    value="<?= $is_umroh_selected ? 1 : 0 ?>">
+
             </div>
 
             <!-- KALENDER BOOKING -->
@@ -175,8 +195,17 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
                         $is_today = ($tanggal_full === $today_date);
 
                         // ❌ JIKA TANGGAL SUDAH LEWAT → DISABLE
-                        if ($tanggal_full < $today_date) {
+                        $tanggal_obj = new DateTime($tanggal_full);
+
+                        /* ❌ tanggal sudah lewat */
+                        if ($tanggal_obj < $today) {
                             echo "<div class='day disabled past-date' title='Tanggal sudah lewat'>$tgl</div>";
+                            continue;
+                        }
+
+                        /* ❌ khusus layanan Umroh → maksimal 7 hari */
+                        if ($is_umroh_selected && $tanggal_obj > $limit_umroh) {
+                            echo "<div class='day disabled umroh-limit' title='Untuk layanan Umroh hanya bisa memilih 7 hari ke depan'>$tgl</div>";
                             continue;
                         }
 
@@ -214,8 +243,9 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
                             <span>Tutup</span>
                         </div>
                     </div>
+                    
                 </div>
-
+                
                 <input type="hidden" name="tanggal_booking" id="selectedDate" value="">
                 
                 <div class="selected-date" id="dateDisplay" style="display:none;">
