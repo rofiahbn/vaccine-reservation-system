@@ -24,7 +24,12 @@ document.getElementById("formTindakan").addEventListener("submit", function(e) {
             alert("✅ Tindakan berhasil disimpan");
 
             // reload halaman biar data fresh
-            window.location.href = "proses_tindakan.php?id=" + formData.get("booking_id");
+            const parentId = document.querySelector('input[name="parent_booking_id"]').value;
+            const patientId = document.querySelector('input[name="patient_id"]').value;
+
+            window.location.href =
+                "proses_tindakan.php?id=" + parentId +
+                "&participant_id=" + patientId;
 
         } else {
             alert("❌ Gagal simpan tindakan: " + data.message);

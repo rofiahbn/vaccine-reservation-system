@@ -6,10 +6,25 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
     die("Booking ID tidak ditemukan.");
 }
 
-$booking_id = intval($_GET['id']);
+$parent_booking_id = intval($_GET['id']);
 
-/* Ambil booking + pasien */
-$sql = "
+/* Ambil booking parent */
+$sql_parent = "
+SELECT b.* 
+FROM bookings b
+WHERE b.id = ?
+";
+$stmt_parent = $conn->prepare($sql_parent);
+$stmt_parent->bind_param("i", $parent_booking_id);
+$stmt_parent->execute();
+$parent_booking = $stmt_parent->get_result()->fetch_assoc();
+
+if (!$parent_booking) {
+    die("Data booking tidak ditemukan.");
+}
+
+/* Ambil semua child bookings (peserta) */
+$sql_peserta = "
 SELECT b.*, 
        p.id AS patient_id,
        p.no_rekam_medis,
@@ -20,21 +35,41 @@ SELECT b.*,
        p.paspor
 FROM bookings b
 JOIN patients p ON b.patient_id = p.id
-WHERE b.id = ?
+WHERE b.parent_id = ? OR (b.parent_id IS NULL AND b.id = ?)
+ORDER BY b.id
 ";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $booking_id);
-$stmt->execute();
-$booking = $stmt->get_result()->fetch_assoc();
+$stmt_peserta = $conn->prepare($sql_peserta);
+$stmt_peserta->bind_param("ii", $parent_booking_id, $parent_booking_id);
+$stmt_peserta->execute();
+$peserta_result = $stmt_peserta->get_result();
 
-if (!$booking) {
-    die("Data booking tidak ditemukan.");
+$semua_peserta = [];
+while ($row = $peserta_result->fetch_assoc()) {
+    $semua_peserta[] = $row;
 }
 
-// ================= AMBIL DATA TINDAKAN JIKA SUDAH ADA =================
+// Ambil participant_id dari URL, default ke peserta pertama
+$current_patient_id = isset($_GET['participant_id']) ? intval($_GET['participant_id']) : $semua_peserta[0]['patient_id'];
+
+// Cari booking untuk peserta yang aktif
+$current_peserta = null;
+$current_booking_id = null;
+foreach ($semua_peserta as $peserta) {
+    if ($peserta['patient_id'] == $current_patient_id) {
+        $current_peserta = $peserta;
+        $current_booking_id = $peserta['id'];
+        break;
+    }
+}
+
+if (!$current_peserta) {
+    die("Data peserta tidak ditemukan.");
+}
+
+// ================= AMBIL DATA TINDAKAN UNTUK PESERTA AKTIF =================
 $sql_tindakan = "SELECT * FROM tindakan WHERE booking_id = ? ORDER BY created_at DESC LIMIT 1";
 $stmt_t = $conn->prepare($sql_tindakan);
-$stmt_t->bind_param("i", $booking_id);
+$stmt_t->bind_param("i", $current_booking_id);
 $stmt_t->execute();
 $tindakan = $stmt_t->get_result()->fetch_assoc();
 
@@ -46,7 +81,7 @@ function hitungUsia($tanggal_lahir) {
     return $diff->y . " tahun " . $diff->m . " bulan";
 }
 
-$usia = hitungUsia($booking['tanggal_lahir']);
+$usia = hitungUsia($current_peserta['tanggal_lahir']);
 
 function formatTanggalIndo($tanggal) {
     if (!$tanggal) return "";
@@ -63,12 +98,12 @@ function formatTanggalIndo($tanggal) {
     return $exp[2] . ' ' . $bulan[(int)$exp[1]] . ' ' . $exp[0];
 }
 
-$tgl_lahir_indo = formatTanggalIndo($booking['tanggal_lahir']);
+$tgl_lahir_indo = formatTanggalIndo($current_peserta['tanggal_lahir']);
 
-/* Ambil layanan */
+/* Ambil layanan untuk booking ini */
 $sql_services = "SELECT nama_layanan FROM booking_services WHERE booking_id = ?";
 $stmt_s = $conn->prepare($sql_services);
-$stmt_s->bind_param("i", $booking_id);
+$stmt_s->bind_param("i", $current_booking_id);
 $stmt_s->execute();
 $services = $stmt_s->get_result();
 
@@ -80,7 +115,7 @@ JOIN staff s ON bs.staff_id = s.id
 WHERE bs.booking_id = ?
 ";
 $stmt_d = $conn->prepare($sql_staff);
-$stmt_d->bind_param("i", $booking_id);
+$stmt_d->bind_param("i", $parent_booking_id); // Ambil dari parent booking
 $stmt_d->execute();
 $dokters = $stmt_d->get_result();
 
@@ -100,7 +135,7 @@ $tanggal_surat_indo = formatTanggalIndo($tanggal_surat);
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Proses / Tindakan</title>
+<title>Proses Tindakan - <?= htmlspecialchars($current_peserta['nama_lengkap']) ?></title>
 
 <link rel="stylesheet" href="css/proses_tindakan.css">
 <link rel="stylesheet" href="css/surat.css">
@@ -117,29 +152,29 @@ $tanggal_surat_indo = formatTanggalIndo($tanggal_surat);
         <img src="v-logo.png" alt="V" class="logo-icon">
     </div>
     <nav class="nav-menu">
-            <a href="dashboard.php" class="nav-item">
-                <i class="fas fa-th-large"></i>
-                <span>Dashboard</span>
-            </a>
-            <a href="products.php" class="nav-item">
-                <i class="fas fa-capsules"></i>
-                <span>Produk</span>
-            </a>
-            <a href="#" class="nav-item">
-                <i class="fas fa-users"></i>
-                <span>Pasien</span>
-            </a>
-            <a href="#" class="nav-item">
-                <i class="fas fa-cog"></i>
-                <span>Pengaturan</span>
-            </a>
-        </nav>
-        <div class="sidebar-footer">
-            <a href="#" class="logout-btn">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>Logout</span>
-            </a>
-        </div>
+        <a href="dashboard.php" class="nav-item">
+            <i class="fas fa-th-large"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="products.php" class="nav-item">
+            <i class="fas fa-capsules"></i>
+            <span>Produk</span>
+        </a>
+        <a href="#" class="nav-item">
+            <i class="fas fa-users"></i>
+            <span>Pasien</span>
+        </a>
+        <a href="#" class="nav-item">
+            <i class="fas fa-cog"></i>
+            <span>Pengaturan</span>
+        </a>
+    </nav>
+    <div class="sidebar-footer">
+        <a href="#" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+        </a>
+    </div>
 </div>
 
 <!-- ================= MAIN CONTENT ================= -->
@@ -147,167 +182,180 @@ $tanggal_surat_indo = formatTanggalIndo($tanggal_surat);
 
     <!-- HEADER -->
     <div class="detail-header">
-        <button onclick="window.location.href='booking_detail.php?id=<?= $booking_id ?>'" class="btn-back">
+        <button onclick="window.location.href='booking_detail.php?id=<?= $parent_booking_id ?>'" class="btn-back">
             <i class="fas fa-arrow-left"></i> Kembali
         </button>
         <h1>Proses / Tindakan Pasien</h1>
+    </div>
+
+    <!-- TAB PESERTA -->
+    <div class="participant-tabs">
+        <?php foreach ($semua_peserta as $index => $peserta): ?>
+            <a href="?id=<?= $parent_booking_id ?>&participant_id=<?= $peserta['patient_id'] ?>" 
+            class="participant-tab <?= $peserta['patient_id'] == $current_patient_id ? 'active' : '' ?>">
+
+                Peserta <?= $index + 1 ?>
+
+            </a>
+        <?php endforeach; ?>
     </div>
 
     <div class="detail-layout">
 
         <!-- ================= FORM KIRI ================= -->
         <div class="detail-container">
+            <form id="formTindakan" action="simpan_tindakan.php" method="POST">
+                <input type="hidden" name="booking_id" value="<?= $current_booking_id ?>">
+                <input type="hidden" name="parent_booking_id" value="<?= $parent_booking_id ?>">
+                <input type="hidden" name="patient_id" value="<?= $current_patient_id ?>">
 
-        <form id="formTindakan">
+                <div class="proses-container">
+                    <div class="detail-grid">
 
-        <input type="hidden" name="booking_id" value="<?= $booking_id ?>">
-        <input type="hidden" name="patient_id" value="<?= $booking['patient_id'] ?>">
+                        <!-- ================= INFO PESERTA ================= -->
+                        <div class="detail-item full-width">
+                            <label>Peserta</label>
+                            <input type="text" value="<?= htmlspecialchars($current_peserta['nama_lengkap']) ?>" readonly>
+                        </div>
 
-        <div class="proses-container">
+                        <div class="detail-item full-width">
+                            <label>Layanan</label>
+                            <?php while($s = $services->fetch_assoc()): ?>
+                                <input type="text" value="<?= htmlspecialchars($s['nama_layanan']) ?>" readonly>
+                            <?php endwhile; ?>
+                        </div>
 
-        <div class="detail-grid">
+                        <div class="detail-item">
+                            <label>No. Rekam Medis</label>
+                            <input type="text" value="<?= htmlspecialchars($current_peserta['no_rekam_medis']) ?>" readonly>
+                        </div>
 
-            <!-- ================= DATA DASAR ================= -->
-            <div class="detail-item full-width">
-                <label>Layanan</label>
-                <?php while($s = $services->fetch_assoc()): ?>
-                    <input type="text" value="<?= htmlspecialchars($s['nama_layanan']) ?>" readonly>
-                <?php endwhile; ?>
-            </div>
+                        <div class="detail-item">
+                            <label>Nama Lengkap</label>
+                            <input type="text" value="<?= htmlspecialchars($current_peserta['nama_lengkap']) ?>" readonly>
+                        </div>
 
-            <div class="detail-item">
-                <label>No. Rekam Medis</label>
-                <input type="text" value="<?= htmlspecialchars($booking['no_rekam_medis']) ?>" readonly>
-            </div>
+                        <div class="detail-item">
+                            <label>Tanggal Vaksinasi</label>
+                            <input type="date" value="<?= $current_peserta['tanggal_booking'] ?>" readonly>
+                        </div>
 
-            <div class="detail-item">
-                <label>Nama Lengkap</label>
-                <input type="text" value="<?= htmlspecialchars($booking['nama_lengkap']) ?>" readonly>
-            </div>
+                        <div class="detail-item">
+                            <label>No Identitas</label>
+                            <input type="text" value="<?= htmlspecialchars($current_peserta['nik'] ?: $current_peserta['paspor']) ?>" readonly>
+                        </div>
 
-            <div class="detail-item">
-                <label>Tanggal Vaksinasi</label>
-                <input type="date" value="<?= $booking['tanggal_booking'] ?>" readonly>
-            </div>
+                        <!-- ================= DATA VAKSIN ================= -->
+                        <div class="detail-item">
+                            <label>Jenis Vaksinasi</label>
+                            <input type="text" name="jenis_vaksin"
+                                value="<?= htmlspecialchars($tindakan['jenis_vaksin'] ?? '') ?>">
+                        </div>
 
-            <div class="detail-item">
-                <label>No Identitas</label>
-                <input type="text" value="<?= htmlspecialchars($booking['nik'] ?: $booking['paspor']) ?>" readonly>
-            </div>
+                        <div class="detail-item">
+                            <label>No. Batch Vaksin</label>
+                            <input type="text" name="batch_vaksin"
+                                value="<?= htmlspecialchars($tindakan['batch_vaksin'] ?? '') ?>">
+                        </div>
 
-            <!-- ================= DATA VAKSIN ================= -->
-            <div class="detail-item">
-                <label>Jenis Vaksinasi</label>
-                <input type="text" name="jenis_vaksin"
-                    value="<?= htmlspecialchars($tindakan['jenis_vaksin'] ?? '') ?>">
-            </div>
+                        <div class="detail-item">
+                            <label>Tanggal Kadaluarsa Vaksin</label>
+                            <input type="date" name="expired_vaksin"
+                                value="<?= $tindakan['expired_vaksin'] ?? '' ?>">
+                        </div>
 
-            <div class="detail-item">
-                <label>No. Batch Vaksin</label>
-                <input type="text" name="batch_vaksin"
-                    value="<?= htmlspecialchars($tindakan['batch_vaksin'] ?? '') ?>">
-            </div>
+                        <!-- ================= KEDATANGAN ================= -->
+                        <div class="detail-item">
+                            <label>Kedatangan ke</label>
+                            <select name="kedatangan_ke">
+                                <option value="">-- Pilih --</option>
+                                <option value="1" <?= ($tindakan['kedatangan_ke'] ?? '') == '1' ? 'selected' : '' ?>>1</option>
+                                <option value="2" <?= ($tindakan['kedatangan_ke'] ?? '') == '2' ? 'selected' : '' ?>>2</option>
+                                <option value="3" <?= ($tindakan['kedatangan_ke'] ?? '') == '3' ? 'selected' : '' ?>>3</option>
+                            </select>
+                        </div>
 
-            <div class="detail-item">
-                <label>Tanggal Kadaluarsa Vaksin</label>
-                <input type="date" name="expired_vaksin"
-                    value="<?= $tindakan['expired_vaksin'] ?? '' ?>">
-            </div>
+                        <div class="detail-item">
+                            <label>Kedatangan Selanjutnya</label>
+                            <select name="kedatangan_selanjutnya">
+                                <option value="">-- Pilih --</option>
+                                <option value="1" <?= ($tindakan['kedatangan_selanjutnya'] ?? '') == '1' ? 'selected' : '' ?>>1</option>
+                                <option value="2" <?= ($tindakan['kedatangan_selanjutnya'] ?? '') == '2' ? 'selected' : '' ?>>2</option>
+                                <option value="3" <?= ($tindakan['kedatangan_selanjutnya'] ?? '') == '3' ? 'selected' : '' ?>>3</option>
+                            </select>
+                        </div>
 
-            <!-- ================= KEDATANGAN ================= -->
-            <div class="detail-item">
-                <label>Kedatangan ke</label>
-                <select name="kedatangan_ke">
-                    <option value="1" <?= ($tindakan['kedatangan_ke'] ?? '') == '1' ? 'selected' : '' ?>>1</option>
-                    <option value="2" <?= ($tindakan['kedatangan_ke'] ?? '') == '2' ? 'selected' : '' ?>>2</option>
-                    <option value="3" <?= ($tindakan['kedatangan_ke'] ?? '') == '3' ? 'selected' : '' ?>>3</option>
-                </select>
-            </div>
+                        <div class="detail-item">
+                            <label>Status</label>
+                            <select name="status">
+                                <option value="">-- Pilih --</option>
+                                <option value="Aktif" <?= ($tindakan['status'] ?? '') == 'Aktif' ? 'selected' : '' ?>>Aktif</option>
+                                <option value="Selesai" <?= ($tindakan['status'] ?? '') == 'Selesai' ? 'selected' : '' ?>>Selesai</option>
+                            </select>
+                        </div>
 
-            <div class="detail-item">
-                <label>Kedatangan Selanjutnya</label>
-                <select name="kedatangan_selanjutnya">
-                    <option value="1" <?= ($tindakan['kedatangan_selanjutnya'] ?? '') == '1' ? 'selected' : '' ?>>1</option>
-                    <option value="2" <?= ($tindakan['kedatangan_selanjutnya'] ?? '') == '2' ? 'selected' : '' ?>>2</option>
-                    <option value="3" <?= ($tindakan['kedatangan_selanjutnya'] ?? '') == '3' ? 'selected' : '' ?>>3</option>
-                </select>
-            </div>
+                        <!-- ================= ANAMNESIS ================= -->
+                        <div class="detail-item full-width">
+                            <label>Anamnesis</label>
+                            <textarea name="anamnesis"><?= htmlspecialchars($tindakan['anamnesis'] ?? '') ?></textarea>
+                        </div>
 
-            <div class="detail-item">
-                <label>Status</label>
-                <select name="status">
-                    <option value="Aktif" <?= ($tindakan['status'] ?? '') == 'Aktif' ? 'selected' : '' ?>>Aktif</option>
-                    <option value="Selesai" <?= ($tindakan['status'] ?? '') == 'Selesai' ? 'selected' : '' ?>>Selesai</option>
-                </select>
-            </div>
+                        <div class="detail-item full-width">
+                            <label>Pemeriksaan Fisik</label>
+                            <textarea name="pemeriksaan_fisik"><?= htmlspecialchars($tindakan['pemeriksaan_fisik'] ?? '') ?></textarea>
+                        </div>
 
-            <!-- ================= ANAMNESIS ================= -->
-            <div class="detail-item full-width">
-                <label>Anamnesis</label>
-                <textarea name="anamnesis"><?= htmlspecialchars($tindakan['anamnesis'] ?? '') ?></textarea>
-            </div>
+                        <div class="detail-item full-width">
+                            <label>Diagnosis</label>
+                            <textarea name="diagnosis"><?= htmlspecialchars($tindakan['diagnosis'] ?? '') ?></textarea>
+                        </div>
 
-            <div class="detail-item full-width">
-                <label>Pemeriksaan Fisik</label>
-                <textarea name="pemeriksaan_fisik"><?= htmlspecialchars($tindakan['pemeriksaan_fisik'] ?? '') ?></textarea>
-            </div>
+                        <div class="detail-item full-width">
+                            <label>Tatalaksana</label>
+                            <textarea name="tatalaksana"><?= htmlspecialchars($tindakan['tatalaksana'] ?? '') ?></textarea>
+                        </div>
 
-            <div class="detail-item full-width">
-                <label>Diagnosis</label>
-                <textarea name="diagnosis"><?= htmlspecialchars($tindakan['diagnosis'] ?? '') ?></textarea>
-            </div>
+                        <!-- ================= VITAL SIGNS ================= -->
+                        <div class="detail-item">
+                            <label>Suhu (°C)</label>
+                            <input type="number" step="0.1" name="suhu"
+                                value="<?= $tindakan['suhu'] ?? '' ?>">
+                        </div>
 
-            <div class="detail-item full-width">
-                <label>Tatalaksana</label>
-                <textarea name="tatalaksana"><?= htmlspecialchars($tindakan['tatalaksana'] ?? '') ?></textarea>
-            </div>
+                        <div class="detail-item">
+                            <label>Tekanan Darah (mmHg)</label>
+                            <input type="text" name="tekanan_darah"
+                                value="<?= htmlspecialchars($tindakan['tekanan_darah'] ?? '') ?>"
+                                placeholder="120/80">
+                        </div>
 
-            <!-- ================= VITAL SIGNS ================= -->
-            <div class="detail-item">
-                <label>Suhu (°C)</label>
-                <input type="number" step="0.1" name="suhu"
-                    value="<?= $tindakan['suhu'] ?? '' ?>">
-            </div>
+                        <div class="detail-item">
+                            <label>Respirasi (/menit)</label>
+                            <input type="number" name="respirasi"
+                                value="<?= $tindakan['respirasi'] ?? '' ?>">
+                        </div>
 
-            <div class="detail-item">
-                <label>Tekanan Darah (mmHg)</label>
-                <input type="text" name="tekanan_darah"
-                    value="<?= htmlspecialchars($tindakan['tekanan_darah'] ?? '') ?>"
-                    placeholder="120/80">
-            </div>
+                        <div class="detail-item">
+                            <label>Nadi (/menit)</label>
+                            <input type="number" name="nadi"
+                                value="<?= $tindakan['nadi'] ?? '' ?>">
+                        </div>
 
-            <div class="detail-item">
-                <label>Respirasi (/menit)</label>
-                <input type="number" name="respirasi"
-                    value="<?= $tindakan['respirasi'] ?? '' ?>">
-            </div>
+                    </div>
 
-            <div class="detail-item">
-                <label>Nadi (/menit)</label>
-                <input type="number" name="nadi"
-                    value="<?= $tindakan['nadi'] ?? '' ?>">
-            </div>
-
+                    <!-- ACTION BUTTON -->
+                    <div class="action-buttons">
+                        <button type="button" class="btn-secondary" onclick="window.history.back()">Batal</button>
+                        <button type="submit" class="btn-save">Simpan Tindakan</button>
+                    </div>
+                </div>
+            </form>
         </div>
 
-        <!-- ACTION BUTTON -->
-        <div class="action-buttons">
-            <button type="button" class="btn-secondary" onclick="window.history.back()">Batal</button>
-            <button type="submit" class="btn-save">Simpan Tindakan</button>
-        </div>
-
-        </div>
-        </form>
-
-        </div>
-
-        <!-- ================= PANEL KANAN (PREVIEW NANTI) ================= -->
+        <!-- ================= PANEL KANAN (PREVIEW SURAT) ================= -->
         <div class="detail-right">
-
             <!-- PREVIEW SURAT -->
             <div class="preview-panel" id="previewPanel">
-
-                <!-- TOMBOL MAXIMIZE -->
                 <button class="btn-maximize" onclick="openFullPreview()">
                     <i class="fas fa-expand"></i>
                 </button>
@@ -320,7 +368,6 @@ $tanggal_surat_indo = formatTanggalIndo($tanggal_surat);
             </div>
 
             <div class="surat-control-panel">
-
                 <div class="panel-title">
                     <i class="fas fa-file-medical"></i>
                     Pengaturan Surat
@@ -329,18 +376,15 @@ $tanggal_surat_indo = formatTanggalIndo($tanggal_surat);
                 <!-- PILIH JENIS SURAT -->
                 <div class="control-group">
                     <label class="group-label">Jenis Surat</label>
-
                     <div class="radio-group modern-radio">
                         <label class="radio-card">
                             <input type="radio" name="surat" value="sehat">
                             <span>Surat Sehat</span>
                         </label>
-
                         <label class="radio-card">
                             <input type="radio" name="surat" value="sakit">
                             <span>Surat Sakit</span>
                         </label>
-
                         <label class="radio-card">
                             <input type="radio" name="surat" value="vaksin">
                             <span>Sertifikat Vaksin</span>
@@ -350,39 +394,30 @@ $tanggal_surat_indo = formatTanggalIndo($tanggal_surat);
 
                 <!-- FORM ISTIRAHAT (KHUSUS SURAT SAKIT) -->
                 <div class="control-group" id="form-istirahat" style="display:none;">
-
                     <label class="group-label">Keterangan Istirahat</label>
-
                     <div class="istirahat-grid">
-
                         <div class="istirahat-item">
                             <label>Lama (hari)</label>
                             <input type="number" id="input_lama" placeholder="Contoh: 2">
                         </div>
-
                         <div class="istirahat-item">
                             <label>Tanggal Awal</label>
                             <input type="date" id="input_tgl_awal">
                         </div>
-
                         <div class="istirahat-item">
                             <label>Tanggal Akhir</label>
                             <input type="date" id="input_tgl_akhir">
                         </div>
-
                     </div>
                 </div>
 
                 <!-- PEMERIKSAAN FISIK LAIN (KHUSUS SURAT SEHAT) -->
                 <div class="control-group" id="form-pf-lain" style="display:none;">
-
                     <label class="group-label">Pemeriksaan Fisik Lain</label>
-
                     <textarea id="input_pf_lain"
                             class="modern-input"
                             rows="3"
                             placeholder="Kosongkan jika dalam batas normal"></textarea>
-
                 </div>
 
                 <!-- DOKTER PENANDATANGAN -->
@@ -405,54 +440,50 @@ $tanggal_surat_indo = formatTanggalIndo($tanggal_surat);
                     <input type="text" name="posisi" class="modern-input"
                         value="Dokter Penanggung Jawab">
                 </div>
-
             </div>
 
             <!-- BUTTON ACTION -->
             <div class="preview-actions">
-
                 <button type="button" class="btn-print-preview" id="btnCetakSurat">
                     Cetak Surat
                 </button>
-
                 <button class="btn-send-preview">
                     Kirim Surat
                 </button>
-
             </div>
-
         </div>
     </div>
-
 </div>
-    <!-- MODAL FULL PREVIEW -->
-    <div id="modalPreview" class="modal-preview" style="display:none;">
-        <div class="modal-content">
 
-            <button class="btn-close" onclick="closePreview()">
-                ✕
-            </button>
-
-            <div id="modalPreviewContent"></div>
-        </div>
+<!-- MODAL FULL PREVIEW -->
+<div id="modalPreview" class="modal-preview" style="display:none;">
+    <div class="modal-content">
+        <button class="btn-close" onclick="closePreview()">
+            ✕
+        </button>
+        <div id="modalPreviewContent"></div>
     </div>
-                        
-    <script>
-        const PV_RM = "<?= $booking['no_rekam_medis'] ?>";
-        const PV_NAMA = "<?= addslashes($booking['nama_lengkap']) ?>";
-        const PV_TGL_LAHIR = "<?= $tgl_lahir_indo ?>";
-        const PV_USIA = "<?= $usia ?>";
-        const PV_JK = "<?= $booking['jenis_kelamin'] ?>";
-        const PV_IDENTITAS = "<?= $booking['nik'] ?: $booking['paspor'] ?>";
-        const PV_TGL_VAKSIN = "<?= $booking['tanggal_booking'] ?>";
-        const PV_DOKTER = "<?= addslashes(($dokter_default['gelar'] ?? '') . ' ' . ($dokter_default['nama_lengkap'] ?? '')) ?>";
-        const PV_SIP = "<?= $dokter_default['sip'] ?? '-' ?>";
-        const PV_TANGGAL_SURAT = "<?= $tanggal_surat_indo ?>";
-    </script>
+</div>
 
-    <script src="js/preview_surat.js"></script>
-    <script src="js/simpan_tindakan.js"></script>
-    <script src="js/cetak_surat.js"></script>                        
-    <script src="js/sidebar-toggle.js"></script>                        
+<script>
+    const PV_RM = "<?= $current_peserta['no_rekam_medis'] ?>";
+    const PV_NAMA = "<?= addslashes($current_peserta['nama_lengkap']) ?>";
+    const PV_TGL_LAHIR = "<?= $tgl_lahir_indo ?>";
+    const PV_USIA = "<?= $usia ?>";
+    const PV_JK = "<?= $current_peserta['jenis_kelamin'] ?>";
+    const PV_IDENTITAS = "<?= $current_peserta['nik'] ?: $current_peserta['paspor'] ?>";
+    const PV_TGL_VAKSIN = "<?= $current_peserta['tanggal_booking'] ?>";
+    const PV_DOKTER = "<?= addslashes(($dokter_default['gelar'] ?? '') . ' ' . ($dokter_default['nama_lengkap'] ?? '')) ?>";
+    const PV_SIP = "<?= $dokter_default['sip'] ?? '-' ?>";
+    const PV_TANGGAL_SURAT = "<?= $tanggal_surat_indo ?>";
+    const CURRENT_BOOKING_ID = "<?= $current_booking_id ?>";
+    const CURRENT_PATIENT_ID = "<?= $current_patient_id ?>";
+</script>
+
+<script src="js/preview_surat.js"></script>
+<script src="js/simpan_tindakan.js"></script>
+<script src="js/cetak_surat.js"></script>                        
+<script src="js/sidebar-toggle.js"></script>
+
 </body>
 </html>
