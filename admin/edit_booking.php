@@ -2,34 +2,46 @@
 session_start();
 include "../config.php";
 
-$booking_id = intval($_GET['booking_id'] ?? 0);
+$parent_booking_id = intval($_GET['booking_id'] ?? 0);  // Ini parent booking ID
 $patient_id = intval($_GET['patient_id'] ?? 0);
 
-if ($booking_id == 0 || $patient_id == 0) {
+// DEBUG: Tambahkan logging
+error_log("edit_booking.php - Parent Booking ID: $parent_booking_id, Patient ID: $patient_id");
+
+if ($parent_booking_id == 0 || $patient_id == 0) {
+    error_log("ERROR: Missing parameters, redirecting to dashboard");
     header('Location: dashboard.php');
     exit;
 }
 
-/* Ambil booking + patient */
+/* Cari booking record yang spesifik untuk patient ini */
 $sql = "
-SELECT b.*, p.*
+SELECT 
+    b.id AS booking_record_id,
+    b.*,
+    p.id AS patient_real_id,
+    p.*
 FROM bookings b
 JOIN patients p ON b.patient_id = p.id
-WHERE b.id = ? AND p.id = ?
+WHERE (b.id = ? OR b.parent_id = ?) AND p.id = ?
 ";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("ii", $booking_id, $patient_id);
+$stmt->bind_param("iii", $parent_booking_id, $parent_booking_id, $patient_id);
 $stmt->execute();
 
 $result = $stmt->get_result();
 
 if ($result->num_rows == 0) {
+    error_log("ERROR: No booking found for parent_booking_id: $parent_booking_id, patient_id: $patient_id");
     header('Location: dashboard.php');
     exit;
 }
 
 $booking = $result->fetch_assoc();
+
+// Gunakan booking_record_id untuk update nanti
+$booking_record_id = $booking['booking_record_id'];
 
 // Get emails
 $sql_emails = "SELECT email FROM patient_emails WHERE patient_id = ? ORDER BY is_primary DESC";
@@ -63,7 +75,7 @@ $address = $stmt_a->get_result()->fetch_assoc();
 // Get services (FULL DATA)
 $sql_services = "SELECT * FROM booking_services WHERE booking_id = ?";
 $stmt_s = $conn->prepare($sql_services);
-$stmt_s->bind_param('i', $booking_id);
+$stmt_s->bind_param('i', $booking_record_id);
 $stmt_s->execute();
 $services_result = $stmt_s->get_result();
 $services = [];
@@ -130,7 +142,7 @@ while ($ms = $result_master->fetch_assoc()) {
     <div class="main-content">
         <div class="detail-header">
             <div class="detail-header-left">
-                <button onclick="window.location.href='booking_detail.php?id=<?php echo $booking_id; ?>'" class="btn-back">
+                <button onclick="window.location.href='booking_detail.php?id=<?php echo $parent_booking_id; ?>'" class="btn-back">
                     <i class="fas fa-arrow-left"></i> Kembali
                 </button>
                 <h1>Edit Pesanan #<?php echo $booking['nomor_antrian']; ?></h1>
@@ -138,7 +150,7 @@ while ($ms = $result_master->fetch_assoc()) {
         </div>
 
         <form action="update_booking.php" method="POST" class="edit-form">
-            <input type="hidden" name="booking_id" value="<?php echo $booking_id; ?>">
+            <input type="hidden" name="booking_id" value="<?php echo $booking_record_id; ?>">
             <input type="hidden" name="patient_id" value="<?php echo $booking['patient_id']; ?>">
             <input type="hidden" name="status" value="<?php echo $booking['status']; ?>">
 
@@ -179,7 +191,7 @@ while ($ms = $result_master->fetch_assoc()) {
                                     <option value="">-- Pilih Layanan --</option>
                                     <?php foreach ($master_services as $ms): ?>
                                         <option value="<?= $ms['id'] ?>"
-                                            <?= $ms['nama_layanan'] == $srv['nama_layanan'] ? 'selected' : '' ?>>
+                                            <?= $ms['id'] == $srv['service_id'] ? 'selected' : '' ?>>
                                             [<?= $ms['kategori'] ?>] <?= $ms['nama_layanan'] ?>
                                         </option>
                                     <?php endforeach; ?>

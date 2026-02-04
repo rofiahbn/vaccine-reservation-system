@@ -123,24 +123,6 @@ $disable_accept = ($booking['status'] !== 'pending');
             </button>
             <h1>Detail Pesanan #<?php echo $booking['nomor_antrian']; ?></h1>
 
-            <?php if ($booking['status'] == 'completed' || $booking['status'] == 'cancelled' || $booking['payment_status'] == 'paid'): ?>
-
-                <!-- MODE TERKUNCI -->
-                <button class="btn-edit disabled"
-                        disabled
-                        title="Data sudah selesai, tidak bisa diedit">
-                    <i class="fas fa-edit"></i> Edit
-                </button>
-
-            <?php else: ?>
-
-                <!-- MODE NORMAL -->
-                <button class="btn-edit" onclick="editBooking()">
-                    <i class="fas fa-edit"></i> Edit
-                </button>
-
-            <?php endif; ?>
-
         </div>
 
         <div class="detail-layout">
@@ -178,22 +160,68 @@ $disable_accept = ($booking['status'] !== 'pending');
                     </div>
                 </div>
 
-                <!-- Booking Info -->
-                <div class="participant-tabs">
+                <!-- CONTAINER UNTUK TABS + TOMBOL EDIT -->
+                <div class="tabs-container">
+                    <!-- TABS PARTICIPANT -->
+                    <div class="participant-tabs">
+                        <?php foreach ($participants as $index => $p): ?>
+                            <button 
+                                class="participant-tab <?= $index == 0 ? 'active' : '' ?>"
+                                onclick="showParticipant(<?= $index ?>)">
+                                Peserta <?= $index + 1 ?>
+                            </button>
+                        <?php endforeach; ?>
 
-                    <?php foreach ($participants as $index => $p): ?>
-                        <button 
-                            class="participant-tab <?= $index == 0 ? 'active' : '' ?>"
-                            onclick="showParticipant(<?= $index ?>)">
-                            Peserta <?= $index + 1 ?>
+                        <!-- Tombol tambah peserta -->
+                        <button class="participant-tab add" onclick="addParticipant()">
+                            <i class="fas fa-plus"></i>
                         </button>
-                    <?php endforeach; ?>
+                    </div>
 
-                    <!-- Tombol tambah peserta -->
-                    <button class="participant-tab add" onclick="addParticipant()">
-                        <i class="fas fa-plus"></i>
-                    </button>
-
+                    <!-- TOMBOL EDIT di pojok kanan -->
+                    <div class="edit-button-container">
+                        <?php if ($booking['status'] == 'completed' || $booking['status'] == 'cancelled' || $booking['payment_status'] == 'paid'): ?>
+                            <button class="btn-edit disabled"
+                                    disabled
+                                    title="Data sudah selesai, tidak bisa diedit">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                        <?php else: ?>
+                            <div class="edit-wrapper">
+                                <button class="btn-edit" id="btnEditMain">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                                
+                                <!-- Dropdown untuk pilih peserta -->
+                                <div id="editOptions" class="edit-dropdown">
+                                    <div class="edit-dropdown-header">
+                                        <i class="fas fa-users"></i> Pilih Peserta
+                                    </div>
+                                    <?php foreach ($participants as $index => $p): ?>
+                                        <?php
+                                        $booking_record_id = $p['booking_id'] ?? $p['id'] ?? 0;
+                                        $patient_id = $p['patient_id'] ?? $p['id'] ?? 0;
+                                        ?>
+                                        
+                                        <a href="edit_booking.php?booking_id=<?= $booking_record_id ?>&patient_id=<?= $patient_id ?>"
+                                        class="edit-dropdown-item"
+                                        title="Edit data <?= htmlspecialchars($p['nama_lengkap']) ?>">
+                                            <i class="fas fa-user-circle"></i>
+                                            <div class="participant-info">
+                                                <div class="participant-name">
+                                                    Peserta <?= $index + 1 ?>: <?= htmlspecialchars($p['nama_lengkap']) ?>
+                                                </div>
+                                                <div class="participant-details">
+                                                    <?= $p['usia'] ?> tahun, <?= $p['jenis_kelamin'] == 'L' ? 'Laki-laki' : 'Perempuan' ?>
+                                                </div>
+                                            </div>
+                                            <i class="fas fa-chevron-right dropdown-arrow"></i>
+                                        </a>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
 
                 <div class="detail-section">
@@ -719,6 +747,8 @@ $disable_accept = ($booking['status'] !== 'pending');
         array_map(fn($p) => $p['patient_id'], $participants)
     ) ?>;
     </script>
+    <script src="js/detail_tabs.js"></script>
+    <script src="js/detail_edit.js"></script>
     <script src="js/detail.js"></script>
     <script src="js/reschedule.js"></script>
     <script src="js/cetak_surat_detail.js"></script>

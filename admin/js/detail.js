@@ -16,11 +16,6 @@ function updateStatus(bookingId, newStatus) {
             .catch(err => console.error(err));
         }
 
-        function editBooking(bookingId) {
-            // Redirect ke halaman edit
-            window.location.href = `edit_booking.php?id=${bookingId}`;
-        }
-
         function assignDoctors() {
             const selects = document.querySelectorAll('.doctorSelect');
             let doctorIds = [];
@@ -149,15 +144,3 @@ function addParticipant() {
     alert("Fitur tambah peserta nanti kita buat 😄");
 }
 
-function editBooking() {
-
-    const activePanel = document.querySelector('.participant-panel.active');
-
-    if (!activePanel) return;
-
-    const bookingId = activePanel.dataset.bookingId;
-    const patientId = activePanel.dataset.patientId;
-
-    window.location.href =
-        `edit_booking.php?booking_id=${bookingId}&patient_id=${patientId}`;
-}
