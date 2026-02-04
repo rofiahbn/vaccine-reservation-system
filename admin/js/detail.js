@@ -132,3 +132,25 @@ function cancelBooking(button, bookingId) {
         button.style.cursor = 'pointer';
     });
 }
+
+function showParticipant(index){
+
+    currentParticipantIndex = index;
+
+    document.querySelectorAll('.participant-panel').forEach(p => {
+        p.classList.remove('active');
+    });
+
+    document.getElementById('participant-' + index).classList.add('active');
+
+    document.querySelectorAll('.participant-tab').forEach(t => {
+        t.classList.remove('active');
+    });
+
+    document.querySelectorAll('.participant-tab')[index].classList.add('active');
+}
+
+
+function addParticipant() {
+    alert("Fitur tambah peserta nanti kita buat 😄");
+}

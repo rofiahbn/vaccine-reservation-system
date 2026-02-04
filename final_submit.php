@@ -255,35 +255,34 @@ try {
             $nomor_antrian_parent = $nomor_antrian;
         }
 
-        // 9. INSERT KE TABLE BOOKING_SERVICES (Layanan yang dipilih + harga snapshot)
+        // 9. INSERT KE TABLE BOOKING_SERVICES (PER PESERTA)
         if (!empty($p['selected_products']) && is_array($p['selected_products'])) {
 
-            $query_service = "INSERT INTO booking_services 
-                (booking_id, service_id, nama_layanan, harga) 
-                VALUES (?, ?, ?, ?)";
+        $query_service = "INSERT INTO booking_services 
+            (booking_id, patient_id, service_id, nama_layanan, harga) 
+            VALUES (?, ?, ?, ?, ?)";
 
-            $stmt_service = mysqli_prepare($conn, $query_service);
+        $stmt_service = mysqli_prepare($conn, $query_service);
 
-            foreach ($p['selected_products'] as $product) {
+        foreach ($p['selected_products'] as $product) {
 
-                $service_id   = $product['id'];       // dari JS
-                $nama_layanan = $product['name'];     // dari JS
-                $harga        = $product['price'];    // dari JS
+            $service_id   = $product['id'];
+            $nama_layanan = $product['name'];
+            $harga        = $product['price'];
 
-                mysqli_stmt_bind_param($stmt_service, 'iisi', 
-                    $booking_id, 
-                    $service_id, 
-                    $nama_layanan, 
-                    $harga
-                );
+            mysqli_stmt_bind_param($stmt_service, 'iiisi', 
+                $parent_booking_id,     
+                $patient_id,     
+                $service_id,
+                $nama_layanan,
+                $harga
+            );
 
-                if (!mysqli_stmt_execute($stmt_service)) {
-                    throw new Exception("Gagal menyimpan layanan: " . mysqli_error($conn));
-                }
-            }
-
-            mysqli_stmt_close($stmt_service);
+            mysqli_stmt_execute($stmt_service);
         }
+
+        mysqli_stmt_close($stmt_service);
+    }
         
         // Simpan info sukses
         $success_bookings[] = [

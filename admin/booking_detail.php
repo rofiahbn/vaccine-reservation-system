@@ -10,24 +10,44 @@ if ($booking_id == 0) {
     exit;
 }
 
-// Get booking detail
-$sql = "SELECT b.*, p.*, 
-               b.payment_status,
-               b.tindakan_selesai
-        FROM bookings b 
-        JOIN patients p ON b.patient_id = p.id 
-        WHERE b.id = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param('i', $booking_id);
+/* 🔥 Pastikan selalu parent booking */
+$sql_parent = "SELECT parent_id FROM bookings WHERE id = ?";
+$stmt = $conn->prepare($sql_parent);
+$stmt->bind_param("i", $booking_id);
 $stmt->execute();
-$result = $stmt->get_result();
 
-if ($result->num_rows == 0) {
+$row_parent = $stmt->get_result()->fetch_assoc();
+
+if ($row_parent && $row_parent['parent_id']) {
+    $booking_id = $row_parent['parent_id'];
+}
+
+
+/* 🔥 Ambil semua peserta */
+$sql = "
+SELECT b.*, p.*
+FROM bookings b
+JOIN patients p ON b.patient_id = p.id
+WHERE b.id = ? OR b.parent_id = ?
+ORDER BY CASE WHEN b.id = ? THEN 0 ELSE 1 END
+";
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("iii", $booking_id, $booking_id, $booking_id);
+$stmt->execute();
+
+$participants = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+
+/* 🔥 Validasi */
+if (empty($participants)) {
     header('Location: dashboard.php');
     exit;
 }
 
-$booking = $result->fetch_assoc();
+
+/* 🔥 Parent booking = index pertama */
+$booking = $participants[0];
 
 // Get staff yang sudah ditugaskan ke booking
 $sql_staff = "
@@ -42,34 +62,6 @@ $stmt_staff->execute();
 $staffs = $stmt_staff->get_result();
 $dokter_count = $staffs->num_rows;
 $disable_accept = ($booking['status'] !== 'pending');
-
-// Get emails
-$sql_emails = "SELECT email FROM patient_emails WHERE patient_id = ? ORDER BY is_primary DESC";
-$stmt_e = $conn->prepare($sql_emails);
-$stmt_e->bind_param('i', $booking['patient_id']);
-$stmt_e->execute();
-$emails = $stmt_e->get_result();
-
-// Get phones
-$sql_phones = "SELECT phone FROM patient_phones WHERE patient_id = ? ORDER BY is_primary DESC";
-$stmt_p = $conn->prepare($sql_phones);
-$stmt_p->bind_param('i', $booking['patient_id']);
-$stmt_p->execute();
-$phones = $stmt_p->get_result();
-
-// Get address
-$sql_addr = "SELECT * FROM patient_addresses WHERE patient_id = ? AND is_primary = 1 LIMIT 1";
-$stmt_a = $conn->prepare($sql_addr);
-$stmt_a->bind_param('i', $booking['patient_id']);
-$stmt_a->execute();
-$address = $stmt_a->get_result()->fetch_assoc();
-
-// Get services
-$sql_services = "SELECT nama_layanan FROM booking_services WHERE booking_id = ?";
-$stmt_s = $conn->prepare($sql_services);
-$stmt_s->bind_param('i', $booking_id);
-$stmt_s->execute();
-$services = $stmt_s->get_result();
 
 ?>
 <!DOCTYPE html>
@@ -181,6 +173,23 @@ $services = $stmt_s->get_result();
                 </div>
 
                 <!-- Booking Info -->
+                <div class="participant-tabs">
+
+                    <?php foreach ($participants as $index => $p): ?>
+                        <button 
+                            class="participant-tab <?= $index == 0 ? 'active' : '' ?>"
+                            onclick="showParticipant(<?= $index ?>)">
+                            Peserta <?= $index + 1 ?>
+                        </button>
+                    <?php endforeach; ?>
+
+                    <!-- Tombol tambah peserta -->
+                    <button class="participant-tab add" onclick="addParticipant()">
+                        <i class="fas fa-plus"></i>
+                    </button>
+
+                </div>
+
                 <div class="detail-section">
                     <h2><i class="fas fa-calendar-check"></i> Informasi Booking</h2>
                     <div class="detail-grid">
@@ -204,101 +213,195 @@ $services = $stmt_s->get_result();
                 </div>
 
                 <!-- Patient Info -->
-                <div class="detail-section">
-                    <h2><i class="fas fa-user"></i> Data Pasien</h2>
-                    <div class="detail-grid">
-                        <div class="detail-item">
-                            <label>Nama Lengkap</label>
-                            <p><?php echo htmlspecialchars($booking['nama_lengkap']); ?></p>
-                        </div>
-                        <div class="detail-item">
-                            <label>Nama Panggilan</label>
-                            <p><?php echo htmlspecialchars($booking['nama_panggilan'] ?: '-'); ?></p>
-                        </div>
-                        <div class="detail-item">
-                            <label>Tanggal Lahir</label>
-                            <p><?php echo date('d F Y', strtotime($booking['tanggal_lahir'])); ?> (<?php echo $booking['usia']; ?> tahun)</p>
-                        </div>
-                        <div class="detail-item">
-                            <label>Jenis Kelamin</label>
-                            <p><?php echo $booking['jenis_kelamin'] == 'L' ? 'Laki-laki' : 'Perempuan'; ?></p>
-                        </div>
-                        <div class="detail-item">
-                            <label>NIK</label>
-                            <p><?php echo htmlspecialchars($booking['nik'] ?: '-'); ?></p>
-                        </div>
-                        <div class="detail-item">
-                            <label>No. Paspor</label>
-                            <p><?php echo htmlspecialchars($booking['paspor'] ?: '-'); ?></p>
-                        </div>
-                        <div class="detail-item">
-                            <label>Kebangsaan</label>
-                            <p><?php echo htmlspecialchars($booking['kebangsaan']); ?></p>
-                        </div>
-                        <div class="detail-item">
-                            <label>Pekerjaan</label>
-                            <p><?php echo htmlspecialchars($booking['pekerjaan'] ?: '-'); ?></p>
-                        </div>
-                    </div>
-                </div>
+                <?php foreach ($participants as $index => $p): ?>
 
-                <!-- Contact Info -->
-                <div class="detail-section">
-                    <h2><i class="fas fa-phone"></i> Kontak</h2>
-                    <div class="detail-grid">
-                        <div class="detail-item full-width">
-                            <label>Email</label>
-                            <?php while ($e = $emails->fetch_assoc()): ?>
-                                <p><?php echo htmlspecialchars($e['email']); ?></p>
-                            <?php endwhile; ?>
-                        </div>
-                        <div class="detail-item full-width">
-                            <label>Nomor HP</label>
-                            <?php while ($ph = $phones->fetch_assoc()): ?>
-                                <p><?php echo htmlspecialchars($ph['phone']); ?></p>
-                            <?php endwhile; ?>
-                        </div>
-                        <?php if ($address): ?>
-                        <div class="detail-item full-width">
-                            <label>Alamat</label>
-                            <p><?php echo htmlspecialchars($address['alamat']); ?></p>
-                            <p><?php echo htmlspecialchars($address['kota']) . ', ' . htmlspecialchars($address['provinsi']); ?></p>
-                        </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
+                <div class="participant-panel <?= $index == 0 ? 'active' : '' ?>" 
+                    id="participant-<?= $index ?>">
 
-                <!-- Services -->
-                <div class="detail-section">
-                    <h2><i class="fas fa-syringe"></i> Layanan yang Dipilih</h2>
-                    <div class="services-grid">
-                        <?php while ($srv = $services->fetch_assoc()): ?>
-                            <div class="service-item">
-                                <i class="fas fa-check-circle"></i>
-                                <?php echo htmlspecialchars($srv['nama_layanan']); ?>
+                    <div class="detail-section">
+                        <h2><i class="fas fa-user"></i> Data Pasien</h2>
+
+                        <div class="detail-grid">
+
+                            <div class="detail-item">
+                                <label>Nama Lengkap</label>
+                                <p><?= htmlspecialchars($p['nama_lengkap']); ?></p>
                             </div>
-                        <?php endwhile; ?>
+
+                            <div class="detail-item">
+                                <label>Nama Panggilan</label>
+                                <p><?= htmlspecialchars($p['nama_panggilan'] ?: '-'); ?></p>
+                            </div>
+
+                            <div class="detail-item">
+                                <label>Tanggal Lahir</label>
+                                <p>
+                                    <?= date('d F Y', strtotime($p['tanggal_lahir'])); ?>
+                                    (<?= $p['usia']; ?> tahun)
+                                </p>
+                            </div>
+
+                            <div class="detail-item">
+                                <label>Jenis Kelamin</label>
+                                <p><?= $p['jenis_kelamin'] == 'L' ? 'Laki-laki' : 'Perempuan'; ?></p>
+                            </div>
+
+                            <div class="detail-item">
+                                <label>NIK</label>
+                                <p><?= htmlspecialchars($p['nik'] ?: '-'); ?></p>
+                            </div>
+
+                            <div class="detail-item">
+                                <label>No. Paspor</label>
+                                <p><?= htmlspecialchars($p['paspor'] ?: '-'); ?></p>
+                            </div>
+
+                            <div class="detail-item">
+                                <label>Kebangsaan</label>
+                                <p><?= htmlspecialchars($p['kebangsaan']); ?></p>
+                            </div>
+
+                            <div class="detail-item">
+                                <label>Pekerjaan</label>
+                                <p><?= htmlspecialchars($p['pekerjaan'] ?: '-'); ?></p>
+                            </div>
+
+                        </div>
+
                     </div>
+
+                    <!-- CONTACT INFO -->
+                    <div class="detail-section">
+                        <h2><i class="fas fa-phone"></i> Kontak</h2>
+
+                        <div class="detail-grid">
+
+                            <!-- EMAIL -->
+                            <div class="detail-item full-width">
+                                <label>Email</label>
+
+                                <?php
+                                $sql_emails = "SELECT email FROM patient_emails WHERE patient_id = ?";
+                                $stmt_e = $conn->prepare($sql_emails);
+                                $stmt_e->bind_param("i", $p['patient_id']);
+                                $stmt_e->execute();
+                                $emails = $stmt_e->get_result();
+                                ?>
+
+                                <?php while ($e = $emails->fetch_assoc()): ?>
+                                    <p><?= htmlspecialchars($e['email']) ?></p>
+                                <?php endwhile; ?>
+
+                            </div>
+
+
+                            <!-- PHONE -->
+                            <div class="detail-item full-width">
+                                <label>Nomor HP</label>
+
+                                <?php
+                                $sql_phones = "SELECT phone FROM patient_phones WHERE patient_id = ?";
+                                $stmt_p = $conn->prepare($sql_phones);
+                                $stmt_p->bind_param("i", $p['patient_id']);
+                                $stmt_p->execute();
+                                $phones = $stmt_p->get_result();
+                                ?>
+
+                                <?php while ($ph = $phones->fetch_assoc()): ?>
+                                    <p><?= htmlspecialchars($ph['phone']) ?></p>
+                                <?php endwhile; ?>
+
+                            </div>
+
+
+                            <!-- ADDRESS -->
+                            <div class="detail-item full-width">
+                                <label>Alamat</label>
+
+                                <?php
+                                $sql_addr = "SELECT * FROM patient_addresses 
+                                            WHERE patient_id = ? AND is_primary = 1 LIMIT 1";
+                                $stmt_a = $conn->prepare($sql_addr);
+                                $stmt_a->bind_param("i", $p['patient_id']);
+                                $stmt_a->execute();
+                                $address = $stmt_a->get_result()->fetch_assoc();
+                                ?>
+
+                                <?php if ($address): ?>
+                                    <p><?= htmlspecialchars($address['alamat']) ?></p>
+                                    <p><?= htmlspecialchars($address['kota']) ?>,
+                                    <?= htmlspecialchars($address['provinsi']) ?></p>
+                                <?php else: ?>
+                                    <p>-</p>
+                                <?php endif; ?>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- SERVICES PER PESERTA -->
+                    <div class="detail-section">
+                        <h2><i class="fas fa-syringe"></i> Layanan Peserta</h2>
+
+                        <?php
+                        $sql_srv = "
+                            SELECT nama_layanan 
+                            FROM booking_services 
+                            WHERE booking_id = ?
+                            AND patient_id = ?
+                        ";
+
+                        $stmt_srv = $conn->prepare($sql_srv);
+                        $stmt_srv->bind_param("ii", $booking_id, $p['patient_id']);
+                        $stmt_srv->execute();
+                        $services = $stmt_srv->get_result();
+                        ?>
+
+                        <div class="services-grid">
+
+                            <?php if ($services->num_rows > 0): ?>
+                                <?php while ($srv = $services->fetch_assoc()): ?>
+                                    <div class="service-item">
+                                        <i class="fas fa-check-circle"></i>
+                                        <?= htmlspecialchars($srv['nama_layanan']) ?>
+                                    </div>
+                                <?php endwhile; ?>
+                            <?php else: ?>
+                                <p>- Tidak ada layanan</p>
+                            <?php endif; ?>
+
+                        </div>
+                    </div>
+
+                    <!-- MEDICAL HISTORY PER PESERTA -->
+                    <div class="detail-section">
+                        <h2><i class="fas fa-file-medical"></i> Riwayat Kesehatan</h2>
+
+                        <div class="detail-grid">
+
+                            <div class="detail-item full-width">
+                                <label>Riwayat Alergi</label>
+                                <p><?= htmlspecialchars($p['riwayat_alergi'] ?: 'Tidak ada') ?></p>
+                            </div>
+
+                            <div class="detail-item full-width">
+                                <label>Riwayat Penyakit</label>
+                                <p><?= htmlspecialchars($p['riwayat_penyakit'] ?: 'Tidak ada') ?></p>
+                            </div>
+
+                            <div class="detail-item full-width">
+                                <label>Riwayat Obat</label>
+                                <p><?= htmlspecialchars($p['riwayat_obat'] ?: 'Tidak ada') ?></p>
+                            </div>
+
+                        </div>
+                    </div>
+
                 </div>
 
-                <!-- Medical History -->
-                <div class="detail-section">
-                    <h2><i class="fas fa-file-medical"></i> Riwayat Kesehatan</h2>
-                    <div class="detail-grid">
-                        <div class="detail-item full-width">
-                            <label>Riwayat Alergi</label>
-                            <p><?php echo htmlspecialchars($booking['riwayat_alergi'] ?: 'Tidak ada'); ?></p>
-                        </div>
-                        <div class="detail-item full-width">
-                            <label>Riwayat Penyakit</label>
-                            <p><?php echo htmlspecialchars($booking['riwayat_penyakit'] ?: 'Tidak ada'); ?></p>
-                        </div>
-                        <div class="detail-item full-width">
-                            <label>Riwayat Obat</label>
-                            <p><?php echo htmlspecialchars($booking['riwayat_obat'] ?: 'Tidak ada'); ?></p>
-                        </div>
-                    </div>
-                </div>
+                <?php endforeach; ?>
+
             </div>
 
             <!-- RIGHT SIDE PANEL -->

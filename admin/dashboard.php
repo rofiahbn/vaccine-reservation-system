@@ -102,8 +102,9 @@ $today = date('Y-m-d');
 // Total layanan hari ini
 $sql_today = "SELECT COUNT(*) as total 
               FROM bookings 
-              WHERE DATE(tanggal_booking) = ? 
-              AND service_type = ?";
+              WHERE DATE(tanggal_booking) = ?
+              AND service_type = ?
+              AND parent_id IS NULL";
 $stmt = $conn->prepare($sql_today);
 $stmt->bind_param('ss', $today, $service_mode);
 $stmt->execute();
@@ -114,7 +115,8 @@ $sql_done = "SELECT COUNT(*) as total
              FROM bookings 
              WHERE status = 'completed' 
              AND DATE(tanggal_booking) = ?
-             AND service_type = ?";
+             AND service_type = ?
+             AND parent_id IS NULL";
 $stmt = $conn->prepare($sql_done);
 $stmt->bind_param('ss', $today, $service_mode);
 $stmt->execute();
@@ -125,7 +127,8 @@ $sql_cancelled = "SELECT COUNT(*) as total
                   FROM bookings 
                   WHERE status = 'cancelled' 
                   AND DATE(tanggal_booking) = ?
-                  AND service_type = ?";
+                  AND service_type = ?
+                  AND parent_id IS NULL";
 $stmt = $conn->prepare($sql_cancelled);
 $stmt->bind_param('ss', $today, $service_mode);
 $stmt->execute();
@@ -136,7 +139,8 @@ $sql_pending = "SELECT COUNT(*) as total
                 FROM bookings 
                 WHERE status = 'pending' 
                 AND DATE(tanggal_booking) = ?
-                AND service_type = ?";
+                AND service_type = ?
+                AND parent_id IS NULL";
 $stmt = $conn->prepare($sql_pending);
 $stmt->bind_param('ss', $today, $service_mode);
 $stmt->execute();
@@ -147,16 +151,12 @@ $sql_now_serving = "
     SELECT 
         b.id,
         b.nomor_antrian,
-        p.nama_lengkap,
-        GROUP_CONCAT(bs.nama_layanan SEPARATOR '<br>') AS layanan,
         b.status
     FROM bookings b
-    JOIN patients p ON b.patient_id = p.id
-    LEFT JOIN booking_services bs ON bs.booking_id = b.id
     WHERE DATE(b.tanggal_booking) = ?
       AND b.status IN ('confirmed', 'pending')
       AND b.service_type = ?
-    GROUP BY b.id
+      AND b.parent_id IS NULL
     ORDER BY 
         FIELD(b.status, 'confirmed', 'pending'),
         b.waktu_booking ASC
@@ -167,6 +167,51 @@ $stmt = $conn->prepare($sql_now_serving);
 $stmt->bind_param('ss', $today, $service_mode);
 $stmt->execute();
 $now_serving = $stmt->get_result()->fetch_assoc();
+$participants_now = [];
+$services_now = [];
+
+if ($now_serving) {
+
+    $parent_id = $now_serving['id'];
+
+    // Ambil semua participant (parent + child)
+    $sql_participants = "
+        SELECT p.nama_lengkap
+        FROM bookings b
+        JOIN patients p ON b.patient_id = p.id
+        WHERE b.id = ? OR b.parent_id = ?
+        ORDER BY CASE WHEN b.id = ? THEN 0 ELSE 1 END
+    ";
+
+    $stmt_p = $conn->prepare($sql_participants);
+    $stmt_p->bind_param("iii", $parent_id, $parent_id, $parent_id);
+    $stmt_p->execute();
+
+    $result_p = $stmt_p->get_result();
+
+    while ($row = $result_p->fetch_assoc()) {
+        $participants_now[] = $row['nama_lengkap'];
+    }
+
+    // Ambil layanan parent
+    $sql_services = "
+        SELECT bs.nama_layanan
+        FROM booking_services bs
+        JOIN bookings b ON bs.booking_id = b.id
+        WHERE b.id = ?
+        OR b.parent_id = ?
+    ";
+
+    $stmt_s = $conn->prepare($sql_services);
+    $stmt_s->bind_param("ii", $booking_id, $booking_id);
+    $stmt_s->execute();
+
+    $result_s = $stmt_s->get_result();
+
+    while ($row = $result_s->fetch_assoc()) {
+        $services_now[] = $row['nama_layanan'];
+    }
+}
 
 $filter = isset($_GET['filter']) ? $_GET['filter'] : 'latest';
 
@@ -221,6 +266,18 @@ $stmt_all = $conn->prepare($sql_all);
 $stmt_all->bind_param('ss', $today, $service_mode);
 $stmt_all->execute();
 $all_bookings = $stmt_all->get_result();
+$grouped_bookings = [];
+
+while ($row = $all_bookings->fetch_assoc()) {
+
+    $group_id = $row['parent_id'] ? $row['parent_id'] : $row['id'];
+
+    if (!isset($grouped_bookings[$group_id])) {
+        $grouped_bookings[$group_id] = [];
+    }
+
+    $grouped_bookings[$group_id][] = $row;
+}
 
 // Get bookings for calendar view (current week)
 // pastikan index minggu valid
@@ -236,6 +293,7 @@ $sql_bookings = "SELECT b.*, p.nama_lengkap
                  JOIN patients p ON b.patient_id = p.id 
                  WHERE b.tanggal_booking BETWEEN ? AND ?
                  AND b.service_type = ?
+                 AND b.parent_id IS NULL
                  ORDER BY b.tanggal_booking, b.waktu_booking";
 $stmt_bookings = $conn->prepare($sql_bookings);
 $stmt_bookings->bind_param('sss', $week_start, $week_end, $service_mode);
@@ -245,23 +303,37 @@ $bookings_result = $stmt_bookings->get_result();
 // Organize bookings by day and time
 $bookings_grid = [];
 while ($row = $bookings_result->fetch_assoc()) {
-    $day = date('N', strtotime($row['tanggal_booking'])); // 1=Monday, 6=Saturday
+
+    $parent_id = $row['id'];
+
+    // Ambil parent + child
+    $sql_participants = "
+        SELECT b.id, b.nomor_antrian, b.status, p.nama_lengkap
+        FROM bookings b
+        JOIN patients p ON b.patient_id = p.id
+        WHERE b.id = ? OR b.parent_id = ?
+        ORDER BY CASE WHEN b.id = ? THEN 0 ELSE 1 END
+    ";
+
+    $stmt_part = $conn->prepare($sql_participants);
+    $stmt_part->bind_param("iii", $parent_id, $parent_id, $parent_id);
+    $stmt_part->execute();
+
+    $participants = $stmt_part->get_result()->fetch_all(MYSQLI_ASSOC);
+
+    $day = date('N', strtotime($row['tanggal_booking']));
     $time = date('H:i', strtotime($row['waktu_booking']));
-    
-    // DEBUG: Print data
-    echo "<!-- DEBUG: Date={$row['tanggal_booking']}, Day=$day, Time=$time, Status={$row['status']} -->";
-    
+
     if (!isset($bookings_grid[$time])) {
         $bookings_grid[$time] = [];
     }
+
     if (!isset($bookings_grid[$time][$day])) {
         $bookings_grid[$time][$day] = [];
     }
-    $bookings_grid[$time][$day][] = $row;
-}
 
-// DEBUG: Print entire grid
-echo "<!-- DEBUG GRID: " . print_r($bookings_grid, true) . " -->";
+    $bookings_grid[$time][$day][$parent_id] = $participants;
+}
 
 // Calculate total weeks in current month
 $total_days = cal_days_in_month(CAL_GREGORIAN, $current_month, $current_year);
@@ -417,9 +489,16 @@ $total_weeks = ceil($total_days / 7);
                 <div class="info-row">
                     <i class="fas fa-user"></i>
                     <span class="info-label">Nama :</span>
-                    <span class="info-value">
-                        <?= $now_serving ? htmlspecialchars($now_serving['nama_lengkap']) : '-' ?>
-                    </span>
+                </div>
+
+                <div id="nowParticipants" class="service-list">
+                    <?php if (!empty($participants_now)): ?>
+                        <?php foreach ($participants_now as $p): ?>
+                            <div><?= htmlspecialchars($p) ?></div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <span style="color:#999;">-</span>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -429,8 +508,14 @@ $total_weeks = ceil($total_days / 7);
                     <i class="fas fa-check-circle"></i>
                     <span class="info-label">Layanan :</span>
                 </div>
-                <div class="service-list">
-                    <?= $now_serving ? $now_serving['layanan'] : '<span style="color:#999;">-</span>' ?>
+                <div id="nowServices" class="service-list">
+                    <?php if (!empty($services_now)): ?>
+                        <?php foreach ($services_now as $srv): ?>
+                            <div><?= htmlspecialchars($srv) ?></div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <span style="color:#999;">-</span>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -497,7 +582,8 @@ $total_weeks = ceil($total_days / 7);
                                                 <?php if (isset($bookings_grid[$time_slot][$day])): ?>
                                                     <?php
                                                     $bookings = $bookings_grid[$time_slot][$day];
-                                                    $status = $bookings[0]['status'];
+                                                    $first_group = reset($bookings);
+                                                    $status = reset($first_group)['status'];
 
                                                     $color_class =
                                                         ($status === 'confirmed') ? 'status-confirmed' :
@@ -506,19 +592,41 @@ $total_weeks = ceil($total_days / 7);
                                                         (($status === 'pending') ? 'status-pending' : '')));
                                                     ?>
 
-                                                    <div class="booking-item <?php echo $color_class; ?>" 
-                                                        onclick="showBookingDetail(<?php echo $bookings[0]['id']; ?>)">
-                                                        <?php foreach ($bookings as $index => $b): ?>
+                                                    <?php foreach ($bookings as $group_id => $participants): ?>
+
+                                                        <?php
+                                                        $parent = reset($participants);
+                                                        ?>
+
+                                                        <div class="booking-item <?php echo $color_class; ?>" 
+                                                            onclick="showBookingDetail(<?php echo $parent['id']; ?>)">
+
+                                                            <!-- Nomor Antrian -->
+                                                            <div class="queue-no" style="font-weight:bold;">
+                                                                <?php echo htmlspecialchars($parent['nomor_antrian']); ?>
+                                                            </div>
+
+                                                            <!-- Parent Name -->
                                                             <div class="booking-row">
-                                                                <span class="queue-no">
-                                                                    <?php echo htmlspecialchars($b['nomor_antrian']); ?>
-                                                                </span>
                                                                 <span class="patient-name">
-                                                                    <?php echo htmlspecialchars($b['nama_lengkap']); ?>
+                                                                    - <?php echo htmlspecialchars($parent['nama_lengkap']); ?>
                                                                 </span>
                                                             </div>
-                                                        <?php endforeach; ?>
-                                                    </div>
+
+                                                            <!-- Child Participants -->
+                                                            <?php foreach ($participants as $p): ?>
+                                                                <?php if ($p['id'] != $parent['id']): ?>
+                                                                    <div class="booking-row">
+                                                                        <span class="patient-name">
+                                                                            - <?php echo htmlspecialchars($p['nama_lengkap']); ?>
+                                                                        </span>
+                                                                    </div>
+                                                                <?php endif; ?>
+                                                            <?php endforeach; ?>
+
+                                                        </div>
+
+                                                    <?php endforeach; ?>
 
                                                 <?php endif; ?>
                                             </td>
@@ -575,10 +683,11 @@ $total_weeks = ceil($total_days / 7);
                     </tr>
                 </thead>
                 <tbody>
-                    <?php while ($booking = $all_bookings->fetch_assoc()): ?>
+                    <?php foreach ($grouped_bookings as $group): ?>
                         <?php
                         // Ambil semua dokter untuk booking ini
-                        $booking_id = $booking['id'];
+                        $parent = reset($group);
+                        $booking_id = $parent['id'];
                         $sql_staff = "
                             SELECT s.gelar, s.nama_lengkap
                             FROM booking_staff bs
@@ -600,7 +709,7 @@ $total_weeks = ceil($total_days / 7);
                         // Get services for this booking
                         $sql_services = "SELECT nama_layanan FROM booking_services WHERE booking_id = ?";
                         $stmt_s = $conn->prepare($sql_services);
-                        $stmt_s->bind_param('i', $booking['id']);
+                        $stmt_s->bind_param('i', $booking_id);
                         $stmt_s->execute();
                         $services = $stmt_s->get_result();
                         $service_names = [];
@@ -609,9 +718,19 @@ $total_weeks = ceil($total_days / 7);
                         }
                         ?>
                         <tr>
-                        <td><?= htmlspecialchars($booking['nama_lengkap']) ?></td>
+                        <td>
+                            <?= htmlspecialchars($parent['nama_lengkap']) ?>
 
-                        <td><?= htmlspecialchars($booking['service_type']) ?></td>
+                            <?php foreach ($group as $p): ?>
+                                <?php if ($p['id'] != $parent['id']): ?>
+                                    <div style="font-size:13px; margin-left:10px;">
+                                        - <?= htmlspecialchars($p['nama_lengkap']) ?>
+                                    </div>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </td>
+
+                        <td><?= htmlspecialchars($parent['service_type']) ?></td>
 
                         <td>
                             <?php if (!empty($service_names)): ?>
@@ -625,7 +744,7 @@ $total_weeks = ceil($total_days / 7);
 
                         <!-- WAKTU -->
                         <td>
-                            <?= substr($booking['waktu_booking'], 0, 5) ?> WIB
+                            <?= substr($parent['waktu_booking'], 0, 5) ?> WIB
                         </td>
 
                         <!-- DOKTER -->
@@ -642,15 +761,15 @@ $total_weeks = ceil($total_days / 7);
 
                         <!-- STATUS -->
                         <td>
-                            <span class="status-badge <?= $booking['status'] ?>">
+                            <span class="status-badge <?= $parent['status'] ?>">
                                 <?php 
-                                    if ($booking['status'] == 'pending') {
+                                    if ($parent['status'] == 'pending') {
                                         echo 'Menunggu Konfirmasi';
-                                    } elseif ($booking['status'] == 'confirmed') {
+                                    } elseif ($parent['status'] == 'confirmed') {
                                         echo 'Pasien Dalam Antrian';
-                                    } elseif ($booking['status'] == 'completed') {
+                                    } elseif ($parent['status'] == 'completed') {
                                         echo 'Pesanan Selesai';
-                                    } elseif ($booking['status'] == 'cancelled') {
+                                    } elseif ($parent['status'] == 'cancelled') {
                                         echo 'Pesanan Dibatalkan';
                                     }
                                 ?>
@@ -658,7 +777,7 @@ $total_weeks = ceil($total_days / 7);
                         </td>
 
                     </tr>
-                    <?php endwhile; ?>
+                    <?php endforeach; ?>
                 </tbody>
             </table>
         </div>
@@ -668,13 +787,26 @@ $total_weeks = ceil($total_days / 7);
     <script>
         document.querySelector('.now-icon').addEventListener('click', function() {
 
-            fetch('get_now_serving.php')
+            fetch('get_now_serving.php?service=<?= urlencode($service_mode) ?>')
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
                         document.querySelector('.number').innerText = data.nomor_antrian;
-                        document.querySelector('.info-value').innerText = data.nama_lengkap;
-                        document.querySelector('.service-list').innerHTML = data.layanan;
+
+                        /* tampilkan participants */
+                        let participantsHTML = '';
+                        data.participants.forEach(p => {
+                            participantsHTML += `<div>- ${p}</div>`;
+                        });
+                        document.getElementById('nowParticipants').innerHTML = participantsHTML;
+
+                        /* tampilkan layanan */
+                        let servicesHTML = '';
+                        data.services.forEach(s => {
+                            servicesHTML += `<div>${s}</div>`;
+                        });
+                        document.getElementById('nowServices').innerHTML = servicesHTML;
+
                     } else {
                         // mode kosong
                         location.reload(); 
@@ -685,14 +817,6 @@ $total_weeks = ceil($total_days / 7);
     </script>
 
     <script>
-        function switchService(mode) {
-            const month = document.getElementById('monthSelect')?.value || '<?= $current_month ?>';
-            const week  = document.getElementById('weekSelect')?.value || '<?= $current_week ?>';
-
-            window.location.href = 
-                "dashboard.php?service=" + mode + "&month=" + month + "&week=" + week;
-        }
-
         function switchService(mode) {
             const month = document.getElementById('monthSelect')?.value || '<?= $current_month ?>';
             const week  = document.getElementById('weekSelect')?.value || '<?= $current_week ?>';
