@@ -290,8 +290,65 @@ while ($ms = $result_master->fetch_assoc()) {
                 <div class="form-row">
                     <div class="form-group">
                         <label>Kebangsaan</label>
-                        <input type="text" name="kebangsaan" value="<?php echo htmlspecialchars($booking['kebangsaan']); ?>">
+
+                        <?php 
+                            $kebangsaan_list = [
+                                "Indonesia",
+                                "Malaysia",
+                                "Singapore",
+                                "Thailand",
+                                "Filipina",
+                                "Vietnam",
+                                "Brunei",
+                                "China",
+                                "India",
+                                "Arab Saudi",
+                                "Pakistan",
+                                "Bangladesh",
+                                "Australia",
+                                "United States",
+                                "United Kingdom",
+                                "Jepang",
+                                "Korea Selatan",
+                                "Lainnya"
+                            ];
+                        ?>
+
+                        <select name="kebangsaan" id="kebangsaanSelect">
+
+                        <?php foreach ($kebangsaan_list as $negara): ?>
+
+                        <option value="<?= $negara ?>"
+                            <?= (
+                                $booking['kebangsaan'] === $negara ||
+                                (
+                                    $negara === 'Lainnya' &&
+                                    !in_array($booking['kebangsaan'], $kebangsaan_list)
+                                )
+                            ) ? 'selected' : '' ?>>
+
+                            <?= $negara ?>
+
+                        </option>
+
+                        <?php endforeach; ?>
+
+                        </select>
+
+                        <?php
+                        $is_lainnya = !in_array($booking['kebangsaan'], $kebangsaan_list);
+                        ?>
+
+                        <input 
+                            type="text" 
+                            name="kebangsaan_lainnya" 
+                            id="kebangsaanLainnya"
+                            placeholder="Isi kebangsaan lainnya"
+                            value="<?= $is_lainnya ? htmlspecialchars($booking['kebangsaan']) : '' ?>"
+                            style="display: <?= $is_lainnya ? 'block' : 'none' ?>; margin-top:8px;">
+
                     </div>
+
                     <div class="form-group">
                         <label>Pekerjaan</label>
                         <input type="text" name="pekerjaan" value="<?php echo htmlspecialchars($booking['pekerjaan']); ?>">
@@ -670,6 +727,26 @@ while ($ms = $result_master->fetch_assoc()) {
         updateEmailButtons();
         updatePhoneButtons();
     });
+
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const select = document.getElementById('kebangsaanSelect');
+        const inputLainnya = document.getElementById('kebangsaanLainnya');
+
+        function toggleKebangsaan() {
+            if (select.value === 'Lainnya') {
+                inputLainnya.style.display = 'block';
+            } else {
+                inputLainnya.style.display = 'none';
+                inputLainnya.value = '';
+            }
+        }
+
+        toggleKebangsaan();
+        select.addEventListener('change', toggleKebangsaan);
+
+    });
+
     </script>
     <script src="js/sidebar-toggle.js"></script>
 </body>

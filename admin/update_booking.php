@@ -21,7 +21,18 @@ $jenis_kelamin     = $_POST['jenis_kelamin'];
 // PERBAIKAN: Ubah string kosong jadi NULL untuk field UNIQUE
 $nik               = !empty($_POST['nik']) ? $_POST['nik'] : null;
 $paspor            = !empty($_POST['paspor']) ? $_POST['paspor'] : null;
-$kebangsaan        = !empty($_POST['kebangsaan']) ? $_POST['kebangsaan'] : null;
+$kebangsaan = $_POST['kebangsaan'] ?? null;
+
+// Kalau pilih "Lainnya"
+if ($kebangsaan === 'Lainnya' && !empty($_POST['kebangsaan_lainnya'])) {
+    $kebangsaan = $_POST['kebangsaan_lainnya'];
+}
+
+// Kalau kosong → NULL
+if (empty($kebangsaan)) {
+    $kebangsaan = null;
+}
+
 $pekerjaan         = !empty($_POST['pekerjaan']) ? $_POST['pekerjaan'] : null;
 
 $alamat            = $_POST['alamat'];
