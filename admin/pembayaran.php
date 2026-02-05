@@ -9,7 +9,76 @@ if ($booking_id == 0) {
     exit;
 }
 
-/* Ambil data booking + pasien */
+/* ================= CEK JENIS BOOKING ================= */
+$sql_jenis = "SELECT parent_id, service_type, tanggal_booking FROM bookings WHERE id = ?";
+$stmt_jenis = $conn->prepare($sql_jenis);
+$stmt_jenis->bind_param("i", $booking_id);
+$stmt_jenis->execute();
+$result_jenis = $stmt_jenis->get_result();
+$jenis_data = $result_jenis->fetch_assoc();
+
+// Cek apakah data ditemukan
+if (!$jenis_data) {
+    header('Location: dashboard.php');
+    exit;
+}
+
+$is_child = ($jenis_data['parent_id'] != NULL);
+$parent_booking_id = $is_child ? $jenis_data['parent_id'] : $booking_id;
+$service_type = $jenis_data['service_type'];
+$tanggal_layanan = $jenis_data['tanggal_booking'];
+
+/* ================= HITUNG JATUH TEMPO ================= */
+function hitungJatuhTempo($service_type, $tanggal_pesanan, $tanggal_layanan) {
+    $tgl_pesanan = new DateTime($tanggal_pesanan);
+    $tgl_layanan = new DateTime($tanggal_layanan);
+    
+    if ($service_type == 'In Clinic') {
+        return $tgl_layanan->format('Y-m-d');
+    } else {
+        if ($tgl_pesanan->format('Y-m-d') == $tgl_layanan->format('Y-m-d')) {
+            return $tgl_pesanan->format('Y-m-d');
+        } else {
+            $tgl_layanan->modify('-1 day');
+            return $tgl_layanan->format('Y-m-d');
+        }
+    }
+}
+
+// Ambil tanggal pesanan (created_at)
+$sql_tgl_pesanan = "SELECT created_at FROM bookings WHERE id = ?";
+$stmt_tgl = $conn->prepare($sql_tgl_pesanan);
+$stmt_tgl->bind_param("i", $parent_booking_id);
+$stmt_tgl->execute();
+$result_tgl = $stmt_tgl->get_result();
+$tgl_pesanan_row = $result_tgl->fetch_assoc();
+$tgl_pesanan = $tgl_pesanan_row ? $tgl_pesanan_row['created_at'] : date('Y-m-d H:i:s');
+
+$jatuh_tempo = hitungJatuhTempo($service_type, $tgl_pesanan, $tanggal_layanan);
+
+/* ================= AMBIL SEMUA PESERTA ================= */
+$sql_peserta = "
+    SELECT b.*, p.nama_lengkap 
+    FROM bookings b 
+    JOIN patients p ON b.patient_id = p.id 
+    WHERE b.parent_id = ? OR b.id = ?
+    ORDER BY b.id
+";
+$stmt_peserta = $conn->prepare($sql_peserta);
+$stmt_peserta->bind_param("ii", $parent_booking_id, $parent_booking_id);
+$stmt_peserta->execute();
+$peserta_result = $stmt_peserta->get_result();
+
+$semua_peserta = [];
+$jumlah_peserta = 0;
+$peserta_ids = [];
+while ($row = $peserta_result->fetch_assoc()) {
+    $semua_peserta[] = $row;
+    $peserta_ids[] = $row['id'];
+    $jumlah_peserta++;
+}
+
+/* ================= AMBIL DATA BOOKING UTAMA ================= */
 $sql = "SELECT b.*, b.payment_status, 
                p.nama_lengkap, 
                p.no_rekam_medis
@@ -17,28 +86,15 @@ $sql = "SELECT b.*, b.payment_status,
         JOIN patients p ON b.patient_id = p.id 
         WHERE b.id = ?";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $booking_id);
+$stmt->bind_param("i", $parent_booking_id);
 $stmt->execute();
-$booking = $stmt->get_result()->fetch_assoc();
+$result_booking = $stmt->get_result();
+$booking = $result_booking->fetch_assoc();
 
-if ($booking['tindakan_selesai'] == 0) {
-    echo "<script>
-        alert('Simpan tindakan terlebih dahulu sebelum melakukan pembayaran');
-        window.location.href = 'booking_detail.php?id=$booking_id';
-    </script>";
+if (!$booking) {
+    echo "<script>alert('Data booking tidak ditemukan!'); window.location.href='dashboard.php';</script>";
     exit;
 }
-
-// ambil data pembayaran terakhir jika sudah paid
-$sql_pay = "SELECT * FROM payments 
-            WHERE booking_id = ? 
-            AND status = 'paid' 
-            ORDER BY id DESC 
-            LIMIT 1";
-$stmt_pay = $conn->prepare($sql_pay);
-$stmt_pay->bind_param("i", $booking_id);
-$stmt_pay->execute();
-$payment = $stmt_pay->get_result()->fetch_assoc();
 
 /* Ambil no HP utama */
 $sql_phone = "SELECT phone FROM patient_phones 
@@ -60,56 +116,114 @@ $stmt_ad->bind_param("i", $booking['patient_id']);
 $stmt_ad->execute();
 $address = $stmt_ad->get_result()->fetch_assoc();
 
-/* Ambil layanan + harga */
-$sql_services = "
-    SELECT id, nama_layanan, harga, diskon, diskon_tipe, total 
-    FROM booking_services 
-    WHERE booking_id = ?
+/* ================= AMBIL RIWAYAT PEMBAYARAN ================= */
+$sql_riwayat = "
+    SELECT p.*, 
+           GROUP_CONCAT(pmd.metode SEPARATOR ' + ') as metode_detail,
+           GROUP_CONCAT(pmd.amount SEPARATOR ', ') as amount_detail
+    FROM payments p
+    LEFT JOIN payment_methods_detail pmd ON p.id = pmd.payment_id
+    WHERE p.booking_id = ?
+    GROUP BY p.id
+    ORDER BY p.created_at DESC
 ";
-$stmt_s = $conn->prepare($sql_services);
-$stmt_s->bind_param("i", $booking_id);
-$stmt_s->execute();
-$services = $stmt_s->get_result();
+$stmt_riwayat = $conn->prepare($sql_riwayat);
+$stmt_riwayat->bind_param("i", $parent_booking_id);
+$stmt_riwayat->execute();
+$result_riwayat = $stmt_riwayat->get_result();
 
-$payment_status = $booking['payment_status'] ?? 'unpaid';
+// Simpan data riwayat ke array
+$riwayat_data = [];
+$total_sudah_dibayar = 0;
 
-/* Hitung subtotal */
-$subtotal = 0;
-$data_services = [];
-
-while ($row = $services->fetch_assoc()) {
-
-    $row['jumlah'] = 1;
-
-    // kalau sudah dibayar → ambil dari DB
-    if ($payment_status == 'paid') {
-
-        $row['diskon'] = $row['diskon'] ?? 0;
-        $row['total']  = $row['total'] ?? $row['harga'];
-
-    } else {
-
-        // MODE BELUM BAYAR (default)
-        $row['diskon'] = 0;
-        $row['total'] = $row['harga'];
+while ($row = $result_riwayat->fetch_assoc()) {
+    $riwayat_data[] = $row;
+    if ($row['status'] == 'paid' || $row['status'] == 'partial') {
+        $total_sudah_dibayar += $row['amount_paid'];
     }
+}
 
+$total_diskon_global = 0;
+
+foreach ($riwayat_data as $rw) {
+    $total_diskon_global += floatval($rw['diskon'] ?? 0);
+}
+
+/* ================= AMBIL LAYANAN & HITUNG TOTAL ================= */
+if ($jumlah_peserta > 1) {
+    $sql_services = "
+        SELECT bs.*, b.id as booking_id, p.nama_lengkap
+        FROM booking_services bs
+        JOIN bookings b ON bs.booking_id = b.id
+        JOIN patients p ON b.patient_id = p.id
+        WHERE b.parent_id = ? OR b.id = ?
+        ORDER BY b.id
+    ";
+    $stmt_s = $conn->prepare($sql_services);
+    $stmt_s->bind_param("ii", $parent_booking_id, $parent_booking_id);
+} else {
+    $sql_services = "
+        SELECT id, nama_layanan, harga, diskon, diskon_tipe, total 
+        FROM booking_services 
+        WHERE booking_id = ?
+    ";
+    $stmt_s = $conn->prepare($sql_services);
+    $stmt_s->bind_param("i", $parent_booking_id);
+}
+
+$stmt_s->execute();
+$result_services = $stmt_s->get_result();
+
+// Hitung total tagihan
+$subtotal = 0;
+$total_tagihan = 0;
+$data_services = [];
+$total_diskon_item = 0;
+$total_harga_item = 0;
+
+while ($row = $result_services->fetch_assoc()) {
+    $row['jumlah'] = 1;
+    $diskon = $row['diskon'] ?? 0;
+    $row['total'] = $row['harga'] - $diskon;
+    
     $subtotal += $row['harga'];
+    $total_tagihan += $row['total'];
+    $total_diskon_item += $diskon;
+    $total_harga_item += $row['harga'];
     $data_services[] = $row;
 }
 
-if ($payment_status == 'paid' && $payment) {
+$total_tagihan_final = $total_tagihan - $total_diskon_global;
 
-    $subtotal = $payment['subtotal'];
-    $diskon   = $payment['diskon'];
-    $total    = $payment['total'];
-
-} else {
-
-    $diskon = 0;
-    $total  = $subtotal;
+if ($total_tagihan_final < 0) {
+    $total_tagihan_final = 0;
 }
 
+$sisa_tagihan = $total_tagihan_final - $total_sudah_dibayar;
+
+if ($sisa_tagihan < 0) {
+    $sisa_tagihan = 0;
+}
+
+/* ================= VALIDASI TINDAKAN ================= */
+$all_completed = true;
+$nama_belum = [];
+
+foreach ($semua_peserta as $peserta) {
+    if ($peserta['tindakan_selesai'] == 0) {
+        $all_completed = false;
+        $nama_belum[] = $peserta['nama_lengkap'];
+    }
+}
+
+if (!$all_completed) {
+    $peserta_list = implode(", ", $nama_belum);
+    echo "<script>
+        alert('Simpan tindakan terlebih dahulu untuk: $peserta_list');
+        window.location.href = 'booking_detail.php?id=$parent_booking_id';
+    </script>";
+    exit;
+}
 ?>
 
 <!DOCTYPE html>
@@ -123,7 +237,7 @@ if ($payment_status == 'paid' && $payment) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- ================= SIDEBAR ================= -->
+    <!-- SIDEBAR -->
     <div class="sidebar">
         <div class="logo">
             <img src="vaksinin-logo.png" alt="Vaksinin" class="logo-full">
@@ -155,686 +269,729 @@ if ($payment_status == 'paid' && $payment) {
         </div>
     </div>
 
-    <!-- ================= MAIN CONTENT ================= -->
+    <!-- MAIN CONTENT -->
     <div class="main-content">
-
-        <!-- HEADER -->
         <div class="detail-header">
-            <button onclick="window.location.href='booking_detail.php?id=<?= $booking_id ?>'" class="btn-back">
+            <button onclick="window.location.href='booking_detail.php?id=<?= $parent_booking_id ?>'" class="btn-back">
                 <i class="fas fa-arrow-left"></i> Kembali
             </button>
             <h1>Proses Pembayaran</h1>
         </div>
 
-    <div class="payment-layout">
-
-        <!-- KIRI -->
-        <div class="payment-left">
-            <h3>Pembayaran</h3>
-            <div class="data-pasien">
-                <!-- Kolom Kiri -->
-                <span class="label"><b>Nama Pasien</b></span>
-                <span class="colon">:</span>
-                <span class="value"><?= htmlspecialchars($booking['nama_lengkap']) ?></span>
-
-                <!-- Kolom Kanan -->
-                <span class="label"><b>No. Antrian</b></span>
-                <span class="colon">:</span>
-                <span class="value"><?= $booking['nomor_antrian'] ?></span>
-
-                <!-- Baris 2 -->
-                <span class="label"><b>Alamat</b></span>
-                <span class="colon">:</span>
-                <span class="value">
-                    <?php if ($address): ?>
-                        <?= htmlspecialchars($address['alamat']) ?>, 
-                        <?= htmlspecialchars($address['kota']) ?>, 
-                        <?= htmlspecialchars($address['provinsi']) ?>
-                    <?php else: ?>
-                        -
-                    <?php endif; ?>
-                </span>
-
-                <span class="label"><b>Tanggal</b></span>
-                <span class="colon">:</span>
-                <span class="value"><?= date('d F Y', strtotime($booking['tanggal_booking'])) ?></span>
-
-                <!-- Baris 3 -->
-                <span class="label"><b>No. Telpon</b></span>
-                <span class="colon">:</span>
-                <span class="value"><?= htmlspecialchars($phone) ?></span>
-
-                <span class="label"><b>Tanggal Jatuh Tempo</b></span>
-                <span class="colon">:</span>
-                <span class="value">-</span>
-
-                <!-- Baris 4 (hanya kiri) -->
-                <span class="label"></span>
-                <span class="colon"></span>
-                <span class="value"></span>
-
-                <span class="label"><b>Tanggal Pelayanan</b></span>
-                <span class="colon">:</span>
-                <span class="value"><?= date('d F Y', strtotime($booking['tanggal_booking'])) ?></span>
+        <!-- SUMMARY PEMBAYARAN -->
+        <div class="payment-summary">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="color: white; margin: 0; font-size: 24px;">
+                    <i class="fas fa-file-invoice-dollar"></i> Ringkasan Pembayaran
+                </h2>
+                <?php if ($jumlah_peserta > 1): ?>
+                    <div style="background: rgba(255, 255, 255, 0.2); padding: 8px 16px; border-radius: 20px; font-size: 14px;">
+                        <i class="fas fa-users"></i> <?= $jumlah_peserta ?> Peserta
+                    </div>
+                <?php endif; ?>
             </div>
+            
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <span class="summary-label">Total Tagihan</span>
+                    <div class="summary-value" id="totalTagihanSummary">
+                        Rp <?= number_format($total_tagihan_final, 0, ',', '.') ?>
+                    </div>
+                </div>
+                
+                <div class="summary-item">
+                    <span class="summary-label">Sudah Dibayar</span>
+                    <div class="summary-value" id="sudahBayarSummary">
+                        Rp <?= number_format($total_sudah_dibayar, 0, ',', '.') ?>
+                    </div>
+                </div>
+                
+                <div class="summary-item">
+                    <span class="summary-label">Sisa Tagihan</span>
+                    <div class="summary-value" id="sisaTagihanSummary">
+                        Rp <?= number_format($sisa_tagihan, 0, ',', '.') ?>
+                    </div>
+                </div>
+                
+                <div class="summary-item">
+                    <span class="summary-label">Jatuh Tempo</span>
+                    <div class="summary-value">
+                        <?= date('d M Y', strtotime($jatuh_tempo)) ?>
+                    </div>
+                    <span class="summary-label"><?= $service_type ?></span>
+                </div>
+            </div>
+            
+            <!-- STATUS BADGE -->
+            <div class="status-badge-container">
+                <?php if ($sisa_tagihan <= 0): ?>
+                    <span class="badge-status lunas">
+                        <i class="fas fa-check-circle"></i> LUNAS
+                    </span>
+                <?php elseif ($total_sudah_dibayar > 0): ?>
+                    <span class="badge-status sebagian">
+                        <i class="fas fa-clock"></i> SEBAGIAN 
+                        (<?php echo ($total_tagihan_final > 0 ? round(($total_sudah_dibayar / $total_tagihan_final) * 100) : 0); ?>%)
+                    </span>
+                <?php else: ?>
+                    <span class="badge-status belum">
+                        <i class="fas fa-times-circle"></i> BELUM BAYAR
+                    </span>
+                <?php endif; ?>
+            </div>
+        </div>
 
-            <table border="1" width="100%" cellpadding="8">
-                <tr>
-                    <th>No</th>
-                    <th>Deskripsi</th>
-                    <th>Jml</th>
-                    <th>Harga</th>
-                    <th>Diskon</th>
-                    <th>Total</th>
-                </tr>
+        <!-- RIWAYAT PEMBAYARAN -->
+        <div class="riwayat-pembayaran">
+            <h3><i class="fas fa-history"></i> Riwayat Pembayaran</h3>
+            <div class="riwayat-card">
 
-                <?php foreach ($data_services as $i => $srv): ?>
-                <tr>
-                    <td><?= $i+1 ?></td>
-                    <td><?= htmlspecialchars($srv['nama_layanan']) ?></td>
-                    <td><?= $srv['jumlah'] ?></td>
-                    <td>Rp <?= number_format($srv['harga'],0,',','.') ?></td>
+                <?php if (count($riwayat_data) > 0): ?>
 
-                    <!-- KOLOM DISKON (WAJIB DITUTUP) -->
-                    <td id="diskon-<?= $i ?>">
-                        <div style="text-align:center;">
+                    <?php foreach ($riwayat_data as $riwayat): ?>
+                    <div class="riwayat-item">
+                        <div class="riwayat-info">
+                            <div class="riwayat-date">
+                                <?= date('d M Y H:i', strtotime($riwayat['created_at'])) ?>
+                            </div>
+                            <div class="riwayat-methods">
+                                <i class="fas fa-credit-card"></i>
+                                <?= $riwayat['metode_detail'] ?? $riwayat['metode'] ?>
+                            </div>
+                        </div>
+                        <div class="riwayat-amount">
+                            <div class="riwayat-total">
+                                Rp <?= number_format($riwayat['amount_paid'], 0, ',', '.') ?>
+                            </div>
+                            <span class="riwayat-badge <?= $riwayat['status'] == 'paid' ? 'badge-paid' : ($riwayat['status'] == 'partial' ? 'badge-partial' : 'badge-pending') ?>">
+                                <?= strtoupper($riwayat['status']) ?>
+                            </span>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
 
-                            <?php if ($payment_status == 'paid'): ?>
+                <?php else: ?>
 
-                                <?php if ($srv['diskon'] > 0): ?>
+                    <div class="riwayat-empty">
+                        <i class="fas fa-receipt"></i>
+                        <p>Belum ada pembayaran</p>
+                    </div>
 
-                                    <?php if ($srv['diskon_tipe'] == 'persen'): ?>
-                                        <div><?= round(($srv['diskon'] / $srv['harga']) * 100) ?>% (Rp <?= number_format($srv['diskon'],0,',','.') ?>)</div>
-                                    <?php else: ?>
-                                        <div>Rp <?= number_format($srv['diskon'],0,',','.') ?></div>
-                                    <?php endif; ?>
+                <?php endif; ?>
 
+            </div>
+        </div>
+
+        <div class="payment-layout">
+            <!-- KIRI: DETAIL LAYANAN -->
+            <div class="payment-left">
+                <h3>
+                    <?php if ($jumlah_peserta > 1): ?>
+                        <i class="fas fa-users"></i> Rincian Layanan
+                    <?php else: ?>
+                        <i class="fas fa-user"></i> Rincian Layanan
+                    <?php endif; ?>
+                </h3>
+                <div class="data-pasien">
+                    <!-- Kolom Kiri -->
+                    <span class="label"><b>Nama Pasien</b></span>
+                    <span class="colon">:</span>
+                    <span class="value"><?= htmlspecialchars($booking['nama_lengkap']) ?></span>
+
+                    <!-- Kolom Kanan -->
+                    <span class="label"><b>No. Antrian</b></span>
+                    <span class="colon">:</span>
+                    <span class="value"><?= $booking['nomor_antrian'] ?></span>
+
+                    <!-- Baris 2 -->
+                    <span class="label"><b>Alamat</b></span>
+                    <span class="colon">:</span>
+                    <span class="value">
+                        <?php if ($address): ?>
+                            <?= htmlspecialchars($address['alamat']) ?>, 
+                            <?= htmlspecialchars($address['kota']) ?>, 
+                            <?= htmlspecialchars($address['provinsi']) ?>
+                        <?php else: ?>
+                            -
+                        <?php endif; ?>
+                    </span>
+
+                    <span class="label"><b>Tanggal Pelayanan</b></span>
+                    <span class="colon">:</span>
+                    <span class="value"><?= date('d F Y', strtotime($booking['tanggal_booking'])) ?></span>
+
+                    <!-- Baris 3 -->
+                    <span class="label"><b>No. Telpon</b></span>
+                    <span class="colon">:</span>
+                    <span class="value"><?= htmlspecialchars($phone) ?></span>
+
+                    <span class="label"><b>Tanggal Jatuh Tempo</b></span>
+                    <span class="colon">:</span>
+                    <span class="value">
+                        <?= date('d F Y', strtotime($jatuh_tempo)) ?>
+                    </span>
+
+                    <!-- Baris 4 (hanya kiri) -->
+                    <span class="label"></span>
+                    <span class="colon"></span>
+                    <span class="value"></span>
+                </div>
+                
+                <table class="services-table">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <?php if ($jumlah_peserta > 1): ?>
+                                <th>Peserta</th>
+                            <?php endif; ?>
+                            <th>Deskripsi</th>
+                            <th>Jml</th>
+                            <th>Harga</th>
+                            <th>Diskon</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php 
+                        $counter = 1;
+                        foreach ($data_services as $i => $srv): 
+                            $harga = $srv['harga'];
+                            $diskon_item = $srv['diskon'] ?? 0;
+                            $total_per_item = $harga - $diskon_item;
+                            $peserta_nama = isset($srv['nama_lengkap']) ? $srv['nama_lengkap'] : $booking['nama_lengkap'];
+                            $diskon_tipe = $srv['diskon_tipe'] ?? '';
+                            $diskon_persen = $diskon_item > 0 ? round(($diskon_item / $harga) * 100) : 0;
+                        ?>
+                        <tr data-harga="<?= $harga ?>" data-index="<?= $i ?>">
+                            <td><?= $counter++ ?></td>
+                            <?php if ($jumlah_peserta > 1): ?>
+                                <td>
+                                    <span class="peserta-text">
+                                        <?= htmlspecialchars($peserta_nama) ?>
+                                    </span>
+                                </td>
+                            <?php endif; ?>
+                            <td><?= htmlspecialchars($srv['nama_layanan']) ?></td>
+                            <td>1</td>
+                            <td class="harga-item">Rp <?= number_format($harga, 0, ',', '.') ?></td>
+                            <td class="diskon-cell" id="diskon-cell-<?= $i ?>">
+
+                                <?php if ($diskon_item > 0): ?>
+                                    <div class="diskon-applied">
+
+                                        <?php if ($diskon_tipe == 'persen'): ?>
+                                            <span class="diskon-badge persen">
+                                                <?= $diskon_persen ?>%
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="diskon-badge nilai">
+                                                - Rp <?= number_format($diskon_item, 0, ',', '.') ?>
+                                            </span>
+                                        <?php endif; ?>
+
+                                        <div class="diskon-info">
+                                            <?= $diskon_tipe == 'persen' ? 
+                                                "($diskon_persen% = Rp " . number_format($diskon_item, 0, ',', '.') . ")" : 
+                                                "" 
+                                            ?>
+                                        </div>
+                                    </div>
                                 <?php else: ?>
-                                    <div>-</div>
+                                    <span class="no-diskon">-</span>
                                 <?php endif; ?>
 
-                            <?php else: ?>
-
-                                <!-- MODE BELUM BAYAR -->
-                                <div>0</div>
-                                <button 
-                                    type="button" 
-                                    class="btn-diskon" 
-                                    onclick="openDiskon(<?= $i ?>, <?= $srv['harga'] ?>)">
-                                    Tambahkan Diskon
+                                <!-- 🔥 BUTTON PINDAH KE SINI -->
+                                <button type="button"
+                                    class="btn-edit-diskon"
+                                    onclick="openDiskonItem(<?= $i ?>, <?= $harga ?>, 
+                                            '<?= $diskon_tipe ?>', <?= $diskon_item ?>, 
+                                            '<?= htmlspecialchars($srv['nama_layanan']) ?>')"
+                                    title="Edit Diskon">
+                                    <i class="fas fa-edit"></i>
                                 </button>
 
-                            <?php endif; ?>
+                            </td>
+
+                            <td class="total-item" id="total-item-<?= $i ?>">
+                                Rp <?= number_format($total_per_item, 0, ',', '.') ?>
+                            </td>
+                            <input type="hidden" name="service_id[]" value="<?= $srv['id'] ?>">
+                            <input type="hidden" name="service_diskon[]" id="service_diskon_<?= $i ?>" value="<?= $diskon_item ?>">
+                            <input type="hidden" name="service_diskon_tipe[]" id="service_diskon_tipe_<?= $i ?>" value="<?= $diskon_tipe ?>">
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="<?= $jumlah_peserta > 1 ? '4' : '3' ?>" style="text-align: right; font-weight: 600;">
+                                Total:
+                            </td>
+                            <td id="total-diskon-items" style="color: #ef4444; font-weight: 600;">
+                                - Rp <?= number_format($total_diskon_item, 0, ',', '.') ?>
+                            </td>
+                            <td id="total-semua-items" style="font-weight: 700; color: #1e293b;">
+                                Rp <?= number_format($total_tagihan_final, 0, ',', '.') ?>
+                            </td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <!-- KANAN: FORM PEMBAYARAN -->
+            <div class="payment-right">
+                <div class="summary-card">
+                    <h4><i class="fas fa-calculator"></i> Ringkasan Pembayaran</h4>
+                    
+                    <div class="total-line">
+                        <span class="label">Subtotal</span>
+                        <span class="value" id="subtotalDisplay">Rp <?= number_format($subtotal, 0, ',', '.') ?></span>
+                    </div>
+                    
+                    <div class="total-line">
+                        <span class="label">Diskon Item</span>
+                        <span class="value" id="diskonItemDisplay" style="color: #ef4444;">
+                            - Rp <?= number_format($total_diskon_item, 0, ',', '.') ?>
+                        </span>
+                    </div>
+                    
+                    <!-- DISKON TOTAL -->
+                    <div class="diskon-total-container">
+                        <label>
+                            <i class="fas fa-tag"></i> Diskon Tambahan (Total)
+                        </label>
+
+                        <!-- SELECT TIPE -->
+                        <div class="diskon-type-selector">
+
+                            <div class="type-option active"
+                                data-type="persen"
+                                onclick="selectDiskonTotalType('persen')">
+
+                                <i class="fas fa-percentage"></i>
+                                <span>Persentase (%)</span>
+
+                            </div>
+
+                            <div class="type-option"
+                                data-type="nominal"
+                                onclick="selectDiskonTotalType('nominal')">
+
+                                <i class="fas fa-money-bill-wave"></i>
+                                <span>Nominal (Rp)</span>
+
+                            </div>
 
                         </div>
-                    </td>
 
-                    <!-- KOLOM TOTAL -->
-                    <td id="total-<?= $i ?>">
-                        Rp <?= number_format($srv['total'],0,',','.') ?>
-                    </td>
-                    <input type="hidden" name="service_id[]" value="<?= $srv['id'] ?>">
-                </tr>
+                        <!-- INPUT PERSEN -->
+                        <div id="diskonPersenContainer">
+                            <input type="number"
+                                id="diskonTotalPersen"
+                                placeholder="Masukkan persen diskon"
+                                class="diskon-input"
+                                oninput="hitungDiskonTotal('persen')"
+                                min="0" max="100">
+                        </div>
 
-                <?php endforeach; ?>
+                        <!-- INPUT NOMINAL -->
+                        <div id="diskonNominalContainer" style="display:none;">
+                            <input type="number"
+                                id="diskonTotalNominal"
+                                placeholder="Masukkan nilai diskon"
+                                class="diskon-input"
+                                oninput="hitungDiskonTotal('nominal')"
+                                min="0" step="1000">
+                        </div>
 
-            </table>
+                        <button type="button" class="btn-diskon" onclick="applyDiskonTotal()">
+                            <i class="fas fa-check"></i> Terapkan Diskon
+                        </button>
 
-        </div>
+                        <div id="diskonTotalInfo" class="info-message">
+                            <i class="fas fa-info-circle"></i>
+                            Diskon akan diterapkan pada total tagihan
+                        </div>
+                    </div>
+                    
+                    <div class="total-line">
+                        <span class="label">Diskon Total</span>
 
-        <!-- KANAN -->
-        <div class="payment-right">
+                        <span class="value" id="diskonTotalDisplay" style="color: #ef4444;">
+                            - Rp 0
+                        </span>
 
-            <div class="card">
-                <h4>Status</h4>
+                        <!-- Tombol Edit -->
+                        <button type="button" 
+                            id="btnEditDiskonTotal"
+                            class="btn-edit-diskon"
+                            style="display:none; margin-left:10px;"
+                            onclick="editDiskonTotal()">
+                            <i class="fas fa-edit"></i>
+                        </button>
 
-                <?php if ($payment_status == 'paid'): ?>
-                    <span class="badge badge-success">Sudah Bayar</span>
-                <?php else: ?>
-                    <span class="badge badge-warning">Belum Bayar</span>
-                    <br><br>
-                <?php endif; ?>
-            </div>
-
-            <div class="card total-card">
-                <h4>Total Pembayaran</h4>
-
-                <div class="total-line">
-                    <span class="label">Subtotal</span>
-                    <span class="colon">:</span>
-                    <span class="value" id="subtotalText">Rp <?= number_format($subtotal,0,',','.') ?></span>
+                        <!-- Tombol Hapus -->
+                        <button type="button" 
+                            id="btnRemoveDiskonTotal"
+                            class="btn-edit-diskon"
+                            style="display:none; margin-left:5px;"
+                            onclick="removeDiskonTotal()">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="total-line">
+                        <span class="label">Total Tagihan</span>
+                        <strong class="value" id="totalTagihan">
+                            Rp <?= number_format($total_tagihan_final, 0, ',', '.') ?>
+                        </strong>
+                    </div>
+                    
+                    <div class="total-line">
+                        <span class="label">Sudah Dibayar</span>
+                        <span class="value">Rp <?= number_format($total_sudah_dibayar, 0, ',', '.') ?></span>
+                    </div>
+                    
+                    <div class="total-final-line sisa">
+                        <span class="label">Sisa Tagihan</span>
+                        <strong class="final-value" id="sisaTagihan">
+                            Rp <?= number_format($sisa_tagihan, 0, ',', '.') ?>
+                        </strong>
+                    </div>
                 </div>
 
-                <div class="total-line">
-                    <span class="label">Diskon</span>
-                    <span class="colon">:</span>
-                    <span class="value" id="diskonText">Rp <?= number_format($diskon,0,',','.') ?></span>
+                <!-- JATUH TEMPO -->
+                <div class="jatuh-tempo-card">
+                    <h4><i class="fas fa-calendar-alt"></i> Jatuh Tempo</h4>
+                    <div class="jatuh-tempo-content">
+                        <div class="jatuh-tempo-date">
+                            <?= date('d', strtotime($jatuh_tempo)) ?>
+                        </div>
+                        <div style="font-size: 18px; font-weight: 600; color: #475569;">
+                            <?= date('M Y', strtotime($jatuh_tempo)) ?>
+                        </div>
+                        <div class="jatuh-tempo-info">
+                            <span class="info-tag"><?= $service_type ?></span>
+                            <?php if ($jumlah_peserta > 1): ?>
+                                <span class="info-tag"><?= $jumlah_peserta ?> Peserta</span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
                 </div>
 
-                <hr>
-
-                <div class="total-final-line">
-                    <span class="label">Total</span>
-                    <span class="colon">:</span>
-                    <strong class="final-value" id="totalText">Rp <?= number_format($total,0,',','.') ?></strong>
-                </div>
-            </div>
-
-
-            <div class="card"> 
-                <h4>Metode Pembayaran</h4>
-                <select id="metode_pembayaran">
-                    <option value="tunai">Tunai</option>
-                    <option value="transfer">Transfer</option>
-                    <option value="qris">QRIS</option>
-                </select>
-            </div>
-
-            <div class="pay-action">
-
-                <?php if ($payment_status == 'paid'): ?>
-
-                    <!-- MODE SUDAH BAYAR -->
-                    <button class="btn-cetak" onclick="cetakPembayaran()">
-                        Cetak Pembayaran
+                <!-- ACTION BUTTONS -->
+                <div class="pay-action">
+                    <?php 
+                    // SELALU TAMPILKAN TOMBOL CETAK, TIDAK PERLU KONDISI $sisa_tagihan <= 0
+                    ?>
+                    
+                    <!-- Tombol Cetak - SELALU TAMPIL -->
+                    <button class="btn-cetak" 
+                            onclick="window.open('cetak_pembayaran.php?id=<?php echo $parent_booking_id; ?>', '_blank')"
+                            title="Cetak faktur pembayaran">
+                        <i class="fas fa-print"></i> Cetak Pembayaran
                     </button>
-
+                    
+                    <!-- Tombol Kirim Invoice - SELALU TAMPIL -->
                     <button class="btn-invoice" onclick="kirimInvoice()">
-                        Kirim Ulang Invoice
+                        <i class="fas fa-paper-plane"></i> Kirim Invoice
                     </button>
-
-                <?php else: ?>
-
-                    <!-- MODE BELUM BAYAR -->
-                    <button class="btn-bayar-big" onclick="openBayar()">
-                        Bayar
-                    </button>
-
-                <?php endif; ?>
-
+                    
+                    <!-- Tombol Bayar (kondisional) -->
+                    <?php if ($sisa_tagihan > 0): ?>
+                        <?php if ($total_sudah_dibayar == 0): ?>
+                            <!-- Belum bayar sama sekali -->
+                            <button class="btn-bayar-big" onclick="openMultiplePayment()">
+                                <i class="fas fa-money-bill-wave"></i> Proses Pembayaran
+                            </button>
+                        <?php else: ?>
+                            <!-- Sudah bayar sebagian -->
+                            <button class="btn-partial" onclick="openBayarLagi()">
+                                <i class="fas fa-plus-circle"></i> Tambah Pembayaran
+                            </button>
+                        <?php endif; ?>
+                    <?php endif; ?>
                 </div>
-
+            </div>
         </div>
-        
     </div>
-</div>
 
-<div id="popupBayar" class="popup-overlay" style="display:none;">
-    <div class="popup-box">
-
-        <h2>Pembayaran</h2>
-        <p>
-            Pastikan data pembayaran sudah sesuai.  
-            “Konfirmasi Pembayaran” untuk melanjutkan
-        </p>
-
-        <form action="proses_bayar.php" method="POST">
+    <!-- ================= MODAL MULTIPLE PAYMENT ================= -->
+    <div id="popupMultiplePayment" class="popup-overlay" style="display:none;">
+        <div class="popup-box" style="width: 600px; max-width: 95vw;">
+            <div class="popup-header">
+                <h2><i class="fas fa-money-bill-wave"></i> Pembayaran Multiple Metode</h2>
+                <button class="popup-close" onclick="closeMultiplePayment()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
             
-            <input type="hidden" name="id" value="<?= $booking_id ?>">
-            <input type="hidden" name="metode" id="metodeInput">
-
-            <input type="hidden" name="subtotal" id="sendSubtotal">
-            <input type="hidden" name="diskon" id="sendDiskon">
-            <input type="hidden" name="total" id="sendTotal">
-            <input type="hidden" name="detail_diskon" id="sendDetailDiskon">
-
-            <div style="margin:20px 0;">
-                <label>
-                    <input type="checkbox" name="invoice_email"> Email
-                </label>
-                &nbsp;&nbsp;
-                <label>
-                    <input type="checkbox" name="invoice_wa"> Whatsapp / No. Telpon
-                </label>
-            </div>
-
-            <button type="submit" class="btn-primary">
-                Konfirmasi Pembayaran
-            </button>
-
-            <button type="button" class="btn-danger" onclick="closePopup()">
-                Batal
-            </button>
-
-        </form>
-
-    </div>
-</div>
-
-<div id="popupDiskon" class="popup-overlay" style="display:none;">
-    <div class="popup-box diskon-box">
-
-        <!-- tombol close -->
-        <button class="popup-close" onclick="closeDiskonPopup()">×</button>
-
-        <h2>Diskon</h2>
-        <p>Silahkan pilih dan isi nominal diskon yang berikan</p>
-
-        <div class="diskon-form">
-
-            <!-- ✅ PERBAIKAN: pisahkan radio dan label -->
-            <div class="diskon-row">
-                <input type="radio" id="diskonPersen" name="tipeDiskon">
-                <label for="diskonPersen">Persen (%)</label>
-                <input type="number" id="inputPersen" placeholder="1 - 100">
-            </div>
-
-            <div class="diskon-row">
-                <input type="radio" id="diskonNilai" name="tipeDiskon">
-                <label for="diskonNilai">Nilai</label>
-                <input type="number" id="inputNilai" placeholder="Rp">
-            </div>
-
-        </div>
-
-        <button class="btn-primary" onclick="applyDiskon()">Selesai</button>
-        <button class="btn-danger" onclick="closeDiskonPopup()">Batal</button>
-
-    </div>
-</div>
-
-<div id="popupSelesai" class="popup-overlay" style="display:none;">
-    <div class="popup-box">
-
-        <h2>Pembayaran Selesai</h2>
-        <p>
-            Pembayaran telah selesai, silahkan kembali  
-            ke halaman utama
-        </p>
-
-        <button class="btn-primary" onclick="cetakPembayaran()">
-            Cetak Pembayaran
-        </button>
-
-        <button class="btn-danger" onclick="window.location.href='pembayaran.php?id=<?= $booking_id ?>'">
-            Selesai
-        </button>
-
-    </div>
-</div>
-
-<!-- Popup Kirim Invoice -->
-<div id="popupKirimInvoice" class="popup-kirim-invoice">
-    <div class="popup-kirim-content">
-        <h2>Kirim Invoice</h2>
-        <p>Pilih metode pengiriman invoice ke pasien</p>
-
-        <div class="checkbox-group">
-            <div class="checkbox-item" onclick="toggleCheckbox('invoice_email')">
-                <input type="checkbox" id="invoice_email" name="invoice_email">
-                <div>
-                    <label for="invoice_email">Email</label>
-                    <div class="contact-info" id="emailInfo">
-                        <?php 
-                        $sql_email = "SELECT email FROM patient_emails 
-                                      WHERE patient_id = ? 
-                                      ORDER BY is_primary DESC 
-                                      LIMIT 1";
-                        $stmt_em = $conn->prepare($sql_email);
-                        $stmt_em->bind_param("i", $booking['patient_id']);
-                        $stmt_em->execute();
-                        $email_data = $stmt_em->get_result()->fetch_assoc();
-                        echo $email_data ? htmlspecialchars($email_data['email']) : 'Email tidak terdaftar';
-                        ?>
+            <p style="color: #64748b; margin-bottom: 25px;">
+                Anda dapat membayar dengan beberapa metode sekaligus dalam satu transaksi.
+            </p>
+            
+            <form action="proses_bayar_multiple.php" method="POST" id="formMultiplePayment">
+                <input type="hidden" name="booking_id" value="<?= $parent_booking_id ?>">
+                <!-- TAMBAHKAN INPUT INI: -->
+                <input type="hidden" name="subtotal" id="subtotalInput" value="<?= $subtotal ?>">
+                <input type="hidden" name="total_tagihan" id="totalTagihanInput" value="<?= $total_tagihan_final ?>">
+                <input type="hidden" name="sisa_tagihan" id="sisaTagihanInput" value="<?= $sisa_tagihan ?>">
+                <input type="hidden" name="diskon_total" id="diskonTotalInput" value="0">
+                <input type="hidden" name="jatuh_tempo" value="<?= $jatuh_tempo ?>">
+                
+                <!-- Input untuk service items -->
+                <?php foreach($data_services as $i => $srv): ?>
+                <input type="hidden" name="service_id[]" value="<?= $srv['id'] ?>">
+                <input type="hidden" name="service_diskon[]" id="service_diskon_<?= $i ?>" value="<?= $srv['diskon'] ?? 0 ?>">
+                <input type="hidden" name="service_diskon_tipe[]" id="service_diskon_tipe_<?= $i ?>" value="<?= $srv['diskon_tipe'] ?? '' ?>">
+                <?php endforeach; ?>
+                
+                <?php if (!empty($peserta_ids)): ?>
+                    <input type="hidden" name="peserta_ids" value="<?= htmlspecialchars(json_encode($peserta_ids)) ?>">
+                <?php endif; ?>
+                
+                <!-- JUMLAH YANG AKAN DIBAYAR -->
+                <div class="total-bayar-container" style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); 
+                        border-radius: 12px; padding: 20px; margin-bottom: 25px;">
+                    <label style="display: block; color: #0369a1; font-weight: 600; margin-bottom: 12px;">
+                        <i class="fas fa-money-check-alt"></i> Jumlah yang akan dibayar
+                    </label>
+                    <div style="position: relative;">
+                        <div style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #64748b; font-weight: 600;">
+                            Rp
+                        </div>
+                        <input type="number" name="jumlahBayar" id="jumlahBayar"
+                            value="<?= $sisa_tagihan ?>" 
+                            readonly
+                            min="1" max="<?= $sisa_tagihan ?>"
+                            style="width: 100%; padding: 15px 15px 15px 40px; 
+                                    font-size: 20px; font-weight: 600; text-align: center;
+                                    border: 2px solid #cbd5e1; border-radius: 8px;"
+                            oninput="updatePaymentMethods()">
                     </div>
                 </div>
-            </div>
-
-            <div class="checkbox-item" onclick="toggleCheckbox('invoice_wa')">
-                <input type="checkbox" id="invoice_wa" name="invoice_wa">
-                <div>
-                    <label for="invoice_wa">WhatsApp</label>
-                    <div class="contact-info" id="waInfo">
-                        <?php echo htmlspecialchars($phone); ?>
+                
+                <!-- METODE PEMBAYARAN -->
+                <div class="payment-methods-container">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h4 style="margin: 0; color: #1e293b;">
+                            <i class="fas fa-credit-card"></i> Metode Pembayaran
+                        </h4>
+                        <button type="button" class="btn-add-method" onclick="addPaymentMethod()" 
+                                style="background: #3b82f6; color: white; border: none; padding: 8px 16px; 
+                                    border-radius: 6px; cursor: pointer; font-size: 14px;">
+                            <i class="fas fa-plus"></i> Tambah Metode
+                        </button>
+                    </div>
+                    
+                    <div id="methodsContainer">
+                        <!-- Method rows akan ditambahkan dinamis -->
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <div class="popup-kirim-actions">
-            <button type="button" class="btn-batal-kirim" onclick="closeKirimInvoicePopup()">
-                Batal
-            </button>
-            <button type="button" class="btn-kirim-invoice" id="btnKirimInvoice" onclick="kirimInvoiceSubmit()" disabled>
-                Kirim Invoice
-            </button>
+                
+                <!-- SUMMARY -->
+                <div class="summary-container" style="background: #f8fafc; border-radius: 12px; padding: 20px; margin: 25px 0;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 16px;">
+                        <span style="color: #475569;">Total Pembayaran:</span>
+                        <strong id="totalMethods" style="color: #3b82f6; font-size: 18px;">Rp 0</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; color: #64748b; font-size: 14px;">
+                        <span>Jumlah metode:</span>
+                        <span id="jumlahMethods">0 metode</span>
+                    </div>
+                </div>
+                
+                <!-- KIRIM INVOICE -->
+                <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 10px; padding: 20px; margin: 20px 0;">
+                    <h4 style="color: #92400e; margin: 0 0 15px 0; font-size: 16px;">
+                        <i class="fas fa-envelope"></i> Kirim Invoice ke Pasien
+                    </h4>
+                    <div style="display: flex; gap: 20px;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <div style="width: 24px; height: 24px; border: 2px solid #d1d5db; border-radius: 6px; 
+                                        display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                                <i class="fas fa-check" style="color: white; font-size: 12px; display: none;"></i>
+                            </div>
+                            <input type="checkbox" name="invoice_email" id="invoiceEmail" 
+                                style="display: none;" 
+                                onchange="toggleCheckbox(this, 'email')">
+                            <span style="color: #4b5563;">Email</span>
+                        </label>
+                        
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <div style="width: 24px; height: 24px; border: 2px solid #d1d5db; border-radius: 6px; 
+                                        display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                                <i class="fas fa-check" style="color: white; font-size: 12px; display: none;"></i>
+                            </div>
+                            <input type="checkbox" name="invoice_wa" id="invoiceWa" 
+                                style="display: none;"
+                                onchange="toggleCheckbox(this, 'wa')">
+                            <span style="color: #4b5563;">WhatsApp</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- ACTION BUTTONS -->
+                <div style="display: flex; gap: 15px; margin-top: 30px;">
+                    <button type="submit" class="btn-primary" id="btnConfirmPayment" disabled
+                            style="flex: 1; background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
+                                color: white; border: none; padding: 16px; border-radius: 10px; 
+                                font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                        <i class="fas fa-check"></i> Konfirmasi Pembayaran
+                    </button>
+                    <button type="button" class="btn-danger" onclick="closeMultiplePayment()"
+                            style="background: #ef4444; color: white; border: none; padding: 16px 24px; 
+                                border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer;">
+                        <i class="fas fa-times"></i> Batal
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
-</div>
 
-<script>
-let currentRow = null;
-let currentHarga = 0;
-
-// simpan semua diskon
-let diskonData = {};   // { rowIndex: { persen: 10, nominal: 20000 } }
-
-function openBayar() {
-    const metode = document.getElementById('metode_pembayaran').value;
-
-    if (!metode) {
-        alert("Pilih metode pembayaran dulu");
-        return;
-    }
-
-    // ambil nilai panel kanan
-    document.getElementById('sendSubtotal').value = finalSubtotal;
-    document.getElementById('sendDiskon').value   = finalDiskon;
-    document.getElementById('sendTotal').value    = finalTotal;
-
-    // kirim detail diskon per item (JSON)
-    document.getElementById('sendDetailDiskon').value = JSON.stringify(diskonData);
-
-    // isi metode ke hidden input
-    document.getElementById('metodeInput').value = metode;
-
-    document.getElementById('popupBayar').style.display = 'flex';
-}
-
-function closePopup() {
-    document.getElementById('popupBayar').style.display = 'none';
-}
-
-function openDiskon(rowIndex, harga) {
-    currentRow = rowIndex;
-    currentHarga = harga;
-
-    // reset radio
-    document.getElementById('diskonPersen').checked = false;
-    document.getElementById('diskonNilai').checked = false;
-
-    // reset input angka
-    document.getElementById('inputPersen').value = '';
-    document.getElementById('inputNilai').value = '';
-
-    document.getElementById('popupDiskon').style.display = 'flex';
-}
-
-function applyDiskon() {
-    const persenChecked = document.getElementById('diskonPersen').checked;
-    const nilaiChecked  = document.getElementById('diskonNilai').checked;
-
-    let diskon = 0;
-    let persen = 0;
-
-    if (persenChecked) {
-        persen = parseInt(document.getElementById('inputPersen').value || 0);
-
-        if (persen <= 0 || persen > 100) {
-            alert("Persen harus antara 1 - 100");
-            return;
-        }
-
-        // hitung nominal dari persen
-        diskon = Math.round(currentHarga * persen / 100);
-
-    } else if (nilaiChecked) {
-        diskon = parseInt(document.getElementById('inputNilai').value || 0);
-
-        if (diskon <= 0) {
-            alert("Isi nilai diskon dulu");
-            return;
-        }
-
-        if (diskon > currentHarga) {
-            alert("Diskon tidak boleh lebih besar dari harga");
-            return;
-        }
-
-        persen = Math.round((diskon / currentHarga) * 100);
-
-    } else {
-        alert("Pilih jenis diskon dulu");
-        return;
-    }
-
-    // simpan ke diskonData
-    diskonData[currentRow] = {
-        service_id: document.querySelectorAll('input[name="service_id[]"]')[currentRow].value,
-        tipe: persenChecked ? 'persen' : 'nilai',
-        persen: persenChecked ? persen : 0,   // 🔥 TAMBAH INI
-        nominal: diskon
+    <!-- ================= MODAL DISKON PER ITEM ================= -->
+    <div id="popupDiskonItem" class="popup-overlay" style="display:none;">
+        <div class="popup-box" style="width: 500px;">
+            <div class="popup-header">
+                <h2><i class="fas fa-percentage"></i> Tambah Diskon Layanan</h2>
+                <button class="popup-close" onclick="closeDiskonItemPopup()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div id="diskonItemInfo" style="background: #f0f9ff; border-radius: 10px; padding: 15px; margin-bottom: 20px;">
+                <div style="font-weight: 600; color: #0369a1; margin-bottom: 5px;">
+                    <i class="fas fa-info-circle"></i> Informasi Layanan
+                </div>
+                <div id="itemName" style="font-size: 16px;"></div>
+                <div style="color: #64748b; font-size: 14px;">
+                    Harga: <span id="itemHarga" style="font-weight: 600;"></span>
+                </div>
+            </div>
+            
+            <form id="formDiskonItem">
+                <input type="hidden" id="currentItemIndex">
+                <input type="hidden" id="currentItemHarga">
+                
+                <div style="margin-bottom: 25px;">
+                    <div style="font-weight: 600; color: #1e293b; margin-bottom: 12px;">
+                        Pilih Jenis Diskon
+                    </div>
+                    
+                    <div class="diskon-type-selector">
+                        <div class="type-option active" data-type="persen" onclick="selectDiskonType('persen')">
+                            <div class="type-icon">
+                                <i class="fas fa-percentage"></i>
+                            </div>
+                            <div class="type-info">
+                                <div class="type-title">Persentase (%)</div>
+                                <div class="type-desc">Diskon berdasarkan persentase harga</div>
+                            </div>
+                            <div class="type-check">
+                                <i class="fas fa-check"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="type-option" data-type="nilai" onclick="selectDiskonType('nilai')">
+                            <div class="type-icon">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <div class="type-info">
+                                <div class="type-title">Nilai (Rp)</div>
+                                <div class="type-desc">Diskon dengan nilai tetap</div>
+                            </div>
+                            <div class="type-check">
+                                <i class="fas fa-check"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="diskonPersenSection" class="diskon-input-section active">
+                    <label style="display: block; color: #475569; font-weight: 600; margin-bottom: 8px;">
+                        Masukkan Persentase Diskon
+                    </label>
+                    <div style="position: relative;">
+                        <input type="number" id="inputDiskonPersen" 
+                            min="0" max="100" step="1"
+                            placeholder="Contoh: 10"
+                            style="width: 100%; padding: 12px 15px; padding-right: 50px;
+                                    border: 2px solid #cbd5e1; border-radius: 8px; font-size: 16px;"
+                            oninput="hitungDiskonFromPersen()">
+                        <div style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); 
+                                    color: #64748b; font-weight: 600;">%</div>
+                    </div>
+                    <div style="font-size: 14px; color: #94a3b8; margin-top: 5px;">
+                        Nilai diskon: <span id="nilaiDiskonPersen" style="font-weight: 600; color: #ef4444;">Rp 0</span>
+                    </div>
+                </div>
+                
+                <div id="diskonNilaiSection" class="diskon-input-section">
+                    <label style="display: block; color: #475569; font-weight: 600; margin-bottom: 8px;">
+                        Masukkan Nilai Diskon
+                    </label>
+                    <div style="position: relative;">
+                        <div style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); 
+                                    color: #64748b; font-weight: 600;">Rp</div>
+                        <input type="number" id="inputDiskonNilai" 
+                            min="0" step="1000"
+                            placeholder="Contoh: 50000"
+                            style="width: 100%; padding: 12px 15px; padding-left: 40px;
+                                    border: 2px solid #cbd5e1; border-radius: 8px; font-size: 16px;"
+                            oninput="hitungPersenFromDiskon()">
+                    </div>
+                    <div style="font-size: 14px; color: #94a3b8; margin-top: 5px;">
+                        Persentase: <span id="persenDiskonNilai" style="font-weight: 600; color: #ef4444;">0%</span>
+                    </div>
+                </div>
+                
+                <div style="background: #f8fafc; border-radius: 10px; padding: 20px; margin: 25px 0;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span style="color: #475569;">Harga Asli:</span>
+                        <span id="originalPrice" style="font-weight: 600;">Rp 0</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span style="color: #475569;">Diskon:</span>
+                        <span id="appliedDiskon" style="color: #ef4444; font-weight: 600;">- Rp 0</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding-top: 10px; border-top: 2px dashed #e2e8f0;">
+                        <span style="color: #1e293b; font-weight: 600;">Harga Setelah Diskon:</span>
+                        <span id="finalPrice" style="color: #10b981; font-size: 18px; font-weight: 700;">Rp 0</span>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 15px;">
+                    <button type="button" class="btn-primary" onclick="applyDiskonItem()"
+                            style="flex: 1; background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
+                                color: white; border: none; padding: 16px; border-radius: 10px; 
+                                font-size: 16px; font-weight: 600; cursor: pointer;">
+                        <i class="fas fa-check"></i> Terapkan Diskon
+                    </button>
+                    <button type="button" class="btn-danger" onclick="removeDiskonItem()"
+                            style="background: #ef4444; color: white; border: none; padding: 16px 24px; 
+                                border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer;">
+                        <i class="fas fa-trash"></i> Hapus Diskon
+                    </button>
+                    <button type="button" class="btn-secondary" onclick="closeDiskonItemPopup()"
+                            style="background: #6b7280; color: white; border: none; padding: 16px 24px; 
+                                border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer;">
+                        <i class="fas fa-times"></i> Batal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+    window.paymentData = {
+        totalTagihan: <?php echo $total_tagihan_final; ?>,
+        sudahDibayar: <?php echo $total_sudah_dibayar; ?>,
+        sisaTagihan: <?php echo $sisa_tagihan; ?>,
+        subtotal: <?php echo $subtotal; ?>,
+        totalDiskonItem: <?php echo $total_diskon_item; ?>,
+        diskonItems: <?php echo json_encode($data_services); ?>
     };
-
-    // total baru per item
-    const total = currentHarga - diskon;
-
-    // update kolom diskon (TAMPIL PERSEN + NOMINAL)
-    let displayText = '';
-
-    if (persenChecked) {
-        // kalau tipe persen → tampil persen + nominal
-        displayText = `${persen}% (Rp ${diskon.toLocaleString()})`;
-    } else {
-        // kalau tipe nilai → tampil nominal aja
-        displayText = `Rp ${diskon.toLocaleString()}`;
-    }
-
-    document.getElementById('diskon-' + currentRow).innerHTML = `
-        <div style="text-align:center;">
-            <div>${displayText}</div>
-            <button 
-                type="button" 
-                class="btn-diskon" 
-                onclick="openDiskon(${currentRow}, ${currentHarga})">
-                Edit Diskon
-            </button>
-        </div>
-    `;
-
-    // update kolom total
-    document.getElementById('total-' + currentRow).innerText =
-        "Rp " + total.toLocaleString();
-
-    // update panel kanan
-    updateTotalRightPanel();
-
-    // tutup popup
-    closeDiskonPopup();
-}
-
-let finalSubtotal = 0;
-let finalDiskon = 0;
-let finalTotal = 0;
-
-function updateTotalRightPanel() {
-    const table = document.querySelector(".payment-left table");
-    let subtotal = 0;
-    let totalDiskon = 0;
-
-    // loop semua baris item
-    for (let i = 1; i < table.rows.length; i++) {
-        const row = table.rows[i];
-
-        // ambil harga asli
-        const hargaText = row.cells[3].innerText.replace(/[^\d]/g, '');
-        const harga = parseInt(hargaText || 0);
-
-        subtotal += harga;
-
-        const cellDiskonText = row.cells[4].innerText;
-
-        //Ekstrak persentase (angka sebelum %)
-        const diskonPersenText = cellDiskonText.match(/(\d+)%/)?.[1] || "0";
-
-        //Ekstrak nilai rupiah (angka di dalam parentheses setelah Rp)
-        const diskonText = cellDiskonText.match(/Rp\s*([\d.,]+)/)?.[1] || "0";
-
-        //Hapus titik jika ada (format Indonesia: 20.400)
-        const diskonTextClean = diskonText.replace(/\./g, '');
-
-        //Konversi ke number
-        const diskonPersenNumber = parseInt(diskonPersenText) || 0;
-        const diskonNumber = parseInt(diskonTextClean) || 0;
-        
-        totalDiskon += diskonNumber;
-    }
-
-    const persentaseDiskonAktual = subtotal > 0 ?
-    (totalDiskon / subtotal) * 100 : 0;
-
-    let formattedPersen;
-    const roundedPersen = Math.round(persentaseDiskonAktual * 100) / 100;
-
-    if (roundedPersen % 1 === 0) {
-        formattedPersen = Math.round(roundedPersen) + '%';
-    } else {
-        formattedPersen = '-' + roundedPersen.toFixed(2) + '%';
-    }
-
-    finalSubtotal = subtotal;
-    finalDiskon   = totalDiskon;
-    finalTotal    = subtotal - totalDiskon;
-
-    console.log(persentaseDiskonAktual);
-
-    // cek apakah ADA diskon persen
-    let adaPersen = false;
-    let totalPersen = 0;
-    let persenCount = 0;
-
-    for (let key in diskonData) {
-        if (diskonData[key].tipe === 'persen') {
-            adaPersen = true;
-            totalPersen += diskonData[key].persen;
-            persenCount++;
-        }
-    }
-
-    // hitung persen tampilan (rata-rata persen item yg persen)
-    let persenTampil = 0;
-    if (adaPersen && persenCount > 0) {
-        persenTampil = Math.round(totalPersen / persenCount);
-    }
-
-    // update subtotal
-    document.getElementById('subtotalText').innerText =
-        "Rp " + subtotal.toLocaleString();
-
-    // update diskon
-    if (totalDiskon > 0) {
-
-        if (persentaseDiskonAktual > 0 && adaPersen) {
-            // tampil persen + nominal
-            document.getElementById('diskonText').innerText =
-                `${formattedPersen} (Rp ${totalDiskon.toLocaleString()})`;
-        } else {
-            // SEMUA NILAI → tampil nominal saja
-            document.getElementById('diskonText').innerText =
-                `Rp ${totalDiskon.toLocaleString()}`;
-        }
-
-    } else {
-        document.getElementById('diskonText').innerText = "Rp 0";
-    }
-
-    // update total akhir
-    document.getElementById('totalText').innerText =
-        "Rp " + finalTotal.toLocaleString();
-}
-
-function closeDiskonPopup() {
-    document.getElementById('popupDiskon').style.display = 'none';
-}
-
-function openPopupSelesai() {
-    document.getElementById('popupBayar').style.display = 'none';
-    document.getElementById('popupDiskon').style.display = 'none';
-    document.getElementById('popupSelesai').style.display = 'flex';
-}
-
-function cetakPembayaran() {
-    window.open('cetak_pembayaran.php?id=<?= $booking_id ?>', '_blank');
-}
-
-// Buka popup kirim invoice
-function kirimInvoice() {
-    document.getElementById('popupKirimInvoice').classList.add('active');
-}
-
-// Tutup popup kirim invoice
-function closeKirimInvoicePopup() {
-    document.getElementById('popupKirimInvoice').classList.remove('active');
-    
-    // Reset checkbox
-    document.getElementById('invoice_email').checked = false;
-    document.getElementById('invoice_wa').checked = false;
-    
-    updateKirimInvoiceButton();
-}
-
-// Toggle checkbox saat klik div
-function toggleCheckbox(id) {
-    const checkbox = document.getElementById(id);
-    checkbox.checked = !checkbox.checked;
-    updateKirimInvoiceButton();
-}
-
-// Update status tombol kirim
-function updateKirimInvoiceButton() {
-    const emailChecked = document.getElementById('invoice_email').checked;
-    const waChecked = document.getElementById('invoice_wa').checked;
-    const btn = document.getElementById('btnKirimInvoice');
-    
-    if (emailChecked || waChecked) {
-        btn.disabled = false;
-    } else {
-        btn.disabled = true;
-    }
-}
-
-// Event listener untuk checkbox
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('invoice_email').addEventListener('change', updateKirimInvoiceButton);
-    document.getElementById('invoice_wa').addEventListener('change', updateKirimInvoiceButton);
-});
-
-// Submit kirim invoice
-function kirimInvoiceSubmit() {
-    const emailChecked = document.getElementById('invoice_email').checked;
-    const waChecked = document.getElementById('invoice_wa').checked;
-    
-    if (!emailChecked && !waChecked) {
-        alert('Pilih minimal satu metode pengiriman');
-        return;
-    }
-    
-    // Build URL dengan parameter
-    let url = 'kirim_invoice.php?id=<?= $booking_id ?>';
-    
-    if (emailChecked) {
-        url += '&email=1';
-    }
-    
-    if (waChecked) {
-        url += '&wa=1';
-    }
-    
-    // Redirect ke kirim_invoice.php
-    window.location.href = url;
-}
-
-function closeAllPopups() {
-    document.querySelectorAll('.popup-overlay').forEach(popup => {
-        popup.style.display = 'none';
-        popup.style.pointerEvents = 'none';
-    });
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-    updateTotalRightPanel();
-});
-</script>
-
-<?php if ($payment_status == 'paid' && isset($_GET['success'])): ?>
-<script>
-    window.onload = function() {
-        openPopupSelesai();
-    }
-</script>
-<?php endif; ?>
-
-<script src="js/sidebar-toggle.js"></script>
-
+    </script>
+    <script src="js/pembayaran.js"></script>
+    <script src="js/sidebar-toggle.js"></script>
 </body>
 </html>
