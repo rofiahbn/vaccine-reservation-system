@@ -11,6 +11,7 @@
     let currentItemIndex = null;
     let currentItemHarga = 0;
     let currentDiskonType = 'persen';
+    let currentItemID = null;
 
     // Inisialisasi diskonItems dari data PHP
     let diskonItems = {};
@@ -117,12 +118,14 @@
     }
 
     // ===================== DISKON PER ITEM =====================
-    function openDiskonItem(index, harga, tipe, diskon, itemName) {
+    function openDiskonItem(id, index, harga, tipe, diskon, itemName) {
+        currentItemID = id;
         currentItemIndex = index;
         currentItemHarga = harga;
         currentDiskonType = tipe || 'persen';
         
         // Set nilai modal
+        document.getElementById('currentItemID').value = id;
         document.getElementById('currentItemIndex').value = index;
         document.getElementById('currentItemHarga').value = harga;
         document.getElementById('itemName').textContent = itemName || 'Layanan';
@@ -242,8 +245,9 @@
     }
 
     function applyDiskonItem() {
-        let diskon = 0;
         let tipe = currentDiskonType;
+        let diskon = 0;
+        let id = currentItemID;
         
         if (tipe === 'persen') {
             const persen = parseFloat(document.getElementById('inputDiskonPersen').value) || 0;
@@ -260,13 +264,17 @@
         
         // Simpan ke diskonItems
         diskonItems[currentItemIndex] = {
+            id: currentItemID,
             harga: currentItemHarga,
             diskon: diskon,
             tipe: tipe
         };
         
         // Update UI di tabel
-        updateDiskonItemUI(currentItemIndex, diskon, tipe);
+        updateDiskonItemUI(id, currentItemIndex, diskon, tipe);
+
+        //Update database via AJAX
+        updateDiskonToDatabase(id, diskon, tipe);
         
         // Update total
         updateTotalSummary();
@@ -278,16 +286,50 @@
         showToast('Diskon berhasil diterapkan!', 'success');
     }
 
+    //Fungsi untuk mengirim data diskon ke server
+    function updateDiskonToDatabase(id, diskon, tipe) {
+        console.log('Mengirim data ke server:', { id, diskon, tipe });
+
+        const formData = new FormData();
+        formData.append('id', id);
+        formData.append('diskon', diskon);
+        formData.append('tipe_diskon', tipe);
+        formData.append('action', 'update_diskon');
+
+        fetch('update_diskon.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response data:', data);
+            if (!data.success) {
+                console.error('Gagal menyimpan diskon:', data.message);
+                showToast('Gagal menyimpan diskon ke database: ' + data.message, 'error');
+            } else {
+                console.log('Sukses:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+            showToast('Terjadi kesalahan koneksi: ' + error.message, 'error');
+        });
+    }
+
     function removeDiskonItem() {
         // Hapus diskon dari item
         diskonItems[currentItemIndex] = {
+            id: currentItemID,
             harga: currentItemHarga,
             diskon: 0,
             tipe: ''
         };
         
         // Update UI di tabel
-        updateDiskonItemUI(currentItemIndex, 0, '');
+        updateDiskonItemUI(currentItemID, currentItemIndex, 0, '');
         
         // Update total
         updateTotalSummary();
@@ -299,11 +341,12 @@
         showToast('Diskon berhasil dihapus!', 'info');
     }
 
-    function updateDiskonItemUI(index, diskon, tipe) {
+    function updateDiskonItemUI(id_item, index, diskon, tipe) {
         const diskonCell = document.getElementById(`diskon-cell-${index}`);
         const totalCell = document.getElementById(`total-item-${index}`);
         
         // Update hidden inputs
+        document.getElementById(`service_id_${index}`).value = id_item;
         document.getElementById(`service_diskon_${index}`).value = diskon;
         document.getElementById(`service_diskon_tipe_${index}`).value = tipe;
         
@@ -338,7 +381,7 @@
 
                 <button type="button"
                     class="btn-edit-diskon"
-                    onclick="openDiskonItem(${index}, ${currentItemHarga}, '${tipe}', ${diskon})"
+                    onclick="openDiskonItem(${id_item}, ${index}, ${currentItemHarga}, '${tipe}', ${diskon})"
                     title="Edit Diskon">
                     <i class="fas fa-edit"></i>
                 </button>
@@ -349,7 +392,7 @@
 
                 <button type="button"
                     class="btn-edit-diskon"
-                    onclick="openDiskonItem(${index}, ${currentItemHarga}, '', 0)"
+                    onclick="openDiskonItem(${id_item}, ${index}, ${currentItemHarga}, '', 0)"
                     title="Tambah Diskon">
                     <i class="fas fa-edit"></i>
                 </button>
@@ -599,12 +642,18 @@
             if(select.value === 'tunai'){
 
                 cashExtra.style.display = 'flex';
-                referenceInput.style.display = 'none';
+
+                if(referenceInput){
+                    referenceInput.style.display = 'none';
+                }
 
             } else {
 
                 cashExtra.style.display = 'none';
-                referenceInput.style.display = 'block';
+
+                if(referenceInput){
+                    referenceInput.style.display = 'block';
+                }
 
             }
 

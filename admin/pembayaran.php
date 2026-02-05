@@ -455,6 +455,7 @@ if (!$all_completed) {
                         <?php 
                         $counter = 1;
                         foreach ($data_services as $i => $srv): 
+                            $id_item = $srv['id'];
                             $harga = $srv['harga'];
                             $diskon_item = $srv['diskon'] ?? 0;
                             $total_per_item = $harga - $diskon_item;
@@ -503,7 +504,7 @@ if (!$all_completed) {
                                 <!-- 🔥 BUTTON PINDAH KE SINI -->
                                 <button type="button"
                                     class="btn-edit-diskon"
-                                    onclick="openDiskonItem(<?= $i ?>, <?= $harga ?>, 
+                                    onclick="openDiskonItem(<?= $id_item ?>, <?= $i ?>, <?= $harga ?>,
                                             '<?= $diskon_tipe ?>', <?= $diskon_item ?>, 
                                             '<?= htmlspecialchars($srv['nama_layanan']) ?>')"
                                     title="Edit Diskon">
@@ -515,7 +516,7 @@ if (!$all_completed) {
                             <td class="total-item" id="total-item-<?= $i ?>">
                                 Rp <?= number_format($total_per_item, 0, ',', '.') ?>
                             </td>
-                            <input type="hidden" name="service_id[]" value="<?= $srv['id'] ?>">
+                            <input type="hidden" name="service_id[]" id="service_id_<?=$i ?>" value="<?= $srv['id'] ?>">
                             <input type="hidden" name="service_diskon[]" id="service_diskon_<?= $i ?>" value="<?= $diskon_item ?>">
                             <input type="hidden" name="service_diskon_tipe[]" id="service_diskon_tipe_<?= $i ?>" value="<?= $diskon_tipe ?>">
                         </tr>
@@ -870,6 +871,7 @@ if (!$all_completed) {
             </div>
             
             <form id="formDiskonItem">
+                <input type="hidden" id="currentItemID">
                 <input type="hidden" id="currentItemIndex">
                 <input type="hidden" id="currentItemHarga">
                 

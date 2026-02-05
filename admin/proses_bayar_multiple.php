@@ -63,6 +63,7 @@ $tagihan_data = $result_t->fetch_assoc();
 $subtotal_db = floatval($tagihan_data['subtotal_db'] ?? 0);
 $diskon_item_db = floatval($tagihan_data['diskon_item_db'] ?? 0);
 $total_tagihan_db = floatval($tagihan_data['total_tagihan_db'] ?? 0);
+$total_diskon_transaksi = $diskon_item_db + $diskon_total;
 
 // Gunakan nilai dari form jika valid, jika tidak gunakan dari database
 $subtotal_final = ($subtotal > 0) ? $subtotal : $subtotal_db;
@@ -180,7 +181,7 @@ $bind_result = $stmt->bind_param(
     $target_booking_id,
     $metode_gabungan,
     $subtotal_final,
-    $diskon_total,
+    $total_diskon_transaksi,
     $diskon_tipe_value,
     $total_setelah_diskon_total,
     $amount_paid,
@@ -255,7 +256,7 @@ $stmt_check->execute();
 $total_bayar_real = $stmt_check->get_result()->fetch_assoc()['total_bayar'] ?? 0;
 
 // Total tagihan final setelah diskon
-$total_final = $total_setelah_diskon_total;
+$total_final = $subtotal_db - $diskon_item_db - $diskon_total;
 
 if ($total_bayar_real >= $total_final) {
     $payment_status = 'paid';
@@ -312,44 +313,6 @@ if (!empty($service_ids) && count($service_ids) == count($service_diskon)) {
             }
         }
         $stmt_diskon->close();
-    }
-}
-
-// ================= SIMPAN DISKON TOTAL KE BOOKING_SERVICES (jika ada) =================
-if ($diskon_total > 0) {
-    // Cek jumlah item layanan
-    $sql_count = "SELECT COUNT(*) as total_items FROM booking_services 
-                  WHERE booking_id IN (
-                      SELECT id FROM bookings 
-                      WHERE parent_id = ? OR id = ?
-                  )";
-    $stmt_c = $conn->prepare($sql_count);
-    $stmt_c->bind_param("ii", $target_booking_id, $target_booking_id);
-    $stmt_c->execute();
-    $result_c = $stmt_c->get_result();
-    $count_data = $result_c->fetch_assoc();
-    $total_items = intval($count_data['total_items'] ?? 1);
-    
-    // Hitung diskon per item
-    $diskon_per_item = $total_items > 0 ? ($diskon_total / $total_items) : $diskon_total;
-    
-    // Update booking_services
-    $sql_update_total_diskon = "UPDATE booking_services 
-                               SET diskon = diskon + ?, 
-                                   diskon_tipe = CASE 
-                                       WHEN diskon_tipe = '' THEN 'total_diskon'
-                                       ELSE CONCAT(diskon_tipe, '+total_diskon')
-                                   END
-                               WHERE booking_id IN (
-                                   SELECT id FROM bookings 
-                                   WHERE parent_id = ? OR id = ?
-                               )";
-    
-    $stmt_td = $conn->prepare($sql_update_total_diskon);
-    if ($stmt_td) {
-        $stmt_td->bind_param("dii", $diskon_per_item, $target_booking_id, $target_booking_id);
-        $stmt_td->execute();
-        $stmt_td->close();
     }
 }
 
