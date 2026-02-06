@@ -11,6 +11,11 @@ function updateFormByService() {
     const nikRequired = document.getElementById('nikRequired');
     const pasporRequired = document.getElementById('pasporRequired');
 
+    // ===== CEK APAKAH FORM SUDAH TERISI (dari search patient) =====
+    const isFormFilled = inputNama.value.trim() !== '' || 
+                         inputNIK.value.trim() !== '' || 
+                         inputPaspor.value.trim() !== '';
+
     if (layanan === 'Umroh/Haji/Luar Negeri') {
         // Ubah label nama
         labelNama.innerHTML = 'Nama Lengkap Sesuai Paspor <span class="required">*</span>';
@@ -23,7 +28,11 @@ function updateFormByService() {
         // Paspor required, NIK optional
         inputPaspor.required = true;
         inputNIK.required = false;
-        inputNIK.value = ''; // Clear NIK
+        
+        // ❌ JANGAN clear NIK jika form sudah terisi (dari search)
+        if (!isFormFilled) {
+            inputNIK.value = ''; // Clear hanya jika form masih kosong
+        }
         
         pasporRequired.style.display = 'inline';
         
@@ -39,7 +48,11 @@ function updateFormByService() {
         // NIK required, Paspor optional
         inputNIK.required = true;
         inputPaspor.required = false;
-        inputPaspor.value = ''; // Clear Paspor
+        
+        // ❌ JANGAN clear Paspor jika form sudah terisi (dari search)
+        if (!isFormFilled) {
+            inputPaspor.value = ''; // Clear hanya jika form masih kosong
+        }
         
         nikRequired.style.display = 'inline';
         
@@ -67,15 +80,136 @@ function updateFormByService() {
     // update hidden input
     document.getElementById("isUmroh").value = isUmroh;
 
-    // hanya reload kalau memang berubah
-    if (currentUmroh != isUmroh || currentLayanan != layanan) {
+    // ✅ CEK APAKAH ADA PERUBAHAN LAYANAN
+    const isLayananChanged = currentUmroh != isUmroh || currentLayanan != layanan;
+    
+    // ✅ CEK APAKAH SWITCH KE/DARI UMROH (butuh reload kalender)
+    const isUmrohSwitch = currentUmroh != isUmroh;
 
+    if (isLayananChanged) {
         url.searchParams.set("is_umroh", isUmroh);
         url.searchParams.set("layanan", layanan);
-
-        window.location.href = url.toString();
+        
+        // ✅ RELOAD jika:
+        // 1. Form masih kosong, ATAU
+        // 2. Switch ke/dari Umroh (karena kalender beda batasan)
+        if (!isFormFilled || isUmrohSwitch) {
+            // ⚠️ SIMPAN DATA FORM KE sessionStorage dulu sebelum reload
+            if (isFormFilled && isUmrohSwitch) {
+                saveFormToSession();
+            }
+            window.location.href = url.toString();
+        } else {
+            // ✅ Jika cuma ganti layanan biasa (bukan Umroh), update URL tanpa reload
+            window.history.replaceState(null, '', url.toString());
+        }
     }
+}
 
+// ===== SIMPAN DATA FORM KE SESSION STORAGE =====
+function saveFormToSession() {
+    const formData = {
+        nama_lengkap: document.getElementById('namaLengkap').value,
+        tanggal_lahir: document.getElementById('tanggalLahir').value,
+        jenis_kelamin: document.querySelector('input[name="jenis_kelamin"]:checked')?.value,
+        nik: document.getElementById('inputNIK').value,
+        paspor: document.getElementById('inputPaspor').value,
+        nama_wali: document.getElementById('inputNamaWali').value,
+        
+        // Email & Phone
+        emails: Array.from(document.querySelectorAll('input[name="emails[]"]')).map(input => input.value),
+        phones: Array.from(document.querySelectorAll('input[name="phones[]"]')).map(input => input.value),
+        
+        // Alamat
+        alamat: document.querySelector('textarea[name="alamat"]').value,
+        provinsi: document.getElementById('provinsiSelect').value,
+        kota: document.getElementById('kotaSelect').value,
+        
+        // Riwayat
+        riwayat_alergi: document.querySelector('textarea[name="riwayat_alergi"]').value,
+        riwayat_penyakit: document.querySelector('textarea[name="riwayat_penyakit"]').value,
+        riwayat_obat: document.querySelector('textarea[name="riwayat_obat"]').value,
+    };
+    
+    sessionStorage.setItem('formData', JSON.stringify(formData));
+}
+
+// ===== RESTORE DATA FORM DARI SESSION STORAGE =====
+function restoreFormFromSession() {
+    const saved = sessionStorage.getItem('formData');
+    if (!saved) return;
+    
+    try {
+        const formData = JSON.parse(saved);
+        
+        // Basic info
+        if (formData.nama_lengkap) document.getElementById('namaLengkap').value = formData.nama_lengkap;
+        if (formData.tanggal_lahir) {
+            document.getElementById('tanggalLahir').value = formData.tanggal_lahir;
+            hitungUsia();
+        }
+        if (formData.jenis_kelamin) {
+            document.querySelector(`input[name="jenis_kelamin"][value="${formData.jenis_kelamin}"]`).checked = true;
+        }
+        if (formData.nik) document.getElementById('inputNIK').value = formData.nik;
+        if (formData.paspor) document.getElementById('inputPaspor').value = formData.paspor;
+        if (formData.nama_wali) document.getElementById('inputNamaWali').value = formData.nama_wali;
+        
+        // Emails
+        if (formData.emails && formData.emails.length > 0) {
+            const emailContainer = document.getElementById('emailContainer');
+            emailContainer.innerHTML = '';
+            formData.emails.forEach(email => {
+                const div = document.createElement('div');
+                div.classList.add('input-group');
+                div.innerHTML = `
+                    <input type="email" name="emails[]" value="${email}">
+                    <button type="button" onclick="this.parentElement.remove()">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                emailContainer.appendChild(div);
+            });
+        }
+        
+        // Phones
+        if (formData.phones && formData.phones.length > 0) {
+            const phoneContainer = document.getElementById('phoneContainer');
+            phoneContainer.innerHTML = '';
+            formData.phones.forEach(phone => {
+                const div = document.createElement('div');
+                div.classList.add('input-group');
+                div.innerHTML = `
+                    <input type="tel" name="phones[]" value="${phone}">
+                    <button type="button" onclick="this.parentElement.remove()">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                phoneContainer.appendChild(div);
+            });
+        }
+        
+        // Alamat
+        if (formData.alamat) document.querySelector('textarea[name="alamat"]').value = formData.alamat;
+        if (formData.provinsi) {
+            document.getElementById('provinsiSelect').value = formData.provinsi;
+            loadKota(formData.provinsi, formData.kota);
+        }
+        
+        // Riwayat
+        if (formData.riwayat_alergi) document.querySelector('textarea[name="riwayat_alergi"]').value = formData.riwayat_alergi;
+        if (formData.riwayat_penyakit) document.querySelector('textarea[name="riwayat_penyakit"]').value = formData.riwayat_penyakit;
+        if (formData.riwayat_obat) document.querySelector('textarea[name="riwayat_obat"]').value = formData.riwayat_obat;
+        
+        // Clear session storage setelah restore
+        sessionStorage.removeItem('formData');
+        
+        // Show notification
+        alert('✅ Data form berhasil dipulihkan setelah pergantian layanan');
+        
+    } catch (e) {
+        console.error('Error restoring form data:', e);
+    }
 }
 
 // ==================== HITUNG USIA ====================
@@ -448,8 +582,15 @@ function selectTime(element, time) {
     if (btnFinish) btnFinish.disabled = false;
 }
 
-// ==================== FORM VALIDATION ====================
+// ==================== FORM VALIDATION & INITIALIZATION ====================
 document.addEventListener('DOMContentLoaded', function() {
+    // ===== 1. RESTORE FORM DATA DULU (jika ada dari reload) =====
+    restoreFormFromSession();
+    
+    // ===== 2. UPDATE FORM BERDASARKAN LAYANAN =====
+    updateFormByService();
+    
+    // ===== 3. SETUP FORM VALIDATION =====
     const form = document.getElementById('registrationForm');
     
     if (form) {
@@ -570,7 +711,3 @@ function addPhone() {
 
     container.appendChild(div);
 }
-
-document.addEventListener("DOMContentLoaded", () => {
-    updateFormByService();
-});
