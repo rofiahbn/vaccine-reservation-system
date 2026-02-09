@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Feb 05, 2026 at 01:56 PM
+-- Generation Time: Feb 09, 2026 at 04:47 PM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.30
 
@@ -52,7 +52,7 @@ INSERT INTO `bookings` (`id`, `parent_id`, `patient_id`, `service_type`, `nomor_
 (78, NULL, 1, 'In Clinic', '20260120-001', '2026-01-23', '09:30:00', 'confirmed', 'Pendaftaran online', '2026-01-20 09:38:53', '2026-01-26 13:37:47', 1, 'unpaid', 0),
 (79, NULL, 2, 'In Clinic', '20260121-001', '2026-01-23', '09:00:00', 'cancelled', 'Pendaftaran online', '2026-01-20 23:23:09', '2026-01-23 21:33:47', NULL, 'unpaid', 0),
 (80, NULL, 3, 'In Clinic', '20260122-002', '2026-01-23', '11:00:00', 'confirmed', 'Pendaftaran online', '2026-01-22 15:53:09', '2026-02-05 20:13:16', NULL, 'unpaid', 1),
-(81, NULL, 4, 'In Clinic', '20260122-003', '2026-01-23', '11:30:00', 'pending', 'Pendaftaran online', '2026-01-22 17:17:05', '2026-01-23 21:35:47', NULL, 'unpaid', 0),
+(81, NULL, 4, 'In Clinic', '20260122-003', '2026-01-23', '11:30:00', 'confirmed', 'Pendaftaran online', '2026-01-22 17:17:05', '2026-02-05 23:47:40', NULL, 'unpaid', 1),
 (82, NULL, 5, 'In Clinic', '20260126-001', '2026-01-26', '10:45:00', 'completed', 'Pendaftaran online', '2026-01-26 09:42:15', '2026-01-28 00:26:50', NULL, 'paid', 1),
 (83, NULL, 1, 'In Clinic', '20260127-001', '2026-01-27', '09:15:00', 'confirmed', 'Pendaftaran online', '2026-01-26 09:56:30', '2026-01-27 12:45:38', NULL, 'unpaid', 1),
 (84, NULL, 6, 'In Clinic', '20260126-002', '2026-01-26', '14:30:00', 'completed', 'Pendaftaran online', '2026-01-26 09:56:30', '2026-01-29 02:17:28', NULL, 'paid', 1),
@@ -68,14 +68,19 @@ INSERT INTO `bookings` (`id`, `parent_id`, `patient_id`, `service_type`, `nomor_
 (102, NULL, 1, 'In Clinic', '20260204-003', '2026-02-04', '09:45:00', 'confirmed', 'Pendaftaran online', '2026-02-03 17:22:18', '2026-02-05 18:53:16', NULL, 'paid', 1),
 (103, 102, 15, 'In Clinic', '20260204-003', '2026-02-04', '09:45:00', 'pending', 'Pendaftaran online', '2026-02-03 17:22:18', '2026-02-05 18:53:16', NULL, 'paid', 1),
 (104, 102, 16, 'In Clinic', '20260204-003', '2026-02-04', '09:45:00', 'pending', 'Pendaftaran online', '2026-02-03 17:22:18', '2026-02-05 18:53:16', NULL, 'paid', 1),
-(105, NULL, 17, 'In Clinic', '20260204-004', '2026-02-04', '14:45:00', 'pending', 'Pendaftaran online', '2026-02-04 13:50:51', '2026-02-04 13:50:51', NULL, 'unpaid', 0),
-(106, 105, 2, 'In Clinic', '20260204-004', '2026-02-04', '14:45:00', 'pending', 'Pendaftaran online', '2026-02-04 13:50:51', '2026-02-04 13:50:51', NULL, 'unpaid', 0),
-(107, 105, 18, 'In Clinic', '20260204-004', '2026-02-04', '14:45:00', 'pending', 'Pendaftaran online', '2026-02-04 13:50:51', '2026-02-04 13:50:51', NULL, 'unpaid', 0),
+(105, NULL, 17, 'In Clinic', '20260204-004', '2026-02-04', '14:45:00', 'completed', 'Pendaftaran online', '2026-02-04 13:50:51', '2026-02-05 23:37:53', NULL, 'paid', 1),
+(106, 105, 2, 'In Clinic', '20260204-004', '2026-02-04', '14:45:00', 'completed', 'Pendaftaran online', '2026-02-04 13:50:51', '2026-02-05 23:37:53', NULL, 'paid', 1),
+(107, 105, 18, 'In Clinic', '20260204-004', '2026-02-04', '14:45:00', 'completed', 'Pendaftaran online', '2026-02-04 13:50:51', '2026-02-05 23:37:53', NULL, 'paid', 1),
 (108, NULL, 19, 'In Clinic', '20260204-005', '2026-02-04', '10:15:00', 'completed', 'Pendaftaran online', '2026-02-04 14:33:59', '2026-02-05 20:17:11', NULL, 'paid', 1),
 (109, 108, 20, 'In Clinic', '20260204-005', '2026-02-04', '10:15:00', 'completed', 'Pendaftaran online', '2026-02-04 14:33:59', '2026-02-05 20:17:11', NULL, 'paid', 1),
 (110, NULL, 21, 'In Clinic', '20260206-001', '2026-02-06', '09:00:00', 'completed', 'Pendaftaran online', '2026-02-05 20:34:35', '2026-02-05 20:36:25', NULL, 'paid', 1),
 (111, 110, 22, 'In Clinic', '20260206-001', '2026-02-06', '09:00:00', 'completed', 'Pendaftaran online', '2026-02-05 20:34:35', '2026-02-05 20:36:25', NULL, 'paid', 1),
-(112, NULL, 23, 'In Clinic', '20260206-002', '2026-02-06', '09:15:00', 'completed', 'Pendaftaran online', '2026-02-05 20:51:06', '2026-02-05 20:51:58', NULL, 'paid', 1);
+(112, NULL, 23, 'In Clinic', '20260206-002', '2026-02-06', '09:15:00', 'completed', 'Pendaftaran online', '2026-02-05 20:51:06', '2026-02-05 20:51:58', NULL, 'paid', 1),
+(113, NULL, 24, 'In Clinic', '20260206-003', '2026-02-06', '09:30:00', 'completed', 'Pendaftaran online', '2026-02-05 23:49:47', '2026-02-05 23:50:45', NULL, 'paid', 1),
+(114, NULL, 25, 'In Clinic', '20260207-001', '2026-02-07', '09:00:00', 'completed', 'Pendaftaran online', '2026-02-06 00:00:25', '2026-02-06 00:01:56', NULL, 'paid', 1),
+(115, NULL, 26, 'In Clinic', '20260207-002', '2026-02-07', '09:30:00', 'completed', 'Pendaftaran online', '2026-02-06 00:15:57', '2026-02-06 00:46:28', NULL, 'paid', 1),
+(116, NULL, 1, 'In Clinic', '20260207-003', '2026-02-07', '09:00:00', 'confirmed', 'Pendaftaran online', '2026-02-06 18:51:17', '2026-02-06 18:52:59', NULL, 'unpaid', 0),
+(117, 116, 27, 'In Clinic', '20260207-003', '2026-02-07', '09:00:00', 'pending', 'Pendaftaran online', '2026-02-06 18:51:17', '2026-02-06 18:51:17', NULL, 'unpaid', 0);
 
 -- --------------------------------------------------------
 
@@ -107,7 +112,7 @@ INSERT INTO `booking_services` (`id`, `parent_booking_id`, `booking_id`, `patien
 (20, 79, 79, 2, 'Swab Antigen COVID-19', '2026-01-20 23:23:09', NULL, 0, 0, 'nilai', 0),
 (21, 80, 80, 3, 'Vitamin Badan Bugar', '2026-01-22 15:53:09', NULL, 0, 0, 'nilai', 0),
 (22, 80, 80, 3, 'Vitamin D3', '2026-01-22 15:53:09', NULL, 0, 0, 'nilai', 0),
-(23, 81, 81, 4, 'Pantoprazole 40 mg Vial', '2026-01-22 17:17:05', NULL, 0, 0, 'nilai', 0),
+(23, 81, 81, 4, 'Pantoprazole 40 mg Vial', '2026-01-22 17:17:05', NULL, 0, 0, 'persen', 0),
 (24, 82, 82, 5, 'Pantoprazole 40 mg Vial', '2026-01-26 09:42:15', 73, 120000, 20400, 'persen', 99600),
 (25, 83, 83, 1, 'Avaxim 160 (Sanofi)', '2026-01-26 09:56:30', 3, 100000, 0, 'nilai', 0),
 (26, 84, 84, 6, 'Paracetamol 1 g Fl', '2026-01-26 09:56:30', 74, 80000, 18400, 'persen', 61600),
@@ -133,7 +138,12 @@ INSERT INTO `booking_services` (`id`, `parent_booking_id`, `booking_id`, `patien
 (47, 108, 109, 20, 'BCG (Biofarma)', '2026-02-04 14:33:59', 5, 150000, 0, 'nilai', 0),
 (48, NULL, 110, 21, 'Suntik Vitamin C', '2026-02-05 20:34:35', 61, 200000, 0, 'nilai', 0),
 (49, NULL, 111, 22, 'Swab PCR COVID-19', '2026-02-05 20:34:35', 77, 350000, 0, 'nilai', 0),
-(50, NULL, 112, 23, 'Swab Antigen COVID-19', '2026-02-05 20:51:06', 76, 100000, 0, 'nilai', 0);
+(50, NULL, 112, 23, 'Swab Antigen COVID-19', '2026-02-05 20:51:06', 76, 100000, 0, 'nilai', 0),
+(51, NULL, 113, 24, 'Arexvy (GSK)', '2026-02-05 23:49:47', 2, 750000, 525000, 'persen', 0),
+(52, NULL, 114, 25, 'Paracetamol 1 g Fl', '2026-02-06 00:00:25', 74, 80000, 0, 'nilai', 0),
+(53, NULL, 115, 26, 'Suntik Vitamin C', '2026-02-06 00:15:57', 61, 200000, 42000, 'persen', 0),
+(54, NULL, 116, 1, 'Suntik Vitamin C', '2026-02-06 18:51:17', 61, 200000, 0, 'nilai', 0),
+(55, NULL, 117, 27, 'Paracetamol 1 g Fl', '2026-02-06 18:51:17', 74, 80000, 0, 'nilai', 0);
 
 -- --------------------------------------------------------
 
@@ -165,7 +175,39 @@ INSERT INTO `booking_staff` (`id`, `booking_id`, `staff_id`, `created_at`) VALUE
 (26, 91, 3, '2026-02-05 12:56:02'),
 (27, 108, 2, '2026-02-05 13:13:40'),
 (28, 110, 2, '2026-02-05 13:34:44'),
-(29, 112, 2, '2026-02-05 13:51:27');
+(29, 112, 2, '2026-02-05 13:51:27'),
+(30, 105, 2, '2026-02-05 16:36:53'),
+(31, 81, 2, '2026-02-05 16:47:35'),
+(32, 113, 2, '2026-02-05 16:50:13'),
+(34, 114, 3, '2026-02-05 17:00:42'),
+(35, 115, 1, '2026-02-05 17:16:05'),
+(36, 116, 1, '2026-02-06 11:52:59');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `jadwal_khusus`
+--
+
+CREATE TABLE `jadwal_khusus` (
+  `id` int NOT NULL,
+  `tanggal` date NOT NULL COMMENT 'Tanggal individual (hasil generate dari rentang)',
+  `tanggal_mulai` date NOT NULL COMMENT 'Tanggal mulai rentang',
+  `tanggal_selesai` date NOT NULL COMMENT 'Tanggal selesai rentang',
+  `jam_buka` time NOT NULL,
+  `jam_tutup` time NOT NULL,
+  `keterangan` varchar(255) DEFAULT NULL,
+  `status` enum('buka','tutup') NOT NULL DEFAULT 'buka',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `jadwal_khusus`
+--
+
+INSERT INTO `jadwal_khusus` (`id`, `tanggal`, `tanggal_mulai`, `tanggal_selesai`, `jam_buka`, `jam_tutup`, `keterangan`, `status`, `created_at`, `updated_at`) VALUES
+(2, '2026-02-11', '2026-02-11', '2026-02-11', '09:00:00', '17:00:00', '', 'tutup', '2026-02-09 15:48:51', '2026-02-09 15:48:51');
 
 -- --------------------------------------------------------
 
@@ -186,12 +228,12 @@ CREATE TABLE `jadwal_klinik` (
 --
 
 INSERT INTO `jadwal_klinik` (`id`, `hari_week`, `jam_buka`, `jam_tutup`, `status`) VALUES
-(1, 2, '09:00:00', '16:30:00', 'buka'),
-(2, 3, '09:00:00', '16:30:00', 'buka'),
-(3, 4, '09:00:00', '16:30:00', 'buka'),
-(4, 5, '09:00:00', '16:30:00', 'buka'),
-(5, 6, '09:00:00', '16:30:00', 'buka'),
-(6, 7, '09:00:00', '16:30:00', 'buka');
+(7, 2, '09:00:00', '16:30:00', 'buka'),
+(8, 3, '09:00:00', '16:30:00', 'buka'),
+(9, 4, '09:00:00', '16:30:00', 'buka'),
+(10, 5, '09:00:00', '16:30:00', 'buka'),
+(11, 6, '09:00:00', '16:30:00', 'buka'),
+(12, 7, '09:00:00', '16:30:00', 'buka');
 
 -- --------------------------------------------------------
 
@@ -211,29 +253,29 @@ CREATE TABLE `jadwal_libur` (
 --
 
 INSERT INTO `jadwal_libur` (`id`, `tanggal`, `keterangan`, `jenis`) VALUES
-(2, '2024-03-11', 'Hari Raya Nyepi', 'nasional'),
-(3, '2024-04-10', 'Idul Fitri 1445 H', 'nasional'),
-(4, '2024-05-01', 'Hari Buruh Internasional', 'nasional'),
-(5, '2024-05-09', 'Kenaikan Isa Almasih', 'nasional'),
-(6, '2024-06-01', 'Hari Lahir Pancasila', 'nasional'),
-(7, '2024-08-17', 'Hari Kemerdekaan RI', 'nasional'),
-(25, '2026-01-01', 'Tahun Baru Masehi', 'nasional'),
-(26, '2026-01-16', 'Isra Mi’raj Nabi Muhammad SAW', 'nasional'),
-(27, '2026-02-17', 'Tahun Baru Imlek 2577 Kongzili', 'nasional'),
-(28, '2026-03-19', 'Hari Suci Nyepi', 'nasional'),
-(29, '2026-03-21', 'Hari Raya Idul Fitri (1)', 'nasional'),
-(30, '2026-03-22', 'Hari Raya Idul Fitri (2)', 'nasional'),
-(31, '2026-04-03', 'Wafat Yesus Kristus', 'nasional'),
-(32, '2026-04-05', 'Hari Kebangkitan Yesus Kristus (Paskah)', 'nasional'),
-(33, '2026-05-01', 'Hari Buruh Internasional', 'nasional'),
-(34, '2026-05-14', 'Kenaikan Yesus Kristus', 'nasional'),
-(35, '2026-05-27', 'Hari Raya Idul Adha 1447 H', 'nasional'),
-(36, '2026-05-31', 'Hari Raya Waisak 2570 BE', 'nasional'),
-(37, '2026-06-01', 'Hari Lahir Pancasila', 'nasional'),
-(38, '2026-06-16', '1 Muharram 1448 H', 'nasional'),
-(39, '2026-08-17', 'Hari Proklamasi Kemerdekaan RI', 'nasional'),
-(40, '2026-08-25', 'Maulid Nabi Muhammad SAW', 'nasional'),
-(41, '2026-12-25', 'Kelahiran Yesus Kristus (Natal)', 'nasional');
+(43, '2024-03-11', 'Hari Raya Nyepi', 'nasional'),
+(44, '2024-04-10', 'Idul Fitri 1445 H', 'nasional'),
+(45, '2024-05-01', 'Hari Buruh Internasional', 'nasional'),
+(46, '2024-05-09', 'Kenaikan Isa Almasih', 'nasional'),
+(47, '2024-06-01', 'Hari Lahir Pancasila', 'nasional'),
+(48, '2024-08-17', 'Hari Kemerdekaan RI', 'nasional'),
+(49, '2026-01-01', 'Tahun Baru Masehi', 'nasional'),
+(50, '2026-01-16', 'Isra Mi’raj Nabi Muhammad SAW', 'nasional'),
+(51, '2026-02-17', 'Tahun Baru Imlek 2577 Kongzili', 'nasional'),
+(52, '2026-03-19', 'Hari Suci Nyepi', 'nasional'),
+(53, '2026-03-21', 'Hari Raya Idul Fitri (1)', 'nasional'),
+(54, '2026-03-22', 'Hari Raya Idul Fitri (2)', 'nasional'),
+(55, '2026-04-03', 'Wafat Yesus Kristus', 'nasional'),
+(56, '2026-04-05', 'Hari Kebangkitan Yesus Kristus (Paskah)', 'nasional'),
+(57, '2026-05-01', 'Hari Buruh Internasional', 'nasional'),
+(58, '2026-05-14', 'Kenaikan Yesus Kristus', 'nasional'),
+(59, '2026-05-27', 'Hari Raya Idul Adha 1447 H', 'nasional'),
+(60, '2026-05-31', 'Hari Raya Waisak 2570 BE', 'nasional'),
+(61, '2026-06-01', 'Hari Lahir Pancasila', 'nasional'),
+(62, '2026-06-16', '1 Muharram 1448 H', 'nasional'),
+(63, '2026-08-17', 'Hari Proklamasi Kemerdekaan RI', 'nasional'),
+(64, '2026-08-25', 'Maulid Nabi Muhammad SAW', 'nasional'),
+(65, '2026-12-25', 'Kelahiran Yesus Kristus (Natal)', 'nasional');
 
 -- --------------------------------------------------------
 
@@ -364,7 +406,11 @@ INSERT INTO `patients` (`id`, `no_rekam_medis`, `nama_lengkap`, `nama_panggilan`
 (20, 'RM202602040004', 'Riza P', '', '2003-03-06', 22, 'Dewasa', 'L', '1233432154367654', NULL, 'Indonesia', '', '', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-02-04 07:33:59', '2026-02-04 07:33:59'),
 (21, 'RM202602050001', 'ava', '', '2008-02-05', 18, 'Dewasa', 'P', NULL, '0987654321234567', 'Indonesia', '', '', '', '', '', 'Umroh/Haji/Luar Negeri', '2026-02-05 13:34:35', '2026-02-05 13:34:35'),
 (22, 'RM202602050002', 'sociolla', '', '2012-03-07', 13, 'Anak', 'P', NULL, '1234567876545671', 'Indonesia', '', 'r', '', '', '', 'Umroh/Haji/Luar Negeri', '2026-02-05 13:34:35', '2026-02-05 13:34:35'),
-(23, 'RM202602050003', 'jean', '', '2004-02-04', 22, 'Dewasa', 'P', '8765432345678765', NULL, 'Indonesia', '', '', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-02-05 13:51:06', '2026-02-05 13:51:06');
+(23, 'RM202602050003', 'jean', '', '2004-02-04', 22, 'Dewasa', 'P', '8765432345678765', NULL, 'Indonesia', '', '', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-02-05 13:51:06', '2026-02-05 13:51:06'),
+(24, 'RM202602050004', 'benita', '', '2006-01-31', 20, 'Dewasa', 'P', '7654323456787654', NULL, 'Indonesia', '', '', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-02-05 16:49:47', '2026-02-05 16:49:47'),
+(25, 'RM202602050005', 'siti', '', '2002-03-06', 23, 'Dewasa', 'P', '3312324323435674', NULL, 'Indonesia', '', '', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-02-05 17:00:25', '2026-02-05 17:00:25'),
+(26, 'RM202602050006', 'mita', '', '2003-02-27', 22, 'Dewasa', 'P', '0987878787676765', NULL, 'Indonesia', '', '', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-02-05 17:15:57', '2026-02-05 17:15:57'),
+(27, 'RM202602060001', 'sociolla', '', '2012-03-07', 13, 'Anak', 'P', '3314546565678769', NULL, 'Indonesia', '', 'p', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-02-06 11:51:17', '2026-02-06 11:51:17');
 
 -- --------------------------------------------------------
 
@@ -412,7 +458,12 @@ INSERT INTO `patient_addresses` (`id`, `patient_id`, `alamat`, `provinsi`, `kota
 (106, 20, 'Jl. Telekomunikasi No. 1, Terusan Buahbatu - Bojongsoang, Sukapura, Kec. Dayeuhkolot', 'Jawa Barat', 'Subang', 1),
 (107, 21, 'Salam, Rt.13, Saren, Kalijambe', 'Jawa Tengah', 'Kudus', 1),
 (108, 22, 'Salam, Rt.13, Saren, Kalijambe', 'Jawa Tengah', 'Kudus', 1),
-(109, 23, 'Kost Adinda Recidence, Jalan Umayah I, Rt 2/Rw 15, Citeureup (Kosan Warna Oren), KAB. BANDUNG, DAYEUHKOLOT, JAWA BARAT, ID, 40257', 'Jawa Barat', 'Indramayu', 1);
+(109, 23, 'Kost Adinda Recidence, Jalan Umayah I, Rt 2/Rw 15, Citeureup (Kosan Warna Oren), KAB. BANDUNG, DAYEUHKOLOT, JAWA BARAT, ID, 40257', 'Jawa Barat', 'Indramayu', 1),
+(110, 24, 'Kost Adinda Recidence, Jalan Umayah I, Rt 2/Rw 15, Citeureup (Kosan Warna Oren), KAB. BANDUNG, DAYEUHKOLOT, JAWA BARAT, ID, 40257', 'Jawa Barat', 'Pangandaran', 1),
+(111, 25, 'Jl. Telekomunikasi No. 1, Terusan Buahbatu - Bojongsoang, Sukapura, Kec. Dayeuhkolot', 'Jawa Barat', 'Depok', 1),
+(112, 26, 'Salam, Rt.13, Saren, Kalijambe', 'Jawa Tengah', 'Magelang', 1),
+(113, 1, 'Kost Adinda Recidence, Jalan Umayah I, Rt 2/Rw 15, Citeureup (Kosan Warna Oren), KAB. BANDUNG, DAYEUHKOLOT, JAWA BARAT, ID, 40257', 'Jawa Barat', 'Purwakarta', 1),
+(114, 27, 'Kost Adinda Recidence, Jalan Umayah I, Rt 2/Rw 15, Citeureup (Kosan Warna Oren), KAB. BANDUNG, DAYEUHKOLOT, JAWA BARAT, ID, 40257', 'Jawa Barat', 'Purwakarta', 1);
 
 -- --------------------------------------------------------
 
@@ -450,7 +501,12 @@ INSERT INTO `patient_emails` (`id`, `patient_id`, `email`, `is_primary`) VALUES
 (110, 20, 'feb@gmail.com', 1),
 (111, 21, 'ava@gmail.com', 1),
 (112, 22, 'ava@gmail.com', 1),
-(113, 23, 'jean@gmail.com', 1);
+(113, 23, 'jean@gmail.com', 1),
+(114, 24, 'ben@gmail.com', 1),
+(115, 25, 'siti@gmail.com', 1),
+(116, 26, 'mita@gmail.com', 1),
+(117, 1, 'rofiahbudi@gmail.com', 1),
+(118, 27, 'rofiahbudi@gmail.com', 1);
 
 -- --------------------------------------------------------
 
@@ -488,7 +544,12 @@ INSERT INTO `patient_phones` (`id`, `patient_id`, `phone`, `is_primary`) VALUES
 (111, 20, '087987898765', 1),
 (112, 21, '065478765432', 1),
 (113, 22, '065478765432', 1),
-(114, 23, '087654345676', 1);
+(114, 23, '087654345676', 1),
+(115, 24, '087987676545', 1),
+(116, 25, '098765666556', 1),
+(117, 26, '090909090909', 1),
+(118, 1, '085876923088', 1),
+(119, 27, '085876923088', 1);
 
 -- --------------------------------------------------------
 
@@ -570,7 +631,11 @@ INSERT INTO `payments` (`id`, `booking_id`, `metode`, `subtotal`, `diskon`, `dis
 (28, 108, 'transfer', 350000.00, 0.00, 'none', 300000.00, 300000.00, 0.00, 'full', '2026-02-04', 'paid', '2026-02-05 13:17:11', '2026-02-05 13:17:11'),
 (29, 108, 'transfer', 350000.00, 0.00, 'none', 345000.00, 40000.00, 5000.00, 'partial', '2026-02-04', 'partial', '2026-02-05 13:28:50', '2026-02-05 13:28:50'),
 (30, 110, 'qris', 550000.00, 0.00, 'none', 530000.00, 530000.00, 0.00, 'full', '2026-02-06', 'paid', '2026-02-05 13:36:25', '2026-02-05 13:36:25'),
-(31, 112, 'tunai', 100000.00, 0.00, 'none', 40000.00, 40000.00, 0.00, 'full', '2026-02-06', 'paid', '2026-02-05 13:51:58', '2026-02-05 13:51:58');
+(31, 112, 'tunai', 100000.00, 0.00, 'none', 40000.00, 40000.00, 0.00, 'full', '2026-02-06', 'paid', '2026-02-05 13:51:58', '2026-02-05 13:51:58'),
+(32, 105, 'transfer', 720000.00, 0.00, 'none', 565000.00, 565000.00, 0.00, 'full', '2026-02-04', 'paid', '2026-02-05 16:37:53', '2026-02-05 16:37:53'),
+(33, 113, 'debit', 750000.00, 0.00, 'none', 225000.00, 225000.00, 0.00, 'full', '2026-02-06', 'paid', '2026-02-05 16:50:45', '2026-02-05 16:50:45'),
+(34, 114, 'qris', 80000.00, 0.00, 'none', 24000.00, 24000.00, 0.00, 'full', '2026-02-07', 'paid', '2026-02-05 17:01:56', '2026-02-05 17:01:56'),
+(35, 115, 'transfer', 200000.00, 42000.00, 'none', 158000.00, 158000.00, 0.00, 'full', '2026-02-07', 'paid', '2026-02-05 17:46:27', '2026-02-05 17:46:27');
 
 -- --------------------------------------------------------
 
@@ -648,28 +713,10 @@ CREATE TABLE `payment_methods_detail` (
 --
 
 INSERT INTO `payment_methods_detail` (`id`, `payment_id`, `metode`, `amount`, `reference`, `created_at`) VALUES
-(1, 7, 'tunai', 100000.00, NULL, '2026-01-26 05:54:40'),
-(2, 8, 'transfer', 120000.00, NULL, '2026-01-26 07:17:32'),
-(3, 9, 'qris', 120000.00, NULL, '2026-01-26 07:25:53'),
-(4, 10, 'transfer', 100000.00, NULL, '2026-01-26 08:19:45'),
-(5, 11, 'tunai', 120000.00, NULL, '2026-01-26 08:54:35'),
-(6, 12, 'tunai', 850000.00, NULL, '2026-01-26 09:11:16'),
-(7, 13, 'transfer', 100000.00, NULL, '2026-01-26 10:10:04'),
-(8, 16, 'tunai', 99600.00, NULL, '2026-01-26 18:12:06'),
-(9, 18, 'tunai', 61600.00, NULL, '2026-01-28 19:17:28'),
-(16, 19, 'tunai', 75000.00, '', '2026-02-05 08:21:01'),
-(17, 20, 'tunai', 75000.00, '', '2026-02-05 08:22:37'),
-(18, 21, 'tunai', 75000.00, '', '2026-02-05 08:27:13'),
-(19, 22, 'tunai', 50000.00, '', '2026-02-05 09:11:53'),
-(20, 23, 'transfer', 1030000.00, '', '2026-02-05 11:53:16'),
-(21, 24, 'qris', 108000.00, '', '2026-02-05 12:54:31'),
-(22, 25, 'tunai', 12000.00, '', '2026-02-05 12:54:53'),
-(23, 26, 'debit', 74950.00, '', '2026-02-05 12:57:09'),
-(24, 27, 'qris', 50.00, '', '2026-02-05 12:57:33'),
-(25, 28, 'transfer', 300000.00, '', '2026-02-05 13:17:11'),
-(26, 29, 'transfer', 40000.00, '', '2026-02-05 13:28:50'),
-(27, 30, 'qris', 530000.00, '', '2026-02-05 13:36:25'),
-(28, 31, 'tunai', 40000.00, '', '2026-02-05 13:51:58');
+(1, 32, 'transfer', 565000.00, '', '2026-02-05 16:37:53'),
+(2, 33, 'debit', 225000.00, '', '2026-02-05 16:50:45'),
+(3, 34, 'qris', 24000.00, '', '2026-02-05 17:01:56'),
+(4, 35, 'transfer', 158000.00, '', '2026-02-05 17:46:28');
 
 -- --------------------------------------------------------
 
@@ -804,7 +851,7 @@ INSERT INTO `services` (`id`, `kategori`, `nama_layanan`, `harga`, `harga_specia
 (76, 'Swab', 'Swab Antigen COVID-19', 100000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
 (77, 'Swab', 'Swab PCR COVID-19', 350000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
 (78, 'Vaksinasi', 'Vaksin Hepatitis B', 950000, NULL, NULL, NULL, 'Vaksin untuk mencegah infeksi Hepatitis B.', NULL, '2026-02-02 10:42:55', 'vaksin', NULL, 'Injeksi', NULL, '2026-12-31', 'HB-2025-001', 0, 10),
-(79, 'Vaksinasi', 'Vaksin Influenza', 350000, 300000, 50000, 'Januari - februari 2026', 'Vaksin influenza untuk perlindungan musiman.', NULL, '2026-02-02 10:42:55', 'vaksin', NULL, 'Injeksi', NULL, '2026-10-15', 'FLU-2025-009', 25, 10),
+(79, 'Semua Usia', 'Vaksin Influenza', 350000, 300000, 50000, 'Januari - februari 2026', 'Vaksin influenza untuk perlindungan musiman.', NULL, '2026-02-02 10:42:55', 'vaksin', NULL, 'Vaksin', NULL, '2026-10-15', 'FLU-2025-009', 25, 10),
 (80, 'Layanan Klinik', 'Konsultasi Dokter Umum', 75000, NULL, NULL, NULL, 'Konsultasi langsung dengan dokter umum di klinik.', NULL, '2026-02-02 10:43:25', 'pelayanan', NULL, 'Layanan', NULL, NULL, NULL, 0, 10),
 (81, 'Layanan Klinik', 'Tes Antigen', 45000, NULL, NULL, NULL, 'Pemeriksaan COVID-19 menggunakan metode antigen.', NULL, '2026-02-02 10:43:25', 'pelayanan', NULL, 'Layanan', NULL, NULL, NULL, 0, 10),
 (82, 'Paket Kesehatan', 'Paket Medical Check Up Dasar', 150000, NULL, NULL, NULL, 'Paket pemeriksaan kesehatan dasar meliputi beberapa layanan.', NULL, '2026-02-02 10:43:47', 'paket', NULL, 'Paket', NULL, NULL, NULL, 0, 10);
@@ -974,7 +1021,14 @@ INSERT INTO `tindakan` (`id`, `booking_id`, `patient_id`, `anamnesis`, `pemeriks
 (15, 109, 20, '', '', 'q', '', NULL, '', 0, 0, '0', '2026-02-05 07:13:49', '', '', NULL, 0, 0),
 (16, 110, 21, '', 't', '', '', NULL, '', 0, 0, '0', '2026-02-05 07:34:49', '', '', NULL, 0, 0),
 (17, 111, 22, '', '', '', 'e', NULL, '', 0, 0, '0', '2026-02-05 07:34:53', '', '', NULL, 0, 0),
-(18, 112, 23, '', 'u', '', '', NULL, '', 0, 0, '0', '2026-02-05 07:51:31', '', '', NULL, 0, 0);
+(18, 112, 23, '', 'u', '', '', NULL, '', 0, 0, '0', '2026-02-05 07:51:31', '', '', NULL, 0, 0),
+(19, 105, 17, 'a', '', '', '', NULL, '', 0, 0, '0', '2026-02-05 10:36:58', '', '', NULL, 0, 0),
+(20, 106, 2, '', 'a', '', '', NULL, '', 0, 0, '0', '2026-02-05 10:37:03', '', '', NULL, 0, 0),
+(21, 107, 18, '', '', 'a', '', NULL, '', 0, 0, '0', '2026-02-05 10:37:08', '', '', NULL, 0, 0),
+(22, 81, 4, '', 'p', '', '', NULL, '', 0, 0, '0', '2026-02-05 10:47:40', '', '', NULL, 0, 0),
+(23, 113, 24, 'p', '', '', '', NULL, '', 0, 0, '0', '2026-02-05 10:50:19', '', '', NULL, 0, 0),
+(24, 114, 25, '', '', '', 'a', NULL, '', 0, 0, '0', '2026-02-05 11:00:51', '', '', NULL, 0, 0),
+(25, 115, 26, '', '', '', '', NULL, '', 0, 0, '0', '2026-02-05 11:16:10', '', '', NULL, 1, 0);
 
 -- --------------------------------------------------------
 
@@ -1067,6 +1121,14 @@ ALTER TABLE `booking_staff`
   ADD PRIMARY KEY (`id`),
   ADD KEY `booking_id` (`booking_id`),
   ADD KEY `staff_id` (`staff_id`);
+
+--
+-- Indexes for table `jadwal_khusus`
+--
+ALTER TABLE `jadwal_khusus`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_tanggal` (`tanggal`),
+  ADD KEY `idx_rentang` (`tanggal_mulai`,`tanggal_selesai`);
 
 --
 -- Indexes for table `jadwal_klinik`
@@ -1249,31 +1311,37 @@ ALTER TABLE `vital_signs`
 -- AUTO_INCREMENT for table `bookings`
 --
 ALTER TABLE `bookings`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=113;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=118;
 
 --
 -- AUTO_INCREMENT for table `booking_services`
 --
 ALTER TABLE `booking_services`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
 
 --
 -- AUTO_INCREMENT for table `booking_staff`
 --
 ALTER TABLE `booking_staff`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+
+--
+-- AUTO_INCREMENT for table `jadwal_khusus`
+--
+ALTER TABLE `jadwal_khusus`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `jadwal_klinik`
 --
 ALTER TABLE `jadwal_klinik`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `jadwal_libur`
 --
 ALTER TABLE `jadwal_libur`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
 
 --
 -- AUTO_INCREMENT for table `kipi_records`
@@ -1303,25 +1371,25 @@ ALTER TABLE `medical_records`
 -- AUTO_INCREMENT for table `patients`
 --
 ALTER TABLE `patients`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `patient_addresses`
 --
 ALTER TABLE `patient_addresses`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=110;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=115;
 
 --
 -- AUTO_INCREMENT for table `patient_emails`
 --
 ALTER TABLE `patient_emails`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=114;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=119;
 
 --
 -- AUTO_INCREMENT for table `patient_phones`
 --
 ALTER TABLE `patient_phones`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=115;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=120;
 
 --
 -- AUTO_INCREMENT for table `patient_services`
@@ -1333,7 +1401,7 @@ ALTER TABLE `patient_services`
 -- AUTO_INCREMENT for table `payments`
 --
 ALTER TABLE `payments`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT for table `payment_installments`
@@ -1345,7 +1413,7 @@ ALTER TABLE `payment_installments`
 -- AUTO_INCREMENT for table `payment_methods_detail`
 --
 ALTER TABLE `payment_methods_detail`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `reservations`
@@ -1387,7 +1455,7 @@ ALTER TABLE `time_slots`
 -- AUTO_INCREMENT for table `tindakan`
 --
 ALTER TABLE `tindakan`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `vaccination_history`

@@ -2,10 +2,6 @@
 session_start();
 include "../config.php";
 
-date_default_timezone_set('Asia/Jakarta');
-
-$current_page = basename($_SERVER['PHP_SELF']);
-
 // Get filter parameters
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $kategori_filter = isset($_GET['kategori']) ? $_GET['kategori'] : '';
@@ -86,19 +82,23 @@ $categories_result = $conn->query($sql_categories);
                 <li>
                     <a href="products.php" 
                     class="<?= $current_page == 'products.php' ? 'active' : '' ?>">
-                    Vaksin
+                    Stok
                     </a>
                 </li>
                 <li>
                     <a href="products_pelayanan.php" 
                     class="<?= $current_page == 'products_pelayanan.php' ? 'active' : '' ?>">
-                    Pelayanan
+                    Pelayanan/Paket
                     </a>
                 </li>
             </ul>
             <a href="#" class="nav-item">
                 <i class="fas fa-users"></i>
                 <span>Pasien</span>
+            </a>
+            <a href="calendar_setting.php" class="nav-item">
+                <i class="fas fa-calendar"></i>
+                <span>Kalender</span>
             </a>
             <a href="#" class="nav-item">
                 <i class="fas fa-cog"></i>

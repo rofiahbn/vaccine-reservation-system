@@ -44,25 +44,26 @@ async function renderCalendarReschedule() {
     
     // Hitung hari pertama dan jumlah hari
     const firstDay = new Date(year, month, 1).getDay();
-    const adjustedFirstDay = firstDay === 0 ? 6 : firstDay - 1; // Senin = 0
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    
+
     const container = document.getElementById('calendarDaysReschedule');
-    
-    // Hapus semua hari kecuali header
+
+    // INIT TODAY (INI WAJIB)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Reset container
     const headers = container.querySelectorAll('.day-header');
     container.innerHTML = '';
     headers.forEach(h => container.appendChild(h));
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    // Empty days
-    for (let i = 0; i < adjustedFirstDay; i++) {
+
+    // Empty days (Sunday-first, AMAN)
+    for (let i = 0; i < firstDay; i++) {
         const emptyDiv = document.createElement('div');
         emptyDiv.className = 'day empty';
         container.appendChild(emptyDiv);
     }
+
     
     // Render tanggal
     for (let day = 1; day <= daysInMonth; day++) {

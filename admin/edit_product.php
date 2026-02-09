@@ -58,6 +58,10 @@ $product = $result->fetch_assoc();
                 <i class="fas fa-users"></i>
                 <span>Pasien</span>
             </a>
+            <a href="calendar_setting.php" class="nav-item active">
+                <i class="fas fa-calendar"></i>
+                <span>Kalender</span>
+            </a>
             <a href="#" class="nav-item">
                 <i class="fas fa-cog"></i>
                 <span>Pengaturan</span>
@@ -111,24 +115,36 @@ $product = $result->fetch_assoc();
                         <input type="hidden" name="action" value="edit">
                         <input type="hidden" name="id" value="<?= $product['id'] ?>">
                         <input type="hidden" name="image_data" id="imageData">
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Jenis Produk<span class="required">*</span></label>
+                                <select name="jenis" id="jenis" required>
+                                    <option value="">Pilih Jenis</option>
+                                    <option value="Vaksin" <?= ($product['jenis'] ?? '') == 'Vaksin' ? 'selected' : '' ?>>Vaksin</option>
+                                    <option value="Obat" <?= ($product['jenis'] ?? '') == 'Obat' ? 'selected' : '' ?>>Obat</option>
+                                    <option value="Vitamin" <?= ($product['jenis'] ?? '') == 'Vitamin' ? 'selected' : '' ?>>Vitamin</option>
+                                </select>
+                            </div>
 
-                        <div class="form-group">
-                            <label>Jenis Produk<span class="required">*</span></label>
-                            <select name="jenis" id="jenis" required>
-                                <option value="">Pilih Jenis</option>
-                                <option value="Injeksi" <?= ($product['jenis'] ?? '') == 'Injeksi' ? 'selected' : '' ?>>Injeksi</option>
-                                <option value="Tablet" <?= ($product['jenis'] ?? '') == 'Tablet' ? 'selected' : '' ?>>Tablet</option>
-                                <option value="Kapsul" <?= ($product['jenis'] ?? '') == 'Kapsul' ? 'selected' : '' ?>>Kapsul</option>
-                                <option value="Sirup" <?= ($product['jenis'] ?? '') == 'Sirup' ? 'selected' : '' ?>>Sirup</option>
-                                <option value="Spray" <?= ($product['jenis'] ?? '') == 'Spray' ? 'selected' : '' ?>>Spray</option>
-                                <option value="Tetes" <?= ($product['jenis'] ?? '') == 'Tetes' ? 'selected' : '' ?>>Tetes</option>
-                                <option value="Alat" <?= ($product['jenis'] ?? '') == 'Alat' ? 'selected' : '' ?>>Alat</option>
-                            </select>
+                            <div class="form-group">
+                                <label>Bentuk Produk<span class="required">*</span></label>
+                                <select name="bentuk_produk" id="bentuk_produk" required>
+                                    <option value="">Pilih Bentuk</option>
+                                    <option value="Injeksi" <?= ($product['bentuk_produk'] ?? '') == 'Injeksi' ? 'selected' : '' ?>>Injeksi</option>
+                                    <option value="Tablet" <?= ($product['bentuk_produk'] ?? '') == 'Tablet' ? 'selected' : '' ?>>Tablet</option>
+                                    <option value="Kapsul" <?= ($product['bentuk_produk'] ?? '') == 'Kapsul' ? 'selected' : '' ?>>Kapsul</option>
+                                    <option value="Sirup" <?= ($product['bentuk_produk'] ?? '') == 'Sirup' ? 'selected' : '' ?>>Sirup</option>
+                                    <option value="Spray" <?= ($product['bentuk_produk'] ?? '') == 'Spray' ? 'selected' : '' ?>>Spray</option>
+                                    <option value="Tetes" <?= ($product['bentuk_produk'] ?? '') == 'Tetes' ? 'selected' : '' ?>>Tetes</option>
+                                    <option value="Alat" <?= ($product['bentuk_produk'] ?? '') == 'Alat' ? 'selected' : '' ?>>Alat</option>
+                                </select>
+                            </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label>Nama Vaksin<span class="required">*</span></label>
+                                <label>Nama Produk<span class="required">*</span></label>
                                 <input type="text" name="nama_layanan" placeholder="Nama" value="<?= htmlspecialchars($product['nama_layanan']) ?>" required>
                             </div>
                             <div class="form-group">
@@ -142,11 +158,21 @@ $product = $result->fetch_assoc();
                                 <label>Kategori<span class="required">*</span></label>
                                 <select name="kategori" id="kategori" required>
                                     <option value="">Pilih Kategori</option>
-                                    <option value="Vaksinasi" <?= ($product['kategori'] ?? '') == 'Vaksinasi' ? 'selected' : '' ?>>Vaksinasi</option>
-                                    <option value="Paket Kesehatan" <?= ($product['kategori'] ?? '') == 'Paket Kesehatan' ? 'selected' : '' ?>>Paket Kesehatan</option>
-                                    <option value="Vitamin" <?= ($product['kategori'] ?? '') == 'Vitamin' ? 'selected' : '' ?>>Vitamin</option>
-                                    <option value="Obat" <?= ($product['kategori'] ?? '') == 'Obat' ? 'selected' : '' ?>>Obat</option>
-                                    <option value="Swab" <?= ($product['kategori'] ?? '') == 'Swab' ? 'selected' : '' ?>>Swab</option>
+
+                                    <option value="Anak"
+                                        <?= ($product['kategori'] ?? '') == 'Anak' ? 'selected' : '' ?>>
+                                        Anak
+                                    </option>
+
+                                    <option value="Dewasa"
+                                        <?= ($product['kategori'] ?? '') == 'Dewasa' ? 'selected' : '' ?>>
+                                        Dewasa
+                                    </option>
+
+                                    <option value="Semua Usia"
+                                        <?= ($product['kategori'] ?? '') == 'Semua usia' ? 'selected' : '' ?>>
+                                        Semua Usia
+                                    </option>
                                 </select>
                             </div>
                             <div class="form-group">

@@ -370,6 +370,10 @@ $total_weeks = ceil($total_days / 7);
                 <i class="fas fa-users"></i>
                 <span>Pasien</span>
             </a>
+            <a href="calendar_setting.php" class="nav-item">
+                <i class="fas fa-calendar"></i>
+                <span>Kalender</span>
+            </a>
             <a href="#" class="nav-item">
                 <i class="fas fa-cog"></i>
                 <span>Pengaturan</span>
