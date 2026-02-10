@@ -72,7 +72,7 @@ $jenis_libur = ['nasional', 'khusus', 'minggu'];
                     </a>
                 </li>
             </ul>
-            <a href="#" class="nav-item">
+            <a href="patients.php" class="nav-item">
                 <i class="fas fa-users"></i>
                 <span>Pasien</span>
             </a>

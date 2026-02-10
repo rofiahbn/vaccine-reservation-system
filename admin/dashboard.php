@@ -366,7 +366,7 @@ $total_weeks = ceil($total_days / 7);
                 <i class="fas fa-capsules"></i>
                 <span>Produk</span>
             </a>
-            <a href="#" class="nav-item">
+            <a href="patients.php" class="nav-item">
                 <i class="fas fa-users"></i>
                 <span>Pasien</span>
             </a>

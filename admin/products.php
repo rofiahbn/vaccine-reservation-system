@@ -92,7 +92,7 @@ $categories_result = $conn->query($sql_categories);
                     </a>
                 </li>
             </ul>
-            <a href="#" class="nav-item">
+            <a href="patients.php" class="nav-item">
                 <i class="fas fa-users"></i>
                 <span>Pasien</span>
             </a>
