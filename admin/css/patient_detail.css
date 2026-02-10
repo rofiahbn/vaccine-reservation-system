@@ -1,0 +1,524 @@
+/* Patient Detail Page Styles - Clean Admin Version */
+
+.patient-detail-container {
+    display: flex;
+    min-height: 100vh;
+    background: #f8fafc;
+    border-radius: 12px;
+}
+
+/* Patient List Sidebar */
+.patient-list-sidebar {
+    width: 300px;
+    background: white;
+    border-right: 1px solid #e2e8f0;
+    overflow-y: auto;
+    flex-shrink: 0;
+    padding: 0;
+    border-radius: 12px;
+}
+
+.sidebar-header {
+    padding: 24px;
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+/* Styling untuk tombol di sidebar */
+.sidebar-back-btn {
+    width: 100%;
+    background: linear-gradient(to right, #fbac07, #f59e0b);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s;
+    box-shadow: 0 3px 8px rgba(251, 172, 7, 0.3);
+}
+
+.sidebar-back-btn:hover {
+    background: linear-gradient(to right, #f59e0b, #fbac07);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 12px rgba(251, 172, 7, 0.4);
+}
+
+.back-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #475569;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 15px;
+    transition: color 0.2s;
+    padding: 8px 12px;
+    border-radius: 8px;
+}
+
+.back-btn:hover {
+    color: #fbac07;
+    background: #fff4db;
+}
+
+.back-btn i {
+    font-size: 14px;
+}
+
+.patient-list {
+    padding: 16px;
+}
+
+.patient-item {
+    display: block;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    color: #334155;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.patient-item:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    transform: translateX(4px);
+}
+
+.patient-item.active {
+    background: #fff4db;
+    color: #92400e;
+    border-color: #fbac07;
+    border-left: 4px solid #fbac07;
+    font-weight: 600;
+}
+
+/* Patient Detail Content */
+.patient-detail-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 32px 40px;
+    background: #f8fafc;
+    border-radius: 12px;
+}
+
+.detail-header {
+    margin-bottom: 32px;
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.detail-header h2 {
+    font-size: 28px;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Info Card Style */
+.info-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.info-card-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.info-card-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.info-card-header h3 i {
+    color: #64748b;
+    font-size: 16px;
+}
+
+.info-card-content {
+    padding: 24px;
+}
+
+/* Info Grid - mirip gambar referensi */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+}
+
+.info-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 12px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.info-item-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-size: 14px;
+    color: #64748b;
+    font-weight: 500;
+    margin-bottom: 4px;
+    min-width: 160px;
+}
+
+.info-value {
+    font-size: 15px;
+    color: #1e293b;
+    font-weight: 500;
+    text-align: right;
+    flex: 1;
+    max-width: 300px;
+}
+
+.info-value .highlight {
+    color: #fbac07;
+    font-weight: 600;
+}
+
+/* Separator seperti di gambar */
+.info-separator {
+    height: 1px;
+    background: linear-gradient(to right, transparent, #e2e8f0, transparent);
+    margin: 16px 0;
+}
+
+/* Textarea Readonly Style */
+.info-textarea {
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    font-size: 14px;
+    color: #475569;
+    line-height: 1.6;
+    min-height: 100px;
+    margin-top: 8px;
+}
+
+.info-textarea:empty::before {
+    content: "Tidak ada data";
+    color: #94a3b8;
+    font-style: italic;
+}
+
+/* Checkbox Style */
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.checkbox-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #cbd5e1;
+    border-radius: 4px;
+    cursor: pointer;
+    background: white;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    position: relative;
+}
+
+.checkbox-item input[type="checkbox"]:checked {
+    background: #fbac07;
+    border-color: #fbac07;
+}
+
+.checkbox-item input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.checkbox-item input[type="checkbox"]:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.checkbox-item label {
+    font-size: 14px;
+    color: #475569;
+    cursor: pointer;
+}
+
+/* Empty State */
+.empty-detail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 60vh;
+    text-align: center;
+    padding: 40px;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.empty-detail i {
+    font-size: 64px;
+    color: #cbd5e1;
+    margin-bottom: 20px;
+    opacity: 0.7;
+}
+
+.empty-detail p {
+    font-size: 18px;
+    color: #64748b;
+    margin: 0 0 8px 0;
+    font-weight: 500;
+}
+
+.empty-detail .hint {
+    font-size: 14px;
+    color: #94a3b8;
+    margin: 0;
+}
+
+/* Badge Styles */
+.badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 8px;
+}
+
+.badge-blue {
+    background: #fff4db;
+    color: #92400e;
+}
+
+.badge-green {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.badge-gray {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.btn-primary {
+    background: #fbac07;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary:hover {
+    background: #f59e0b;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: white;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-secondary:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+}
+
+/* Scrollbar */
+.patient-list-sidebar::-webkit-scrollbar,
+.patient-detail-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.patient-list-sidebar::-webkit-scrollbar-track,
+.patient-detail-content::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+.patient-list-sidebar::-webkit-scrollbar-thumb,
+.patient-detail-content::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.patient-list-sidebar::-webkit-scrollbar-thumb:hover,
+.patient-detail-content::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .patient-list-sidebar {
+        width: 280px;
+    }
+    
+    .patient-detail-content {
+        padding: 24px 32px;
+    }
+}
+
+@media (max-width: 992px) {
+    .patient-detail-container {
+        flex-direction: column;
+    }
+
+    .patient-list-sidebar {
+        width: 100%;
+        height: 300px;
+        max-height: 300px;
+        border-right: none;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .patient-detail-content {
+        padding: 20px 24px;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .patient-detail-content {
+        padding: 16px;
+    }
+    
+    .detail-header {
+        padding: 20px;
+    }
+    
+    .detail-header h2 {
+        font-size: 24px;
+    }
+    
+    .info-card-header,
+    .info-card-content {
+        padding: 16px;
+    }
+    
+    .info-item-row {
+        flex-direction: column;
+        gap: 8px;
+        padding: 16px 0;
+    }
+    
+    .info-label {
+        min-width: auto;
+    }
+    
+    .info-value {
+        text-align: left;
+        max-width: 100%;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .sidebar,
+    .patient-list-sidebar,
+    .action-buttons,
+    .back-btn,
+    .patient-item {
+        display: none !important;
+    }
+    
+    .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+    
+    .patient-detail-content {
+        padding: 20px !important;
+        background: white !important;
+    }
+    
+    .info-card {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+        break-inside: avoid;
+    }
+}
+
