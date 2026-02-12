@@ -154,19 +154,6 @@ $products_result = $conn->query($sql_products);
                 </div>
                 <?php endif; ?>
                 
-                <!-- Durasi Layanan (khusus layanan) -->
-                <?php if ($tipe == 'pelayanan'): ?>
-                <div class="form-group">
-                    <label>Durasi Layanan (menit)</label>
-                    <input type="number" 
-                           name="durasi_layanan" 
-                           class="form-control"
-                           placeholder="Contoh: 15, 30, 60"
-                           min="1">
-                    <small class="form-text">Kosongkan jika tidak ada durasi tetap</small>
-                </div>
-                <?php endif; ?>
-                
                 <!-- Deskripsi -->
                 <div class="form-group">
                     <label>Deskripsi (Opsional)</label>
