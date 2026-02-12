@@ -164,6 +164,31 @@ while($d = $dokters->fetch_assoc()){
 
 $nakes_text = count($nakes_list) ? implode(', ', $nakes_list) : '-';
 
+// ================= STATUS BOOKING BADGE =================
+$status_booking = strtolower($parent_booking['status'] ?? 'pending');
+
+$status_label = [
+    'pending'   => 'Menunggu',
+    'confirmed' => 'Terkonfirmasi',
+    'completed' => 'Selesai',
+    'cancel'    => 'Dibatalkan'
+];
+
+$status_text = $status_label[$status_booking] ?? ucfirst($status_booking);
+
+$status_class = 'badge-default';
+
+if ($status_booking === 'pending') {
+    $status_class = 'badge-pending';
+} elseif ($status_booking === 'confirmed') {
+    $status_class = 'badge-confirmed';
+} elseif ($status_booking === 'completed') {
+    $status_class = 'badge-completed';
+} elseif ($status_booking === 'cancel') {
+    $status_class = 'badge-cancel';
+}
+
+
 ?>
 
 <!DOCTYPE html>
@@ -223,16 +248,22 @@ $nakes_text = count($nakes_list) ? implode(', ', $nakes_list) : '-';
         <h1>Proses / Tindakan Pasien</h1>
     </div>
 
-    <!-- TAB PESERTA -->
-    <div class="participant-tabs">
-        <?php foreach ($semua_peserta as $index => $peserta): ?>
-            <a href="?id=<?= $parent_booking_id ?>&participant_id=<?= $peserta['patient_id'] ?>" 
-            class="participant-tab <?= $peserta['patient_id'] == $current_patient_id ? 'active' : '' ?>">
+    <!-- TAB PESERTA + STATUS -->
+    <div class="participant-header">
 
-                Peserta <?= $index + 1 ?>
+        <div class="participant-tabs">
+            <?php foreach ($semua_peserta as $index => $peserta): ?>
+                <a href="?id=<?= $parent_booking_id ?>&participant_id=<?= $peserta['patient_id'] ?>" 
+                class="participant-tab <?= $peserta['patient_id'] == $current_patient_id ? 'active' : '' ?>">
+                    Peserta <?= $index + 1 ?>
+                </a>
+            <?php endforeach; ?>
+        </div>
 
-            </a>
-        <?php endforeach; ?>
+        <div class="booking-badge <?= $status_class ?>">
+            <?= htmlspecialchars($status_text) ?>
+        </div>
+
     </div>
 
     <div class="detail-layout">

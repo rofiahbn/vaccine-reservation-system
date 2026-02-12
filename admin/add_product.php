@@ -3,6 +3,10 @@ session_start();
 include "../config.php";
 
 date_default_timezone_set('Asia/Jakarta');
+
+// Ambil daftar kategori untuk dropdown
+$sql_categories = "SELECT DISTINCT kategori FROM products WHERE kategori IS NOT NULL AND kategori != '' ORDER BY kategori";
+$categories_result = $conn->query($sql_categories);
 ?>
 
 <!DOCTYPE html>
@@ -28,17 +32,24 @@ date_default_timezone_set('Asia/Jakarta');
                 <i class="fas fa-th-large"></i>
                 <span>Dashboard</span>
             </a>
-            <a href="products.php" class="nav-item">
+            <a href="javascript:void(0)" 
+                class="nav-item has-submenu active open" 
+                onclick="toggleSubmenu(this)">
                 <i class="fas fa-capsules"></i>
                 <span>Produk</span>
+                <i class="fas fa-chevron-down arrow"></i>
             </a>
-            <a href="#" class="nav-item">
+            <ul class="submenu open">
+                <li><a href="products.php" class="active">Vaksin & Obat</a></li>
+                <li><a href="products_pelayanan.php">Pelayanan/Paket</a></li>
+            </ul>
+            <a href="patients.php" class="nav-item">
                 <i class="fas fa-users"></i>
                 <span>Pasien</span>
             </a>
-            <a href="#" class="nav-item">
-                <i class="fas fa-cog"></i>
-                <span>Pengaturan</span>
+            <a href="calendar_setting.php" class="nav-item">
+                <i class="fas fa-calendar"></i>
+                <span>Kalender</span>
             </a>
         </nav>
         <div class="sidebar-footer">
@@ -51,121 +62,140 @@ date_default_timezone_set('Asia/Jakarta');
 
     <!-- Main Content -->
     <div class="main-content">
-        <header class="page-header-form">
-            <a href="products.php" class="back-button">
-                <i class="fas fa-arrow-left"></i>
-            </a>
-            <h1>Tambah Produk</h1>
-            <div class="notification-icon">
-                <i class="fas fa-bell"></i>
+        <header class="page-header">
+            <div class="header-left">
+                <a href="products.php" class="btn-back">
+                    <i class="fas fa-arrow-left"></i> Kembali
+                </a>
+                <h1>Tambah Produk</h1>
             </div>
         </header>
 
         <div class="form-container">
-            <div class="form-layout">
-                <!-- Left Side - Image Upload -->
-                <div class="image-upload-section">
-                    <div class="upload-box" id="uploadBox">
-                        <div class="upload-placeholder" id="uploadPlaceholder">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                            <p>Tambahkan<br>gambar</p>
-                        </div>
-                        <img id="imagePreview" style="display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
-                        <input type="file" id="productImage" accept="image/*" style="display: none;">
-                    </div>
-                    <div class="image-info">
-                        <h3>Keterangan Produk</h3>
-                        <textarea id="keterangan" name="keterangan" rows="10" placeholder="Tambahkan keterangan produk..."></textarea>
-                    </div>
+            <div class="form-card">
+                <div class="form-card-header">
+                    <h3><i class="fas fa-info-circle"></i> Informasi Produk</h3>
                 </div>
-
-                <!-- Right Side - Form -->
-                <div class="form-section">
-                    <form id="productForm" method="POST" action="save_product.php" enctype="multipart/form-data">
+                <div class="form-card-body">
+                    <form id="productForm" method="POST" action="save_product.php">
                         <input type="hidden" name="action" value="add">
-                        <input type="hidden" name="image_data" id="imageData">
 
-                        <div class="form-group">
-                            <label>Pilih Jenis<span class="required">*</span></label>
-                            <select name="jenis" id="jenis" required>
-                                <option value="">Pilih Jenis</option>
-                                <option value="Injeksi">Injeksi</option>
-                                <option value="Tablet">Tablet</option>
-                                <option value="Kapsul">Kapsul</option>
-                                <option value="Sirup">Sirup</option>
-                                <option value="Spray">Spray</option>
-                                <option value="Tetes">Tetes</option>
-                                <option value="Alat">Alat</option>
-                            </select>
-                        </div>
-
+                        <!-- Baris 1: Kode Produk & Nama Produk -->
                         <div class="form-row">
                             <div class="form-group">
-                                <label>Nama Vaksin<span class="required">*</span></label>
-                                <input type="text" name="nama_layanan" placeholder="Nama" required>
+                                <label>Kode Produk <span class="required">*</span></label>
+                                <input type="text" name="kode_produk" placeholder="Contoh: FLU-001, HPV-001" required>
+                                <small class="form-text">Kode unik untuk produk</small>
                             </div>
                             <div class="form-group">
-                                <label>Expired<span class="required">*</span></label>
-                                <input type="date" name="expired_date" placeholder="Expired">
+                                <label>Nama Produk <span class="required">*</span></label>
+                                <input type="text" name="nama_produk" placeholder="Contoh: Vaksin Influenza" required>
                             </div>
                         </div>
 
+                        <!-- Baris 2: Jenis & Kategori -->
                         <div class="form-row">
                             <div class="form-group">
-                                <label>Kategori</label>
-                                <select name="kategori" id="kategori" required>
-                                    <option value="">Pilih Kategori</option>
-                                    <option value="Vaksinasi">Vaksinasi</option>
-                                    <option value="Paket Kesehatan">Paket Kesehatan</option>
-                                    <option value="Vitamin">Vitamin</option>
+                                <label>Jenis <span class="required">*</span></label>
+                                <select name="jenis" required>
+                                    <option value="">-- Pilih Jenis --</option>
+                                    <option value="Vaksin">Vaksin</option>
                                     <option value="Obat">Obat</option>
-                                    <option value="Swab">Swab</option>
+                                    <option value="Vitamin">Vitamin</option>
+                                    <option value="Alat Kesehatan">Alat Kesehatan</option>
+                                    <option value="Konsumsi">Konsumsi</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>Batch Number</label>
-                                <input type="text" name="batch_number" placeholder="Batch Number">
+                                <label>Kategori <span class="required">*</span></label>
+                                <select name="kategori" required>
+                                    <option value="">-- Pilih Kategori --</option>
+                                    <option value="Influenza">Influenza</option>
+                                    <option value="HPV">HPV</option>
+                                    <option value="Hepatitis">Hepatitis</option>
+                                    <option value="COVID-19">COVID-19</option>
+                                    <option value="Antibiotik">Antibiotik</option>
+                                    <option value="Antipiretik">Antipiretik</option>
+                                    <option value="Vitamin">Vitamin</option>
+                                    <?php if ($categories_result && $categories_result->num_rows > 0): ?>
+                                        <?php while ($cat = $categories_result->fetch_assoc()): ?>
+                                            <option value="<?= htmlspecialchars($cat['kategori']) ?>"><?= htmlspecialchars($cat['kategori']) ?></option>
+                                        <?php endwhile; ?>
+                                    <?php endif; ?>
+                                </select>
                             </div>
                         </div>
 
+                        <!-- Baris 3: Satuan & Harga -->
                         <div class="form-row">
                             <div class="form-group">
-                                <label>Harga Standard<span class="required">*</span></label>
-                                <input type="number" name="harga" placeholder="Harga" required>
+                                <label>Satuan</label>
+                                <select name="satuan">
+                                    <option value="dosis">Dosis</option>
+                                    <option value="tablet">Tablet</option>
+                                    <option value="kapsul">Kapsul</option>
+                                    <option value="botol">Botol</option>
+                                    <option value="ampul">Ampul</option>
+                                    <option value="vial">Vial</option>
+                                    <option value="buah">Buah</option>
+                                </select>
+                                <small class="form-text">Satuan produk</small>
                             </div>
                             <div class="form-group">
-                                <label>Jumlah Stok</label>
-                                <input type="number" name="stock" placeholder="100">
-                            </div>
-                            <div class="form-group">
-                                <label>Set Low Stock</label>
-                                <input type="number" name="low_stock" placeholder="10">
+                                <label>Harga <span class="required">*</span></label>
+                                <div class="price-input-wrapper">
+                                    <span class="price-prefix">Rp</span>
+                                    <input type="number" name="harga" placeholder="0" min="0" step="1000" required>
+                                </div>
+                                <small class="form-text">Harga jual produk</small>
                             </div>
                         </div>
 
+                        <!-- Baris 4: Minimal Stok -->
                         <div class="form-row">
                             <div class="form-group">
-                                <label>Harga Spesial</label>
-                                <input type="number" name="harga_special" placeholder="Harga">
+                                <label>Minimal Stok</label>
+                                <input type="number" name="minimal_stok" placeholder="10" value="10" min="1">
+                                <small class="form-text">Peringatan stok menipis jika di bawah nilai ini</small>
                             </div>
                             <div class="form-group">
-                                <label>Diskon</label>
-                                <input type="number" name="harga_diskon" placeholder="Harga">
-                            </div>
-                            <div class="form-group">
-                                <label>Periode</label>
-                                <input type="text" name="periode_diskon" placeholder="Periode">
+                                <!-- Empty for spacing -->
                             </div>
                         </div>
 
-                        <button type="submit" class="btn-submit">Selesai</button>
+                        <!-- Baris 5: Deskripsi -->
+                        <div class="form-group full-width">
+                            <label>Deskripsi Produk</label>
+                            <textarea name="deskripsi" rows="4" placeholder="Masukkan deskripsi produk..."></textarea>
+                            <small class="form-text">Informasi tambahan tentang produk</small>
+                        </div>
+
+                        <!-- Informasi Batch & Stok -->
+                        <div class="info-box">
+                            <div class="info-box-header">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Informasi Batch dan Stok</span>
+                            </div>
+                            <div class="info-box-body">
+                                <p>Batch number, expired date, dan jumlah stok dapat ditambahkan setelah produk tersimpan melalui halaman <strong>Edit Produk</strong>.</p>
+                                <p class="text-muted">Setelah produk tersimpan, Anda dapat menambahkan beberapa batch dengan nomor batch dan tanggal expired yang berbeda.</p>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn-save">
+                                <i class="fas fa-save"></i> Simpan Produk
+                            </button>
+                            <a href="products.php" class="btn-cancel">
+                                Batal
+                            </a>
+                        </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="js/products.js"></script>
     <script src="js/sidebar-toggle.js"></script>
 </body>
 </html>
