@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Feb 09, 2026 at 04:47 PM
+-- Generation Time: Feb 12, 2026 at 02:17 PM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.30
 
@@ -721,6 +721,61 @@ INSERT INTO `payment_methods_detail` (`id`, `payment_id`, `metode`, `amount`, `r
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `products`
+--
+
+CREATE TABLE `products` (
+  `id` int NOT NULL,
+  `kode_produk` varchar(50) DEFAULT NULL,
+  `nama_produk` varchar(255) NOT NULL,
+  `kategori` varchar(100) DEFAULT NULL,
+  `jenis` varchar(50) DEFAULT NULL,
+  `deskripsi` text,
+  `satuan` varchar(20) DEFAULT 'dosis',
+  `harga` int DEFAULT '0',
+  `minimal_stok` int DEFAULT '10',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `products`
+--
+
+INSERT INTO `products` (`id`, `kode_produk`, `nama_produk`, `kategori`, `jenis`, `deskripsi`, `satuan`, `harga`, `minimal_stok`, `created_at`, `updated_at`) VALUES
+(1, 'FLU-001', 'Vaksin Influenza', 'Influenza', 'Vaksin', NULL, 'dosis', 234000, 10, '2026-02-12 13:22:19', '2026-02-12 14:08:18'),
+(2, 'HPV-001', 'Vaksin HPV', 'HPV', 'Vaksin', NULL, 'dosis', 364000, 10, '2026-02-12 13:22:19', '2026-02-12 14:08:18'),
+(3, 'PCT-001', 'Paracetamol Infus', 'Antipiretik', 'Obat', NULL, 'botol', 40000, 10, '2026-02-12 13:22:19', '2026-02-12 14:08:18');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `product_stock`
+--
+
+CREATE TABLE `product_stock` (
+  `id` int NOT NULL,
+  `product_id` int NOT NULL,
+  `batch_number` varchar(100) NOT NULL,
+  `expired_date` date NOT NULL,
+  `stock` int DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `product_stock`
+--
+
+INSERT INTO `product_stock` (`id`, `product_id`, `batch_number`, `expired_date`, `stock`, `created_at`, `updated_at`) VALUES
+(1, 1, 'FLU-2025-001', '2026-10-15', 50, '2026-02-12 13:22:19', '2026-02-12 13:22:19'),
+(2, 1, 'FLU-2025-002', '2026-12-20', 25, '2026-02-12 13:22:19', '2026-02-12 13:22:19'),
+(3, 2, 'HPV-2025-001', '2027-01-30', 30, '2026-02-12 13:22:19', '2026-02-12 13:22:19'),
+(4, 3, 'PCT-2025-001', '2026-06-15', 100, '2026-02-12 13:22:19', '2026-02-12 13:22:19');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `reservations`
 --
 
@@ -750,111 +805,52 @@ CREATE TABLE `reservations` (
 
 CREATE TABLE `services` (
   `id` int NOT NULL,
-  `kategori` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `nama_layanan` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `kode_layanan` varchar(50) DEFAULT NULL,
+  `nama_layanan` varchar(255) NOT NULL,
+  `kategori_usia` enum('Anak','Dewasa','Semua Usia') DEFAULT 'Semua Usia',
+  `tipe` enum('pelayanan','paket') NOT NULL,
+  `deskripsi` text,
   `harga` int DEFAULT '0',
-  `harga_special` int DEFAULT NULL,
-  `harga_diskon` int DEFAULT NULL,
-  `periode_diskon` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `deskripsi` text COLLATE utf8mb4_general_ci,
-  `image` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `product_category` enum('vaksin','pelayanan','paket') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'vaksin',
-  `kode_paket` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `jenis` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `durasi_layanan` int DEFAULT NULL,
-  `expired_date` date DEFAULT NULL,
-  `batch_number` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `stock` int DEFAULT '0',
-  `low_stock` int DEFAULT '10'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `kode_paket` varchar(50) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `product_category` enum('vaksin','pelayanan','paket') NOT NULL DEFAULT 'vaksin'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `services`
 --
 
-INSERT INTO `services` (`id`, `kategori`, `nama_layanan`, `harga`, `harga_special`, `harga_diskon`, `periode_diskon`, `deskripsi`, `image`, `created_at`, `product_category`, `kode_paket`, `jenis`, `durasi_layanan`, `expired_date`, `batch_number`, `stock`, `low_stock`) VALUES
-(1, 'Vaksinasi', 'Adacel (Sanofi)', 350000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(2, 'Vaksinasi', 'Arexvy (GSK)', 750000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(3, 'Vaksinasi', 'Avaxim 160 (Sanofi)', 400000, NULL, NULL, '', 'lorem ipsum', NULL, '2026-01-26 02:22:01', 'vaksin', NULL, 'Tablet', NULL, NULL, '', 0, 10),
-(4, 'Vaksinasi', 'Avaxim 80 (Sanofi)', 300000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(5, 'Vaksinasi', 'BCG (Biofarma)', 150000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(6, 'Vaksinasi', 'Boostrix (GSK)', 350000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(7, 'Vaksinasi', 'bOPV Polio (Biofarma)', 120000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(8, 'Vaksinasi', 'Campak (Biofarma)', 130000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(9, 'Vaksinasi', 'Cervarix (GSK)', 800000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(10, 'Vaksinasi', 'Engerix B 10mcg (GSK)', 200000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(11, 'Vaksinasi', 'Engerix B 20mcg (GSK)', 300000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(12, 'Vaksinasi', 'Euvax B Adult (Sanofi)', 250000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(13, 'Vaksinasi', 'Euvax B Pediatric (Sanofi)', 200000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(14, 'Vaksinasi', 'Fluarix Tetra (GSK)', 450000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(15, 'Vaksinasi', 'Formening (Mersi)', 300000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(16, 'Vaksinasi', 'Gardasil (MSD)', 2500000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(17, 'Vaksinasi', 'Gardasil 9 (MSD)', 3500000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(18, 'Vaksinasi', 'Havrix 1440 (GSK)', 500000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(19, 'Vaksinasi', 'Havrix 720 (GSK)', 350000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(20, 'Vaksinasi', 'Hepatitis B Dewasa (Biofarma)', 200000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(21, 'Vaksinasi', 'Hexaxim (Sanofi)', 850000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(22, 'Vaksinasi', 'Imojev (Sanofi)', 600000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(23, 'Vaksinasi', 'Infanrix Hexa (GSK)', 900000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(24, 'Vaksinasi', 'Influvac Tetra (Abbott)', 400000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(25, 'Vaksinasi', 'Inlive (Sinovac)', 300000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(26, 'Vaksinasi', 'IPV (Biofarma)', 250000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(27, 'Vaksinasi', 'MMR II (MSD)', 450000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(28, 'Vaksinasi', 'MR (Biofarma)', 200000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(29, 'Vaksinasi', 'Menactra (Sanofi)', 800000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(30, 'Vaksinasi', 'Menivax (Biofarma)', 350000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(31, 'Vaksinasi', 'Menquadfi (Sanofi)', 900000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(32, 'Vaksinasi', 'Pneumovax 23 (MSD)', 1000000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(33, 'Vaksinasi', 'Prevenar 13 (Pfizer)', 1200000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(34, 'Vaksinasi', 'Prevenar 20 (Pfizer)', 1500000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(35, 'Vaksinasi', 'Proquad (MSD)', 950000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(36, 'Vaksinasi', 'Qdenga (Takeda)', 650000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(37, 'Vaksinasi', 'Rotarix (GSK)', 350000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(38, 'Vaksinasi', 'Rotateq (MSD)', 400000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(39, 'Vaksinasi', 'Shingrix (GSK)', 2500000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(40, 'Vaksinasi', 'Stamaril (Sanofi)', 500000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(41, 'Vaksinasi', 'Synflorix (GSK)', 850000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(42, 'Vaksinasi', 'Tetraxim (Sanofi)', 450000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(43, 'Vaksinasi', 'Twinrix (GSK)', 750000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(44, 'Vaksinasi', 'Typhim Vi (Sanofi)', 400000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(45, 'Vaksinasi', 'Varivax (MSD)', 700000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(46, 'Vaksinasi', 'Vaxigrip Tetra (Sanofi)', 450000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(47, 'Vaksinasi', 'Vaxneuvance (MSD)', 1300000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(48, 'Vaksinasi', 'Vecon Adult (Biofarma)', 300000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(49, 'Vaksinasi', 'Verorab (Sanofi)', 600000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(50, 'Vaksinasi', 'Vivaxim (Sanofi)', 550000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(52, 'Paket Kesehatan', 'Telekonsultasi', 150000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(53, 'Paket Kesehatan', 'Pemeriksaan Dokter', 250000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(54, 'Paket Kesehatan', 'Medical Check Up Lengkap', 1500000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(55, 'Paket Kesehatan', 'Medical Check Up Standard', 800000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(56, 'Paket Kesehatan', 'Pemeriksaan Asam Urat', 150000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(57, 'Paket Kesehatan', 'Pemeriksaan Gula Darah', 120000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(58, 'Paket Kesehatan', 'Pemeriksaan Kolesterol', 180000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(59, 'Vitamin', 'Vitamin B Complex', 120000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(60, 'Vitamin', 'Vitamin D3', 150000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(61, 'Vitamin', 'Suntik Vitamin C', 200000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(62, 'Vitamin', 'Vitamin Badan Bugar', 180000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(63, 'Vitamin', 'Vitamin Bugar Kinclong', 220000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(64, 'Vitamin', 'Vitamin Jeruk Segar', 170000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(65, 'Vitamin', 'Vitamin Remaja Abadi', 250000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(66, 'Vitamin', 'Vitamin Segar Bugar', 160000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(67, 'Vitamin', 'Vitamin Segar Kinclong', 210000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(68, 'Vitamin', 'Vitamin Sultan', 300000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(69, 'Vitamin', 'Vitamin Segar Bugar Ekstra', 230000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(70, 'Vitamin', 'Vitamin Sultan +', 350000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(71, 'Vitamin', 'Vitamin Badan Bugar Ekstra', 240000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(72, 'Vitamin', 'Vitamin Jeruk Segar Ekstra', 220000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(73, 'Obat', 'Pantoprazole 40 mg Vial', 120000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(74, 'Obat', 'Paracetamol 1 g Fl', 80000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(75, 'Obat', 'Tuberculin PPD RT 23 SSI', 250000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(76, 'Swab', 'Swab Antigen COVID-19', 100000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(77, 'Swab', 'Swab PCR COVID-19', 350000, NULL, NULL, NULL, NULL, NULL, '2026-01-26 02:22:01', 'vaksin', NULL, NULL, NULL, NULL, NULL, 0, 10),
-(78, 'Vaksinasi', 'Vaksin Hepatitis B', 950000, NULL, NULL, NULL, 'Vaksin untuk mencegah infeksi Hepatitis B.', NULL, '2026-02-02 10:42:55', 'vaksin', NULL, 'Injeksi', NULL, '2026-12-31', 'HB-2025-001', 0, 10),
-(79, 'Semua Usia', 'Vaksin Influenza', 350000, 300000, 50000, 'Januari - februari 2026', 'Vaksin influenza untuk perlindungan musiman.', NULL, '2026-02-02 10:42:55', 'vaksin', NULL, 'Vaksin', NULL, '2026-10-15', 'FLU-2025-009', 25, 10),
-(80, 'Layanan Klinik', 'Konsultasi Dokter Umum', 75000, NULL, NULL, NULL, 'Konsultasi langsung dengan dokter umum di klinik.', NULL, '2026-02-02 10:43:25', 'pelayanan', NULL, 'Layanan', NULL, NULL, NULL, 0, 10),
-(81, 'Layanan Klinik', 'Tes Antigen', 45000, NULL, NULL, NULL, 'Pemeriksaan COVID-19 menggunakan metode antigen.', NULL, '2026-02-02 10:43:25', 'pelayanan', NULL, 'Layanan', NULL, NULL, NULL, 0, 10),
-(82, 'Paket Kesehatan', 'Paket Medical Check Up Dasar', 150000, NULL, NULL, NULL, 'Paket pemeriksaan kesehatan dasar meliputi beberapa layanan.', NULL, '2026-02-02 10:43:47', 'paket', NULL, 'Paket', NULL, NULL, NULL, 0, 10);
+INSERT INTO `services` (`id`, `kode_layanan`, `nama_layanan`, `kategori_usia`, `tipe`, `deskripsi`, `harga`, `durasi_layanan`, `kode_paket`, `created_at`, `updated_at`, `product_category`) VALUES
+(1, 'SVC-FLU', 'Vaksinasi Influenza', 'Semua Usia', 'pelayanan', NULL, 250000, 15, NULL, '2026-02-12 13:22:19', '2026-02-12 13:22:19', 'vaksin'),
+(2, 'SVC-HPV', 'Vaksinasi HPV', 'Anak', 'pelayanan', NULL, 350000, 15, NULL, '2026-02-12 13:22:19', '2026-02-12 13:22:19', 'vaksin'),
+(3, 'SVC-INF', 'Infus Obat Demam', 'Semua Usia', 'pelayanan', NULL, 200000, 30, NULL, '2026-02-12 13:22:19', '2026-02-12 13:22:19', 'vaksin'),
+(4, 'PKG-HPV-3', 'Paket Vaksinasi HPV 3 Dosis', 'Anak', 'paket', NULL, 950000, NULL, 'HPV-3X', '2026-02-12 13:22:19', '2026-02-12 13:22:19', 'vaksin'),
+(5, 'PKG-FLU-2', 'Paket Vaksinasi Influenza 2 Dosis', 'Semua Usia', 'paket', NULL, 450000, NULL, 'FLU-2X', '2026-02-12 13:22:19', '2026-02-12 13:22:19', 'vaksin');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `service_components`
+--
+
+CREATE TABLE `service_components` (
+  `id` int NOT NULL,
+  `service_id` int NOT NULL,
+  `product_id` int NOT NULL,
+  `quantity` int DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `service_components`
+--
+
+INSERT INTO `service_components` (`id`, `service_id`, `product_id`, `quantity`, `created_at`) VALUES
+(1, 1, 1, 1, '2026-02-12 13:22:19'),
+(2, 2, 2, 1, '2026-02-12 13:22:19'),
+(3, 3, 3, 1, '2026-02-12 13:22:19');
 
 -- --------------------------------------------------------
 
@@ -867,6 +863,7 @@ CREATE TABLE `service_package_items` (
   `package_id` int NOT NULL,
   `service_id` int NOT NULL,
   `quantity` int DEFAULT '1',
+  `visit_order` int DEFAULT '1',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -874,9 +871,12 @@ CREATE TABLE `service_package_items` (
 -- Dumping data for table `service_package_items`
 --
 
-INSERT INTO `service_package_items` (`id`, `package_id`, `service_id`, `quantity`, `created_at`) VALUES
-(1, 10, 3, 1, '2026-02-02 10:57:47'),
-(2, 10, 5, 1, '2026-02-02 10:57:47');
+INSERT INTO `service_package_items` (`id`, `package_id`, `service_id`, `quantity`, `visit_order`, `created_at`) VALUES
+(1, 4, 2, 1, 1, '2026-02-12 13:22:19'),
+(2, 4, 2, 1, 2, '2026-02-12 13:22:19'),
+(3, 4, 2, 1, 3, '2026-02-12 13:22:19'),
+(4, 5, 1, 1, 1, '2026-02-12 13:22:19'),
+(5, 5, 1, 1, 2, '2026-02-12 13:22:19');
 
 -- --------------------------------------------------------
 
@@ -983,6 +983,9 @@ CREATE TABLE `tindakan` (
   `id` int NOT NULL,
   `booking_id` int DEFAULT NULL,
   `patient_id` int DEFAULT NULL,
+  `keluhan` text COLLATE utf8mb4_general_ci,
+  `kipi_sebelumnya` text COLLATE utf8mb4_general_ci,
+  `kontraindikasi` text COLLATE utf8mb4_general_ci,
   `anamnesis` text COLLATE utf8mb4_general_ci,
   `pemeriksaan_fisik` text COLLATE utf8mb4_general_ci,
   `diagnosis` text COLLATE utf8mb4_general_ci,
@@ -997,38 +1000,42 @@ CREATE TABLE `tindakan` (
   `batch_vaksin` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `expired_vaksin` date DEFAULT NULL,
   `kedatangan_ke` int DEFAULT NULL,
-  `kedatangan_selanjutnya` int DEFAULT NULL
+  `kedatangan_selanjutnya` int DEFAULT NULL,
+  `bb` float DEFAULT NULL,
+  `tb` float DEFAULT NULL,
+  `lingkar_kepala` float DEFAULT NULL,
+  `pf_lainnya` text COLLATE utf8mb4_general_ci
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `tindakan`
 --
 
-INSERT INTO `tindakan` (`id`, `booking_id`, `patient_id`, `anamnesis`, `pemeriksaan_fisik`, `diagnosis`, `tatalaksana`, `suhu`, `tekanan_darah`, `respirasi`, `nadi`, `status`, `created_at`, `jenis_vaksin`, `batch_vaksin`, `expired_vaksin`, `kedatangan_ke`, `kedatangan_selanjutnya`) VALUES
-(2, 78, 1, 'a', 's', 'p', 'f', 36.0, '120', 0, 0, '0', '2026-01-23 08:53:46', 'a', 'a', '2026-01-24', 1, 1),
-(3, 80, 3, 'p', 'p', 'p', 'p', 30.0, '', 0, 0, '0', '2026-01-23 08:53:39', '', '', NULL, 1, 1),
-(4, 83, 1, 'a', 'a', 'a', 'a', 36.0, '120', 0, 0, '0', '2026-01-26 04:00:59', 'a', 'a', '2026-01-24', 1, 1),
-(5, 84, 6, 'a', 'b', 'c', 'd', 36.0, '', 0, 0, '0', '2026-01-26 11:46:42', '', '', NULL, 1, 1),
-(6, 82, 5, 'a', '', '', '', NULL, '', 0, 0, '0', '2026-01-27 11:26:50', '', '', NULL, 1, 1),
-(7, 99, 2, '', 'a', '', '', NULL, '', 0, 0, '0', '2026-02-04 07:11:42', '', '', NULL, 0, 0),
-(8, 101, 14, '', 'b', '', '', NULL, '', 0, 0, '0', '2026-02-04 07:26:56', '', '', NULL, 0, 0),
-(9, 102, 1, 'b', '', '', '', NULL, '', 0, 0, '0', '2026-02-05 03:51:47', '', '', NULL, 0, 0),
-(10, 103, 15, 'b', '', '', '', NULL, '', 0, 0, '0', '2026-02-05 03:52:01', '', '', NULL, 0, 0),
-(11, 104, 16, '', '', '', 'c', NULL, '', 0, 0, '0', '2026-02-05 03:52:08', '', '', NULL, 0, 0),
-(12, 86, 1, 'a', '', '', '', NULL, '', 0, 0, '0', '2026-02-05 06:53:58', '', '', NULL, 0, 0),
-(13, 91, 8, '', '', 'k', '', NULL, '', 0, 0, '0', '2026-02-05 06:56:06', '', '', NULL, 0, 0),
-(14, 108, 19, '', 'g', '', '', NULL, '', 0, 0, '0', '2026-02-05 07:13:44', '', '', NULL, 0, 0),
-(15, 109, 20, '', '', 'q', '', NULL, '', 0, 0, '0', '2026-02-05 07:13:49', '', '', NULL, 0, 0),
-(16, 110, 21, '', 't', '', '', NULL, '', 0, 0, '0', '2026-02-05 07:34:49', '', '', NULL, 0, 0),
-(17, 111, 22, '', '', '', 'e', NULL, '', 0, 0, '0', '2026-02-05 07:34:53', '', '', NULL, 0, 0),
-(18, 112, 23, '', 'u', '', '', NULL, '', 0, 0, '0', '2026-02-05 07:51:31', '', '', NULL, 0, 0),
-(19, 105, 17, 'a', '', '', '', NULL, '', 0, 0, '0', '2026-02-05 10:36:58', '', '', NULL, 0, 0),
-(20, 106, 2, '', 'a', '', '', NULL, '', 0, 0, '0', '2026-02-05 10:37:03', '', '', NULL, 0, 0),
-(21, 107, 18, '', '', 'a', '', NULL, '', 0, 0, '0', '2026-02-05 10:37:08', '', '', NULL, 0, 0),
-(22, 81, 4, '', 'p', '', '', NULL, '', 0, 0, '0', '2026-02-05 10:47:40', '', '', NULL, 0, 0),
-(23, 113, 24, 'p', '', '', '', NULL, '', 0, 0, '0', '2026-02-05 10:50:19', '', '', NULL, 0, 0),
-(24, 114, 25, '', '', '', 'a', NULL, '', 0, 0, '0', '2026-02-05 11:00:51', '', '', NULL, 0, 0),
-(25, 115, 26, '', '', '', '', NULL, '', 0, 0, '0', '2026-02-05 11:16:10', '', '', NULL, 1, 0);
+INSERT INTO `tindakan` (`id`, `booking_id`, `patient_id`, `keluhan`, `kipi_sebelumnya`, `kontraindikasi`, `anamnesis`, `pemeriksaan_fisik`, `diagnosis`, `tatalaksana`, `suhu`, `tekanan_darah`, `respirasi`, `nadi`, `status`, `created_at`, `jenis_vaksin`, `batch_vaksin`, `expired_vaksin`, `kedatangan_ke`, `kedatangan_selanjutnya`, `bb`, `tb`, `lingkar_kepala`, `pf_lainnya`) VALUES
+(2, 78, 1, NULL, NULL, NULL, 'a', 's', 'p', 'f', 36.0, '120', 0, 0, '0', '2026-01-23 08:53:46', 'a', 'a', '2026-01-24', 1, 1, NULL, NULL, NULL, NULL),
+(3, 80, 3, NULL, NULL, NULL, 'p', 'p', 'p', 'p', 30.0, '', 0, 0, '0', '2026-01-23 08:53:39', '', '', NULL, 1, 1, NULL, NULL, NULL, NULL),
+(4, 83, 1, NULL, NULL, NULL, 'a', 'a', 'a', 'a', 36.0, '120', 0, 0, '0', '2026-01-26 04:00:59', 'a', 'a', '2026-01-24', 1, 1, NULL, NULL, NULL, NULL),
+(5, 84, 6, NULL, NULL, NULL, 'a', 'b', 'c', 'd', 36.0, '', 0, 0, '0', '2026-01-26 11:46:42', '', '', NULL, 1, 1, NULL, NULL, NULL, NULL),
+(6, 82, 5, NULL, NULL, NULL, 'a', '', '', '', NULL, '', 0, 0, '0', '2026-01-27 11:26:50', '', '', NULL, 1, 1, NULL, NULL, NULL, NULL),
+(7, 99, 2, NULL, NULL, NULL, '', 'a', '', '', NULL, '', 0, 0, '0', '2026-02-04 07:11:42', '', '', NULL, 0, 0, NULL, NULL, NULL, NULL),
+(8, 101, 14, NULL, NULL, NULL, '', 'b', '', '', NULL, '', 0, 0, '0', '2026-02-04 07:26:56', '', '', NULL, 0, 0, NULL, NULL, NULL, NULL),
+(9, 102, 1, NULL, NULL, NULL, 'b', '', '', '', NULL, '', 0, 0, '0', '2026-02-05 03:51:47', '', '', NULL, 0, 0, NULL, NULL, NULL, NULL),
+(10, 103, 15, NULL, NULL, NULL, 'b', '', '', '', NULL, '', 0, 0, '0', '2026-02-05 03:52:01', '', '', NULL, 0, 0, NULL, NULL, NULL, NULL),
+(11, 104, 16, NULL, NULL, NULL, '', '', '', 'c', NULL, '', 0, 0, '0', '2026-02-05 03:52:08', '', '', NULL, 0, 0, NULL, NULL, NULL, NULL),
+(12, 86, 1, NULL, NULL, NULL, 'a', '', '', '', NULL, '', 0, 0, '0', '2026-02-05 06:53:58', '', '', NULL, 0, 0, NULL, NULL, NULL, NULL),
+(13, 91, 8, NULL, NULL, NULL, '', '', 'k', '', NULL, '', 0, 0, '0', '2026-02-05 06:56:06', '', '', NULL, 0, 0, NULL, NULL, NULL, NULL),
+(14, 108, 19, NULL, NULL, NULL, '', 'g', '', '', NULL, '', 0, 0, '0', '2026-02-05 07:13:44', '', '', NULL, 0, 0, NULL, NULL, NULL, NULL),
+(15, 109, 20, NULL, NULL, NULL, '', '', 'q', '', NULL, '', 0, 0, '0', '2026-02-05 07:13:49', '', '', NULL, 0, 0, NULL, NULL, NULL, NULL),
+(16, 110, 21, NULL, NULL, NULL, '', 't', '', '', NULL, '', 0, 0, '0', '2026-02-05 07:34:49', '', '', NULL, 0, 0, NULL, NULL, NULL, NULL),
+(17, 111, 22, NULL, NULL, NULL, '', '', '', 'e', NULL, '', 0, 0, '0', '2026-02-05 07:34:53', '', '', NULL, 0, 0, NULL, NULL, NULL, NULL),
+(18, 112, 23, NULL, NULL, NULL, '', 'u', '', '', NULL, '', 0, 0, '0', '2026-02-05 07:51:31', '', '', NULL, 0, 0, NULL, NULL, NULL, NULL),
+(19, 105, 17, NULL, NULL, NULL, 'a', '', '', '', NULL, '', 0, 0, '0', '2026-02-05 10:36:58', '', '', NULL, 0, 0, NULL, NULL, NULL, NULL),
+(20, 106, 2, NULL, NULL, NULL, '', 'a', '', '', NULL, '', 0, 0, '0', '2026-02-05 10:37:03', '', '', NULL, 0, 0, NULL, NULL, NULL, NULL),
+(21, 107, 18, NULL, NULL, NULL, '', '', 'a', '', NULL, '', 0, 0, '0', '2026-02-05 10:37:08', '', '', NULL, 0, 0, NULL, NULL, NULL, NULL),
+(22, 81, 4, NULL, NULL, NULL, '', 'p', '', '', NULL, '', 0, 0, '0', '2026-02-05 10:47:40', '', '', NULL, 0, 0, NULL, NULL, NULL, NULL),
+(23, 113, 24, NULL, NULL, NULL, 'p', '', '', '', NULL, '', 0, 0, '0', '2026-02-05 10:50:19', '', '', NULL, 0, 0, NULL, NULL, NULL, NULL),
+(24, 114, 25, NULL, NULL, NULL, '', '', '', 'a', NULL, '', 0, 0, '0', '2026-02-05 11:00:51', '', '', NULL, 0, 0, NULL, NULL, NULL, NULL),
+(25, 115, 26, NULL, NULL, NULL, '', '', '', '', NULL, '', 0, 0, '0', '2026-02-05 11:16:10', '', '', NULL, 1, 0, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1235,6 +1242,21 @@ ALTER TABLE `payment_methods_detail`
   ADD KEY `idx_payment_methods_payment` (`payment_id`);
 
 --
+-- Indexes for table `products`
+--
+ALTER TABLE `products`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `kode_produk` (`kode_produk`);
+
+--
+-- Indexes for table `product_stock`
+--
+ALTER TABLE `product_stock`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_product_id` (`product_id`),
+  ADD KEY `idx_expired` (`expired_date`);
+
+--
 -- Indexes for table `reservations`
 --
 ALTER TABLE `reservations`
@@ -1248,15 +1270,26 @@ ALTER TABLE `reservations`
 -- Indexes for table `services`
 --
 ALTER TABLE `services`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `kode_layanan` (`kode_layanan`),
+  ADD KEY `idx_tipe` (`tipe`),
+  ADD KEY `idx_kategori` (`kategori_usia`);
+
+--
+-- Indexes for table `service_components`
+--
+ALTER TABLE `service_components`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `product_id` (`product_id`),
+  ADD KEY `idx_service_id` (`service_id`);
 
 --
 -- Indexes for table `service_package_items`
 --
 ALTER TABLE `service_package_items`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `package_id` (`package_id`),
-  ADD KEY `service_id` (`service_id`);
+  ADD KEY `service_id` (`service_id`),
+  ADD KEY `idx_package_id` (`package_id`);
 
 --
 -- Indexes for table `staff`
@@ -1416,6 +1449,18 @@ ALTER TABLE `payment_methods_detail`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
+-- AUTO_INCREMENT for table `products`
+--
+ALTER TABLE `products`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `product_stock`
+--
+ALTER TABLE `product_stock`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
 -- AUTO_INCREMENT for table `reservations`
 --
 ALTER TABLE `reservations`
@@ -1425,13 +1470,19 @@ ALTER TABLE `reservations`
 -- AUTO_INCREMENT for table `services`
 --
 ALTER TABLE `services`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=83;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `service_components`
+--
+ALTER TABLE `service_components`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `service_package_items`
 --
 ALTER TABLE `service_package_items`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `staff`
@@ -1564,6 +1615,12 @@ ALTER TABLE `payment_methods_detail`
   ADD CONSTRAINT `payment_methods_detail_ibfk_1` FOREIGN KEY (`payment_id`) REFERENCES `payments` (`id`) ON DELETE CASCADE;
 
 --
+-- Constraints for table `product_stock`
+--
+ALTER TABLE `product_stock`
+  ADD CONSTRAINT `product_stock_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `reservations`
 --
 ALTER TABLE `reservations`
@@ -1572,11 +1629,18 @@ ALTER TABLE `reservations`
   ADD CONSTRAINT `reservations_ibfk_3` FOREIGN KEY (`slot_id`) REFERENCES `time_slots` (`id`);
 
 --
+-- Constraints for table `service_components`
+--
+ALTER TABLE `service_components`
+  ADD CONSTRAINT `service_components_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `service_components_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE RESTRICT;
+
+--
 -- Constraints for table `service_package_items`
 --
 ALTER TABLE `service_package_items`
   ADD CONSTRAINT `service_package_items_ibfk_1` FOREIGN KEY (`package_id`) REFERENCES `services` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `service_package_items_ibfk_2` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `service_package_items_ibfk_2` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE RESTRICT;
 
 --
 -- Constraints for table `vaccination_history`
