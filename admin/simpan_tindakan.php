@@ -10,6 +10,16 @@ $booking_id = intval($_POST['booking_id']);
 $parent_booking_id = intval($_POST['parent_booking_id']);
 $patient_id = intval($_POST['patient_id']);
 
+$keluhan = $_POST['keluhan'] ?? 'Tidak ada keluhan';
+$kipi = $_POST['kipi_sebelumnya'] ?? 'Tidak ada';
+$kontraindikasi = $_POST['kontraindikasi'] ?? 'Tidak ada';
+
+$bb = $_POST['bb'] !== '' ? (float)$_POST['bb'] : null;
+$tb = $_POST['tb'] !== '' ? (float)$_POST['tb'] : null;
+$lingkar_kepala = $_POST['lingkar_kepala'] ?? null;
+$pf_lainnya = $_POST['pf_lainnya'] ?? 'Dalam batas normal';
+
+
 // Cek apakah sudah ada data tindakan untuk booking ini
 $check_sql = "SELECT id FROM tindakan WHERE booking_id = ?";
 $check_stmt = $conn->prepare($check_sql);
@@ -23,6 +33,13 @@ if ($check_result->num_rows > 0) {
     $tindakan_id = $row['id'];
     
     $update_sql = "UPDATE tindakan SET 
+        keluhan = ?,
+        kipi_sebelumnya = ?,
+        kontraindikasi = ?,
+        bb = ?,
+        tb = ?,
+        lingkar_kepala = ?,
+        pf_lainnya = ?,
         anamnesis = ?,
         pemeriksaan_fisik = ?,
         diagnosis = ?,
@@ -42,7 +59,14 @@ if ($check_result->num_rows > 0) {
     
     $update_stmt = $conn->prepare($update_sql);
     $update_stmt->bind_param(
-        "sssssssissssssi",
+        "sssdddsssssssssssssi",
+        $keluhan,
+        $kipi,
+        $kontraindikasi,
+        $bb,
+        $tb,
+        $lingkar_kepala,
+        $pf_lainnya,
         $_POST['anamnesis'],
         $_POST['pemeriksaan_fisik'],
         $_POST['diagnosis'],
@@ -64,6 +88,13 @@ if ($check_result->num_rows > 0) {
     $insert_sql = "INSERT INTO tindakan (
         booking_id,
         patient_id,
+        keluhan,
+        kipi_sebelumnya,
+        kontraindikasi,
+        bb,
+        tb,
+        lingkar_kepala,
+        pf_lainnya,
         anamnesis,
         pemeriksaan_fisik,
         diagnosis,
@@ -80,13 +111,24 @@ if ($check_result->num_rows > 0) {
         kedatangan_selanjutnya,
         created_at,
         updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
-    
+    ) VALUES (
+        ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,
+        NOW(),
+        NOW()
+    )";
+
     $insert_stmt = $conn->prepare($insert_sql);
     $insert_stmt->bind_param(
-        "iissssssisssssss",
+    "iisssdddsssssssssssssss",
         $booking_id,
         $patient_id,
+        $keluhan,
+        $kipi,
+        $kontraindikasi,
+        $bb,
+        $tb,
+        $lingkar_kepala,
+        $pf_lainnya,
         $_POST['anamnesis'],
         $_POST['pemeriksaan_fisik'],
         $_POST['diagnosis'],

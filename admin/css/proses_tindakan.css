@@ -676,3 +676,142 @@ body {
     color: #fbac07;
     font-size: 17px;
 }
+
+.patient-summary-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px 26px;
+    margin-bottom: 24px;
+    border: 1px solid #e2e8f0;
+}
+
+.patient-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px 40px;
+    margin-bottom: 20px;
+}
+
+.summary-row.full-width {
+    grid-column: 1 / -1;
+}
+
+.patient-summary-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.btn-summary {
+    background: #f3f4f6;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    text-decoration: none;
+    color: #374151;
+    font-weight: 600;
+}
+
+.btn-summary:hover {
+    background: #e5e7eb;
+}
+
+.btn-summary.primary {
+    background: #60a5fa;
+    color: white;
+}
+
+.btn-summary.primary:hover {
+    background: #2563eb;
+}
+
+.anamnesis-subbox {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    background: #fafafa;
+}
+
+.anamnesis-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.anamnesis-row label {
+    width: 160px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #6b7280;
+    margin-top: 10px;
+}
+
+.anamnesis-row textarea {
+    flex: 1;
+    min-height: 70px;
+}
+
+.pf-subbox {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    background: #fafafa;
+}
+
+.pf-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.pf-row label {
+    width: 170px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+.pf-row input {
+    flex: 1;
+}
+
+.pf-row textarea {
+    flex: 1;
+    min-height: 60px;
+}
+
+.pf-unit {
+    width: 60px;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.pf-row.full {
+    align-items: flex-start;
+}
+
+.diagnosis-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.diagnosis-buttons button {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.diagnosis-buttons button:hover {
+    background: #dbeafe;
+    border-color: #60a5fa;
+}

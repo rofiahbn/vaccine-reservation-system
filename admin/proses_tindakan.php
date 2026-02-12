@@ -29,8 +29,12 @@ SELECT b.*,
        p.id AS patient_id,
        p.no_rekam_medis,
        p.nama_lengkap,
+       p.nama_panggilan,
        p.tanggal_lahir,
        p.jenis_kelamin,
+       p.riwayat_alergi,
+       p.riwayat_penyakit,
+       p.riwayat_obat,
        p.nik,
        p.paspor
 FROM bookings b
@@ -287,41 +291,93 @@ $nakes_text = count($nakes_list) ? implode(', ', $nakes_list) : '-';
                 </div>
             </div>
 
+            <div class="patient-summary-card">
+
+                <div class="summary-header">
+                    <i class="fas fa-user"></i>
+                    <span>Informasi Pasien</span>
+                </div>
+
+                <div class="patient-summary-grid">
+
+                    <div class="summary-row">
+                        <div class="summary-label">No. Rekam Medis</div>
+                        <div class="summary-value">
+                            <?= htmlspecialchars($current_peserta['no_rekam_medis']) ?>
+                        </div>
+                    </div>
+
+                    <div class="summary-row">
+                        <div class="summary-label">Nama Lengkap</div>
+                        <div class="summary-value">
+                            <?= htmlspecialchars($current_peserta['nama_lengkap']) ?>
+                            <?php if(!empty($current_peserta['nama_panggilan'])): ?>
+                                (<?= htmlspecialchars($current_peserta['nama_panggilan']) ?>)
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <div class="summary-row">
+                        <div class="summary-label">Tanggal Lahir</div>
+                        <div class="summary-value">
+                            <?= $tgl_lahir_indo ?> (<?= $usia ?>)
+                        </div>
+                    </div>
+
+                    <div class="summary-row">
+                        <div class="summary-label">Jenis Kelamin</div>
+                        <div class="summary-value">
+                            <?= htmlspecialchars($current_peserta['jenis_kelamin']) ?>
+                        </div>
+                    </div>
+
+                    <div class="summary-row full-width">
+                        <div class="summary-label">Riwayat Alergi</div>
+                        <div class="summary-value">
+                            <?= htmlspecialchars($current_peserta['riwayat_alergi'] ?? '-') ?>
+                        </div>
+                    </div>
+
+                    <div class="summary-row full-width">
+                        <div class="summary-label">Riwayat Penyakit</div>
+                        <div class="summary-value">
+                            <?= htmlspecialchars($current_peserta['riwayat_penyakit'] ?? '-') ?>
+                        </div>
+                    </div>
+
+                    <div class="summary-row full-width">
+                        <div class="summary-label">Konsumsi Obat</div>
+                        <div class="summary-value">
+                            <?= htmlspecialchars($current_peserta['konsumsi_obat'] ?? '-') ?>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="patient-summary-actions">
+
+                    <a href="patient_detail.php?id=<?= $current_patient_id ?>" class="btn-summary">
+                        Informasi Lengkap
+                    </a>
+
+                    <a href="rekam_medis_history.php?id=<?= $current_patient_id ?>" class="btn-summary">
+                        Riwayat Rekam Medis
+                    </a>
+
+                    <a href="vaksin_history.php?id=<?= $current_patient_id ?>" class="btn-summary">
+                        Riwayat Vaksinasi
+                    </a>
+
+                    <a href="patient_edit.php?id=<?= $current_patient_id ?>" class="btn-summary primary">
+                        Edit Data Pasien
+                    </a>
+
+                </div>
+
+            </div>
+
                 <div class="proses-container">
                     <div class="detail-grid">
-
-                        <!-- ================= INFO PESERTA ================= -->
-                        <div class="detail-item full-width">
-                            <label>Peserta</label>
-                            <input type="text" value="<?= htmlspecialchars($current_peserta['nama_lengkap']) ?>" readonly>
-                        </div>
-
-                        <div class="detail-item full-width">
-                            <label>Layanan</label>
-                            <?php while($s = $services->fetch_assoc()): ?>
-                                <input type="text" value="<?= htmlspecialchars($s['nama_layanan']) ?>" readonly>
-                            <?php endwhile; ?>
-                        </div>
-
-                        <div class="detail-item">
-                            <label>No. Rekam Medis</label>
-                            <input type="text" value="<?= htmlspecialchars($current_peserta['no_rekam_medis']) ?>" readonly>
-                        </div>
-
-                        <div class="detail-item">
-                            <label>Nama Lengkap</label>
-                            <input type="text" value="<?= htmlspecialchars($current_peserta['nama_lengkap']) ?>" readonly>
-                        </div>
-
-                        <div class="detail-item">
-                            <label>Tanggal Vaksinasi</label>
-                            <input type="date" value="<?= $current_peserta['tanggal_booking'] ?>" readonly>
-                        </div>
-
-                        <div class="detail-item">
-                            <label>No Identitas</label>
-                            <input type="text" value="<?= htmlspecialchars($current_peserta['nik'] ?: $current_peserta['paspor']) ?>" readonly>
-                        </div>
 
                         <!-- ================= DATA VAKSIN ================= -->
                         <div class="detail-item">
@@ -355,12 +411,18 @@ $nakes_text = count($nakes_list) ? implode(', ', $nakes_list) : '-';
 
                         <div class="detail-item">
                             <label>Kedatangan Selanjutnya</label>
-                            <select name="kedatangan_selanjutnya">
-                                <option value="">-- Pilih --</option>
-                                <option value="1" <?= ($tindakan['kedatangan_selanjutnya'] ?? '') == '1' ? 'selected' : '' ?>>1</option>
-                                <option value="2" <?= ($tindakan['kedatangan_selanjutnya'] ?? '') == '2' ? 'selected' : '' ?>>2</option>
-                                <option value="3" <?= ($tindakan['kedatangan_selanjutnya'] ?? '') == '3' ? 'selected' : '' ?>>3</option>
-                            </select>
+                                <select name="kedatangan_selanjutnya">
+
+                                    <option value="">-- Pilih --</option>
+
+                                    <?php for($i=1; $i<=10; $i++): ?>
+                                        <option value="<?= $i ?>"
+                                            <?= ($tindakan['kedatangan_selanjutnya'] ?? '') == $i ? 'selected' : '' ?>>
+                                            <?= $i ?>
+                                        </option>
+                                    <?php endfor; ?>
+
+                                </select>
                         </div>
 
                         <div class="detail-item">
@@ -375,17 +437,105 @@ $nakes_text = count($nakes_list) ? implode(', ', $nakes_list) : '-';
                         <!-- ================= ANAMNESIS ================= -->
                         <div class="detail-item full-width">
                             <label>Anamnesis</label>
-                            <textarea name="anamnesis"><?= htmlspecialchars($tindakan['anamnesis'] ?? '') ?></textarea>
+
+                            <div class="anamnesis-subbox">
+
+                                <div class="anamnesis-row">
+                                    <label>Keluhan</label>
+                                    <textarea name="keluhan"><?= htmlspecialchars($tindakan['keluhan'] ?? 'Tidak ada keluhan') ?></textarea>
+                                </div>
+
+                                <div class="anamnesis-row">
+                                    <label>KIPI Sebelumnya</label>
+                                    <textarea name="kipi_sebelumnya"><?= htmlspecialchars($tindakan['kipi_sebelumnya'] ?? 'Tidak ada') ?></textarea>
+                                </div>
+
+                                <div class="anamnesis-row">
+                                    <label>Kontraindikasi</label>
+                                    <textarea name="kontraindikasi"><?= htmlspecialchars($tindakan['kontraindikasi'] ?? 'Tidak ada') ?></textarea>
+                                </div>
+
+                                <textarea name="anamnesis" placeholder="Catatan anamnesis tambahan"><?= htmlspecialchars($tindakan['anamnesis'] ?? '') ?></textarea>
+
+                            </div>
+
+                            
                         </div>
 
                         <div class="detail-item full-width">
                             <label>Pemeriksaan Fisik</label>
-                            <textarea name="pemeriksaan_fisik"><?= htmlspecialchars($tindakan['pemeriksaan_fisik'] ?? '') ?></textarea>
+
+                            <div class="pf-subbox">
+
+                                <div class="pf-row">
+                                    <label>Berat Badan</label>
+                                    <input type="number" step="0.1" name="bb"
+                                        value="<?= htmlspecialchars($tindakan['bb'] ?? '') ?>">
+                                    <span class="pf-unit">kg</span>
+                                </div>
+
+                                <div class="pf-row">
+                                    <label>Tinggi / Panjang Badan</label>
+                                    <input type="number" step="0.1" name="tb"
+                                        value="<?= htmlspecialchars($tindakan['tb'] ?? '') ?>">
+                                    <span class="pf-unit">cm</span>
+                                </div>
+
+                                <div class="pf-row">
+                                    <label>Lingkar Kepala</label>
+                                    <input type="number" step="0.1" name="lingkar_kepala"
+                                        value="<?= htmlspecialchars($tindakan['lingkar_kepala'] ?? '') ?>">
+                                    <span class="pf-unit">cm</span>
+                                </div>
+
+                                <div class="pf-row">
+                                    <label>Suhu</label>
+                                    <input type="number" step="0.1" name="suhu"
+                                        value="<?= htmlspecialchars($tindakan['suhu'] ?? '') ?>">
+                                    <span class="pf-unit">°C</span>
+                                </div>
+
+                                <div class="pf-row">
+                                    <label>Tekanan Darah</label>
+                                    <input type="text" name="tekanan_darah"
+                                        value="<?= htmlspecialchars($tindakan['tekanan_darah'] ?? '') ?>">
+                                    <span class="pf-unit">mmHg</span>
+                                </div>
+
+                                <div class="pf-row full">
+                                    <label>PF Lainnya</label>
+                                    <textarea name="pf_lainnya"><?= htmlspecialchars($tindakan['pf_lainnya'] ?? 'Dalam batas normal') ?></textarea>
+                                </div>
+
+                                <textarea name="pemeriksaan_fisik"
+                                    placeholder="Catatan tambahan pemeriksaan fisik"><?= htmlspecialchars($tindakan['pemeriksaan_fisik'] ?? '') ?></textarea>
+
+                            </div>
+
+                            
                         </div>
 
                         <div class="detail-item full-width">
                             <label>Diagnosis</label>
-                            <textarea name="diagnosis"><?= htmlspecialchars($tindakan['diagnosis'] ?? '') ?></textarea>
+
+                            <!-- Tombol Diagnosis Cepat -->
+                            <div class="diagnosis-buttons">
+                                <button type="button" onclick="setDiagnosis('Pro Vaksinasi (Z23)')">
+                                    Pro Vaksinasi (Z23)
+                                </button>
+
+                                <button type="button" onclick="setDiagnosis('Pro Infus Vitamin (Z51.89)')">
+                                    Pro Infus Vitamin (Z51.89)
+                                </button>
+
+                                <button type="button" onclick="setDiagnosis('Infeksi saluran napas atas (J06.9)')">
+                                    ISPA (J06.9)
+                                </button>
+                            </div>
+
+                            <textarea 
+                                id="diagnosisBox"
+                                name="diagnosis"><?= htmlspecialchars($tindakan['diagnosis'] ?? '') ?></textarea>
                         </div>
 
                         <div class="detail-item full-width">
@@ -557,7 +707,17 @@ $nakes_text = count($nakes_list) ? implode(', ', $nakes_list) : '-';
     const CURRENT_BOOKING_ID = "<?= $current_booking_id ?>";
     const CURRENT_PATIENT_ID = "<?= $current_patient_id ?>";
 </script>
+<script>
+    function setDiagnosis(text) {
+        const box = document.getElementById("diagnosisBox");
 
+        if (box.value.trim() === "") {
+            box.value = text;
+        } else {
+            box.value += "\n" + text;
+        }
+    }
+</script>
 <script src="js/preview_surat.js"></script>
 <script src="js/simpan_tindakan.js"></script>
 <script src="js/cetak_surat.js"></script>                        
