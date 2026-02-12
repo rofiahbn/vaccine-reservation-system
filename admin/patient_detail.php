@@ -15,6 +15,9 @@ $result_all_patients = mysqli_query($conn, $query_all_patients);
 
 // Get selected patient detail
 $patient_detail = null;
+$patient_emails = [];
+$patient_phones = [];
+
 if ($patient_id > 0) {
     $query_detail = "
         SELECT 
@@ -22,9 +25,7 @@ if ($patient_id > 0) {
             GROUP_CONCAT(DISTINCT bs.nama_layanan SEPARATOR ', ') as layanan,
             (SELECT alamat FROM patient_addresses WHERE patient_id = p.id AND is_primary = 1 LIMIT 1) as alamat_primary,
             (SELECT provinsi FROM patient_addresses WHERE patient_id = p.id AND is_primary = 1 LIMIT 1) as provinsi,
-            (SELECT kota FROM patient_addresses WHERE patient_id = p.id AND is_primary = 1 LIMIT 1) as kota,
-            (SELECT email FROM patient_emails WHERE patient_id = p.id AND is_primary = 1 LIMIT 1) as email_primary,
-            (SELECT phone FROM patient_phones WHERE patient_id = p.id AND is_primary = 1 LIMIT 1) as phone_primary
+            (SELECT kota FROM patient_addresses WHERE patient_id = p.id AND is_primary = 1 LIMIT 1) as kota
         FROM patients p
         LEFT JOIN tindakan t ON p.id = t.patient_id
         LEFT JOIN bookings b ON t.booking_id = b.id
@@ -37,6 +38,26 @@ if ($patient_id > 0) {
     $stmt->execute();
     $result = $stmt->get_result();
     $patient_detail = $result->fetch_assoc();
+    
+    // Get all emails
+    $query_emails = "SELECT email, is_primary FROM patient_emails WHERE patient_id = ? ORDER BY is_primary DESC, id ASC";
+    $stmt = $conn->prepare($query_emails);
+    $stmt->bind_param('i', $patient_id);
+    $stmt->execute();
+    $result_emails = $stmt->get_result();
+    while ($email = $result_emails->fetch_assoc()) {
+        $patient_emails[] = $email;
+    }
+    
+    // Get all phones
+    $query_phones = "SELECT phone, is_primary FROM patient_phones WHERE patient_id = ? ORDER BY is_primary DESC, id ASC";
+    $stmt = $conn->prepare($query_phones);
+    $stmt->bind_param('i', $patient_id);
+    $stmt->execute();
+    $result_phones = $stmt->get_result();
+    while ($phone = $result_phones->fetch_assoc()) {
+        $patient_phones[] = $phone;
+    }
 }
 
 // Fungsi untuk menghitung usia dengan bulan
@@ -246,11 +267,41 @@ function calculateAgeWithMonths($tanggal_lahir) {
                                 <div class="info-item">
                                     <div class="info-item-row">
                                         <span class="info-label">No Telepon</span>
-                                        <span class="info-value"><?= htmlspecialchars($patient_detail['phone_primary'] ?: '-') ?></span>
+                                        <span class="info-value">
+                                            <?php if (!empty($patient_phones)): ?>
+                                                <div class="info-value-list">
+                                                    <?php foreach ($patient_phones as $phone_data): ?>
+                                                        <div class="info-value-item">
+                                                            <span><?= htmlspecialchars($phone_data['phone']) ?></span>
+                                                            <?php if ($phone_data['is_primary'] == 1): ?>
+                                                                <span class="badge-primary">Utama</span>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            <?php else: ?>
+                                                -
+                                            <?php endif; ?>
+                                        </span>
                                     </div>
                                     <div class="info-item-row">
                                         <span class="info-label">Email</span>
-                                        <span class="info-value"><?= htmlspecialchars($patient_detail['email_primary'] ?: '-') ?></span>
+                                        <span class="info-value">
+                                            <?php if (!empty($patient_emails)): ?>
+                                                <div class="info-value-list">
+                                                    <?php foreach ($patient_emails as $email_data): ?>
+                                                        <div class="info-value-item">
+                                                            <span><?= htmlspecialchars($email_data['email']) ?></span>
+                                                            <?php if ($email_data['is_primary'] == 1): ?>
+                                                                <span class="badge-primary">Utama</span>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            <?php else: ?>
+                                                -
+                                            <?php endif; ?>
+                                        </span>
                                     </div>
                                 </div>
                                 

@@ -129,6 +129,37 @@ if ($dokters->num_rows > 0) {
 $tanggal_surat = date("Y-m-d");
 $tanggal_surat_indo = formatTanggalIndo($tanggal_surat);
 
+// ================= DATA BOOKING SUMMARY =================
+$total_tagihan = $parent_booking['total_tagihan'] ?? 0;
+
+$tgl_layanan = formatTanggalIndo($parent_booking['tanggal_booking'] ?? '');
+$jam_layanan = !empty($parent_booking['waktu_booking'])
+    ? date('H:i', strtotime($parent_booking['waktu_booking'])) . ' WIB'
+    : '-';
+
+// Lokasi layanan dari service_type
+$service_type_raw = $parent_booking['service_type'] ?? '';
+
+$service_type_map = [
+    'in_clinic' => 'In Clinic',
+    'home_service' => 'Home Service',
+    'onsite' => 'On Site',
+    'corporate' => 'Corporate'
+];
+
+$lokasi_layanan = $service_type_map[strtolower($service_type_raw)] 
+    ?? ucwords(str_replace('_',' ', $service_type_raw)) 
+    ?: '-';
+
+// Gabungkan dokter
+$nakes_list = [];
+$dokters->data_seek(0);
+while($d = $dokters->fetch_assoc()){
+    $nakes_list[] = $d['gelar'].' '.$d['nama_lengkap'];
+}
+
+$nakes_text = count($nakes_list) ? implode(', ', $nakes_list) : '-';
+
 ?>
 
 <!DOCTYPE html>
@@ -208,6 +239,53 @@ $tanggal_surat_indo = formatTanggalIndo($tanggal_surat);
                 <input type="hidden" name="booking_id" value="<?= $current_booking_id ?>">
                 <input type="hidden" name="parent_booking_id" value="<?= $parent_booking_id ?>">
                 <input type="hidden" name="patient_id" value="<?= $current_patient_id ?>">
+    
+            <div class="booking-summary-card">
+
+                <div class="summary-header">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>Informasi Booking</span>
+                </div>
+
+                <div class="summary-grid">
+
+                    <div class="summary-row">
+                        <div class="summary-label">No. Antrian</div>
+                        <div class="summary-value">
+                            <?= htmlspecialchars($parent_booking['nomor_antrian'] ?? $parent_booking['id']) ?>
+                        </div>
+                    </div>
+
+                    <div class="summary-row">
+                        <div class="summary-label">Tanggal & Jam Layanan</div>
+                        <div class="summary-value">
+                            <?= $tgl_layanan ?>, <?= htmlspecialchars($jam_layanan) ?>
+                        </div>
+                    </div>
+
+                    <div class="summary-row">
+                        <div class="summary-label">Lokasi Layanan</div>
+                        <div class="summary-value">
+                            <?= htmlspecialchars($lokasi_layanan) ?>
+                        </div>
+                    </div>
+
+                    <div class="summary-row">
+                        <div class="summary-label">Nakes Bertugas</div>
+                        <div class="summary-value">
+                            <?= htmlspecialchars($nakes_text) ?>
+                        </div>
+                    </div>
+
+                    <div class="summary-row highlight">
+                        <div class="summary-label">Total Tagihan</div>
+                        <div class="summary-value">
+                            Rp <?= number_format($total_tagihan,0,',','.') ?>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
 
                 <div class="proses-container">
                     <div class="detail-grid">

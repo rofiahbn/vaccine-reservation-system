@@ -626,3 +626,53 @@ body {
 .participant-tab:hover {
     background: #dcdcdc;
 }
+
+.booking-summary-card {
+    background: white;
+    border-radius: 12px;
+    padding: 22px 26px;
+    margin-bottom: 24px;
+    border: 1px solid #e2e8f0;
+}
+
+.summary-header {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.summary-header i {
+    color: #fbac07;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px 40px;
+}
+
+.summary-row {
+    display: flex;
+    flex-direction: column;
+}
+
+.summary-label {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 4px;
+}
+
+.summary-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.summary-row.highlight .summary-value {
+    color: #fbac07;
+    font-size: 17px;
+}

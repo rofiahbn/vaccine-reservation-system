@@ -287,6 +287,34 @@
     cursor: pointer;
 }
 
+/* Multi Value Items untuk Email & Phone */
+.info-item-row .info-value-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: right;
+}
+
+.info-value-item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.badge-primary {
+    display: inline-block;
+    padding: 2px 8px;
+    background: #fbac07;
+    color: white;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
 /* Empty State */
 .empty-detail {
     display: flex;
@@ -521,4 +549,3 @@
         break-inside: avoid;
     }
 }
-
