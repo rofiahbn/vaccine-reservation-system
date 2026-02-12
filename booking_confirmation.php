@@ -235,6 +235,7 @@ $firstBooking = $participants[0];
         <form action="final_submit.php" method="POST" id="confirmForm">
 
             <div class="action-buttons">
+                <input type="hidden" name="action" value="finish">
                 <button type="button" class="btn btn-add" onclick="window.location.href='add_participant.php'">
                     <i class="fas fa-user-plus"></i> Tambah Peserta Lagi
                 </button>

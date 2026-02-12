@@ -6,7 +6,7 @@ include "calendar_helper.php";
 // ================== AMBIL DATA SERVICES ==================
 $services_data = [];
 
-$result = $conn->query("SELECT * FROM services ORDER BY kategori, nama_layanan ASC");
+$result = $conn->query("SELECT * FROM services ORDER BY kategori_usia, nama_layanan ASC");
 
 while ($row = $result->fetch_assoc()) {
     $services_data[] = $row;
@@ -627,15 +627,28 @@ if (isset($errors) && count($errors) > 0) {
     const productData = {};
 
     rawServices.forEach(item => {
-        if (!productData[item.kategori]) {
-            productData[item.kategori] = [];
+        // Gunakan kategori_usia, default 'Lainnya' jika null
+        const kategori = item.kategori_usia || 'Lainnya';
+        
+        if (!productData[kategori]) {
+            productData[kategori] = [];
         }
 
-        productData[item.kategori].push({
+        productData[kategori].push({
             id: item.id,
             name: item.nama_layanan,
-            price: item.harga
+            price: item.harga,
+            kode_layanan: item.kode_layanan,
+            tipe: item.tipe,
+            deskripsi: item.deskripsi,
+            kategori_usia: item.kategori_usia
         });
+    });
+
+    // Urutkan kategori biar rapi
+    const sortedProductData = {};
+    Object.keys(productData).sort().forEach(key => {
+        sortedProductData[key] = productData[key];
     });
     </script>
     <script src="provinces.js"></script>

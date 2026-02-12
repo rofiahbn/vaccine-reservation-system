@@ -125,7 +125,29 @@ if (isset($_POST['selected_products']) && !empty($_POST['selected_products'])) {
         $selected_products = [];
     }
 
-    $participant_data['selected_products'] = $selected_products;
+    // FORMAT ULANG DATA PRODUCTS UNTUK PASTIKAN SEMUA FIELD TERSIMPAN
+    $formatted_products = [];
+    
+    foreach ($selected_products as $product) {
+        // Pastikan format standar
+        $formatted_products[] = [
+            'id' => $product['id'] ?? 0,
+            'service_id' => $product['id'] ?? 0, // DUPLIKAT UNTUK JAGA-JAGA
+            'name' => $product['name'] ?? $product['nama_layanan'] ?? '',
+            'nama_layanan' => $product['name'] ?? $product['nama_layanan'] ?? '',
+            'harga' => $product['price'] ?? $product['harga'] ?? 0,
+            'price' => $product['price'] ?? $product['harga'] ?? 0,
+            'kode_layanan' => $product['kode_layanan'] ?? '',
+            'tipe' => $product['tipe'] ?? 'pelayanan',
+            'kategori_usia' => $product['kategori_usia'] ?? '',
+            'deskripsi' => $product['deskripsi'] ?? ''
+        ];
+    }
+
+    $participant_data['selected_products'] = $formatted_products;
+
+    // SIMPAN JUGA KE SESSION UNTUK MULTI PARTICIPANT
+    $_SESSION['selected_products_raw'] = $formatted_products;
 
 } else {
     $participant_data['selected_products'] = [];
