@@ -11,19 +11,44 @@ if (!isset($_SESSION['booking_active'])) {
 /* ===== AMBIL DATA SERVICES DARI DATABASE ===== */
 $services_data = [];
 
-// Perbaiki query - hapus ORDER BY kategori karena kolom kategori tidak ada
-// Gunakan kategori_usia atau nama_layanan untuk sorting
-$result = $conn->query("SELECT * FROM services ORDER BY nama_layanan ASC");
+// 🔥 QUERY yang benar
+$sql = "SELECT 
+            id, 
+            nama_layanan, 
+            tipe,
+            kategori_usia, 
+            harga,
+            kode_paket,
+            kode_layanan,
+            deskripsi
+        FROM services 
+        WHERE tipe IN ('pelayanan', 'paket')
+        ORDER BY 
+            CASE tipe 
+                WHEN 'pelayanan' THEN 1 
+                WHEN 'paket' THEN 2 
+            END,
+            kategori_usia, 
+            nama_layanan ASC";
 
-// Cek apakah query berhasil
+$result = $conn->query($sql);
+
 if ($result === false) {
-    // Tampilkan error query
     die("Error query: " . $conn->error);
 }
 
 while ($row = $result->fetch_assoc()) {
     $services_data[] = $row;
 }
+
+// Pisahkan berdasarkan tipe
+$layanan_data = array_filter($services_data, function($item) {
+    return $item['tipe'] === 'pelayanan';
+});
+
+$paket_data = array_filter($services_data, function($item) {
+    return $item['tipe'] === 'paket';
+});
 
 // Ambil data peserta dari session (untuk multi participant)
 $participants = isset($_SESSION['participants']) ? $_SESSION['participants'] : [];
@@ -435,6 +460,9 @@ $limit_umroh = (clone $today)->modify('+7 days');
                 <div class="form-group">
                     <input type="text" class="search-box-layanan" id="searchLayanan" placeholder="🔍 Ketik nama layanan...">
                 </div>
+
+                <!-- Tabs Container -->
+                <div id="productTabsContainer"></div>
                 
                 <!-- Category Accordion -->
                 <div class="category-accordion" id="categoryAccordion">
@@ -533,37 +561,49 @@ $limit_umroh = (clone $today)->modify('+7 days');
     </script>
     
     <script>
-        // Data services langsung dari database
-        const servicesFromDB = <?= json_encode($services_data) ?>;
-        
-        // Kelompokkan berdasarkan kategori_usia
-        const servicesByCategory = {};
-        
-        servicesFromDB.forEach(service => {
-            // Gunakan kategori_usia sebagai kategori, default 'Lainnya' jika null
-            const category = service.kategori_usia || 'Lainnya';
-            
-            if (!servicesByCategory[category]) {
-                servicesByCategory[category] = [];
+        // Data mentah dari database
+        const rawServices = <?= json_encode($services_data) ?>;
+        const rawLayanan = <?= json_encode(array_values($layanan_data)) ?>;
+        const rawPaket = <?= json_encode(array_values($paket_data)) ?>;
+
+        console.log('Raw Services:', rawServices);
+        console.log('Layanan:', rawLayanan);
+        console.log('Paket:', rawPaket);
+
+        // Susun per kategori untuk Layanan
+        const productDataLayanan = {};
+        rawLayanan.forEach(item => {
+            const kategori = item.kategori_usia || 'Layanan Lainnya';
+            if (!productDataLayanan[kategori]) {
+                productDataLayanan[kategori] = [];
             }
-            
-            servicesByCategory[category].push({
-                id: service.id,
-                kode_layanan: service.kode_layanan,
-                nama_layanan: service.nama_layanan,
-                kategori_usia: service.kategori_usia,
-                tipe: service.tipe,
-                deskripsi: service.deskripsi,
-                harga: service.harga,
-                kode_paket: service.kode_paket
+            productDataLayanan[kategori].push({
+                id: item.id,
+                name: item.nama_layanan,
+                price: item.harga,
+                kode_layanan: item.kode_layanan,
+                tipe: 'pelayanan'
             });
         });
-        
-        // Urutkan kategori
-        const sortedCategories = {};
-        Object.keys(servicesByCategory).sort().forEach(key => {
-            sortedCategories[key] = servicesByCategory[key];
+
+        // Susun per kategori untuk Paket
+        const productDataPaket = {};
+        rawPaket.forEach(item => {
+            const kategori = item.kategori_usia || 'Paket Lainnya';
+            if (!productDataPaket[kategori]) {
+                productDataPaket[kategori] = [];
+            }
+            productDataPaket[kategori].push({
+                id: item.id,
+                name: item.nama_layanan,
+                price: item.harga,
+                kode_paket: item.kode_paket,
+                tipe: 'paket'
+            });
         });
+
+        // Gabungkan untuk keperluan global (backward compatibility)
+        const productData = {...productDataLayanan, ...productDataPaket};
     </script>
     <script src="provinces.js"></script>
     <script src="script.js?v=<?php echo time(); ?>"></script>

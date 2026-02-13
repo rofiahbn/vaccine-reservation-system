@@ -1003,125 +1003,315 @@ textarea {
     color: #e74c3c;
 }
 
+/* ============================================
+   SERVICE.CSS - Styling untuk Layanan & Paket
+   ============================================ */
+
+/* ===== PRODUCT TABS ===== */
+.product-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0;
+}
+
+.tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    bottom: -2px;
+}
+
+.tab-btn:hover {
+    background: #f8fafc;
+    color: #475569;
+}
+
+.tab-btn i {
+    font-size: 16px;
+    color: #94a3b8;
+}
+
+.tab-btn.active {
+    background: white;
+    color: #1e293b;
+    border-color: #fbac07;
+    border-bottom: 2px solid white;
+    z-index: 1;
+}
+
+.tab-btn.active i {
+    color: #fbac07;
+}
+
+.tab-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 8px;
+    background: #e2e8f0;
+    color: #475569;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: 4px;
+}
+
+.tab-btn.active .tab-count {
+    background: #fff4db;
+    color: #92400e;
+}
+
 /* ===== CATEGORY ACCORDION ===== */
+.category-accordion {
+    margin-top: 20px;
+}
+
 .category-item {
-    border: 1px solid #edf2f7;
-    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
     margin-bottom: 12px;
     background: white;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.category-item:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .category-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 14px 18px;
-    background: #f9fbfd;
+    padding: 16px 20px;
+    background: #f8fafc;
     cursor: pointer;
-    border-radius: 6px;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.category-header:hover {
+    background: #f1f5f9;
 }
 
 .category-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     font-weight: 600;
-    color: #2c3e50;
-    font-size: 0.95rem;
+    color: #1e293b;
+    font-size: 15px;
 }
 
-.category-count {
-    color: #6c7a89;
-    font-size: 0.85rem;
-    background: white;
-    padding: 2px 10px;
+.category-title i {
+    font-size: 16px;
+    color: #64748b;
+}
+
+.category-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 8px;
+    background: #fbac07;
+    color: white;
     border-radius: 20px;
-    border: 1px solid #e2e9f0;
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: 8px;
 }
 
-.category-icon {
-    color: #95a5a6;
-    font-size: 0.8rem;
-    transition: transform 0.2s;
-}
-
-.category-header.active .category-icon {
-    transform: rotate(180deg);
+.category-header .fa-chevron-down {
+    color: #94a3b8;
+    font-size: 14px;
+    transition: transform 0.3s ease;
 }
 
 .category-content {
     padding: 16px;
-    border-top: 1px solid #edf2f7;
+    border-top: 1px solid #e2e8f0;
     background: white;
+    display: none;
 }
 
-/* ===== SERVICE ITEMS ===== */
-.service-item {
+/* ===== PRODUCT ITEMS ===== */
+.product-item {
     display: flex;
     align-items: flex-start;
     gap: 12px;
-    padding: 12px;
-    border-bottom: 1px solid #f0f4f8;
+    padding: 14px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    transition: all 0.2s ease;
 }
 
-.service-item:last-child {
-    border-bottom: none;
+.product-item:hover {
+    background: #f8fafc;
 }
 
-.service-checkbox input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    margin-top: 3px;
+.product-item:last-child {
+    margin-bottom: 0;
+}
+
+.product-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    flex: 1;
     cursor: pointer;
-    accent-color: #2c7da0;
 }
 
-.service-details {
+.product-checkbox input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    cursor: pointer;
+    accent-color: #fbac07;
+    border-radius: 4px;
+}
+
+.checkmark {
+    /* Optional: custom checkbox styling dapat ditambahkan di sini */
+}
+
+.product-name {
+    font-weight: 500;
+    color: #1e293b;
+    font-size: 14px;
+    line-height: 1.5;
     flex: 1;
 }
 
-.service-details label {
-    font-weight: 500;
-    color: #34495e;
-    font-size: 0.95rem;
-    cursor: pointer;
+.product-meta {
     display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    margin-left: auto;
+}
+
+.product-code {
+    color: #64748b;
+    font-size: 11px;
+    background: #f1f5f9;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+.product-price {
+    color: #fbac07;
+    font-weight: 700;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+/* ===== SELECTED BADGES ===== */
+.selected-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 16px;
+    align-items: center;
+}
+
+.badges-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    margin-right: 4px;
+}
+
+.product-badge {
+    display: inline-flex;
     align-items: center;
     gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 4px;
+    padding: 6px 12px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #1e293b;
+    transition: all 0.2s ease;
 }
 
-.service-code {
-    color: #7f8c8d;
-    font-size: 0.75rem;
-    background: #f0f4f8;
-    padding: 2px 8px;
-    border-radius: 4px;
+.product-badge:hover {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
-.service-description {
-    color: #5f6b7a;
-    font-size: 0.85rem;
-    margin: 4px 0;
-    line-height: 1.5;
+.product-badge button {
+    background: none;
+    border: none;
+    color: #64748b;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
 }
 
-.service-price {
-    color: #2c7da0;
-    font-weight: 600;
-    font-size: 0.9rem;
-    margin-top: 6px;
-    display: inline-block;
+.product-badge button:hover {
+    background: #fee;
+    color: #dc2626;
 }
 
-/* ===== BADGES ===== */
+.badge-layanan {
+    background: #dbeafe;
+    border-color: #93c5fd;
+    color: #1e40af;
+}
+
 .badge-paket {
-    background: #fff4e5;
-    color: #e67e22;
-    padding: 2px 10px;
-    border-radius: 4px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
+    background: #f3e8ff;
+    border-color: #d8b4fe;
+    color: #6d28d9;
+}
+
+/* ===== SEARCH BOX ===== */
+.search-box-layanan {
+    width: 100%;
+    padding: 12px 16px;
+    padding-left: 42px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.search-box-layanan:focus {
+    outline: none;
+    border-color: #fbac07;
+    box-shadow: 0 0 0 3px rgba(251, 172, 7, 0.1);
 }
 
 /* ===== TOTAL INFO ===== */
@@ -1130,47 +1320,177 @@ textarea {
     justify-content: space-between;
     align-items: center;
     padding: 16px 20px;
-    background: #f9fbfd;
-    border-radius: 6px;
+    background: #fff4db;
+    border-radius: 10px;
     margin-top: 20px;
-    border: 1px solid #eef2f6;
+    border: 1px solid #fde68a;
 }
 
 .total-info strong {
-    color: #2c7da0;
-    font-size: 1.1rem;
+    color: #92400e;
+    font-size: 18px;
     margin-left: 5px;
+    font-weight: 700;
 }
 
 /* ===== EMPTY STATE ===== */
-.empty-services {
+.empty-state {
     text-align: center;
-    padding: 40px 20px;
-    background: #f9fbfd;
-    border-radius: 6px;
-    color: #7f8c8d;
-    font-size: 0.95rem;
+    padding: 60px 20px;
+    background: #f8fafc;
+    border-radius: 12px;
+    color: #64748b;
+    font-size: 15px;
+}
+
+.empty-state i {
+    font-size: 48px;
+    color: #cbd5e1;
+    margin-bottom: 16px;
+    display: block;
+}
+
+.empty-state p {
+    margin: 8px 0 0 0;
+    line-height: 1.6;
 }
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
-    .service-section {
-        padding: 18px;
+    .product-tabs {
+        gap: 6px;
     }
     
-    .service-item {
+    .tab-btn {
+        padding: 10px 16px;
+        font-size: 13px;
+        flex: 1;
+        justify-content: center;
+    }
+    
+    .tab-btn i {
+        font-size: 14px;
+    }
+    
+    .category-header {
+        padding: 14px 16px;
+    }
+    
+    .category-title {
+        font-size: 14px;
+    }
+    
+    .category-content {
+        padding: 12px;
+    }
+    
+    .product-item {
         flex-direction: column;
-        gap: 8px;
+        gap: 10px;
+        padding: 12px;
     }
     
-    .badge-selected {
+    .product-checkbox {
+        width: 100%;
+    }
+    
+    .product-meta {
+        flex-direction: row;
+        align-items: center;
         width: 100%;
         justify-content: space-between;
+    }
+    
+    .selected-badges {
+        padding: 12px;
+        gap: 6px;
+    }
+    
+    .product-badge {
+        font-size: 12px;
+        padding: 5px 10px;
+    }
+    
+    .badges-label {
+        width: 100%;
+        margin-bottom: 4px;
     }
     
     .total-info {
         flex-direction: column;
         gap: 8px;
         text-align: center;
+        padding: 14px;
     }
+    
+    .search-box-layanan {
+        padding: 10px 14px;
+        padding-left: 38px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .tab-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+    
+    .tab-count {
+        font-size: 10px;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 6px;
+    }
+    
+    .category-title {
+        font-size: 13px;
+    }
+    
+    .product-name {
+        font-size: 13px;
+    }
+    
+    .product-price {
+        font-size: 13px;
+    }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.category-content {
+    animation: fadeIn 0.3s ease;
+}
+
+.product-badge {
+    animation: fadeIn 0.2s ease;
+}
+
+/* ===== SCROLLBAR STYLING ===== */
+.category-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.category-content::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.category-content::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.category-content::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }

@@ -6,11 +6,40 @@ include "calendar_helper.php";
 // ================== AMBIL DATA SERVICES ==================
 $services_data = [];
 
-$result = $conn->query("SELECT * FROM services ORDER BY kategori_usia, nama_layanan ASC");
+// 🔥 QUERY BARU - sesuai dengan database services yang baru
+$sql = "SELECT 
+            id, 
+            nama_layanan, 
+            tipe,
+            kategori_usia, 
+            harga,
+            kode_paket,
+            kode_layanan,
+            deskripsi
+        FROM services 
+        WHERE tipe IN ('pelayanan', 'paket')
+        ORDER BY 
+            CASE tipe 
+                WHEN 'pelayanan' THEN 1 
+                WHEN 'paket' THEN 2 
+            END,
+            kategori_usia, 
+            nama_layanan ASC";
+
+$result = $conn->query($sql);
 
 while ($row = $result->fetch_assoc()) {
     $services_data[] = $row;
 }
+
+// Pisahkan berdasarkan tipe
+$layanan_data = array_filter($services_data, function($item) {
+    return $item['tipe'] === 'pelayanan';
+});
+
+$paket_data = array_filter($services_data, function($item) {
+    return $item['tipe'] === 'paket';
+});
 
 // Set bulan dan tahun untuk kalender
 $bulan = isset($_GET['bulan']) ? intval($_GET['bulan']) : date('n');
@@ -500,6 +529,9 @@ if (isset($errors) && count($errors) > 0) {
                 <div class="form-group">
                     <input type="text" class="search-box-layanan" id="searchLayanan" placeholder="🔍 Ketik nama layanan...">
                 </div>
+
+                <!-- Tabs Container -->
+                <div id="productTabsContainer"></div>
                 
                 <!-- Category Accordion -->
                 <div class="category-accordion" id="categoryAccordion">
@@ -621,35 +653,49 @@ if (isset($errors) && count($errors) > 0) {
     ?>;
     </script>
     <script>
+    // Data mentah dari database
     const rawServices = <?= json_encode($services_data) ?>;
+    const rawLayanan = <?= json_encode(array_values($layanan_data)) ?>;
+    const rawPaket = <?= json_encode(array_values($paket_data)) ?>;
 
-    // Susun per kategori otomatis
-    const productData = {};
+    console.log('Raw Services:', rawServices);
+    console.log('Layanan:', rawLayanan);
+    console.log('Paket:', rawPaket);
 
-    rawServices.forEach(item => {
-        // Gunakan kategori_usia, default 'Lainnya' jika null
-        const kategori = item.kategori_usia || 'Lainnya';
-        
-        if (!productData[kategori]) {
-            productData[kategori] = [];
+    // Susun per kategori untuk Layanan
+    const productDataLayanan = {};
+    rawLayanan.forEach(item => {
+        const kategori = item.kategori_usia || 'Layanan Lainnya';
+        if (!productDataLayanan[kategori]) {
+            productDataLayanan[kategori] = [];
         }
-
-        productData[kategori].push({
+        productDataLayanan[kategori].push({
             id: item.id,
             name: item.nama_layanan,
             price: item.harga,
             kode_layanan: item.kode_layanan,
-            tipe: item.tipe,
-            deskripsi: item.deskripsi,
-            kategori_usia: item.kategori_usia
+            tipe: 'pelayanan'
         });
     });
 
-    // Urutkan kategori biar rapi
-    const sortedProductData = {};
-    Object.keys(productData).sort().forEach(key => {
-        sortedProductData[key] = productData[key];
+    // Susun per kategori untuk Paket
+    const productDataPaket = {};
+    rawPaket.forEach(item => {
+        const kategori = item.kategori_usia || 'Paket Lainnya';
+        if (!productDataPaket[kategori]) {
+            productDataPaket[kategori] = [];
+        }
+        productDataPaket[kategori].push({
+            id: item.id,
+            name: item.nama_layanan,
+            price: item.harga,
+            kode_paket: item.kode_paket,
+            tipe: 'paket'
+        });
     });
+
+    // Gabungkan untuk keperluan global (backward compatibility)
+    const productData = {...productDataLayanan, ...productDataPaket};
     </script>
     <script src="provinces.js"></script>
     <script src="script.js"></script>

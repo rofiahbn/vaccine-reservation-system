@@ -1,6 +1,12 @@
 // ==================== FORM LAYANAN ====================
 function updateFormByService() {
-    const layanan = document.getElementById('pelayananSelect').value;
+    const layanan = document.getElementById('pelayananSelect')?.value;
+    
+    // ✅ SKIP jika layanan belum dipilih
+    if (!layanan) {
+        return;
+    }
+    
     const labelNama = document.getElementById('labelNama');
     const inputNama = document.getElementById('namaLengkap');
     
@@ -584,23 +590,52 @@ function selectTime(element, time) {
 
 // ==================== FORM VALIDATION & INITIALIZATION ====================
 document.addEventListener('DOMContentLoaded', function() {
+    // ===== 0. CLEAN URL jika layanan kosong =====
+    const urlParams = new URLSearchParams(window.location.search);
+    const layananParam = urlParams.get('layanan');
+    
+    // ✅ Jika ada parameter layanan tapi kosong, clean URL
+    if (urlParams.has('layanan') && !layananParam) {
+        window.history.replaceState(null, '', window.location.pathname);
+    }
+    
     // ===== 1. RESTORE FORM DATA DULU (jika ada dari reload) =====
     restoreFormFromSession();
     
-    // ===== 2. UPDATE FORM BERDASARKAN LAYANAN =====
-    updateFormByService();
+    // ===== 2. UPDATE FORM BERDASARKAN LAYANAN (hanya jika sudah dipilih) =====
+    const currentLayanan = document.getElementById('pelayananSelect')?.value;
+    if (currentLayanan) {
+        updateFormByService();
+    }
     
     // ===== 3. SETUP FORM VALIDATION =====
     const form = document.getElementById('registrationForm');
     
     if (form) {
         form.addEventListener('submit', function(e) {
+            // CEK DULU: apakah ini submit untuk "Selesai" atau "Tambah Peserta"
+            const submitButton = e.submitter;
+            const action = submitButton?.getAttribute('name') === 'action' ? submitButton.value : '';
+            
+            console.log('Form submit with action:', action);
+            console.log('Submit button:', submitButton);
+            
             // Validasi layanan dipilih
-            const layanan = document.getElementById('pelayananSelect').value;
+            const layanan = document.getElementById('pelayananSelect')?.value;
             if (!layanan) {
                 e.preventDefault();
                 alert('Pilih layanan terlebih dahulu!');
-                return;
+                document.getElementById('pelayananSelect').focus();
+                return false;
+            }
+            
+            // Validasi nama lengkap
+            const namaLengkap = document.getElementById('namaLengkap')?.value.trim();
+            if (!namaLengkap) {
+                e.preventDefault();
+                alert('Nama lengkap harus diisi!');
+                document.getElementById('namaLengkap').focus();
+                return false;
             }
             
             // Validasi tanggal lahir
@@ -608,7 +643,16 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!tglLahir || !tglLahir.value) {
                 e.preventDefault();
                 alert('Tanggal lahir harus diisi!');
-                return;
+                tglLahir?.focus();
+                return false;
+            }
+            
+            // Validasi jenis kelamin
+            const jenisKelamin = document.querySelector('input[name="jenis_kelamin"]:checked');
+            if (!jenisKelamin) {
+                e.preventDefault();
+                alert('Pilih jenis kelamin!');
+                return false;
             }
             
             // Validasi identitas sesuai layanan
@@ -616,23 +660,26 @@ document.addEventListener('DOMContentLoaded', function() {
             const inputPaspor = document.getElementById('inputPaspor');
             
             if (layanan === 'Umroh/Haji/Luar Negeri') {
-                if (!inputPaspor.value.trim()) {
+                if (!inputPaspor?.value.trim()) {
                     e.preventDefault();
                     alert('Nomor Paspor harus diisi untuk layanan Umroh/Haji/Luar Negeri!');
-                    return;
+                    inputPaspor?.focus();
+                    return false;
                 }
             } else if (layanan === 'Vaksinasi Umum/Infus Vitamin') {
-                if (!inputNIK.value.trim()) {
+                if (!inputNIK?.value.trim()) {
                     e.preventDefault();
                     alert('NIK harus diisi untuk layanan Vaksinasi Umum/Infus Vitamin!');
-                    return;
+                    inputNIK?.focus();
+                    return false;
                 }
                 
                 // Validasi format NIK (16 digit)
                 if (inputNIK.value.trim().length !== 16) {
                     e.preventDefault();
                     alert('NIK harus 16 digit!');
-                    return;
+                    inputNIK?.focus();
+                    return false;
                 }
             }
             
@@ -654,28 +701,70 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!emailValid || !phoneValid) {
                 e.preventDefault();
                 alert('Minimal harus ada 1 email dan 1 nomor HP yang diisi!');
-                return;
+                return false;
+            }
+            
+            // Validasi alamat
+            const alamat = document.querySelector('textarea[name="alamat"]')?.value.trim();
+            if (!alamat) {
+                e.preventDefault();
+                alert('Alamat lengkap harus diisi!');
+                document.querySelector('textarea[name="alamat"]')?.focus();
+                return false;
             }
             
             // Validasi provinsi & kota
-            const provinsi = document.getElementById('provinsiSelect').value;
-            const kota = document.getElementById('kotaSelect').value;
+            const provinsi = document.getElementById('provinsiSelect')?.value;
+            const kota = document.getElementById('kotaSelect')?.value;
             
             if (!provinsi || !kota) {
                 e.preventDefault();
                 alert('Provinsi dan Kota/Kabupaten harus dipilih!');
-                return;
+                if (!provinsi) document.getElementById('provinsiSelect')?.focus();
+                else document.getElementById('kotaSelect')?.focus();
+                return false;
             }
             
             // Validasi jadwal dipilih
-            const tanggalBooking = document.getElementById('selectedDate').value;
-            const waktuBooking = document.getElementById('selectedTime').value;
+            const tanggalBooking = document.getElementById('selectedDate')?.value;
+            const waktuBooking = document.getElementById('selectedTime')?.value;
             
             if (!tanggalBooking || !waktuBooking) {
                 e.preventDefault();
                 alert('Pilih tanggal dan jam booking terlebih dahulu!');
-                return;
+                if (!tanggalBooking) {
+                    document.querySelector('.calendar-wrapper')?.scrollIntoView({ behavior: 'smooth' });
+                }
+                return false;
             }
+            
+            // Validasi produk/layanan dipilih
+            const selectedProductsInput = document.getElementById('selectedProductsInput')?.value;
+            if (!selectedProductsInput || selectedProductsInput === '[]' || selectedProductsInput === '') {
+                e.preventDefault();
+                alert('Pilih minimal 1 layanan atau paket!');
+                document.getElementById('categoryAccordion')?.scrollIntoView({ behavior: 'smooth' });
+                return false;
+            }
+            
+            // ✅ SEMUA VALIDASI PASSED
+            console.log('All validations passed, submitting form...');
+            
+            // Tampilkan loading state
+            if (submitButton) {
+                submitButton.disabled = true;
+                const originalText = submitButton.innerHTML;
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+                
+                // Restore button setelah 5 detik (jika form tidak submit)
+                setTimeout(() => {
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalText;
+                }, 5000);
+            }
+            
+            // Allow form to submit
+            return true;
         });
     }
 });
