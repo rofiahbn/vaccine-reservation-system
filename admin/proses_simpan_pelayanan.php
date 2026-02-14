@@ -9,57 +9,55 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $tipe = $_POST['tipe'] ?? 'pelayanan';
 $nama_layanan = trim($_POST['nama_layanan'] ?? '');
-$kategori = $_POST['kategori'] ?? '';
-$harga = $_POST['harga'] ?? 0;
+$kategori_usia = $_POST['kategori_usia'] ?? '';
+$harga = str_replace('.', '', $_POST['harga'] ?? 0); // Hapus titik jika ada format rupiah
 $deskripsi = $_POST['deskripsi'] ?? '';
+$kode_paket = $_POST['kode_paket'] ?? '';
 
 // Validasi
-if (empty($nama_layanan) || empty($kategori) || empty($harga)) {
-    $_SESSION['error'] = 'Nama, kategori, dan harga wajib diisi';
+if (empty($nama_layanan) || empty($kategori_usia) || empty($harga)) {
+    $_SESSION['error'] = 'Nama, kategori usia, dan harga wajib diisi';
     header('Location: add_pelayanan.php?tipe=' . $tipe);
     exit;
 }
 
 // ========== INSERT KE TABEL SERVICES ==========
 if ($tipe == 'pelayanan') {
-    $durasi_layanan = $_POST['durasi_layanan'] ?? null;
+    // Untuk layanan (pelayanan)
     $sql = "INSERT INTO services (
         nama_layanan, 
-        product_category, 
-        kategori, 
+        kategori_usia, 
+        tipe, 
         harga, 
-        durasi_layanan, 
         deskripsi,
-        created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, NOW())";
+        created_at,
+        updated_at
+    ) VALUES (?, ?, 'pelayanan', ?, ?, NOW(), NOW())";
     
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sssiss", 
+    $stmt->bind_param("ssis", 
         $nama_layanan, 
-        $tipe, 
-        $kategori, 
+        $kategori_usia, 
         $harga, 
-        $durasi_layanan, 
         $deskripsi
     );
     
 } else { // paket
-    $kode_paket = $_POST['kode_paket'] ?? null;
     $sql = "INSERT INTO services (
         nama_layanan, 
-        product_category, 
-        kategori, 
+        kategori_usia, 
+        tipe, 
         harga, 
         kode_paket, 
         deskripsi,
-        created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, NOW())";
+        created_at,
+        updated_at
+    ) VALUES (?, ?, 'paket', ?, ?, ?, NOW(), NOW())";
     
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sssiss", 
+    $stmt->bind_param("ssiss", 
         $nama_layanan, 
-        $tipe, 
-        $kategori, 
+        $kategori_usia, 
         $harga, 
         $kode_paket, 
         $deskripsi
@@ -74,64 +72,75 @@ if (!$stmt->execute()) {
 
 $service_id = $stmt->insert_id;
 
-// ========== INSERT KOMPONEN LAYANAN ==========
-if ($tipe == 'pelayanan' && $service_id) {
-    $component_ids = $_POST['component_id'] ?? [];
-    $component_customs = $_POST['component_custom'] ?? [];
-    $component_qty = $_POST['component_qty'] ?? [];
-    $component_type = $_POST['component_type'] ?? [];
+// ========== INSERT KOMPONEN LAYANAN (untuk pelayanan) ==========
+if ($tipe == 'pelayanan' && $service_id && isset($_POST['components'])) {
+    $components = $_POST['components'];
     
-    $comp_sql = "INSERT INTO service_components 
-                  (service_id, component_name, component_type, quantity) 
-                  VALUES (?, ?, ?, ?)";
-    $comp_stmt = $conn->prepare($comp_sql);
+    // Pisahkan komponen produk dan jasa
+    $produk_components = [];
+    $jasa_components = [];
     
-    for ($i = 0; $i < count($component_qty); $i++) {
-        $qty = $component_qty[$i] ?? 1;
-        $type = $component_type[$i] ?? 'vaksin';
-        $name = '';
+    foreach ($components as $comp) {
+        $id = $comp['id'] ?? '';
+        $qty = $comp['qty'] ?? 1;
+        $tipe_komponen = $comp['tipe'] ?? '';
         
-        // Cek apakah pilih dari dropdown atau manual
-        if (isset($component_ids[$i]) && !empty($component_ids[$i]) && $component_ids[$i] !== 'custom') {
-            // Ambil nama produk dari database
-            $prod_id = $component_ids[$i];
-            $prod_query = "SELECT nama_layanan FROM services WHERE id = ?";
-            $prod_stmt = $conn->prepare($prod_query);
-            $prod_stmt->bind_param("i", $prod_id);
-            $prod_stmt->execute();
-            $prod_result = $prod_stmt->get_result();
-            $prod = $prod_result->fetch_assoc();
-            $name = $prod['nama_layanan'] ?? 'Produk';
-        } else {
-            // Manual input
-            $name = $component_customs[$i] ?? '';
+        if (empty($id) || empty($tipe_komponen)) continue;
+        
+        if ($tipe_komponen === 'produk') {
+            $produk_components[] = [
+                'product_id' => $id,
+                'quantity' => $qty
+            ];
+        } elseif ($tipe_komponen === 'jasa') {
+            $jasa_components[] = [
+                'jasa_id' => $id,
+                'quantity' => $qty
+            ];
         }
+    }
+    
+    // Insert komponen PRODUK ke tabel service_product_components
+    if (!empty($produk_components)) {
+        $produk_sql = "INSERT INTO service_product_components (service_id, product_id, quantity, created_at, updated_at) 
+                       VALUES (?, ?, ?, NOW(), NOW())";
+        $produk_stmt = $conn->prepare($produk_sql);
         
-        if (!empty($name)) {
-            $comp_stmt->bind_param("issi", $service_id, $name, $type, $qty);
-            $comp_stmt->execute();
+        foreach ($produk_components as $comp) {
+            $produk_stmt->bind_param("iii", $service_id, $comp['product_id'], $comp['quantity']);
+            $produk_stmt->execute();
+        }
+    }
+    
+    // Insert komponen JASA ke tabel service_jasa_components
+    if (!empty($jasa_components)) {
+        $jasa_sql = "INSERT INTO service_jasa_components (service_id, jasa_id, quantity, created_at, updated_at) 
+                     VALUES (?, ?, ?, NOW(), NOW())";
+        $jasa_stmt = $conn->prepare($jasa_sql);
+        
+        foreach ($jasa_components as $comp) {
+            $jasa_stmt->bind_param("iii", $service_id, $comp['jasa_id'], $comp['quantity']);
+            $jasa_stmt->execute();
         }
     }
 }
 
-// ========== INSERT ITEM PAKET ==========
-if ($tipe == 'paket' && $service_id) {
-    $package_service_ids = $_POST['package_service_id'] ?? [];
-    $package_visit_order = $_POST['package_visit_order'] ?? [];
-    $package_qty = $_POST['package_qty'] ?? [];
+// ========== INSERT ITEM PAKET (untuk paket) ==========
+if ($tipe == 'paket' && $service_id && isset($_POST['package_items'])) {
+    $package_items = $_POST['package_items'];
     
     $item_sql = "INSERT INTO service_package_items 
-                  (package_id, service_id, quantity, visit_order) 
-                  VALUES (?, ?, ?, ?)";
+                  (package_id, service_id, quantity, visit_order, created_at) 
+                  VALUES (?, ?, ?, ?, NOW())";
     $item_stmt = $conn->prepare($item_sql);
     
-    for ($i = 0; $i < count($package_service_ids); $i++) {
-        $service_id_item = $package_service_ids[$i] ?? 0;
-        $qty = $package_qty[$i] ?? 1;
-        $visit_order = $package_visit_order[$i] ?? ($i + 1);
+    foreach ($package_items as $item) {
+        $service_id_item = $item['id'] ?? 0;
+        $visit_order = $item['visit_order'] ?? 1;
+        $quantity = $item['qty'] ?? 1;
         
         if (!empty($service_id_item)) {
-            $item_stmt->bind_param("iiii", $service_id, $service_id_item, $qty, $visit_order);
+            $item_stmt->bind_param("iiii", $service_id, $service_id_item, $quantity, $visit_order);
             $item_stmt->execute();
         }
     }
