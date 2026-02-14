@@ -33,7 +33,7 @@ if (!empty($where_conditions)) {
 
 // ================= GET PRODUCTS WITH STOCK =================
 $sql = "SELECT 
-            p.*,
+            p.*,  
             COALESCE(SUM(ps.stock), 0) as total_stock,
             GROUP_CONCAT(
                 CONCAT(ps.batch_number, '||', ps.expired_date, '||', ps.stock) 
