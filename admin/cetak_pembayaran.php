@@ -134,12 +134,14 @@ $result_riwayat = $stmt_riwayat->get_result();
 
 $riwayat_data = [];
 $total_sudah_dibayar = 0;
+$total_diskon_global = 0;
 
 while ($row = $result_riwayat->fetch_assoc()) {
     $riwayat_data[] = $row;
     if ($row['status'] == 'paid' || $row['status'] == 'partial') {
         $total_sudah_dibayar += $row['amount_paid'];
     }
+    $total_diskon_global += floatval($row['diskon'] ?? 0);
 }
 
 // Ambil payment terakhir untuk info di faktur
@@ -186,13 +188,15 @@ while ($row = $result_services->fetch_assoc()) {
     $data_services[] = $row;
 }
 
-$sisa_tagihan = $total_tagihan - $total_sudah_dibayar;
+// 🔥 PERBAIKAN: Hitung total tagihan final dengan diskon global
+$total_tagihan_final = $total_tagihan - $total_diskon_global;
+if ($total_tagihan_final < 0) $total_tagihan_final = 0;
+
+$sisa_tagihan = $total_tagihan_final - $total_sudah_dibayar;
+if ($sisa_tagihan < 0) $sisa_tagihan = 0;
 
 /* ================= DISKON TOTAL (jika ada di payment terakhir) ================= */
-$diskon_total = 0;
-if ($payment_terakhir && isset($payment_terakhir['diskon'])) {
-    $diskon_total = floatval($payment_terakhir['diskon']);
-}
+$diskon_total = $total_diskon_global; // Gunakan total diskon global
 
 /* ================= FORMAT TANGGAL ================= */
 function formatTanggalIndo($date) {
@@ -693,7 +697,7 @@ $html .= '
                 <tr>
                     <td><strong>Total Tagihan</strong></td>
                     <td>:</td>
-                    <td>Rp. ' . number_format($total_tagihan, 0, ',', '.') . '</td>
+                    <td>Rp. ' . number_format($total_tagihan_final, 0, ',', '.') . '</td>
                 </tr>
                 <tr>
                     <td><strong>Sudah Dibayar</strong></td>

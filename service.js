@@ -224,14 +224,27 @@ function updateButtonState() {
     const btnAddMore = document.getElementById('btnAddMore');
     const btnFinish = document.getElementById('btnFinish');
     
-    const hasSelection = 
-        selectedProducts.length > 0 &&
-        document.getElementById("selectedDate")?.value &&
-        document.getElementById("selectedTime")?.value;
+    // ✅ Check apakah ada field date/time (untuk order.php)
+    const dateField = document.getElementById("selectedDate");
+    const timeField = document.getElementById("selectedTime");
+    
+    let hasSelection;
+    
+    if (dateField && timeField) {
+        // ✅ order.php - butuh produk DAN jadwal
+        hasSelection = 
+            selectedProducts.length > 0 &&
+            dateField.value &&
+            timeField.value;
+    } else {
+        // ✅ add_participant.php - cukup ada produk
+        // (jadwal sudah dipilih di peserta pertama)
+        hasSelection = selectedProducts.length > 0;
+    }
     
     if (btnSelesai) btnSelesai.disabled = !hasSelection;
     if (btnTambah) btnTambah.disabled = !hasSelection;
-    if (btnAddMore) btnAddMore.disabled = !hasSelection;
+    if (btnAddMore) btnAddMore.disabled = false; // ✅ Add more selalu enabled
     if (btnFinish) btnFinish.disabled = !hasSelection;
 }
 

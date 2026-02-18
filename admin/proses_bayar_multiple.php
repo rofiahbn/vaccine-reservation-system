@@ -290,30 +290,47 @@ if ($stmt_uc) {
     $stmt_uc->close();
 }
 
-// ================= UPDATE DISKON PER ITEM (jika ada) =================
-// Ambil service_id dari form jika ada
+// ================= UPDATE DISKON PER ITEM =================
 $service_ids = isset($_POST['service_id']) ? (array)$_POST['service_id'] : [];
 $service_diskon = isset($_POST['service_diskon']) ? (array)$_POST['service_diskon'] : [];
 $service_diskon_tipe = isset($_POST['service_diskon_tipe']) ? (array)$_POST['service_diskon_tipe'] : [];
 
-if (!empty($service_ids) && count($service_ids) == count($service_diskon)) {
+error_log("Service IDs: " . print_r($service_ids, true));
+error_log("Service Diskon: " . print_r($service_diskon, true));
+error_log("Service Diskon Tipe: " . print_r($service_diskon_tipe, true));
+
+if (!empty($service_ids)) {
     $sql_update_diskon = "UPDATE booking_services 
-                         SET diskon = ?, diskon_tipe = ?
+                         SET diskon = ?, diskon_tipe = ?, total = harga - ?
                          WHERE id = ?";
     
     $stmt_diskon = $conn->prepare($sql_update_diskon);
     if ($stmt_diskon) {
         foreach ($service_ids as $index => $service_id) {
-            if (isset($service_diskon[$index]) && isset($service_diskon_tipe[$index])) {
-                $diskon_value = floatval($service_diskon[$index]);
-                $tipe_value = trim($service_diskon_tipe[$index]);
+            $service_id = intval($service_id);
+            
+            // Ambil nilai diskon, default 0 jika tidak ada
+            $diskon_value = isset($service_diskon[$index]) ? floatval($service_diskon[$index]) : 0;
+            $tipe_value = isset($service_diskon_tipe[$index]) ? trim($service_diskon_tipe[$index]) : '';
+            
+            error_log("Updating service ID: $service_id, diskon: $diskon_value, tipe: $tipe_value");
+            
+            if ($service_id > 0) {
+                $stmt_diskon->bind_param("dsdi", $diskon_value, $tipe_value, $diskon_value, $service_id);
                 
-                $stmt_diskon->bind_param("dsi", $diskon_value, $tipe_value, $service_id);
-                $stmt_diskon->execute();
+                if (!$stmt_diskon->execute()) {
+                    error_log("Error updating service $service_id: " . $stmt_diskon->error);
+                } else {
+                    error_log("Service $service_id updated successfully");
+                }
             }
         }
         $stmt_diskon->close();
+    } else {
+        error_log("Prepare statement error: " . $conn->error);
     }
+} else {
+    error_log("No service IDs found in POST data");
 }
 
 // ================= RESPONSE SUCCESS =================

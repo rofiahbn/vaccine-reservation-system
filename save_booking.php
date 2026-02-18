@@ -1,9 +1,24 @@
 <?php
 session_start();
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// ========== DEBUG ==========
+error_log("========== SAVE BOOKING START ==========");
+error_log("Request Method: " . $_SERVER['REQUEST_METHOD']);
+error_log("POST data: " . print_r($_POST, true));
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    error_log("ERROR: Bukan POST request");
+    $_SESSION['error_message'] = 'Method tidak valid';
     header('Location: order.php');
     exit;
+}
+
+// Inisialisasi session participants jika belum ada
+if (!isset($_SESSION['participants'])) {
+    $_SESSION['participants'] = [];
+    error_log("Inisialisasi participants array");
 }
 
 // Validasi data
@@ -16,8 +31,13 @@ $tanggal_lahir = $_POST['tanggal_lahir'] ?? '';
 $jenis_kelamin = $_POST['jenis_kelamin'] ?? '';
 $tanggal_booking = $_POST['tanggal_booking'] ?? '';
 $waktu_booking = $_POST['waktu_booking'] ?? '';
-$action = $_POST['action'] ?? ''; // 'add_more' atau 'finish'
+$action = $_POST['submit_action'] ?? '';
 
+error_log("Action: $action");
+error_log("Service Type: $service_type");
+error_log("Nama: $nama_lengkap");
+
+// Validasi dasar
 if (empty($service_type)) $errors[] = 'Tipe layanan harus dipilih';
 if (empty($pelayanan)) $errors[] = 'Pelayanan harus dipilih';
 if (empty($nama_lengkap)) $errors[] = 'Nama lengkap harus diisi';
@@ -40,33 +60,43 @@ if ($pelayanan === 'Umroh/Haji/Luar Negeri') {
 }
 
 // Validasi kontak
-$emails = $_POST['emails'] ?? [];
-$phones = $_POST['phones'] ?? [];
+$raw_emails = $_POST['emails'] ?? [];
+$raw_phones = $_POST['phones'] ?? [];
 
-if (empty($emails[0])) $errors[] = 'Email harus diisi';
-if (empty($phones[0])) $errors[] = 'Nomor HP harus diisi';
+if (!is_array($raw_emails)) $raw_emails = [$raw_emails];
+if (!is_array($raw_phones)) $raw_phones = [$raw_phones];
 
-// Filter array (hapus yang kosong)
-$emails = array_filter($emails);
-$phones = array_filter($phones);
+if (empty($raw_emails[0])) $errors[] = 'Email harus diisi';
+if (empty($raw_phones[0])) $errors[] = 'Nomor HP harus diisi';
+
+// Filter array (hapus yang kosong) dan unique
+$emails = array_values(array_unique(array_filter($raw_emails)));
+$phones = array_values(array_unique(array_filter($raw_phones)));
 
 // Validasi alamat
 if (empty($_POST['alamat'])) $errors[] = 'Alamat harus diisi';
 if (empty($_POST['provinsi'])) $errors[] = 'Provinsi harus dipilih';
 if (empty($_POST['kota'])) $errors[] = 'Kota harus dipilih';
 
-// Jika ada error, kembali ke order.php dengan error message
+// Jika ada error
 if (!empty($errors)) {
     $_SESSION['error_message'] = implode('<br>', $errors);
+    error_log("ERRORS: " . print_r($errors, true));
     header('Location: order.php');
     exit;
 }
 
 // Hitung usia
-$birthDate = new DateTime($tanggal_lahir);
-$today = new DateTime();
-$usia = $today->diff($birthDate)->y;
-$kategori_usia = ($usia < 18) ? 'Anak' : 'Dewasa';
+try {
+    $birthDate = new DateTime($tanggal_lahir);
+    $today = new DateTime();
+    $usia = $today->diff($birthDate)->y;
+    $kategori_usia = ($usia < 18) ? 'Anak' : 'Dewasa';
+} catch (Exception $e) {
+    error_log("ERROR hitung usia: " . $e->getMessage());
+    $usia = 0;
+    $kategori_usia = 'Dewasa';
+}
 
 // Siapkan data peserta
 $participant_data = [
@@ -95,91 +125,63 @@ $participant_data = [
     'waktu_booking' => $waktu_booking
 ];
 
-if (!empty($_SESSION['participants'])) {
+error_log("Participant data: " . print_r($participant_data, true));
 
+// ========== CEK KONSISTENSI JADWAL ==========
+if (count($_SESSION['participants']) > 0) {
     $first = $_SESSION['participants'][0];
+    error_log("Cek konsistensi dengan peserta pertama");
 
-    // Lock jadwal
-    if (
-        $participant_data['tanggal_booking'] !== $first['tanggal_booking'] ||
-        $participant_data['waktu_booking'] !== $first['waktu_booking']
-    ) {
+    if ($participant_data['tanggal_booking'] !== $first['tanggal_booking'] ||
+        $participant_data['waktu_booking'] !== $first['waktu_booking']) {
         $_SESSION['error_message'] = 'Semua peserta harus memiliki jadwal yang sama.';
+        error_log("ERROR: Jadwal tidak sama");
         header('Location: add_participant.php');
         exit;
     }
 
-    // Lock service type
     if ($participant_data['service_type'] !== $first['service_type']) {
         $_SESSION['error_message'] = 'Semua peserta harus menggunakan tipe layanan yang sama.';
+        error_log("ERROR: Service type tidak sama");
         header('Location: add_participant.php');
         exit;
     }
 }
 
-// ========== SIMPAN SELECTED PRODUCTS KE PARTICIPANT DATA ==========
+// ========== SIMPAN SELECTED PRODUCTS ==========
 if (isset($_POST['selected_products']) && !empty($_POST['selected_products'])) {
     $selected_products = json_decode($_POST['selected_products'], true);
+    error_log("Selected products: " . print_r($selected_products, true));
 
-    if (!is_array($selected_products)) {
-        $selected_products = [];
+    if (is_array($selected_products)) {
+        $participant_data['selected_products'] = $selected_products;
+        $_SESSION['selected_products_raw'] = $selected_products;
+    } else {
+        $participant_data['selected_products'] = [];
     }
-
-    // FORMAT ULANG DATA PRODUCTS UNTUK PASTIKAN SEMUA FIELD TERSIMPAN
-    $formatted_products = [];
-    
-    foreach ($selected_products as $product) {
-        // Pastikan format standar
-        $formatted_products[] = [
-            'id' => $product['id'] ?? 0,
-            'service_id' => $product['id'] ?? 0, // DUPLIKAT UNTUK JAGA-JAGA
-            'name' => $product['name'] ?? $product['nama_layanan'] ?? '',
-            'nama_layanan' => $product['name'] ?? $product['nama_layanan'] ?? '',
-            'harga' => $product['price'] ?? $product['harga'] ?? 0,
-            'price' => $product['price'] ?? $product['harga'] ?? 0,
-            'kode_layanan' => $product['kode_layanan'] ?? '',
-            'tipe' => $product['tipe'] ?? 'pelayanan',
-            'kategori_usia' => $product['kategori_usia'] ?? '',
-            'deskripsi' => $product['deskripsi'] ?? ''
-        ];
-    }
-
-    $participant_data['selected_products'] = $formatted_products;
-
-    // SIMPAN JUGA KE SESSION UNTUK MULTI PARTICIPANT
-    $_SESSION['selected_products_raw'] = $formatted_products;
-
 } else {
     $participant_data['selected_products'] = [];
 }
 
-// Cek action
+// ========== SIMPAN DATA PESERTA ==========
+$_SESSION['participants'][] = $participant_data;
+error_log("Total participants: " . count($_SESSION['participants']));
+
+// ========== REDIRECT ==========
 if ($action === 'add_more') {
-    // Simpan ke session sebagai peserta pertama
-    if (!isset($_SESSION['participants'])) {
-        $_SESSION['participants'] = [];
-    }
-    $_SESSION['participants'][] = $participant_data;
-    
-    // Redirect ke add_participant.php
-    $_SESSION['success_message'] = 'Peserta pertama berhasil ditambahkan! Silakan tambah peserta berikutnya.';
+    $_SESSION['success_message'] = 'Peserta berhasil ditambahkan!';
+    error_log("REDIRECT to add_participant.php");
     header('Location: add_participant.php');
     exit;
-    
 } else if ($action === 'finish') {
-    // Simpan peserta pertama ke session juga
-    if (!isset($_SESSION['participants'])) {
-        $_SESSION['participants'] = [];
-    }
-    $_SESSION['participants'][] = $participant_data;
-    
-    // Redirect langsung ke konfirmasi
+    $_SESSION['success_message'] = 'Data berhasil disimpan.';
+    error_log("REDIRECT to booking_confirmation.php");
     header('Location: booking_confirmation.php');
     exit;
+} else {
+    $_SESSION['error_message'] = 'Action tidak valid';
+    error_log("ERROR: Action tidak valid: $action");
+    header('Location: order.php');
+    exit;
 }
-
-// Fallback jika action tidak valid
-$_SESSION['error_message'] = 'Action tidak valid';
-header('Location: order.php');
-exit;
 ?>

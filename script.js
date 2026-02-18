@@ -615,7 +615,7 @@ document.addEventListener('DOMContentLoaded', function() {
         form.addEventListener('submit', function(e) {
             // CEK DULU: apakah ini submit untuk "Selesai" atau "Tambah Peserta"
             const submitButton = e.submitter;
-            const action = submitButton?.getAttribute('name') === 'action' ? submitButton.value : '';
+            const action = submitButton?.value || '';
             
             console.log('Form submit with action:', action);
             console.log('Submit button:', submitButton);
@@ -738,14 +738,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 return false;
             }
             
-            // Validasi produk/layanan dipilih
-            const selectedProductsInput = document.getElementById('selectedProductsInput')?.value;
-            if (!selectedProductsInput || selectedProductsInput === '[]' || selectedProductsInput === '') {
-                e.preventDefault();
-                alert('Pilih minimal 1 layanan atau paket!');
-                document.getElementById('categoryAccordion')?.scrollIntoView({ behavior: 'smooth' });
-                return false;
+            // ✅ Validasi produk HANYA untuk action finish
+            if (action === 'finish') {
+                const selectedProductsInput = document.getElementById('selectedProductsInput')?.value;
+                if (!selectedProductsInput || selectedProductsInput === '[]') {
+                    e.preventDefault();
+                    alert('Pilih minimal 1 layanan atau paket!');
+                    return false;
+                }
             }
+            // ✅ action='add_more' → SKIP validasi produk
             
             // ✅ SEMUA VALIDASI PASSED
             console.log('All validations passed, submitting form...');

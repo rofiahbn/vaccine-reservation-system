@@ -3,6 +3,24 @@ session_start();
 include "config.php";
 include "calendar_helper.php";
 
+// ✅ AUTO RESET SESSION
+// Jika user buka order.php dengan parameter reset=1
+if (isset($_GET['reset']) && $_GET['reset'] == '1') {
+    unset($_SESSION['participants']);
+    unset($_SESSION['booking_active']);
+    unset($_SESSION['selected_products_raw']);
+    unset($_SESSION['editing_mode']);
+    unset($_SESSION['editing_index']);
+    header('Location: order.php');
+    exit;
+}
+
+// ✅ ATAU jika booking_active tidak ada, reset participants
+if (!isset($_SESSION['booking_active'])) {
+    $_SESSION['participants'] = [];
+    $_SESSION['booking_active'] = true;
+}
+
 if (!isset($_SESSION['booking_active'])) {
     $_SESSION['participants'] = [];
     $_SESSION['booking_active'] = true;
@@ -481,11 +499,11 @@ $limit_umroh = (clone $today)->modify('+7 days');
             
             <!-- BUTTONS -->
             <div class="form-actions">
-                <button type="submit" name="action" value="add_more" class="btn btn-secondary" id="btnTambahPeserta" disabled>
+                <button type="submit" name="submit_action" value="add_more" class="btn btn-secondary" id="btnTambahPeserta">
                     <i class="fas fa-user-plus"></i> Tambah Peserta
                 </button>
-                
-                <button type="submit" name="action" value="finish" class="btn btn-primary" id="btnSelesai" disabled>
+
+                <button type="submit" name="submit_action" value="finish" class="btn btn-primary" id="btnSelesai">
                     <i class="fas fa-check"></i> Selesai
                 </button>
             </div>
@@ -608,5 +626,220 @@ $limit_umroh = (clone $today)->modify('+7 days');
     <script src="provinces.js"></script>
     <script src="script.js?v=<?php echo time(); ?>"></script>
     <script src="service.js"></script>
+    // ==========================================
+// SOLUSI FINAL - MANUAL FORM SUBMISSION
+// Paste di order.php REPLACE semua script validasi
+// ==========================================
+
+<script>
+console.log('🔥 MANUAL FORM SUBMISSION LOADED');
+
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('registrationForm');
+    
+    if (!form) {
+        console.error('Form not found!');
+        return;
+    }
+    
+    console.log('✅ Form found:', form);
+    
+    // Intercept button clicks
+    const btnTambah = document.getElementById('btnTambahPeserta');
+    const btnSelesai = document.getElementById('btnSelesai');
+    
+    if (btnTambah) {
+        btnTambah.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🔵 TAMBAH PESERTA CLICKED');
+            handleSubmit('add_more');
+        });
+    }
+    
+    if (btnSelesai) {
+        btnSelesai.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🟢 SELESAI CLICKED');
+            handleSubmit('finish');
+        });
+    }
+    
+    // Prevent form default submit
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('⛔ Form submit prevented');
+        return false;
+    });
+});
+
+function handleSubmit(action) {
+    console.log('📝 Handle submit with action:', action);
+    
+    // 1. VALIDASI LAYANAN
+    const pelayanan = document.getElementById('pelayananSelect')?.value;
+    if (!pelayanan) {
+        alert('❌ Pilih layanan terlebih dahulu');
+        return;
+    }
+    
+    // 2. VALIDASI JADWAL
+    const tanggalBooking = document.getElementById('selectedDate')?.value;
+    const waktuBooking = document.getElementById('selectedTime')?.value;
+    
+    if (!tanggalBooking || !waktuBooking) {
+        alert('❌ Pilih tanggal dan jam booking');
+        return;
+    }
+    
+    // 3. VALIDASI DATA DIRI
+    const namaLengkap = document.querySelector('input[name="nama_lengkap"]')?.value.trim();
+    const tanggalLahir = document.querySelector('input[name="tanggal_lahir"]')?.value;
+    const jenisKelamin = document.querySelector('input[name="jenis_kelamin"]:checked');
+    
+    if (!namaLengkap) {
+        alert('❌ Nama lengkap harus diisi');
+        return;
+    }
+    
+    if (!tanggalLahir) {
+        alert('❌ Tanggal lahir harus diisi');
+        return;
+    }
+    
+    if (!jenisKelamin) {
+        alert('❌ Pilih jenis kelamin');
+        return;
+    }
+    
+    // 4. VALIDASI IDENTITAS
+    const isUmroh = pelayanan === 'Umroh/Haji/Luar Negeri';
+    const nik = document.getElementById('inputNIK')?.value.trim();
+    const paspor = document.getElementById('inputPaspor')?.value.trim();
+    
+    if (isUmroh) {
+        if (!paspor) {
+            alert('❌ Nomor Paspor harus diisi');
+            return;
+        }
+    } else {
+        if (!nik) {
+            alert('❌ NIK harus diisi');
+            return;
+        }
+        if (nik.length !== 16) {
+            alert('❌ NIK harus 16 digit');
+            return;
+        }
+    }
+    
+    // 5. VALIDASI KONTAK
+    const email = document.querySelector('input[name="emails[]"]')?.value.trim();
+    const phone = document.querySelector('input[name="phones[]"]')?.value.trim();
+    
+    if (!email) {
+        alert('❌ Email harus diisi');
+        return;
+    }
+    
+    if (!phone) {
+        alert('❌ Nomor HP harus diisi');
+        return;
+    }
+    
+    // 6. VALIDASI ALAMAT
+    const alamat = document.querySelector('textarea[name="alamat"]')?.value.trim();
+    const provinsi = document.getElementById('provinsiSelect')?.value;
+    const kota = document.getElementById('kotaSelect')?.value;
+    
+    if (!alamat || !provinsi || !kota) {
+        alert('❌ Lengkapi data alamat');
+        return;
+    }
+    
+    // 7. VALIDASI PRODUK (hanya untuk finish)
+    if (action === 'finish') {
+        const selectedProductsInput = document.getElementById('selectedProductsInput')?.value;
+        if (!selectedProductsInput || selectedProductsInput === '[]' || selectedProductsInput === '') {
+            alert('❌ Pilih minimal 1 layanan atau paket');
+            return;
+        }
+    }
+    
+    console.log('✅ All validation passed');
+    
+    // Submit form manually
+    submitFormManually(action);
+}
+
+function submitFormManually(action) {
+    const form = document.getElementById('registrationForm');
+    const formData = new FormData(form);
+    
+    // Add action
+    formData.append('submit_action', action);
+    
+    console.log('🚀 Submitting form to save_booking.php');
+    console.log('Action:', action);
+    
+    // Show loading
+    const btn = action === 'add_more' ? 
+        document.getElementById('btnTambahPeserta') : 
+        document.getElementById('btnSelesai');
+    
+    if (btn) {
+        btn.disabled = true;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+    }
+    
+    // Submit via fetch
+    fetch('save_booking.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        console.log('Response URL:', response.url);
+        
+        // Check if redirected
+        if (response.redirected) {
+            console.log('✅ Redirected to:', response.url);
+            window.location.href = response.url;
+        } else {
+            return response.text();
+        }
+    })
+    .then(text => {
+        if (text) {
+            console.log('Response text:', text);
+            
+            // Check for redirect in response
+            if (text.includes('Location:')) {
+                const match = text.match(/Location:\s*(.+)/);
+                if (match) {
+                    const redirectUrl = match[1].trim();
+                    console.log('✅ Manual redirect to:', redirectUrl);
+                    window.location.href = redirectUrl;
+                }
+            } else {
+                console.error('Unexpected response:', text);
+                alert('Error: ' + text);
+            }
+        }
+    })
+    .catch(error => {
+        console.error('❌ Submit error:', error);
+        alert('Terjadi kesalahan: ' + error.message);
+        
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    });
+}
+</script>
 </body>
 </html>
