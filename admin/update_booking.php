@@ -260,9 +260,10 @@ $stmt->execute();
 $stmt->close();
 
 // ============================
-// UPDATE SERVICES (dengan Add/Delete)
+// UPDATE SERVICES - PERBAIKAN UTAMA
 // ============================
 if (isset($_POST['service_master_id']) && is_array($_POST['service_master_id'])) {
+    
     $service_db_ids = $_POST['service_db_id'];
     $service_master_ids = $_POST['service_master_id'];
     $nama_layanans = $_POST['nama_layanan'];
@@ -270,18 +271,23 @@ if (isset($_POST['service_master_id']) && is_array($_POST['service_master_id']))
     // Get existing service IDs untuk booking ini
     $existing_ids = [];
     $stmt_existing = $conn->prepare("SELECT id FROM booking_services WHERE booking_id = ? AND patient_id = ?");
-    $stmt_existing->bind_param("ii", $booking_id, $patient_id);
-    $stmt_existing->execute();
-    $result_existing = $stmt_existing->get_result();
-    while ($row = $result_existing->fetch_assoc()) {
-        $existing_ids[] = $row['id'];
+    if ($stmt_existing) {
+        $stmt_existing->bind_param("ii", $booking_id, $patient_id);
+        $stmt_existing->execute();
+        $result_existing = $stmt_existing->get_result();
+        while ($row = $result_existing->fetch_assoc()) {
+            $existing_ids[] = $row['id'];
+        }
+        $stmt_existing->close();
+    } else {
+        error_log("Error prepare existing services: " . $conn->error);
     }
-    $stmt_existing->close();
     
     $processed_ids = [];
     
     // Process each service
     for ($i = 0; $i < count($service_master_ids); $i++) {
+        
         $service_db_id = $service_db_ids[$i];
         $service_master_id = intval($service_master_ids[$i]);
         $nama_layanan = trim($nama_layanans[$i]);
@@ -290,23 +296,30 @@ if (isset($_POST['service_master_id']) && is_array($_POST['service_master_id']))
         
         // Get service details from master
         $stmt_master = $conn->prepare("SELECT * FROM services WHERE id = ?");
-        $stmt_master->bind_param("i", $service_master_id);
-        $stmt_master->execute();
-        $service_data = $stmt_master->get_result()->fetch_assoc();
-        $stmt_master->close();
+        if ($stmt_master) {
+            $stmt_master->bind_param("i", $service_master_id);
+            $stmt_master->execute();
+            $service_data = $stmt_master->get_result()->fetch_assoc();
+            $stmt_master->close();
+        } else {
+            error_log("Error prepare master service: " . $conn->error);
+            continue;
+        }
         
         if (!$service_data) continue;
         
         $harga = $service_data['harga'];
         $diskon = $service_data['diskon'] ?? 0;
-        $diskon_tipe = $service_data['diskon_tipe'] ?? 'percentage';
+        $diskon_tipe = $service_data['diskon_tipe'] ?? 'persen';
         
         // Calculate total
-        if ($diskon_tipe == 'percentage') {
+        if ($diskon_tipe == 'persen') {
             $total = $harga - ($harga * $diskon / 100);
         } else {
             $total = $harga - $diskon;
         }
+        
+        if ($total < 0) $total = 0;
         
         if ($service_db_id === 'new') {
             // INSERT new service
@@ -315,20 +328,25 @@ if (isset($_POST['service_master_id']) && is_array($_POST['service_master_id']))
                 (booking_id, patient_id, service_id, nama_layanan, harga, diskon, diskon_tipe, total) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ");
-            // Tipe: i=int, s=string, d=double
-            // booking_id(i), patient_id(i), service_id(i), nama(s), harga(d), diskon(d), tipe(s), total(d)
-            $stmt->bind_param("iiisddsd", 
-                $booking_id,           // int
-                $patient_id,           // int
-                $service_master_id,    // int
-                $nama_layanan,         // string
-                $harga,                // double
-                $diskon,               // double
-                $diskon_tipe,          // string
-                $total                 // double
-            );
-            $stmt->execute();
-            $stmt->close();
+            if ($stmt) {
+                $stmt->bind_param("iiisddsd", 
+                    $booking_id,
+                    $patient_id,
+                    $service_master_id,
+                    $nama_layanan,
+                    $harga,
+                    $diskon,
+                    $diskon_tipe,
+                    $total
+                );
+                
+                if (!$stmt->execute()) {
+                    error_log("Error insert service: " . $stmt->error);
+                }
+                $stmt->close();
+            } else {
+                error_log("Error prepare insert service: " . $conn->error);
+            }
         } else {
             // UPDATE existing service
             $service_db_id = intval($service_db_id);
@@ -344,21 +362,26 @@ if (isset($_POST['service_master_id']) && is_array($_POST['service_master_id']))
                     total = ?
                 WHERE id = ? AND booking_id = ? AND patient_id = ?
             ");
-            // Tipe: i=int, s=string, d=double
-            // service_id(i), nama(s), harga(d), diskon(d), tipe(s), total(d), id(i), booking_id(i), patient_id(i)
-            $stmt->bind_param("isddsdiii", 
-                $service_master_id,    // int
-                $nama_layanan,         // string
-                $harga,                // double
-                $diskon,               // double
-                $diskon_tipe,          // string
-                $total,                // double
-                $service_db_id,        // int
-                $booking_id,           // int
-                $patient_id            // int
-            );
-            $stmt->execute();
-            $stmt->close();
+            if ($stmt) {
+                $stmt->bind_param("isddsdiii", 
+                    $service_master_id,
+                    $nama_layanan,
+                    $harga,
+                    $diskon,
+                    $diskon_tipe,
+                    $total,
+                    $service_db_id,
+                    $booking_id,
+                    $patient_id
+                );
+                
+                if (!$stmt->execute()) {
+                    error_log("Error update service: " . $stmt->error);
+                }
+                $stmt->close();
+            } else {
+                error_log("Error prepare update service: " . $conn->error);
+            }
         }
     }
     
@@ -366,12 +389,21 @@ if (isset($_POST['service_master_id']) && is_array($_POST['service_master_id']))
     $to_delete = array_diff($existing_ids, $processed_ids);
     if (!empty($to_delete)) {
         $placeholders = str_repeat('?,', count($to_delete) - 1) . '?';
-        $stmt = $conn->prepare("DELETE FROM booking_services WHERE booking_id = ? AND patient_id = ? AND id IN ($placeholders)");
-        $types = 'ii' . str_repeat('i', count($to_delete));
-        $params = array_merge([$booking_id, $patient_id], $to_delete);
-        $stmt->bind_param($types, ...$params);
-        $stmt->execute();
-        $stmt->close();
+        $delete_sql = "DELETE FROM booking_services WHERE booking_id = ? AND patient_id = ? AND id IN ($placeholders)";
+        $stmt = $conn->prepare($delete_sql);
+        
+        if ($stmt) {
+            $types = 'ii' . str_repeat('i', count($to_delete));
+            $params = array_merge([$booking_id, $patient_id], $to_delete);
+            $stmt->bind_param($types, ...$params);
+            
+            if (!$stmt->execute()) {
+                error_log("Error delete services: " . $stmt->error);
+            }
+            $stmt->close();
+        } else {
+            error_log("Error prepare delete services: " . $conn->error);
+        }
     }
 }
 

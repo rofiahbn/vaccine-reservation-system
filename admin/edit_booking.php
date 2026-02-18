@@ -81,7 +81,7 @@ while ($srv = $services_result->fetch_assoc()) {
 }
 
 // Get master services
-$sql_master = "SELECT * FROM services ORDER BY kategori, nama_layanan";
+$sql_master = "SELECT id, nama_layanan, kategori_usia as kategori, harga FROM services ORDER BY nama_layanan";
 $result_master = $conn->query($sql_master);
 
 $master_services = [];
