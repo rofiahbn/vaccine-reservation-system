@@ -399,7 +399,6 @@ function calculateAgeWithMonths($tanggal_lahir) {
                         <div class="info-card-content">
                             <div class="info-item">
                                 <div class="info-item-row">
-                                    <span class="info-label">Layanan yang Diterima</span>
                                     <span class="info-value"><?= htmlspecialchars($patient_detail['layanan']) ?></span>
                                 </div>
                             </div>
@@ -411,9 +410,6 @@ function calculateAgeWithMonths($tanggal_lahir) {
                     <div class="action-buttons">
                         <button class="btn-primary" onclick="window.location.href='edit_patient.php?id=<?= $patient_id ?>'">
                             <i class="fas fa-edit"></i> Edit Data
-                        </button>
-                        <button class="btn-secondary" onclick="window.print()">
-                            <i class="fas fa-print"></i> Cetak Data
                         </button>
                     </div>
 
