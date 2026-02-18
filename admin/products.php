@@ -64,7 +64,7 @@ $categories_result = $conn->query($sql_categories);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Produk Vaksin & Obat - Vaksinin</title>
     <link rel="stylesheet" href="css/admin.css">
-    <link rel="stylesheet" href="css/products.css">
+    <link rel="stylesheet" href="css/products_pelayanan.css">
     <link rel="stylesheet" href="css/sidebar-toggle.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -135,22 +135,30 @@ $categories_result = $conn->query($sql_categories);
         </header>
 
         <!-- Search and Filter Section -->
-        <div class="search-filter-section">
-            <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" id="searchInput" placeholder="Cari nama atau kode produk..." value="<?= htmlspecialchars($search) ?>" onkeyup="handleSearch()">
+        <div class="filter-section-wrapper">
+            <div class="search-filter-section">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Cari nama atau kode produk..." value="<?= htmlspecialchars($search) ?>">
+                </div>
+                <select id="kategoriFilter" class="filter-dropdown">
+                    <option value="">Semua Kategori</option>
+                    <?php if ($categories_result && $categories_result->num_rows > 0): ?>
+                        <?php while ($cat = $categories_result->fetch_assoc()): ?>
+                            <option value="<?= htmlspecialchars($cat['kategori']) ?>" 
+                                    <?= ($kategori_filter == $cat['kategori']) ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($cat['kategori']) ?>
+                            </option>
+                        <?php endwhile; ?>
+                    <?php endif; ?>
+                </select>
+                <button class="btn-filter-apply" onclick="handleFilter()">
+                    <i class="fas fa-filter"></i> Terapkan
+                </button>
+                <button class="btn-filter-reset" onclick="resetFilters()">
+                    <i class="fas fa-undo"></i> Reset
+                </button>
             </div>
-            <select id="kategoriFilter" class="filter-dropdown" onchange="handleFilter()">
-                <option value="">Semua Kategori</option>
-                <?php if ($categories_result && $categories_result->num_rows > 0): ?>
-                    <?php while ($cat = $categories_result->fetch_assoc()): ?>
-                        <option value="<?= htmlspecialchars($cat['kategori']) ?>" 
-                                <?= ($kategori_filter == $cat['kategori']) ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($cat['kategori']) ?>
-                        </option>
-                    <?php endwhile; ?>
-                <?php endif; ?>
-            </select>
         </div>
 
         <!-- Products Grid -->
@@ -187,79 +195,101 @@ $categories_result = $conn->query($sql_categories);
                     }
                 ?>
                     <div class="product-card">
-                        <div class="product-icon">
-                            <?php 
-                            $jenis = strtolower($product['jenis'] ?? '');
-                            $nama = strtolower($product['nama_produk'] ?? '');
+                        <!-- Card Header -->
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <?php 
+                                $jenis = strtolower($product['jenis'] ?? '');
+                                $nama = strtolower($product['nama_produk'] ?? '');
 
-                            if (strpos($jenis, 'vaksin') !== false || strpos($nama, 'vaksin') !== false): ?>
-                                <i class="fas fa-syringe"></i>
-                            <?php elseif (strpos($jenis, 'vitamin') !== false || strpos($nama, 'vitamin') !== false): ?>
-                                <i class="fas fa-pills"></i>
-                            <?php elseif (strpos($jenis, 'obat') !== false): ?>
-                                <i class="fas fa-prescription-bottle"></i>
-                            <?php else: ?>
-                                <i class="fas fa-capsules"></i>
-                            <?php endif; ?>
-                        </div>
-
-                        <div class="product-content">
-                            <div class="product-header">
-                                <h3 class="product-name"><?= htmlspecialchars($product['nama_produk']) ?></h3>
-                                <?php if (!empty($product['kode_produk'])): ?>
-                                    <span class="product-code"><?= htmlspecialchars($product['kode_produk']) ?></span>
+                                if (strpos($jenis, 'vaksin') !== false || strpos($nama, 'vaksin') !== false): ?>
+                                    <i class="fas fa-syringe"></i>
+                                <?php elseif (strpos($jenis, 'vitamin') !== false || strpos($nama, 'vitamin') !== false): ?>
+                                    <i class="fas fa-pills"></i>
+                                <?php elseif (strpos($jenis, 'obat') !== false): ?>
+                                    <i class="fas fa-prescription-bottle"></i>
+                                <?php else: ?>
+                                    <i class="fas fa-capsules"></i>
                                 <?php endif; ?>
                             </div>
+                            <div class="card-title">
+                                <h3 class="product-name"><?= htmlspecialchars($product['nama_produk']) ?></h3>
+                                <?php if (!empty($product['kode_produk'])): ?>
+                                    <span class="badge"><?= htmlspecialchars($product['kode_produk']) ?></span>
+                                <?php endif; ?>
+                            </div>
+                        </div>
 
+                        <!-- Card Body -->
+                        <div class="card-body">
                             <?php if (!empty($product['deskripsi'])): ?>
-                                <p class="product-description"><?= htmlspecialchars($product['deskripsi']) ?></p>
+                                <div class="description-section">
+                                    <div class="description-text" style="margin-bottom: 16px; font-size: 13px; color: #64748b;">
+                                        <?= htmlspecialchars($product['deskripsi']) ?>
+                                    </div>
+                                </div>
                             <?php endif; ?>
 
-                            <div class="product-details">
-                                <div class="detail-row">
-                                    <span class="detail-label">Jenis</span>
-                                    <span class="detail-value"><?= htmlspecialchars($product['jenis'] ?? '-') ?></span>
-                                </div>
-                                
-                                <div class="detail-row">
-                                    <span class="detail-label">Kategori</span>
-                                    <span class="detail-value"><?= htmlspecialchars($product['kategori'] ?? '-') ?></span>
-                                </div>
+                            <div class="info-row">
+                                <span class="info-label">Jenis</span>
+                                <span class="info-value"><?= htmlspecialchars($product['jenis'] ?? '-') ?></span>
+                            </div>
+                            
+                            <div class="info-row">
+                                <span class="info-label">Kategori</span>
+                                <span class="info-value">
+                                    <span class="category-tag"><?= htmlspecialchars($product['kategori'] ?? '-') ?></span>
+                                </span>
+                            </div>
 
-                                <div class="detail-row">
-                                    <span class="detail-label">Satuan</span>
-                                    <span class="detail-value"><?= htmlspecialchars($product['satuan'] ?? 'dosis') ?></span>
-                                </div>
+                            <div class="info-row">
+                                <span class="info-label">Satuan</span>
+                                <span class="info-value"><?= htmlspecialchars($product['satuan'] ?? 'dosis') ?></span>
+                            </div>
 
-                                <div class="detail-row">
-                                    <span class="detail-label">Harga</span>
-                                    <span class="detail-value price">Rp <?= number_format($product['harga'] ?? 0, 0, ',', '.') ?></span>
-                                </div>
+                            <div class="info-row">
+                                <span class="info-label">Harga</span>
+                                <span class="info-value price">Rp <?= number_format($product['harga'] ?? 0, 0, ',', '.') ?></span>
+                            </div>
 
-                                <div class="detail-row">
-                                    <span class="detail-label">Total Stok</span>
-                                    <span class="detail-value stock <?= $stock_class ?>"><?= $stock_text ?></span>
-                                </div>
+                            <div class="info-row">
+                                <span class="info-label">Total Stok</span>
+                                <span class="info-value stock <?= $stock_class ?>">
+                                    <?= $stock_text ?>
+                                </span>
                             </div>
 
                             <!-- Batch Information -->
                             <?php if (!empty($batch_list)): ?>
-                            <div class="batch-info">
-                                <div class="batch-title">
-                                    <i class="fas fa-boxes"></i> Batch
+                            <div class="batch-info" style="margin-top: 16px; padding: 16px; background: #fafbfc; border-radius: 12px;">
+                                <div class="components-title" style="margin-bottom: 12px;">
+                                    <i class="fas fa-boxes"></i> Batch Stok
                                 </div>
                                 <div class="batch-list">
                                     <?php foreach ($batch_list as $batch): ?>
-                                        <div class="batch-item <?= $batch['stock'] == 0 ? 'batch-empty' : '' ?>">
-                                            <span class="batch-number"><?= htmlspecialchars($batch['batch']) ?></span>
-                                            <span class="batch-expired">Exp: <?= date('d/m/Y', strtotime($batch['expired'])) ?></span>
-                                            <span class="batch-stock"><?= $batch['stock'] ?> stok</span>
+                                        <?php 
+                                        $batch_stock = intval($batch['stock']);
+                                        $is_empty = $batch_stock == 0;
+                                        ?>
+                                        <div class="info-row" style="<?= $is_empty ? 'opacity: 0.5;' : '' ?>">
+                                            <span class="info-label">
+                                                <span class="badge"><?= htmlspecialchars($batch['batch']) ?></span>
+                                                <small style="display: block; margin-top: 2px; font-size: 11px;">
+                                                    Exp: <?= date('d/m/Y', strtotime($batch['expired'])) ?>
+                                                </small>
+                                            </span>
+                                            <span class="info-value">
+                                                <?= $batch_stock ?> stok
+                                            </span>
                                         </div>
                                     <?php endforeach; ?>
                                 </div>
                             </div>
                             <?php endif; ?>
+                        </div>
 
+                        <!-- Card Footer -->
+                        <div class="card-footer">
                             <div class="product-actions">
                                 <button class="btn-edit" onclick="location.href='edit_product.php?id=<?= $product['id'] ?>'">
                                     <i class="fas fa-edit"></i> Edit
@@ -292,9 +322,7 @@ $categories_result = $conn->query($sql_categories);
         function handleSearch() {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
-                const search = document.getElementById('searchInput').value;
-                const kategori = document.getElementById('kategoriFilter').value;
-                window.location.href = `products.php?search=${encodeURIComponent(search)}&kategori=${encodeURIComponent(kategori)}`;
+                handleFilter();
             }, 500);
         }
 
@@ -304,11 +332,24 @@ $categories_result = $conn->query($sql_categories);
             window.location.href = `products.php?search=${encodeURIComponent(search)}&kategori=${encodeURIComponent(kategori)}`;
         }
 
+        function resetFilters() {
+            window.location.href = 'products.php';
+        }
+
         function deleteProduct(id, name) {
             if (confirm(`Hapus produk "${name}"?\nData yang dihapus tidak dapat dikembalikan.`)) {
                 window.location.href = `delete_product.php?id=${id}`;
             }
         }
+
+        // Auto-filter saat ketik
+        document.getElementById('searchInput')?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                handleFilter();
+            }
+        });
+
+        document.getElementById('searchInput')?.addEventListener('input', handleSearch);
     </script>          
 
     <script src="js/sidebar-toggle.js"></script>

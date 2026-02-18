@@ -2,6 +2,9 @@
 session_start();
 include "../config.php";
 
+// ✅ Set timezone Jakarta
+date_default_timezone_set('Asia/Jakarta');
+
 $current_page = 'products.php';
 
 // Cek parameter ID
@@ -291,11 +294,46 @@ unset($_SESSION['success']);
 
                         <!-- Kategori -->
                         <div class="form-group">
-                            <label>Kategori</label>
-                            <input type="text" 
-                                   name="kategori" 
-                                   value="<?= htmlspecialchars($product['kategori'] ?? '') ?>"
-                                   placeholder="Contoh: Imunisasi Dasar">
+                            <label>
+                                Kategori 
+                                <span class="required">*</span>
+                            </label>
+                            <select name="kategori" required>
+                                <option value="">-- Pilih Kategori --</option>
+                                
+                                <?php 
+                                // Kategori default
+                                $default_categories = [
+                                    'Influenza',
+                                    'HPV',
+                                    'Hepatitis',
+                                    'COVID-19',
+                                    'Antibiotik',
+                                    'Antipiretik',
+                                    'Vitamin'
+                                ];
+                                
+                                // Gabungkan kategori dari database
+                                $all_categories = $default_categories;
+                                
+                                if ($categories_result && $categories_result->num_rows > 0) {
+                                    while ($cat = $categories_result->fetch_assoc()) {
+                                        $kategori_db = $cat['kategori'];
+                                        // ✅ Cek jika belum ada di array, baru tambahkan
+                                        if (!in_array($kategori_db, $all_categories) && !empty($kategori_db)) {
+                                            $all_categories[] = $kategori_db;
+                                        }
+                                    }
+                                }
+                                
+                                // Tampilkan semua kategori (unique)
+                                foreach ($all_categories as $kategori): 
+                                ?>
+                                    <option value="<?= htmlspecialchars($kategori) ?>">
+                                        <?= htmlspecialchars($kategori) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
 
                         <!-- Satuan -->
@@ -397,8 +435,31 @@ unset($_SESSION['success']);
                                 $batches->data_seek(0);
                                 while ($batch = $batches->fetch_assoc()): 
                                     $is_expired = strtotime($batch['expired_date']) < strtotime(date('Y-m-d'));
-                                    $is_near_expired = !$is_expired && strtotime($batch['expired_date']) < strtotime('+3 months');
-                                ?>
+                                    $expired_date_obj = new DateTime($batch['expired_date']);
+                                    $today_obj = new DateTime();
+                                    $diff = $today_obj->diff($expired_date_obj);
+
+                                    // Hitung sisa waktu
+                                    $is_near_expired = false;
+                                    $sisa_waktu = '';
+                                    if (!$is_expired) {
+                                        $total_days = $diff->days;
+                                        
+                                        if ($total_days <= 90) { // 3 bulan = ~90 hari
+                                            $is_near_expired = true;
+                                            
+                                            if ($diff->y > 0) {
+                                                $sisa_waktu = $diff->y . ' tahun';
+                                            } elseif ($diff->m > 0) {
+                                                $sisa_waktu = $diff->m . ' bulan';
+                                            } elseif ($diff->d > 0) {
+                                                $sisa_waktu = $diff->d . ' hari';
+                                            } else {
+                                                $sisa_waktu = 'Hari ini';
+                                            }
+                                        }
+                                    }
+                                    ?>
                                     <tr>
                                         <td>
                                             <strong><?= htmlspecialchars($batch['batch_number']) ?></strong>
@@ -411,7 +472,7 @@ unset($_SESSION['success']);
                                                 </span>
                                             <?php elseif ($is_near_expired): ?>
                                                 <span class="expired-near">
-                                                    <i class="fas fa-clock"></i> 3 bulan lagi
+                                                    <i class="fas fa-clock"></i> <?= $sisa_waktu ?> lagi
                                                 </span>
                                             <?php endif; ?>
                                         </td>

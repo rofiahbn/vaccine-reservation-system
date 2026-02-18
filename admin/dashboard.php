@@ -97,7 +97,7 @@ while (true) {
 }
 
 // Get statistics for dashboard cards
-$today = date('Y-m-d');
+$today_date = date('Y-m-d');
 
 // Total layanan hari ini
 $sql_today = "SELECT COUNT(*) as total 
@@ -106,7 +106,7 @@ $sql_today = "SELECT COUNT(*) as total
               AND service_type = ?
               AND parent_id IS NULL";
 $stmt = $conn->prepare($sql_today);
-$stmt->bind_param('ss', $today, $service_mode);
+$stmt->bind_param('ss', $today_date, $service_mode);
 $stmt->execute();
 $total_today = $stmt->get_result()->fetch_assoc()['total'];
 
@@ -118,7 +118,7 @@ $sql_done = "SELECT COUNT(*) as total
              AND service_type = ?
              AND parent_id IS NULL";
 $stmt = $conn->prepare($sql_done);
-$stmt->bind_param('ss', $today, $service_mode);
+$stmt->bind_param('ss', $today_date, $service_mode);
 $stmt->execute();
 $total_done = $stmt->get_result()->fetch_assoc()['total'];
 
@@ -130,7 +130,7 @@ $sql_cancelled = "SELECT COUNT(*) as total
                   AND service_type = ?
                   AND parent_id IS NULL";
 $stmt = $conn->prepare($sql_cancelled);
-$stmt->bind_param('ss', $today, $service_mode);
+$stmt->bind_param('ss', $today_date, $service_mode);
 $stmt->execute();
 $total_cancelled = $stmt->get_result()->fetch_assoc()['total'];
 
@@ -142,7 +142,7 @@ $sql_pending = "SELECT COUNT(*) as total
                 AND service_type = ?
                 AND parent_id IS NULL";
 $stmt = $conn->prepare($sql_pending);
-$stmt->bind_param('ss', $today, $service_mode);
+$stmt->bind_param('ss', $today_date, $service_mode);
 $stmt->execute();
 $total_pending = $stmt->get_result()->fetch_assoc()['total'];
 
@@ -164,11 +164,12 @@ $sql_now_serving = "
 ";
 
 $stmt = $conn->prepare($sql_now_serving);
-$stmt->bind_param('ss', $today, $service_mode);
+$stmt->bind_param('ss', $today_date, $service_mode);
 $stmt->execute();
 $now_serving = $stmt->get_result()->fetch_assoc();
 $participants_now = [];
-$services_now = [];
+$services_layanan_now = [];
+$services_paket_now = [];
 
 if ($now_serving) {
 
@@ -193,23 +194,58 @@ if ($now_serving) {
         $participants_now[] = $row['nama_lengkap'];
     }
 
-    // Ambil layanan parent
+    // 🔥 QUERY BARU - Ambil layanan dengan tipe
     $sql_services = "
-        SELECT bs.nama_layanan
+        SELECT bs.nama_layanan, bs.tipe
         FROM booking_services bs
         JOIN bookings b ON bs.booking_id = b.id
-        WHERE b.id = ?
-        OR b.parent_id = ?
+        WHERE b.id = ? OR b.parent_id = ?
+        ORDER BY 
+            CASE bs.tipe 
+                WHEN 'pelayanan' THEN 1 
+                WHEN 'paket' THEN 2 
+            END,
+            bs.nama_layanan ASC
     ";
 
     $stmt_s = $conn->prepare($sql_services);
-    $stmt_s->bind_param("ii", $parent_id, $parent_id);
-    $stmt_s->execute();
-
-    $result_s = $stmt_s->get_result();
-
-    while ($row = $result_s->fetch_assoc()) {
-        $services_now[] = $row['nama_layanan'];
+    
+    // ✅ Check jika prepare gagal
+    if ($stmt_s === false) {
+        // Field 'tipe' belum ada, gunakan query fallback
+        $sql_services = "
+            SELECT bs.nama_layanan
+            FROM booking_services bs
+            JOIN bookings b ON bs.booking_id = b.id
+            WHERE b.id = ? OR b.parent_id = ?
+            ORDER BY bs.nama_layanan ASC
+        ";
+        
+        $stmt_s = $conn->prepare($sql_services);
+        
+        if ($stmt_s) {
+            $stmt_s->bind_param("ii", $parent_id, $parent_id);
+            $stmt_s->execute();
+            $result_s = $stmt_s->get_result();
+            
+            // Semua masuk ke layanan (no grouping)
+            while ($row = $result_s->fetch_assoc()) {
+                $services_layanan_now[] = $row['nama_layanan'];
+            }
+        }
+    } else {
+        $stmt_s->bind_param("ii", $parent_id, $parent_id);
+        $stmt_s->execute();
+        $result_s = $stmt_s->get_result();
+        
+        // Group by tipe
+        while ($row = $result_s->fetch_assoc()) {
+            if ($row['tipe'] === 'pelayanan') {
+                $services_layanan_now[] = $row['nama_layanan'];
+            } else if ($row['tipe'] === 'paket') {
+                $services_paket_now[] = $row['nama_layanan'];
+            }
+        }
     }
 }
 
@@ -263,7 +299,7 @@ $sql_all = "
 ";
 
 $stmt_all = $conn->prepare($sql_all);
-$stmt_all->bind_param('ss', $today, $service_mode);
+$stmt_all->bind_param('ss', $today_date, $service_mode);
 $stmt_all->execute();
 $all_bookings = $stmt_all->get_result();
 $grouped_bookings = [];
@@ -349,6 +385,43 @@ $total_weeks = ceil($total_days / 7);
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="css/sidebar-toggle.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Badge tipe layanan */
+        .service-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-left: 6px;
+        }
+        
+        .service-badge.layanan {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .service-badge.paket {
+            background: #f3e8ff;
+            color: #6d28d9;
+        }
+        
+        /* Group header */
+        .service-group-header {
+            font-weight: 600;
+            color: #64748b;
+            font-size: 12px;
+            margin-top: 8px;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .service-group-header:first-child {
+            margin-top: 0;
+        }
+    </style>
 </head>
 <body>
     <!-- Sidebar -->
@@ -506,17 +579,33 @@ $total_weeks = ceil($total_days / 7);
                 </div>
             </div>
 
-            <!-- KANAN: LAYANAN -->
+            <!-- KANAN: LAYANAN (DENGAN GROUPING) -->
             <div class="now-info">
                 <div class="info-row">
                     <i class="fas fa-check-circle"></i>
                     <span class="info-label">Layanan :</span>
                 </div>
                 <div id="nowServices" class="service-list">
-                    <?php if (!empty($services_now)): ?>
-                        <?php foreach ($services_now as $srv): ?>
-                            <div><?= htmlspecialchars($srv) ?></div>
-                        <?php endforeach; ?>
+                    <?php if (!empty($services_layanan_now) || !empty($services_paket_now)): ?>
+                        
+                        <?php if (!empty($services_layanan_now)): ?>
+                            <div class="service-group-header">
+                                <i class="fas fa-stethoscope"></i> Layanan
+                            </div>
+                            <?php foreach ($services_layanan_now as $srv): ?>
+                                <div>• <?= htmlspecialchars($srv) ?></div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                        
+                        <?php if (!empty($services_paket_now)): ?>
+                            <div class="service-group-header">
+                                <i class="fas fa-box"></i> Paket
+                            </div>
+                            <?php foreach ($services_paket_now as $srv): ?>
+                                <div>• <?= htmlspecialchars($srv) ?></div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                        
                     <?php else: ?>
                         <span style="color:#999;">-</span>
                     <?php endif; ?>
@@ -710,21 +799,59 @@ $total_weeks = ceil($total_days / 7);
                         ?>
 
                         <?php
-                        // Get services for this booking
+                        // 🔥 QUERY BARU - Get services dengan tipe
                         $sql_services = "
-                            SELECT bs.nama_layanan
+                            SELECT bs.nama_layanan, bs.tipe
                             FROM booking_services bs
                             JOIN bookings b ON bs.booking_id = b.id
-                            WHERE b.id = ?
-                            OR b.parent_id = ?
+                            WHERE b.id = ? OR b.parent_id = ?
+                            ORDER BY 
+                                CASE bs.tipe 
+                                    WHEN 'pelayanan' THEN 1 
+                                    WHEN 'paket' THEN 2 
+                                END,
+                                bs.nama_layanan ASC
                         ";
                         $stmt_s = $conn->prepare($sql_services);
-                        $stmt_s->bind_param('ii', $booking_id, $booking_id);
-                        $stmt_s->execute();
-                        $services = $stmt_s->get_result();
-                        $service_names = [];
-                        while ($s = $services->fetch_assoc()) {
-                            $service_names[] = $s['nama_layanan'];
+                        
+                        $services_layanan = [];
+                        $services_paket = [];
+                        
+                        // ✅ Check jika prepare gagal
+                        if ($stmt_s === false) {
+                            // Field 'tipe' belum ada, gunakan query fallback
+                            $sql_services = "
+                                SELECT bs.nama_layanan
+                                FROM booking_services bs
+                                JOIN bookings b ON bs.booking_id = b.id
+                                WHERE b.id = ? OR b.parent_id = ?
+                                ORDER BY bs.nama_layanan ASC
+                            ";
+                            
+                            $stmt_s = $conn->prepare($sql_services);
+                            
+                            if ($stmt_s) {
+                                $stmt_s->bind_param('ii', $booking_id, $booking_id);
+                                $stmt_s->execute();
+                                $services = $stmt_s->get_result();
+                                
+                                // Semua masuk ke layanan (no grouping)
+                                while ($s = $services->fetch_assoc()) {
+                                    $services_layanan[] = $s['nama_layanan'];
+                                }
+                            }
+                        } else {
+                            $stmt_s->bind_param('ii', $booking_id, $booking_id);
+                            $stmt_s->execute();
+                            $services = $stmt_s->get_result();
+                            
+                            while ($s = $services->fetch_assoc()) {
+                                if ($s['tipe'] === 'pelayanan') {
+                                    $services_layanan[] = $s['nama_layanan'];
+                                } else if ($s['tipe'] === 'paket') {
+                                    $services_paket[] = $s['nama_layanan'];
+                                }
+                            }
                         }
                         ?>
                         <tr>
@@ -742,12 +869,27 @@ $total_weeks = ceil($total_days / 7);
 
                         <td><?= htmlspecialchars($parent['service_type']) ?></td>
 
+                        <!-- 🔥 PRODUK DENGAN GROUPING & BADGE -->
                         <td>
-                            <?php if (!empty($service_names)): ?>
-                                <?php foreach ($service_names as $prod): ?>
-                                    <div><?= htmlspecialchars($prod) ?></div>
-                                <?php endforeach; ?>
-                            <?php else: ?>
+                            <?php if (!empty($services_layanan)): ?>
+                                <div style="margin-bottom:8px;">
+                                    <strong style="font-size:11px; color:#64748b;">LAYANAN:</strong>
+                                    <?php foreach ($services_layanan as $srv): ?>
+                                        <div style="font-size:13px;">• <?= htmlspecialchars($srv) ?></div>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <?php if (!empty($services_paket)): ?>
+                                <div>
+                                    <strong style="font-size:11px; color:#64748b;">PAKET:</strong>
+                                    <?php foreach ($services_paket as $srv): ?>
+                                        <div style="font-size:13px;">• <?= htmlspecialchars($srv) ?></div>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <?php if (empty($services_layanan) && empty($services_paket)): ?>
                                 -
                             <?php endif; ?>
                         </td>
@@ -806,15 +948,31 @@ $total_weeks = ceil($total_days / 7);
                         /* tampilkan participants */
                         let participantsHTML = '';
                         data.participants.forEach(p => {
-                            participantsHTML += `<div>- ${p}</div>`;
+                            participantsHTML += `<div>${p}</div>`;
                         });
                         document.getElementById('nowParticipants').innerHTML = participantsHTML;
 
-                        /* tampilkan layanan */
+                        /* tampilkan layanan DENGAN GROUPING */
                         let servicesHTML = '';
-                        data.services.forEach(s => {
-                            servicesHTML += `<div>${s}</div>`;
-                        });
+                        
+                        if (data.services_layanan && data.services_layanan.length > 0) {
+                            servicesHTML += '<div class="service-group-header"><i class="fas fa-stethoscope"></i> Layanan</div>';
+                            data.services_layanan.forEach(s => {
+                                servicesHTML += `<div>• ${s}</div>`;
+                            });
+                        }
+                        
+                        if (data.services_paket && data.services_paket.length > 0) {
+                            servicesHTML += '<div class="service-group-header"><i class="fas fa-box"></i> Paket</div>';
+                            data.services_paket.forEach(s => {
+                                servicesHTML += `<div>• ${s}</div>`;
+                            });
+                        }
+                        
+                        if (!servicesHTML) {
+                            servicesHTML = '<span style="color:#999;">-</span>';
+                        }
+                        
                         document.getElementById('nowServices').innerHTML = servicesHTML;
 
                     } else {

@@ -409,18 +409,39 @@ $categories_result = $conn->query($sql_categories);
                             </label>
                             <select name="kategori" required>
                                 <option value="">-- Pilih Kategori --</option>
-                                <option value="Influenza">Influenza</option>
-                                <option value="HPV">HPV</option>
-                                <option value="Hepatitis">Hepatitis</option>
-                                <option value="COVID-19">COVID-19</option>
-                                <option value="Antibiotik">Antibiotik</option>
-                                <option value="Antipiretik">Antipiretik</option>
-                                <option value="Vitamin">Vitamin</option>
-                                <?php if ($categories_result && $categories_result->num_rows > 0): ?>
-                                    <?php while ($cat = $categories_result->fetch_assoc()): ?>
-                                        <option value="<?= htmlspecialchars($cat['kategori']) ?>"><?= htmlspecialchars($cat['kategori']) ?></option>
-                                    <?php endwhile; ?>
-                                <?php endif; ?>
+                                
+                                <?php 
+                                // Kategori default
+                                $default_categories = [
+                                    'Influenza',
+                                    'HPV',
+                                    'Hepatitis',
+                                    'COVID-19',
+                                    'Antibiotik',
+                                    'Antipiretik',
+                                    'Vitamin'
+                                ];
+                                
+                                // Gabungkan kategori dari database
+                                $all_categories = $default_categories;
+                                
+                                if ($categories_result && $categories_result->num_rows > 0) {
+                                    while ($cat = $categories_result->fetch_assoc()) {
+                                        $kategori_db = $cat['kategori'];
+                                        // ✅ Cek jika belum ada di array, baru tambahkan
+                                        if (!in_array($kategori_db, $all_categories) && !empty($kategori_db)) {
+                                            $all_categories[] = $kategori_db;
+                                        }
+                                    }
+                                }
+                                
+                                // Tampilkan semua kategori (unique)
+                                foreach ($all_categories as $kategori): 
+                                ?>
+                                    <option value="<?= htmlspecialchars($kategori) ?>">
+                                        <?= htmlspecialchars($kategori) ?>
+                                    </option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
 
