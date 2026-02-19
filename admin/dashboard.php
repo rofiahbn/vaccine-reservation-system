@@ -435,10 +435,26 @@ $total_weeks = ceil($total_days / 7);
                 <i class="fas fa-th-large"></i>
                 <span>Dashboard</span>
             </a>
-            <a href="products.php" class="nav-item">
+            <a href="javascript:void(0)" 
+                class="nav-item has-submenu <?= in_array($current_page, ['products.php','products_pelayanan.php']) ? 'active open' : '' ?>" 
+                onclick="toggleSubmenu(this)">
                 <i class="fas fa-capsules"></i>
                 <span>Produk</span>
+                <i class="fas fa-chevron-down arrow"></i>
             </a>
+            
+            <ul class="submenu <?= in_array($current_page, ['products.php','products_pelayanan.php']) ? 'open' : '' ?>">
+                <li>
+                    <a href="products.php" class="<?= $current_page == 'products.php' ? 'active' : '' ?>">
+                        Stok
+                    </a>
+                </li>
+                <li>
+                    <a href="products_pelayanan.php" class="<?= $current_page == 'products_pelayanan.php' ? 'active' : '' ?>">
+                        Pelayanan/Paket
+                    </a>
+                </li>
+            </ul>
             <a href="patients.php" class="nav-item">
                 <i class="fas fa-users"></i>
                 <span>Pasien</span>

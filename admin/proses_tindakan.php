@@ -270,7 +270,7 @@ if ($status_booking === 'pending') {
 
         <!-- ================= FORM KIRI ================= -->
         <div class="detail-container">
-            <form id="formTindakan" action="simpan_tindakan.php" method="POST">
+            <form id="formTindakan" action="proses_simpan_tindakan.php" method="POST">
                 <input type="hidden" name="booking_id" value="<?= $current_booking_id ?>">
                 <input type="hidden" name="parent_booking_id" value="<?= $parent_booking_id ?>">
                 <input type="hidden" name="patient_id" value="<?= $current_patient_id ?>">
@@ -442,18 +442,13 @@ if ($status_booking === 'pending') {
 
                         <div class="detail-item">
                             <label>Kedatangan Selanjutnya</label>
-                                <select name="kedatangan_selanjutnya">
-
-                                    <option value="">-- Pilih --</option>
-
-                                    <?php for($i=1; $i<=10; $i++): ?>
-                                        <option value="<?= $i ?>"
-                                            <?= ($tindakan['kedatangan_selanjutnya'] ?? '') == $i ? 'selected' : '' ?>>
-                                            <?= $i ?>
-                                        </option>
-                                    <?php endfor; ?>
-
-                                </select>
+                            <input type="date" 
+                                name="kedatangan_selanjutnya" 
+                                value="<?= htmlspecialchars($tindakan['kedatangan_selanjutnya'] ?? '') ?>"
+                                min="<?= date('Y-m-d') ?>">
+                            <small style="display: block; color: #64748b; margin-top: 4px; font-size: 12px;">
+                                <i class="fas fa-info-circle"></i> Jadwal kunjungan berikutnya
+                            </small>
                         </div>
 
                         <div class="detail-item">

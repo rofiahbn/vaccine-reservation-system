@@ -387,13 +387,7 @@ unset($_SESSION['success'], $_SESSION['error']);
     <link rel="stylesheet" href="css/sidebar-toggle.css">
     <link rel="stylesheet" href="css/product-form.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .edit-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 24px;
-        }
-        
+    <style>        
         .page-header {
             display: flex;
             justify-content: space-between;
@@ -758,12 +752,25 @@ unset($_SESSION['success'], $_SESSION['error']);
                 <i class="fas fa-th-large"></i><span>Dashboard</span>
             </a>
             <a href="javascript:void(0)" 
-                class="nav-item has-submenu" 
+                class="nav-item has-submenu <?= in_array($current_page, ['products.php','products_pelayanan.php']) ? 'active open' : '' ?>" 
                 onclick="toggleSubmenu(this)">
                 <i class="fas fa-capsules"></i>
                 <span>Produk</span>
                 <i class="fas fa-chevron-down arrow"></i>
             </a>
+            
+            <ul class="submenu <?= in_array($current_page, ['products.php','products_pelayanan.php']) ? 'open' : '' ?>">
+                <li>
+                    <a href="products.php" class="<?= $current_page == 'products.php' ? 'active' : '' ?>">
+                        Stok
+                    </a>
+                </li>
+                <li>
+                    <a href="products_pelayanan.php" class="<?= $current_page == 'products_pelayanan.php' ? 'active' : '' ?>">
+                        Pelayanan/Paket
+                    </a>
+                </li>
+            </ul>
             <a href="patients.php" class="nav-item">
                 <i class="fas fa-users"></i><span>Pasien</span>
             </a>
@@ -783,8 +790,11 @@ unset($_SESSION['success'], $_SESSION['error']);
         <div class="edit-container">
             <!-- Header -->
             <div class="page-header">
+                <a href="patient_detail.php?id=<?= $patient_id ?>" class="btn-back">
+                    <i class="fas fa-arrow-left"></i> Kembali ke Detail
+                </a>
+                <h1>Edit Data Pasien</h1>
                 <div>
-                    <h1>Edit Data Pasien</h1>
                     <p class="subtitle">
                         <i class="fas fa-user"></i>
                         <?= htmlspecialchars($patient['nama_lengkap']) ?>
@@ -793,9 +803,6 @@ unset($_SESSION['success'], $_SESSION['error']);
                         <?php endif; ?>
                     </p>
                 </div>
-                <a href="patient_detail.php?id=<?= $patient_id ?>" class="btn-back">
-                    <i class="fas fa-arrow-left"></i> Kembali ke Detail
-                </a>
             </div>
 
             <!-- Alert Messages -->
