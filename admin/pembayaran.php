@@ -997,6 +997,281 @@ if (!$all_completed) {
         diskonItems: <?php echo json_encode($data_services); ?>
     };
     </script>
+    <script>
+    // ==========================================
+// PATCH UNTUK PEMBAYARAN.JS
+// Tambahkan kode ini di AKHIR file pembayaran.js
+// SEBELUM tag 
+// ==========================================
+
+// ✅ FIX 1: Update fungsi applyDiskonItem untuk auto-save
+function applyDiskonItem() {
+    let tipe = currentDiskonType;
+    let diskon = 0;
+    let id = currentItemID;
+    
+    if (tipe === 'persen') {
+        const persen = parseFloat(document.getElementById('inputDiskonPersen').value) || 0;
+        diskon = Math.round(currentItemHarga * persen / 100);
+    } else {
+        diskon = parseFloat(document.getElementById('inputDiskonNilai').value) || 0;
+    }
+    
+    // Validasi
+    if (diskon > currentItemHarga) {
+        alert('Diskon tidak boleh lebih besar dari harga item');
+        return;
+    }
+    
+    // Simpan ke diskonItems
+    diskonItems[currentItemIndex] = {
+        id: currentItemID,
+        harga: currentItemHarga,
+        diskon: diskon,
+        tipe: tipe
+    };
+    
+    // Update UI
+    updateDiskonItemUI(id, currentItemIndex, diskon, tipe);
+    
+    // ✅ UPDATE TO DATABASE VIA AJAX
+    updateDiskonToDatabase(id, diskon, tipe);
+    
+    // Update total
+    updateTotalSummary();
+    
+    // Close modal
+    closeDiskonItemPopup();
+    
+    // Success message
+    showToast('Diskon berhasil diterapkan dan tersimpan!', 'success');
+}
+
+// ✅ FIX 2: Perbaiki fungsi updateDiskonToDatabase
+function updateDiskonToDatabase(id, diskon, tipe) {
+    console.log('🔄 Updating diskon to database...');
+    console.log('ID:', id, 'Diskon:', diskon, 'Tipe:', tipe);
+
+    const formData = new FormData();
+    formData.append('id', id);
+    formData.append('diskon', diskon);
+    formData.append('tipe_diskon', tipe);
+    formData.append('action', 'update_diskon');
+
+    return fetch('update_diskon.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('✅ Response:', data);
+        
+        if (data.success) {
+            console.log('✅ Diskon saved to database');
+            console.log('Updated data:', data.data);
+            return true;
+        } else {
+            console.error('❌ Failed:', data.message);
+            showToast('Gagal menyimpan: ' + data.message, 'error');
+            return false;
+        }
+    })
+    .catch(error => {
+        console.error('❌ Fetch error:', error);
+        showToast('Error: ' + error.message, 'error');
+        return false;
+    });
+}
+
+// ✅ FIX 3: Update fungsi updateDiskonItemUI
+function updateDiskonItemUI(id_item, index, diskon, tipe) {
+    const diskonCell = document.getElementById(`diskon-cell-${index}`);
+    const totalCell = document.getElementById(`total-item-${index}`);
+    
+    // ✅ Update ALL hidden inputs dengan ID yang sama
+    // Cari semua input dengan name yang match
+    const allServiceIdInputs = document.querySelectorAll(`input[name="service_id[]"]`);
+    const allServiceDiskonInputs = document.querySelectorAll(`input[name="service_diskon[]"]`);
+    const allServiceTipeInputs = document.querySelectorAll(`input[name="service_diskon_tipe[]"]`);
+    
+    // Update berdasarkan index
+    if (allServiceDiskonInputs[index]) {
+        allServiceDiskonInputs[index].value = diskon;
+        console.log(`✅ Updated service_diskon[${index}] = ${diskon}`);
+    }
+    
+    if (allServiceTipeInputs[index]) {
+        allServiceTipeInputs[index].value = tipe;
+        console.log(`✅ Updated service_diskon_tipe[${index}] = ${tipe}`);
+    }
+    
+    // Update UI display
+    if (diskon > 0) {
+        const persen = Math.round((diskon / currentItemHarga) * 100);
+        
+        let diskonHTML = `
+            <div class="diskon-applied">
+                <div style="display: flex; align-items: center; gap: 8px;">
+        `;
+        
+        if (tipe === 'persen') {
+            diskonHTML += `
+                <span class="diskon-badge persen">${persen}%</span>
+                <span style="font-size: 12px; color: #64748b;">
+                    (Rp ${formatNumber(diskon)})
+                </span>
+            `;
+        } else {
+            diskonHTML += `
+                <span class="diskon-badge nilai">- Rp ${formatNumber(diskon)}</span>
+            `;
+        }
+        
+        diskonHTML += `
+                </div>
+            </div>
+        `;
+        
+        diskonCell.innerHTML = `
+            ${diskonHTML}
+            <button type="button"
+                class="btn-edit-diskon"
+                onclick="openDiskonItem(${id_item}, ${index}, ${currentItemHarga}, '${tipe}', ${diskon}, '')"
+                title="Edit Diskon">
+                <i class="fas fa-edit"></i>
+            </button>
+        `;
+    } else {
+        diskonCell.innerHTML = `
+            <span class="no-diskon">-</span>
+            <button type="button"
+                class="btn-edit-diskon"
+                onclick="openDiskonItem(${id_item}, ${index}, ${currentItemHarga}, '', 0, '')"
+                title="Tambah Diskon">
+                <i class="fas fa-edit"></i>
+            </button>
+        `;
+    }
+    
+    // Update total per item
+    const totalPerItem = currentItemHarga - diskon;
+    if (totalCell) {
+        totalCell.textContent = `Rp ${formatNumber(totalPerItem)}`;
+    }
+}
+
+// ✅ FIX 4: Override form submit untuk sync data
+document.addEventListener('DOMContentLoaded', function() {
+    const formMultiple = document.getElementById('formMultiplePayment');
+    
+    if (formMultiple) {
+        // Remove existing listener dan add new one
+        const newForm = formMultiple.cloneNode(true);
+        formMultiple.parentNode.replaceChild(newForm, formMultiple);
+        
+        newForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            console.log('=== FORM SUBMIT - SYNCING DISKON DATA ===');
+            
+            // ✅ SYNC diskon dari diskonItems ke hidden inputs
+            Object.keys(diskonItems).forEach((index) => {
+                const item = diskonItems[index];
+                const idx = parseInt(index);
+                
+                // Get all inputs
+                const allDiskonInputs = newForm.querySelectorAll('input[name="service_diskon[]"]');
+                const allTipeInputs = newForm.querySelectorAll('input[name="service_diskon_tipe[]"]');
+                
+                if (allDiskonInputs[idx]) {
+                    allDiskonInputs[idx].value = item.diskon || 0;
+                    console.log(`✅ Synced service_diskon[${idx}] = ${item.diskon}`);
+                }
+                
+                if (allTipeInputs[idx]) {
+                    allTipeInputs[idx].value = item.tipe || '';
+                    console.log(`✅ Synced service_diskon_tipe[${idx}] = ${item.tipe}`);
+                }
+            });
+            
+            // Log final data
+            console.log('=== FINAL FORM DATA ===');
+            const formData = new FormData(this);
+            for (let pair of formData.entries()) {
+                if (pair[0].includes('service')) {
+                    console.log(pair[0] + ': ' + pair[1]);
+                }
+            }
+            
+            // Validasi
+            if (paymentMethods.length === 0) {
+                alert('Tambahkan minimal satu metode pembayaran');
+                return false;
+            }
+            
+            const jumlahBayar = parseFloat(document.getElementById('jumlahBayar').value) || 0;
+            const totalMethods = paymentMethods.reduce((sum, m) => sum + m.amount, 0);
+            
+            if (totalMethods > jumlahBayar) {
+                alert(`Total metode (${formatRupiah(totalMethods)}) melebihi jumlah bayar (${formatRupiah(jumlahBayar)})`);
+                return false;
+            }
+            
+            if (totalMethods === 0) {
+                alert('Total pembayaran tidak boleh Rp 0');
+                return false;
+            }
+            
+            // Konfirmasi
+            let konfirmasiText = `Konfirmasi Pembayaran\n\n`;
+            konfirmasiText += `Jumlah: ${formatRupiah(totalMethods)}\n`;
+            konfirmasiText += `Metode: ${paymentMethods.map(m => m.metode.toUpperCase()).join(', ')}\n\n`;
+            
+            if (totalMethods === jumlahBayar) {
+                konfirmasiText += `Status: LUNAS ✓\n\n`;
+            } else {
+                const sisaHutang = jumlahBayar - totalMethods;
+                konfirmasiText += `Status: PARTIAL\n`;
+                konfirmasiText += `Sisa: ${formatRupiah(sisaHutang)}\n\n`;
+            }
+            
+            konfirmasiText += `Lanjutkan?`;
+            
+            if (!confirm(konfirmasiText)) {
+                return false;
+            }
+            
+            // Add payment methods JSON
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'payment_methods';
+            input.value = JSON.stringify(paymentMethods);
+            this.appendChild(input);
+            
+            // Show loading
+            const btnConfirm = document.getElementById('btnConfirmPayment');
+            if (btnConfirm) {
+                btnConfirm.disabled = true;
+                btnConfirm.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+            }
+            
+            // Submit
+            console.log('✅ Submitting form...');
+            this.submit();
+        });
+        
+        console.log('✅ Form submit handler installed');
+    }
+});
+
+console.log('✅ PEMBAYARAN.JS PATCH LOADED');
+    </script>
     <script src="js/pembayaran.js"></script>
     <script src="js/sidebar-toggle.js"></script>
 </body>

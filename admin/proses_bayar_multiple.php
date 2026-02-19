@@ -6,13 +6,16 @@ include "../config.php";
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+error_log("========== PAYMENT PROCESSING START ==========");
+error_log("POST data: " . print_r($_POST, true));
+
 // Ambil data
 $booking_id = intval($_POST['booking_id'] ?? 0);
 $payment_methods = json_decode($_POST['payment_methods'] ?? '[]', true);
 $jumlah_bayar = floatval($_POST['jumlahBayar'] ?? 0);
 $diskon_total = floatval($_POST['diskon_total'] ?? 0);
 $subtotal = floatval($_POST['subtotal'] ?? 0);
-$total_tagihan = floatval($_POST['total_tagihan'] ?? 0); // Ini sudah termasuk diskon item
+$total_tagihan = floatval($_POST['total_tagihan'] ?? 0);
 $sisa_tagihan = floatval($_POST['sisa_tagihan'] ?? 0);
 
 // Validasi data dasar
@@ -24,14 +27,6 @@ if (empty($payment_methods) || !is_array($payment_methods)) {
     die(json_encode(['error' => 'Metode pembayaran tidak valid']));
 }
 
-// ================= TENTUKAN DISKON_TIPE =================
-if ($diskon_total > 0) {
-    $diskon_tipe_value = 'total_diskon';
-} else {
-    // Sesuaikan dengan default di database
-    $diskon_tipe_value = 'none'; // atau NULL jika diizinkan
-}
-
 // ================= AMBIL DATA BOOKING UTAMA =================
 $sql_booking = "SELECT parent_id FROM bookings WHERE id = ?";
 $stmt_b = $conn->prepare($sql_booking);
@@ -41,14 +36,76 @@ $result_b = $stmt_b->get_result();
 $booking_data = $result_b->fetch_assoc();
 
 $parent_booking_id = $booking_data['parent_id'] ?? $booking_id;
-$target_booking_id = $parent_booking_id; // Gunakan parent ID untuk semua query
+$target_booking_id = $parent_booking_id;
 
-// ================= AMBIL TOTAL TAGIHAN AKTUAL DARI DATABASE =================
+error_log("Booking ID: $booking_id");
+error_log("Parent ID: $parent_booking_id");
+error_log("Target ID: $target_booking_id");
+
+// ================= UPDATE DISKON PER ITEM DULU =================
+// ✅ PENTING: Update diskon per item SEBELUM hitung total
+$service_ids = isset($_POST['service_id']) ? (array)$_POST['service_id'] : [];
+$service_diskons = isset($_POST['service_diskon']) ? (array)$_POST['service_diskon'] : [];
+$service_diskon_tipes = isset($_POST['service_diskon_tipe']) ? (array)$_POST['service_diskon_tipe'] : [];
+
+error_log("=== UPDATING DISKON PER ITEM ===");
+error_log("Service IDs: " . print_r($service_ids, true));
+error_log("Service Diskons: " . print_r($service_diskons, true));
+error_log("Service Diskon Tipes: " . print_r($service_diskon_tipes, true));
+
+$total_diskon_item_actual = 0;
+
+if (!empty($service_ids)) {
+    $sql_update_diskon = "UPDATE booking_services 
+                         SET diskon = ?, 
+                             diskon_tipe = ?,
+                             total = harga - ?
+                         WHERE id = ?";
+    
+    $stmt_diskon = $conn->prepare($sql_update_diskon);
+    
+    if ($stmt_diskon) {
+        foreach ($service_ids as $index => $service_id) {
+            $service_id = intval($service_id);
+            
+            if ($service_id <= 0) {
+                error_log("⚠️ Invalid service ID at index $index");
+                continue;
+            }
+            
+            $diskon_value = isset($service_diskons[$index]) ? floatval($service_diskons[$index]) : 0;
+            $tipe_value = isset($service_diskon_tipes[$index]) ? trim($service_diskon_tipes[$index]) : '';
+            
+            // Set default tipe jika kosong tapi ada diskon
+            if (empty($tipe_value) && $diskon_value > 0) {
+                $tipe_value = 'nilai';
+            }
+            
+            error_log("Updating service_id=$service_id: diskon=$diskon_value, tipe=$tipe_value");
+            
+            $stmt_diskon->bind_param("dsdi", $diskon_value, $tipe_value, $diskon_value, $service_id);
+            
+            if ($stmt_diskon->execute()) {
+                error_log("✅ Service $service_id updated");
+                $total_diskon_item_actual += $diskon_value;
+            } else {
+                error_log("❌ Error updating service $service_id: " . $stmt_diskon->error);
+            }
+        }
+        $stmt_diskon->close();
+    } else {
+        error_log("❌ Prepare error: " . $conn->error);
+    }
+}
+
+error_log("Total diskon item actual: $total_diskon_item_actual");
+
+// ================= AMBIL TOTAL TAGIHAN DARI DATABASE =================
 $sql_total = "
 SELECT 
     SUM(bs.harga) as subtotal_db,
     SUM(bs.diskon) as diskon_item_db,
-    SUM(bs.harga - bs.diskon) as total_tagihan_db
+    SUM(bs.total) as total_tagihan_db
 FROM booking_services bs
 JOIN bookings b ON bs.booking_id = b.id
 WHERE b.parent_id = ? OR b.id = ?
@@ -63,11 +120,40 @@ $tagihan_data = $result_t->fetch_assoc();
 $subtotal_db = floatval($tagihan_data['subtotal_db'] ?? 0);
 $diskon_item_db = floatval($tagihan_data['diskon_item_db'] ?? 0);
 $total_tagihan_db = floatval($tagihan_data['total_tagihan_db'] ?? 0);
+
+error_log("Subtotal DB: $subtotal_db");
+error_log("Diskon Item DB: $diskon_item_db");
+error_log("Total Tagihan DB: $total_tagihan_db");
+
+// Gunakan nilai dari DB (yang sudah ter-update)
+$subtotal_final = $subtotal_db;
+$total_tagihan_before_diskon_total = $total_tagihan_db;
+
+// Total diskon transaksi = diskon item + diskon total
 $total_diskon_transaksi = $diskon_item_db + $diskon_total;
 
-// Gunakan nilai dari form jika valid, jika tidak gunakan dari database
-$subtotal_final = ($subtotal > 0) ? $subtotal : $subtotal_db;
-$total_tagihan_final = ($total_tagihan > 0) ? $total_tagihan : $total_tagihan_db;
+error_log("Diskon Total: $diskon_total");
+error_log("Total Diskon Transaksi: $total_diskon_transaksi");
+
+// ================= TENTUKAN DISKON_TIPE =================
+$has_diskon_item = ($diskon_item_db > 0);
+$has_diskon_total = ($diskon_total > 0);
+
+if ($has_diskon_total) {
+    $diskon_tipe_value = 'total_diskon';
+} else if ($has_diskon_item) {
+    $diskon_tipe_value = 'item_diskon';
+} else {
+    $diskon_tipe_value = '';
+}
+
+error_log("Diskon Tipe: $diskon_tipe_value");
+
+// ================= HITUNG TOTAL SETELAH DISKON TOTAL =================
+$total_setelah_diskon_total = $total_tagihan_before_diskon_total - $diskon_total;
+if ($total_setelah_diskon_total < 0) $total_setelah_diskon_total = 0;
+
+error_log("Total Setelah Diskon Total: $total_setelah_diskon_total");
 
 // ================= HITUNG SUDAH DIBAYAR =================
 $sql_sudah = "SELECT COALESCE(SUM(amount_paid), 0) as sudah 
@@ -81,38 +167,39 @@ $result_s = $stmt_s->get_result();
 $sudah_data = $result_s->fetch_assoc();
 $sudah_dibayar = floatval($sudah_data['sudah'] ?? 0);
 
+error_log("Sudah Dibayar: $sudah_dibayar");
+
 // ================= HITUNG TOTAL METODE PEMBAYARAN =================
 $total_metode = 0;
 foreach ($payment_methods as $method) {
     $total_metode += floatval($method['amount'] ?? 0);
 }
 
+error_log("Total Metode: $total_metode");
+
 // Validasi
 if ($total_metode <= 0) {
     die(json_encode(['error' => 'Total pembayaran harus lebih dari Rp 0']));
 }
 
-if ($total_metode > ($jumlah_bayar + 1000)) { // Toleransi 1000
+if ($total_metode > ($jumlah_bayar + 1000)) {
     die(json_encode(['error' => 'Total metode pembayaran melebihi jumlah yang akan dibayar']));
 }
 
 $amount_paid = $total_metode;
 
 // ================= HITUNG SISA =================
-// Hitung total setelah diskon total (jika ada)
-$total_setelah_diskon_total = $total_tagihan_final - $diskon_total;
-if ($total_setelah_diskon_total < 0) $total_setelah_diskon_total = 0;
-
-// Sisa sebelum pembayaran ini
 $sisa_sebelum = $total_setelah_diskon_total - $sudah_dibayar;
 if ($sisa_sebelum < 0) $sisa_sebelum = 0;
 
-// Sisa setelah pembayaran ini
 $sisa_setelah = $sisa_sebelum - $amount_paid;
 if ($sisa_setelah < 0) $sisa_setelah = 0;
 
+error_log("Sisa Sebelum: $sisa_sebelum");
+error_log("Sisa Setelah: $sisa_setelah");
+
 // ================= TENTUKAN STATUS =================
-if ($sisa_setelah <= 100) { // Toleransi 100 rupiah
+if ($sisa_setelah <= 100) {
     $status = 'paid';
     $payment_type = 'full';
     $remaining_balance = 0;
@@ -122,6 +209,10 @@ if ($sisa_setelah <= 100) { // Toleransi 100 rupiah
     $remaining_balance = $sisa_setelah;
 }
 
+error_log("Status: $status");
+error_log("Payment Type: $payment_type");
+error_log("Remaining Balance: $remaining_balance");
+
 // ================= PREPARE DATA LAINNYA =================
 $metode_array = [];
 foreach ($payment_methods as $method) {
@@ -130,28 +221,6 @@ foreach ($payment_methods as $method) {
 $metode_gabungan = implode(' + ', $metode_array);
 
 $jatuh_tempo = $_POST['jatuh_tempo'] ?? date('Y-m-d');
-
-// ================= DEBUG VALUES =================
-error_log("=== PAYMENT PROCESSING ===");
-error_log("Booking ID: $booking_id");
-error_log("Parent ID: $parent_booking_id");
-error_log("Target Booking ID: $target_booking_id");
-error_log("Subtotal (Form): $subtotal");
-error_log("Subtotal (DB): $subtotal_db");
-error_log("Subtotal (Final): $subtotal_final");
-error_log("Diskon Total: $diskon_total");
-error_log("Diskon Tipe: $diskon_tipe_value");
-error_log("Total Tagihan (Form): $total_tagihan");
-error_log("Total Tagihan (DB): $total_tagihan_db");
-error_log("Total Tagihan (Final): $total_tagihan_final");
-error_log("Total Setelah Diskon: $total_setelah_diskon_total");
-error_log("Sudah Dibayar: $sudah_dibayar");
-error_log("Amount Paid Now: $amount_paid");
-error_log("Sisa Sebelum: $sisa_sebelum");
-error_log("Sisa Setelah: $sisa_setelah");
-error_log("Status: $status");
-error_log("Payment Type: $payment_type");
-error_log("Remaining Balance: $remaining_balance");
 
 // ================= INSERT KE PAYMENTS =================
 $sql_payment = "INSERT INTO payments (
@@ -201,26 +270,14 @@ if (!$execute_result) {
     $error_info = [
         'error' => 'Execute payment insert failed',
         'stmt_error' => $stmt->error,
-        'errno' => $stmt->errno,
-        'values' => [
-            'booking_id' => $target_booking_id,
-            'metode' => $metode_gabungan,
-            'subtotal' => $subtotal_final,
-            'diskon' => $diskon_total,
-            'diskon_tipe' => $diskon_tipe_value,
-            'total' => $total_setelah_diskon_total,
-            'amount_paid' => $amount_paid,
-            'remaining_balance' => $remaining_balance,
-            'payment_type' => $payment_type,
-            'jatuh_tempo' => $jatuh_tempo,
-            'status' => $status
-        ]
+        'errno' => $stmt->errno
     ];
     error_log(print_r($error_info, true));
     die(json_encode($error_info));
 }
 
 $payment_id = $conn->insert_id;
+error_log("Payment ID created: $payment_id");
 
 // ================= INSERT DETAIL METODE =================
 if (!empty($payment_methods)) {
@@ -255,16 +312,19 @@ $stmt_check->bind_param("i", $target_booking_id);
 $stmt_check->execute();
 $total_bayar_real = $stmt_check->get_result()->fetch_assoc()['total_bayar'] ?? 0;
 
-// Total tagihan final setelah diskon
-$total_final = $subtotal_db - $diskon_item_db - $diskon_total;
+error_log("Total Bayar Real: $total_bayar_real");
 
-if ($total_bayar_real >= $total_final) {
+// Tentukan payment status final
+if ($total_bayar_real >= $total_setelah_diskon_total) {
     $payment_status = 'paid';
     $booking_status = 'completed';
 } else {
     $payment_status = 'partial';
     $booking_status = 'confirmed';
 }
+
+error_log("Payment Status Final: $payment_status");
+error_log("Booking Status Final: $booking_status");
 
 // Update parent booking
 $sql_update = "UPDATE bookings 
@@ -290,49 +350,6 @@ if ($stmt_uc) {
     $stmt_uc->close();
 }
 
-// ================= UPDATE DISKON PER ITEM =================
-$service_ids = isset($_POST['service_id']) ? (array)$_POST['service_id'] : [];
-$service_diskon = isset($_POST['service_diskon']) ? (array)$_POST['service_diskon'] : [];
-$service_diskon_tipe = isset($_POST['service_diskon_tipe']) ? (array)$_POST['service_diskon_tipe'] : [];
-
-error_log("Service IDs: " . print_r($service_ids, true));
-error_log("Service Diskon: " . print_r($service_diskon, true));
-error_log("Service Diskon Tipe: " . print_r($service_diskon_tipe, true));
-
-if (!empty($service_ids)) {
-    $sql_update_diskon = "UPDATE booking_services 
-                         SET diskon = ?, diskon_tipe = ?, total = harga - ?
-                         WHERE id = ?";
-    
-    $stmt_diskon = $conn->prepare($sql_update_diskon);
-    if ($stmt_diskon) {
-        foreach ($service_ids as $index => $service_id) {
-            $service_id = intval($service_id);
-            
-            // Ambil nilai diskon, default 0 jika tidak ada
-            $diskon_value = isset($service_diskon[$index]) ? floatval($service_diskon[$index]) : 0;
-            $tipe_value = isset($service_diskon_tipe[$index]) ? trim($service_diskon_tipe[$index]) : '';
-            
-            error_log("Updating service ID: $service_id, diskon: $diskon_value, tipe: $tipe_value");
-            
-            if ($service_id > 0) {
-                $stmt_diskon->bind_param("dsdi", $diskon_value, $tipe_value, $diskon_value, $service_id);
-                
-                if (!$stmt_diskon->execute()) {
-                    error_log("Error updating service $service_id: " . $stmt_diskon->error);
-                } else {
-                    error_log("Service $service_id updated successfully");
-                }
-            }
-        }
-        $stmt_diskon->close();
-    } else {
-        error_log("Prepare statement error: " . $conn->error);
-    }
-} else {
-    error_log("No service IDs found in POST data");
-}
-
 // ================= RESPONSE SUCCESS =================
 $response = [
     'success' => true,
@@ -343,9 +360,8 @@ $response = [
     'redirect_url' => "pembayaran.php?id=$booking_id&success=1&payment_id=$payment_id"
 ];
 
-// Debug response
 error_log("Payment processed successfully. Payment ID: " . $payment_id);
-error_log("Response: " . print_r($response, true));
+error_log("========== PAYMENT PROCESSING END ==========");
 
 // Close statements
 if (isset($stmt)) $stmt->close();

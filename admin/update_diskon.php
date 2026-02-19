@@ -1,74 +1,104 @@
 <?php
-require_once '../config.php'; // Sesuaikan path
+session_start();
+include "../config.php";
 
 header('Content-Type: application/json');
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo json_encode(['success' => false, 'message' => 'Invalid request method']);
+// Debug logging
+error_reporting(E_ALL);
+ini_set('display_errors', 0); // Jangan tampilkan error di response
+error_log("=== UPDATE DISKON REQUEST ===");
+error_log("POST data: " . print_r($_POST, true));
+
+// Ambil data
+$action = $_POST['action'] ?? '';
+$service_id = isset($_POST['id']) ? intval($_POST['id']) : 0;
+$diskon = isset($_POST['diskon']) ? floatval($_POST['diskon']) : 0;
+$tipe_diskon = isset($_POST['tipe_diskon']) ? trim($_POST['tipe_diskon']) : '';
+
+// Validasi
+if ($action !== 'update_diskon') {
+    echo json_encode([
+        'success' => false,
+        'message' => 'Action tidak valid'
+    ]);
     exit;
 }
 
-try {
-    // Validasi input
-    if (!isset($_POST['id']) || !isset($_POST['diskon']) || !isset($_POST['tipe_diskon'])) {
-        throw new Exception('Data tidak lengkap!');
-    }
-    
-    $id = $_POST['id'];
-    $diskon = $_POST['diskon'];
-    $tipe_diskon = $_POST['tipe_diskon'];
-    
-    // Validasi tipe data
-    if (!is_numeric($id)) {
-        throw new Exception('ID tidak valid!');
-    }
-    
-    if (!is_numeric($diskon)) {
-        throw new Exception('Nilai diskon tidak valid!');
-    }
-    
-    // Update database
-    $query = "UPDATE booking_services 
-              SET diskon = ?, 
-                  diskon_tipe = ?
-              WHERE id = ?";
-    
-    $stmt = $conn->prepare($query);
-    
-    if (!$stmt) {
-        throw new Exception('Query error: ' . $conn->error);
-    }
-    
-    $stmt->bind_param("isi", $diskon, $tipe_diskon, $id);
-    
-    if ($stmt->execute()) {
-        if ($stmt->affected_rows > 0) {
-            echo json_encode([
-                'success' => true,
-                'message' => 'Diskon berhasil diperbarui'
-            ]);
-        } else {
-            // Tidak ada perubahan, mungkin ID tidak ditemukan
-            echo json_encode([
-                'success' => false,
-                'message' => 'Data tidak ditemukan'
-            ]);
-        }
-    } else {
-        throw new Exception('Gagal mengeksekusi query: ' . $stmt->error);
-    }
-    
-    $stmt->close();
-    
-} catch (Exception $e) {
+if ($service_id <= 0) {
     echo json_encode([
         'success' => false,
-        'message' => $e->getMessage()
+        'message' => 'ID layanan tidak valid'
+    ]);
+    exit;
+}
+
+// Validasi diskon
+if ($diskon < 0) {
+    echo json_encode([
+        'success' => false,
+        'message' => 'Diskon tidak boleh negatif'
+    ]);
+    exit;
+}
+
+// Set default tipe jika kosong
+if (empty($tipe_diskon) && $diskon > 0) {
+    $tipe_diskon = 'nilai';
+}
+
+error_log("Service ID: $service_id");
+error_log("Diskon: $diskon");
+error_log("Tipe: $tipe_diskon");
+
+// Update database
+$sql = "UPDATE booking_services 
+        SET diskon = ?, 
+            diskon_tipe = ?,
+            total = harga - ?
+        WHERE id = ?";
+
+$stmt = $conn->prepare($sql);
+
+if (!$stmt) {
+    error_log("Prepare failed: " . $conn->error);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Database error: ' . $conn->error
+    ]);
+    exit;
+}
+
+$stmt->bind_param("dsdi", $diskon, $tipe_diskon, $diskon, $service_id);
+
+if ($stmt->execute()) {
+    error_log("✅ Update berhasil untuk service_id: $service_id");
+    
+    // Verify update
+    $verify_sql = "SELECT id, nama_layanan, harga, diskon, diskon_tipe, total 
+                   FROM booking_services 
+                   WHERE id = ?";
+    $stmt_verify = $conn->prepare($verify_sql);
+    $stmt_verify->bind_param("i", $service_id);
+    $stmt_verify->execute();
+    $result = $stmt_verify->get_result();
+    $data = $result->fetch_assoc();
+    
+    error_log("Verified data: " . print_r($data, true));
+    
+    echo json_encode([
+        'success' => true,
+        'message' => 'Diskon berhasil disimpan',
+        'data' => $data
+    ]);
+} else {
+    error_log("❌ Execute failed: " . $stmt->error);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Gagal menyimpan: ' . $stmt->error
     ]);
 }
 
-// Tutup koneksi
-if (isset($conn)) {
-    $conn->close();
-}
+$stmt->close();
+$conn->close();
 ?>
