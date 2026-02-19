@@ -35,11 +35,6 @@ function showParticipant(index) {
     }
 }
 
-// Fungsi untuk tambah peserta (placeholder)
-function addParticipant() {
-    alert("Fitur tambah peserta akan datang!");
-}
-
 // Inisialisasi saat halaman dimuat
 document.addEventListener('DOMContentLoaded', function() {
     console.log("Halaman detail dimuat");

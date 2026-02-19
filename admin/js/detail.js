@@ -139,8 +139,3 @@ function showParticipant(index) {
     document.getElementById('participant-' + index).classList.add('active');
     document.querySelectorAll('.participant-tab')[index].classList.add('active');
 }
-
-function addParticipant() {
-    alert("Fitur tambah peserta nanti kita buat 😄");
-}
-

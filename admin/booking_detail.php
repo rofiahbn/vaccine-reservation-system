@@ -680,6 +680,245 @@ $disable_accept = ($booking['status'] !== 'pending');
         </div>
     </div>
 
+    <!-- Add Participant Modal -->
+    <div id="addParticipantModal" class="modal-add-participant" style="display:none;">
+        <div class="modal-add-content">
+            <div class="modal-add-header">
+                <h2><i class="fas fa-user-plus"></i> Tambah Peserta Baru</h2>
+                <button class="modal-close" onclick="closeAddParticipantModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-add-body">
+                <!-- Pilih Pasien Existing -->
+                <div class="selection-section">
+                    <h3>Pilih Pasien Existing</h3>
+                    <div class="search-box-participant">
+                        <i class="fas fa-search"></i>
+                        <input type="text" 
+                               id="searchPatient" 
+                               placeholder="Cari nama atau nomor rekam medis..."
+                               onkeyup="searchPatients()">
+                    </div>
+                    
+                    <div class="patient-list" id="patientList">
+                        <div class="loading-patients">
+                            <i class="fas fa-spinner fa-spin"></i> Memuat data pasien...
+                        </div>
+                    </div>
+                    
+                    <div class="or-divider">
+                        <span>ATAU</span>
+                    </div>
+                </div>
+                
+                <!-- Buat Pasien Baru -->
+                <div class="new-patient-section">
+                    <h3>Buat Pasien Baru</h3>
+                    <button class="btn-create-new" onclick="showNewPatientForm()">
+                        <i class="fas fa-plus-circle"></i> Buat Pasien Baru
+                    </button>
+                </div>
+                
+                <!-- Form Pasien Baru (hidden by default) -->
+                <div id="newPatientForm" style="display:none;">
+                    <form id="newPatientFormElement" onsubmit="saveNewPatient(event)">
+                        <!-- Data Diri Pasien -->
+                        <h4 style="margin-top: 0; margin-bottom: 16px; color: #1e293b;">
+                            <i class="fas fa-user"></i> Data Diri Pasien
+                        </h4>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Nama Lengkap <span class="required">*</span></label>
+                                <input type="text" name="nama_lengkap" required placeholder="Nama lengkap">
+                            </div>
+                            <div class="form-group">
+                                <label>Nama Panggilan</label>
+                                <input type="text" name="nama_panggilan" placeholder="Nama panggilan">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Tanggal Lahir <span class="required">*</span></label>
+                                <input type="date" name="tanggal_lahir" id="tanggalLahir" required onchange="hitungUsiaDetail(this)">
+                            </div>
+                            <div class="form-group">
+                                <label>Usia</label>
+                                <input type="text" name="usia_display" id="usiaDisplay" readonly placeholder="Tahun Bulan">
+                                <input type="hidden" name="usia_tahun" id="usiaTahun">
+                                <input type="hidden" name="usia_bulan" id="usiaBulan">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Jenis Kelamin <span class="required">*</span></label>
+                                <select name="jenis_kelamin" required>
+                                    <option value="">Pilih Jenis Kelamin</option>
+                                    <option value="L">Laki-laki</option>
+                                    <option value="P">Perempuan</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Kebangsaan</label>
+                                <select name="kebangsaan">
+                                    <option value="WNI">WNI</option>
+                                    <option value="WNA">WNA</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>NIK</label>
+                                <input type="text" name="nik" placeholder="Nomor NIK">
+                            </div>
+                            <div class="form-group">
+                                <label>No. Paspor</label>
+                                <input type="text" name="paspor" placeholder="Nomor paspor">
+                            </div>
+                        </div>
+                        
+                        <!-- Data Wali (untuk anak di bawah 12 tahun) -->
+                        <div id="waliSection" style="display: none; margin-top: 20px; padding: 16px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                            <h4 style="margin-top: 0; margin-bottom: 12px; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-user-shield" style="color: #3b82f6;"></i> Data Wali / Orang Tua
+                                <span style="font-size: 12px; background: #dbeafe; padding: 2px 8px; border-radius: 100px; color: #1e40af;">Anak di bawah 12 tahun</span>
+                            </h4>
+                            
+                            <div class="form-group">
+                                <label>Nama Wali <span class="required">*</span></label>
+                                <input type="text" name="nama_wali" id="namaWali" placeholder="Nama lengkap wali / orang tua">
+                            </div>
+                        </div>
+                        
+                        <!-- Data Kontak -->
+                        <h4 style="margin-top: 24px; margin-bottom: 16px; color: #1e293b;">
+                            <i class="fas fa-phone"></i> Data Kontak
+                        </h4>
+                        
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" name="email" placeholder="email@example.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Nomor HP</label>
+                            <input type="text" name="phone" placeholder="08123456789">
+                        </div>
+                        
+                        <!-- Data Alamat dengan Provinsi & Kota -->
+                        <h4 style="margin-top: 24px; margin-bottom: 16px; color: #1e293b;">
+                            <i class="fas fa-map-marker-alt"></i> Data Alamat
+                        </h4>
+
+                        <div class="form-group">
+                            <label>Alamat</label>
+                            <textarea name="alamat" rows="2" placeholder="Alamat lengkap (jalan, gang, nomor)"></textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Provinsi</label>
+                                <select name="provinsi" id="provinsiSelect">
+                                    <option value="">-- Pilih Provinsi --</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Kota/Kabupaten</label>
+                                <select name="kota" id="kotaSelect" disabled>
+                                    <option value="">-- Pilih Kota --</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Data Pekerjaan & Riwayat Kesehatan -->
+                        <h4 style="margin-top: 24px; margin-bottom: 16px; color: #1e293b;">
+                            <i class="fas fa-briefcase"></i> Data Tambahan
+                        </h4>
+                        
+                        <div class="form-group">
+                            <label>Pekerjaan</label>
+                            <input type="text" name="pekerjaan" placeholder="Pekerjaan">
+                        </div>
+                        
+                        <h4 style="margin-top: 24px; margin-bottom: 16px; color: #1e293b;">
+                            <i class="fas fa-file-medical"></i> Riwayat Kesehatan
+                        </h4>
+                        
+                        <div class="form-group">
+                            <label>Riwayat Alergi</label>
+                            <textarea name="riwayat_alergi" rows="2" placeholder="Riwayat alergi (obat, makanan, dll)"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Riwayat Penyakit</label>
+                            <textarea name="riwayat_penyakit" rows="2" placeholder="Riwayat penyakit yang pernah diderita"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Riwayat Obat</label>
+                            <textarea name="riwayat_obat" rows="2" placeholder="Riwayat konsumsi obat"></textarea>
+                        </div>
+                        
+                        <div class="modal-actions">
+                            <button type="button" class="btn-back-to-select" onclick="hideNewPatientForm()">
+                                <i class="fas fa-arrow-left"></i> Kembali
+                            </button>
+                            <button type="submit" class="btn-save-patient">
+                                <i class="fas fa-save"></i> Simpan Pasien
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pilih Layanan Modal -->
+    <div id="selectServicesModal" class="modal-select-services" style="display:none;">
+        <div class="modal-services-content">
+            <div class="modal-services-header">
+                <h2><i class="fas fa-syringe"></i> Pilih Layanan</h2>
+                <button class="modal-close" onclick="closeServicesModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-services-body">
+                <div class="selected-patient-info" id="selectedPatientInfo">
+                    <!-- Akan diisi dengan info pasien -->
+                </div>
+                
+                <div class="services-list" id="servicesList">
+                    <div class="loading-services">
+                        <i class="fas fa-spinner fa-spin"></i> Memuat layanan...
+                    </div>
+                </div>
+                
+                <div class="selected-services-summary">
+                    <h4>Layanan Dipilih</h4>
+                    <div id="selectedServicesList"></div>
+                    <div class="total-price">
+                        Total: <span id="totalPrice">Rp 0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-services-footer">
+                <button type="button" class="btn-back-to-participant" onclick="closeServicesModal()">
+                    Batal
+                </button>
+                <button type="button" class="btn-add-to-booking" onclick="addServicesToBooking()" id="btnAddServices" disabled>
+                    <i class="fas fa-plus-circle"></i> Tambahkan ke Booking
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Popup overlay -->
     <div id="addDoctorPopup" class="popup-overlay" style="display:none;">
         <div class="popup-content">
@@ -745,17 +984,18 @@ $disable_accept = ($booking['status'] !== 'pending');
 </div>
 
     <script>
-    const bookingId = <?= $booking_id ?>;
-
-    const participants = <?= json_encode(
-        array_map(fn($p) => $p['patient_id'], $participants)
-    ) ?>;
+        const bookingId = <?= $booking_id ?>;
+        const participants = <?= json_encode(array_map(fn($p) => $p['patient_id'], $participants)) ?>;
+        const bookingStatus = '<?= $booking['status'] ?>';
+        const bookingStatusText = '<?= $booking['status'] == 'confirmed' ? 'dikonfirmasi' : ($booking['status'] == 'completed' ? 'selesai' : ($booking['status'] == 'cancelled' ? 'dibatalkan' : 'pending')) ?>';
     </script>
+    <script src="../provinces.js"></script>
     <script src="js/detail_tabs.js"></script>
     <script src="js/detail_edit.js"></script>
     <script src="js/detail.js"></script>
     <script src="js/reschedule.js"></script>
     <script src="js/cetak_surat_detail.js"></script>
+    <script src="js/add_participant.js"></script>
     <script src="js/sidebar-toggle.js"></script>
 </body>
 </html>
