@@ -93,11 +93,16 @@ if ($stmt === false) {
 }
 
 if (!empty($params)) {
-    // Bind parameters jika ada
-    if ($types && count($params) > 0) {
-        $bind_params = array_merge([$stmt, $types], $params);
-        call_user_func_array('mysqli_stmt_bind_param', $bind_params);
+    // Binding parameter dengan metode yang benar untuk PHP versi lama
+    $bind_params = array($stmt, $types);
+    
+    // Buat references untuk setiap parameter
+    foreach ($params as $key => $value) {
+        $bind_params[] = &$params[$key]; // Pakai reference (&)
     }
+    
+    // Panggil dengan call_user_func_array
+    call_user_func_array('mysqli_stmt_bind_param', $bind_params);
 }
 
 if (!mysqli_stmt_execute($stmt)) {
@@ -117,66 +122,97 @@ mysqli_stmt_close($stmt);
 $rate_per_jam = 50000;
 
 foreach ($staff_list as $key => $staff) {
-    // Coba cari kolom yang menghubungkan staff dengan tindakan
-    // Kemungkinan nama kolom: 'staff_id', 'dokter_id', 'petugas_id', 'user_id', 'created_by'
-    
-    $possible_columns = ['staff_id', 'dokter_id', 'petugas_id', 'user_id', 'created_by'];
     $total_pasien = 0;
     $total_jam = 0;
     
+    // CEK 1: Cari di tabel tindakan (jika ada kolom staff_id)
+    $possible_columns = ['staff_id', 'dokter_id', 'petugas_id', 'user_id', 'created_by'];
+    
     foreach ($possible_columns as $column) {
         // Cek apakah kolom ada di tabel tindakan
-        $check_column = mysqli_query($conn, "SHOW COLUMNS FROM tindakan LIKE '$column'");
-        if (mysqli_num_rows($check_column) > 0) {
-            // Kolom ditemukan, gunakan untuk query
-            $sql_tindakan = "SELECT 
-                                COUNT(DISTINCT id) as total_pasien,
-                                SUM(TIMESTAMPDIFF(HOUR, created_at, COALESCE(updated_at, created_at))) as total_jam
-                            FROM tindakan 
-                            WHERE $column = ?";
+        $check_column = @mysqli_query($conn, "SHOW COLUMNS FROM tindakan LIKE '$column'");
+        if ($check_column && mysqli_num_rows($check_column) > 0) {
             
-            $stmt_tindakan = mysqli_prepare($conn, $sql_tindakan);
-            if ($stmt_tindakan) {
-                mysqli_stmt_bind_param($stmt_tindakan, 'i', $staff['id']);
-                mysqli_stmt_execute($stmt_tindakan);
-                $result_tindakan = mysqli_stmt_get_result($stmt_tindakan);
-                $data_tindakan = mysqli_fetch_assoc($result_tindakan);
-                
-                if ($data_tindakan) {
-                    $total_pasien = $data_tindakan['total_pasien'] ?? 0;
-                    $total_jam = $data_tindakan['total_jam'] ?? 0;
+            // Hitung total pasien unik dari tindakan
+            $sql_pasien = "SELECT COUNT(DISTINCT patient_id) as total FROM tindakan WHERE $column = ?";
+            $stmt_pasien = mysqli_prepare($conn, $sql_pasien);
+            
+            if ($stmt_pasien) {
+                mysqli_stmt_bind_param($stmt_pasien, 'i', $staff['id']);
+                mysqli_stmt_execute($stmt_pasien);
+                $result_pasien = mysqli_stmt_get_result($stmt_pasien);
+                if ($result_pasien) {
+                    $data_pasien = mysqli_fetch_assoc($result_pasien);
+                    $total_pasien = $data_pasien['total'] ?? 0;
                 }
-                
-                mysqli_stmt_close($stmt_tindakan);
-                break; // Keluar dari loop setelah menemukan kolom yang valid
+                mysqli_stmt_close($stmt_pasien);
+            }
+            
+            // Hitung total jam kerja dari tindakan
+            $sql_jam = "SELECT SUM(TIMESTAMPDIFF(HOUR, created_at, COALESCE(updated_at, created_at))) as total_jam
+                       FROM tindakan 
+                       WHERE $column = ?";
+            $stmt_jam = mysqli_prepare($conn, $sql_jam);
+            
+            if ($stmt_jam) {
+                mysqli_stmt_bind_param($stmt_jam, 'i', $staff['id']);
+                mysqli_stmt_execute($stmt_jam);
+                $result_jam = mysqli_stmt_get_result($stmt_jam);
+                if ($result_jam) {
+                    $data_jam = mysqli_fetch_assoc($result_jam);
+                    $total_jam = $data_jam['total_jam'] ?? 0;
+                }
+                mysqli_stmt_close($stmt_jam);
+            }
+            
+            break; // Keluar dari loop setelah ketemu kolom
+        }
+    }
+    
+    // CEK 2: Jika tidak ada di tindakan, cek di tabel booking_staff
+    if ($total_pasien == 0) {
+        // Cek apakah tabel booking_staff ada
+        $check_table = mysqli_query($conn, "SHOW TABLES LIKE 'booking_staff'");
+        if (mysqli_num_rows($check_table) > 0) {
+            $sql_booking = "SELECT COUNT(DISTINCT b.patient_id) as total
+                           FROM booking_staff bs
+                           JOIN bookings b ON bs.booking_id = b.id
+                           WHERE bs.staff_id = ?";
+            
+            $stmt_booking = mysqli_prepare($conn, $sql_booking);
+            if ($stmt_booking) {
+                mysqli_stmt_bind_param($stmt_booking, 'i', $staff['id']);
+                mysqli_stmt_execute($stmt_booking);
+                $result_booking = mysqli_stmt_get_result($stmt_booking);
+                if ($result_booking) {
+                    $data_booking = mysqli_fetch_assoc($result_booking);
+                    $total_pasien = $data_booking['total'] ?? 0;
+                }
+                mysqli_stmt_close($stmt_booking);
             }
         }
     }
     
-    // Jika tidak ada kolom yang ditemukan, gunakan query tanpa JOIN
-    if ($total_pasien == 0 && $total_jam == 0) {
-        // Coba query alternatif: hitung dari tabel bookings atau tabel lain
-        // Sesuaikan dengan struktur database Anda
-        $sql_alternatif = "SELECT 
-                            COUNT(DISTINCT patient_id) as total_pasien
-                          FROM bookings 
-                          WHERE created_by = ?"; // Atau kolom lain yang sesuai
+    // CEK 3: Jika masih 0, cek di tabel bookings (created_by)
+    if ($total_pasien == 0) {
+        $sql_created = "SELECT COUNT(DISTINCT patient_id) as total
+                       FROM bookings 
+                       WHERE created_by = ?";
         
-        $stmt_alt = mysqli_prepare($conn, $sql_alternatif);
-        if ($stmt_alt) {
-            mysqli_stmt_bind_param($stmt_alt, 'i', $staff['id']);
-            mysqli_stmt_execute($stmt_alt);
-            $result_alt = mysqli_stmt_get_result($stmt_alt);
-            $data_alt = mysqli_fetch_assoc($result_alt);
-            
-            if ($data_alt) {
-                $total_pasien = $data_alt['total_pasien'] ?? 0;
+        $stmt_created = mysqli_prepare($conn, $sql_created);
+        if ($stmt_created) {
+            mysqli_stmt_bind_param($stmt_created, 'i', $staff['id']);
+            mysqli_stmt_execute($stmt_created);
+            $result_created = mysqli_stmt_get_result($stmt_created);
+            if ($result_created) {
+                $data_created = mysqli_fetch_assoc($result_created);
+                $total_pasien = $data_created['total'] ?? 0;
             }
-            
-            mysqli_stmt_close($stmt_alt);
+            mysqli_stmt_close($stmt_created);
         }
     }
     
+    // Simpan ke array
     $staff_list[$key]['total_pasien'] = $total_pasien;
     $staff_list[$key]['total_jam_kerja'] = $total_jam;
 }
@@ -300,7 +336,6 @@ foreach ($staff_list as $key => $staff) {
             <!-- Header dengan tombol tambah -->
             <div class="page-header">
                 <h1 class="page-title">
-                    <i class="fas fa-user-md"></i>
                     Manajemen Staff
                 </h1>
                 <div class="header-actions">
@@ -358,17 +393,17 @@ foreach ($staff_list as $key => $staff) {
                                     <tr data-staff-id="<?= $staff['id'] ?>">
                                         <td>
                                             <div class="staff-name">
-                                                <strong><?= htmlspecialchars($staff['nama_lengkap'] ?? '-') ?></strong>
+                                                <strong><?= htmlspecialchars($staff['nama_lengkap'] ?? '-', ENT_QUOTES, 'UTF-8') ?></strong>
                                                 <?php if (!empty($staff['gelar'])): ?>
                                                     <div class="staff-gelar">
-                                                        <small><?= htmlspecialchars($staff['gelar']) ?></small>
+                                                        <small><?= htmlspecialchars($staff['gelar'] ?? '', ENT_QUOTES, 'UTF-8') ?></small>
                                                     </div>
                                                 <?php endif; ?>
                                             </div>
                                         </td>
                                         <td>
                                             <?php if (!empty($staff['sip'])): ?>
-                                                <span class="sip-number"><?= htmlspecialchars($staff['sip']) ?></span>
+                                                <span class="sip-number"><?= htmlspecialchars($staff['sip'], ENT_QUOTES, 'UTF-8') ?></span>
                                             <?php else: ?>
                                                 <span class="no-data">-</span>
                                             <?php endif; ?>
@@ -400,12 +435,19 @@ foreach ($staff_list as $key => $staff) {
                                             <div class="action-buttons">
                                                 <button type="button" 
                                                         class="btn-edit" 
-                                                        onclick="editStaff(<?= $staff['id'] ?>)">
+                                                        data-id="<?= $staff['id'] ?>"
+                                                        data-nama="<?= htmlspecialchars($staff['nama_lengkap'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                                        data-gelar="<?= htmlspecialchars($staff['gelar'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                                        data-sip="<?= htmlspecialchars($staff['sip'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                                        data-role="<?= $staff['role'] ?? '' ?>"
+                                                        onclick="editStaff(this)">
                                                     <i class="fas fa-edit"></i> Edit
                                                 </button>
                                                 <button type="button" 
                                                         class="btn-delete" 
-                                                        onclick="hapusStaff(<?= $staff['id'] ?>, '<?= htmlspecialchars($staff['nama_lengkap'] ?? '') ?>')">
+                                                        data-id="<?= $staff['id'] ?>"
+                                                        data-nama="<?= htmlspecialchars($staff['nama_lengkap'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                                        onclick="hapusStaff(this)">
                                                     <i class="fas fa-trash"></i> Hapus
                                                 </button>
                                             </div>
@@ -530,43 +572,97 @@ foreach ($staff_list as $key => $staff) {
         
         // Modal functions
         function tambahStaff() {
-            document.getElementById('modalTitle').textContent = 'Tambah Staff Baru';
-            document.getElementById('staffForm').reset();
-            document.getElementById('staffId').value = '';
-            document.getElementById('staffModal').style.display = 'flex';
+            console.log('Tambah staff dipanggil');
+            
+            // Cek element
+            const modalTitle = document.getElementById('modalTitle');
+            const staffForm = document.getElementById('staffForm');
+            const staffId = document.getElementById('staffId');
+            const staffModal = document.getElementById('staffModal');
+            
+            if (!modalTitle || !staffForm || !staffId || !staffModal) {
+                alert('Terjadi kesalahan: Form tidak ditemukan');
+                return;
+            }
+            
+            // Reset form
+            modalTitle.textContent = 'Tambah Staff Baru';
+            staffForm.reset();
+            staffId.value = '';
+            
+            // Tampilkan modal
+            staffModal.style.display = 'flex';
         }
         
-        function editStaff(id) {
-            // Fetch staff data via AJAX
-            fetch(`get_staff.php?id=${id}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        document.getElementById('modalTitle').textContent = 'Edit Staff';
-                        document.getElementById('staffId').value = data.data.id;
-                        document.getElementById('nama_lengkap').value = data.data.nama_lengkap;
-                        document.getElementById('gelar').value = data.data.gelar || '';
-                        document.getElementById('sip').value = data.data.sip || '';
-                        document.getElementById('role').value = data.data.role;
-                        document.getElementById('staffModal').style.display = 'flex';
-                    } else {
-                        showNotification('Gagal mengambil data staff', 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showNotification('Terjadi kesalahan', 'error');
-                });
+        function editStaff(button) {
+            console.log('Edit staff dipanggil', button);
+            
+            // Ambil data dari attribute tombol
+            const id = button.getAttribute('data-id');
+            const nama = button.getAttribute('data-nama');
+            const gelar = button.getAttribute('data-gelar');
+            const sip = button.getAttribute('data-sip');
+            const role = button.getAttribute('data-role');
+            
+            console.log('Data staff:', {id, nama, gelar, sip, role});
+            
+            // Validasi data
+            if (!id) {
+                alert('ID staff tidak ditemukan');
+                return;
+            }
+            
+            // Cek apakah element-element form ada
+            const elements = {
+                modalTitle: document.getElementById('modalTitle'),
+                staffId: document.getElementById('staffId'),
+                nama_lengkap: document.getElementById('nama_lengkap'),
+                gelar: document.getElementById('gelar'),
+                sip: document.getElementById('sip'),
+                role: document.getElementById('role'),
+                staffModal: document.getElementById('staffModal')
+            };
+            
+            // Validasi semua element
+            for (let [key, element] of Object.entries(elements)) {
+                if (!element) {
+                    console.error(`Element ${key} tidak ditemukan!`);
+                    alert(`Terjadi kesalahan: Form tidak lengkap (${key})`);
+                    return;
+                }
+            }
+            
+            // Isi form modal
+            elements.modalTitle.textContent = 'Edit Staff';
+            elements.staffId.value = id;
+            elements.nama_lengkap.value = nama;
+            elements.gelar.value = gelar || '';
+            elements.sip.value = sip || '';
+            elements.role.value = role;
+            
+            // Tampilkan modal
+            elements.staffModal.style.display = 'flex';
+            
+            // Notifikasi
+            showNotification('Data staff siap diedit', 'success');
         }
         
-        function hapusStaff(id, nama) {
+        function hapusStaff(button) {
+            // Ambil data dari attribute tombol
+            const id = button.getAttribute('data-id');
+            const nama = button.getAttribute('data-nama');
+            
+            console.log('Hapus staff:', {id, nama});
+            
+            if (!id) {
+                alert('ID staff tidak ditemukan');
+                return;
+            }
+            
             if (confirm(`Yakin ingin menghapus staff ${nama}?`)) {
                 // Show loading state
-                const buttons = document.querySelectorAll(`[data-staff-id="${id}"] .btn-delete`);
-                buttons.forEach(btn => {
-                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...';
-                    btn.disabled = true;
-                });
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...';
+                button.disabled = true;
                 
                 // Send delete request
                 fetch('delete_staff.php', {
@@ -580,31 +676,27 @@ foreach ($staff_list as $key => $staff) {
                 .then(data => {
                     if (data.success) {
                         showNotification(`Staff ${nama} berhasil dihapus`, 'success');
-                        // Refresh halaman setelah 1.5 detik
                         setTimeout(() => location.reload(), 1500);
                     } else {
                         showNotification('Gagal menghapus staff: ' + (data.message || ''), 'error');
-                        // Reset button
-                        buttons.forEach(btn => {
-                            btn.innerHTML = '<i class="fas fa-trash"></i> Hapus';
-                            btn.disabled = false;
-                        });
+                        button.innerHTML = '<i class="fas fa-trash"></i> Hapus';
+                        button.disabled = false;
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
                     showNotification('Terjadi kesalahan', 'error');
-                    // Reset button
-                    buttons.forEach(btn => {
-                        btn.innerHTML = '<i class="fas fa-trash"></i> Hapus';
-                        btn.disabled = false;
-                    });
+                    button.innerHTML = '<i class="fas fa-trash"></i> Hapus';
+                    button.disabled = false;
                 });
             }
         }
         
         function tutupModal() {
-            document.getElementById('staffModal').style.display = 'none';
+            const modal = document.getElementById('staffModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
         }
         
         function simpanStaff(event) {
