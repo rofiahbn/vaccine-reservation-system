@@ -106,6 +106,10 @@ $categories_result = $conn->query($sql_categories);
                 <i class="fas fa-users"></i>
                 <span>Pasien</span>
             </a>
+            <a href="staff.php" class="nav-item">
+                <i class="fas fa-user-md"></i>
+                <span>Staff</span>
+            </a>
             <a href="calendar_setting.php" class="nav-item">
                 <i class="fas fa-calendar"></i>
                 <span>Kalender</span>

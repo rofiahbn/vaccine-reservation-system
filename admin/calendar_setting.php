@@ -76,6 +76,10 @@ $jenis_libur = ['nasional', 'khusus', 'minggu'];
                 <i class="fas fa-users"></i>
                 <span>Pasien</span>
             </a>
+            <a href="staff.php" class="nav-item">
+                <i class="fas fa-user-md"></i>
+                <span>Staff</span>
+            </a>
             <a href="calendar_setting.php" class="nav-item <?= $current_page == 'calendar_setting.php' ? 'active' : '' ?>">
                 <i class="fas fa-calendar"></i>
                 <span>Kalender</span>
