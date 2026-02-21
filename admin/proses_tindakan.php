@@ -382,7 +382,16 @@ if ($status_booking === 'pending') {
                     <div class="summary-row">
                         <div class="summary-label">Jenis Kelamin</div>
                         <div class="summary-value">
-                            <?= htmlspecialchars($current_peserta['jenis_kelamin']) ?>
+                            <?php 
+                            $jk = $current_peserta['jenis_kelamin'] ?? '';
+                            if ($jk == 'L') {
+                                echo 'Laki-laki';
+                            } elseif ($jk == 'P') {
+                                echo 'Perempuan';
+                            } else {
+                                echo htmlspecialchars($jk);
+                            }
+                            ?>
                         </div>
                     </div>
 
@@ -592,33 +601,6 @@ if ($status_booking === 'pending') {
                             <label>Tatalaksana</label>
                             <textarea name="tatalaksana"><?= htmlspecialchars($tindakan['tatalaksana'] ?? '') ?></textarea>
                         </div>
-
-                        <!-- ================= VITAL SIGNS ================= -->
-                        <div class="detail-item">
-                            <label>Suhu (°C)</label>
-                            <input type="number" step="0.1" name="suhu"
-                                value="<?= $tindakan['suhu'] ?? '' ?>">
-                        </div>
-
-                        <div class="detail-item">
-                            <label>Tekanan Darah (mmHg)</label>
-                            <input type="text" name="tekanan_darah"
-                                value="<?= htmlspecialchars($tindakan['tekanan_darah'] ?? '') ?>"
-                                placeholder="120/80">
-                        </div>
-
-                        <div class="detail-item">
-                            <label>Respirasi (/menit)</label>
-                            <input type="number" name="respirasi"
-                                value="<?= $tindakan['respirasi'] ?? '' ?>">
-                        </div>
-
-                        <div class="detail-item">
-                            <label>Nadi (/menit)</label>
-                            <input type="number" name="nadi"
-                                value="<?= $tindakan['nadi'] ?? '' ?>">
-                        </div>
-
                     </div>
 
                     <!-- ACTION BUTTON -->
