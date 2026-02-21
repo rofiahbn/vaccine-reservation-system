@@ -216,13 +216,37 @@ if ($status_booking === 'pending') {
             <i class="fas fa-th-large"></i>
             <span>Dashboard</span>
         </a>
-        <a href="products.php" class="nav-item">
+        <a href="javascript:void(0)" 
+            class="nav-item has-submenu <?= in_array($current_page, ['products.php','products_pelayanan.php']) ? 'active open' : '' ?>" 
+            onclick="toggleSubmenu(this)">
             <i class="fas fa-capsules"></i>
             <span>Produk</span>
+            <i class="fas fa-chevron-down arrow"></i>
         </a>
-        <a href="#" class="nav-item">
+            
+        <ul class="submenu <?= in_array($current_page, ['products.php','products_pelayanan.php']) ? 'open' : '' ?>">
+            <li>
+                <a href="products.php" class="<?= $current_page == 'products.php' ? 'active' : '' ?>">
+                    Stok
+                </a>
+            </li>
+            <li>
+                <a href="products_pelayanan.php" class="<?= $current_page == 'products_pelayanan.php' ? 'active' : '' ?>">
+                    Pelayanan/Paket
+                </a>
+            </li>
+        </ul>
+        <a href="patients.php" class="nav-item">
             <i class="fas fa-users"></i>
             <span>Pasien</span>
+        </a>
+        <a href="staff.php" class="nav-item">
+            <i class="fas fa-user-md"></i>
+            <span>Staff</span>
+        </a>
+        <a href="calendar_setting.php" class="nav-item">
+            <i class="fas fa-calendar"></i>
+            <span>Kalender</span>
         </a>
         <a href="#" class="nav-item">
             <i class="fas fa-cog"></i>
@@ -608,6 +632,60 @@ if ($status_booking === 'pending') {
 
         <!-- ================= PANEL KANAN (PREVIEW SURAT) ================= -->
         <div class="detail-right">
+            <!-- ===== CARD TENAGA KESEHATAN ===== -->
+            <div class="side-card staff-card">
+                <div class="side-header">
+                    <div class="header-title">
+                        <i class="fas fa-user-md"></i>
+                        <h3>Tenaga Kesehatan</h3>
+                    </div>
+                    <span class="staff-count"><?= $dokters->num_rows ?> Orang</span>
+                </div>
+
+                <div class="side-body">
+                    <?php if($dokters->num_rows > 0): ?>
+                        <?php 
+                        $dokters->data_seek(0); // Reset pointer
+                        while($dokter = $dokters->fetch_assoc()): 
+                        ?>
+                            <div class="staff-item" id="staff-<?= $dokter['id'] ?>">
+                                <div class="staff-info">
+                                    <div class="staff-name">
+                                        <i class="fas fa-user-circle"></i>
+                                        <span>
+                                            <?= htmlspecialchars($dokter['gelar'] . ' ' . $dokter['nama_lengkap']) ?>
+                                        </span>
+                                    </div>
+                                    <?php if(!empty($dokter['sip'])): ?>
+                                        <div class="staff-sip">
+                                            SIP: <?= htmlspecialchars($dokter['sip']) ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                                
+                                <!-- Tombol hapus selalu enable karena status sudah confirmed -->
+                                <button class="btn-delete-staff" 
+                                        onclick="removeStaff(<?= $parent_booking_id ?>, <?= $dokter['id'] ?>)" 
+                                        title="Hapus dari tim">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        <?php endwhile; ?>
+                    <?php else: ?>
+                        <div class="empty-staff">
+                            <i class="fas fa-user-md-slash"></i>
+                            <p>Belum ada tenaga kesehatan</p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Tombol Tambah Nakes - SELALU ENABLE -->
+                <button class="btn-add-worker" onclick="openAddDoctorPopup()">
+                    <i class="fas fa-plus-circle"></i>
+                    Tambah Nakes
+                </button>
+            </div>
+
             <!-- PREVIEW SURAT -->
             <div class="preview-panel" id="previewPanel">
                 <button class="btn-maximize" onclick="openFullPreview()">
@@ -719,6 +797,69 @@ if ($status_booking === 'pending') {
     </div>
 </div>
 
+<!-- POPUP TAMBAH DOKTER -->
+<div id="addDoctorPopup" class="popup-overlay" style="display:none;">
+    <div class="popup-content">
+        <div class="popup-header">
+            <h3><i class="fas fa-user-md"></i> Pilih Dokter</h3>
+            <button type="button" class="popup-close" onclick="closeAddDoctorPopup()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="popup-body">
+            <div class="doctor-select-container" id="doctorContainer">
+                <div class="doctor-select-row">
+                    <select class="doctor-select">
+                        <option value="" selected disabled>-- Pilih Dokter --</option>
+                        <?php
+                        // Ambil semua staff dengan role dokter
+                        $sql_all_dokter = "SELECT id, nama_lengkap, gelar, sip FROM staff WHERE role = 'dokter' ORDER BY nama_lengkap";
+                        $result_all_dokter = mysqli_query($conn, $sql_all_dokter);
+                        
+                        // Reset pointer dokters yang sudah dipilih
+                        $dokters->data_seek(0);
+                        $existing_dokter_ids = [];
+                        while($d = $dokters->fetch_assoc()) {
+                            $existing_dokter_ids[] = $d['id'];
+                        }
+                        $dokters->data_seek(0); // Reset lagi
+                        
+                        // Tampilkan semua dokter
+                        while($dokter = mysqli_fetch_assoc($result_all_dokter)):
+                            // Cek apakah dokter sudah dipilih
+                            $disabled = in_array($dokter['id'], $existing_dokter_ids) ? 'disabled' : '';
+                            // HAPUS selected, biar tidak ada yang terpilih otomatis
+                        ?>
+                            <option value="<?= $dokter['id'] ?>" <?= $disabled ?>>
+                                <?= htmlspecialchars($dokter['gelar'] . ' ' . $dokter['nama_lengkap']) ?>
+                                <?= !empty($dokter['sip']) ? ' (SIP: ' . $dokter['sip'] . ')' : '' ?>
+                                <?= $disabled ? ' - Sudah Ditugaskan' : '' ?>
+                            </option>
+                        <?php endwhile; ?>
+                    </select>
+                    <button type="button" class="btn-remove-row" onclick="removeDoctorRow(this)" style="display: none;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="button" class="btn-add-row" onclick="addDoctorRow()">
+                <i class="fas fa-plus"></i> Tambah Tenaga Kerja
+            </button>
+        </div>
+        
+        <div class="popup-footer">
+            <button type="button" class="btn-selesai" onclick="assignDoctors()">
+                <i class="fas fa-check"></i> Selesai
+            </button>
+            <button type="button" class="btn-batal-popup" onclick="closeAddDoctorPopup()">
+                <i class="fas fa-times"></i> Batal
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
     const PV_RM = "<?= $current_peserta['no_rekam_medis'] ?>";
     const PV_NAMA = "<?= addslashes($current_peserta['nama_lengkap']) ?>";
@@ -742,6 +883,186 @@ if ($status_booking === 'pending') {
         } else {
             box.value += "\n" + text;
         }
+    }
+
+    // Fungsi hapus staff dari tim
+    function removeStaff(bookingId, staffId) {
+        if (!confirm('Yakin ingin menghapus tenaga kesehatan dari tim ini?')) return;
+        
+        fetch('remove_staff.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `booking_id=${bookingId}&staff_id=${staffId}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                // Hapus elemen staff dari tampilan
+                const staffElement = document.getElementById(`staff-${staffId}`);
+                if (staffElement) {
+                    staffElement.remove();
+                    
+                    // Update count
+                    const staffCount = document.querySelector('.staff-count');
+                    const currentCount = parseInt(staffCount.textContent);
+                    staffCount.textContent = (currentCount - 1) + ' Orang';
+                    
+                    // Tampilkan empty state jika sudah tidak ada staff
+                    const staffBody = document.querySelector('.staff-card .side-body');
+                    if (staffBody.children.length === 0) {
+                        staffBody.innerHTML = `
+                            <div class="empty-staff">
+                                <i class="fas fa-user-md-slash"></i>
+                                <p>Belum ada tenaga kesehatan</p>
+                            </div>
+                        `;
+                    }
+                }
+                showNotification('Tenaga kesehatan berhasil dihapus', 'success');
+            } else {
+                showNotification('Gagal menghapus: ' + (data.message || ''), 'error');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            showNotification('Terjadi kesalahan', 'error');
+        });
+    }
+
+    // Fungsi untuk membuka popup tambah dokter
+    function openAddDoctorPopup() {
+        document.getElementById('addDoctorPopup').style.display = 'flex';
+    }
+
+    // Fungsi untuk menutup popup
+    function closeAddDoctorPopup() {
+        document.getElementById('addDoctorPopup').style.display = 'none';
+    }
+
+    // Fungsi untuk menambah row select dokter
+    function addDoctorRow() {
+        const container = document.getElementById('doctorContainer');
+        const firstRow = container.querySelector('.doctor-select-row');
+        const newRow = firstRow.cloneNode(true);
+        
+        // Reset select value ke placeholder
+        const select = newRow.querySelector('.doctor-select');
+        select.value = ''; // Pilih opsi "-- Pilih Dokter --"
+        
+        // Tampilkan tombol remove
+        const removeBtn = newRow.querySelector('.btn-remove-row');
+        removeBtn.style.display = 'block';
+        
+        // Di row baru, ENABLE SEMUA OPTION (termasuk yang tadinya disabled)
+        // Tapi kita biarkan saja, nanti validasi di backend
+        // Agar user tidak bisa pilih dokter yang sudah ditugaskan di row lain,
+        // kita bisa tambahkan validasi saat submit
+        
+        container.appendChild(newRow);
+    }
+
+    // Fungsi untuk menghapus row select dokter
+    function removeDoctorRow(btn) {
+        const row = btn.closest('.doctor-select-row');
+        const container = document.getElementById('doctorContainer');
+        
+        // Minimal harus ada 1 row
+        if (container.children.length > 1) {
+            row.remove();
+        } else {
+            alert('Minimal harus ada 1 pilihan dokter');
+        }
+    }
+
+    // Fungsi untuk menyimpan dokter yang dipilih
+    function assignDoctors() {
+        const rows = document.querySelectorAll('.doctor-select-row');
+        let selectedDoctors = [];
+        
+        rows.forEach(row => {
+            const select = row.querySelector('.doctor-select');
+            if (select.value) {
+                selectedDoctors.push(select.value);
+            }
+        });
+        
+        if (selectedDoctors.length === 0) {
+            alert('Pilih minimal 1 dokter');
+            return;
+        }
+        
+        // Tampilkan loading
+        const btnSelesai = document.querySelector('.btn-selesai');
+        const originalText = btnSelesai.innerHTML;
+        btnSelesai.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+        btnSelesai.disabled = true;
+        
+        fetch('assign_doctor.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                booking_id: <?= $parent_booking_id ?>,
+                doctor_ids: selectedDoctors,
+                mode: 'add'  // <-- GANTI DARI 'replace' KE 'add'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification(data.message, 'success');
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+            } else {
+                showNotification('Gagal: ' + (data.message || ''), 'error');
+                btnSelesai.innerHTML = originalText;
+                btnSelesai.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Terjadi kesalahan', 'error');
+            btnSelesai.innerHTML = originalText;
+            btnSelesai.disabled = false;
+        });
+    }
+
+    // Tutup popup jika klik di luar
+    window.onclick = function(event) {
+        const popup = document.getElementById('addDoctorPopup');
+        if (event.target == popup) {
+            closeAddDoctorPopup();
+        }
+    }
+
+    // Fungsi notifikasi (copy dari booking_detail)
+    function showNotification(message, type = 'info') {
+        // Hapus notifikasi yang sudah ada
+        const existing = document.querySelector('.notification');
+        if (existing) existing.remove();
+        
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        
+        let icon = 'info-circle';
+        if (type === 'success') icon = 'check-circle';
+        if (type === 'error') icon = 'exclamation-circle';
+        
+        notification.innerHTML = `
+            <i class="fas fa-${icon}"></i>
+            <span>${message}</span>
+            <button onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
+            }
+        }, 5000);
     }
 </script>
 <script src="js/preview_surat.js"></script>

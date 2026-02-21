@@ -29,27 +29,42 @@ function updateStatus(bookingId, newStatus) {
                 return;
             }
 
-            const formData = new FormData();
-            formData.append('booking_id', bookingId);
-            formData.append('doctor_ids', doctorIds.join(',')); // "1,2,3"
+            // Tampilkan loading
+            const selesaiBtn = document.querySelector('#addDoctorPopup .popup-content button[onclick="assignDoctors()"]');
+            const originalText = selesaiBtn.innerHTML;
+            selesaiBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+            selesaiBtn.disabled = true;
 
             fetch('assign_doctor.php', {
                 method: 'POST',
-                body: formData
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    booking_id: bookingId,
+                    doctor_ids: doctorIds,
+                    mode: 'add'  // <-- PENTING: mode add
+                })
             })
-            .then(res => res.text())
-            .then(res => {
-                if (res.trim() === 'success') {
-
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
                     closeAddDoctorPopup();
-                    location.reload(); // 🔥 MODE CONFIRMED LANGSUNG AKTIF
-
+                    location.reload();
                 } else {
-                    alert('Gagal menambahkan dokter');
+                    alert('Gagal: ' + data.message);
+                    selesaiBtn.innerHTML = originalText;
+                    selesaiBtn.disabled = false;
                 }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                alert('Terjadi kesalahan koneksi');
+                selesaiBtn.innerHTML = originalText;
+                selesaiBtn.disabled = false;
             });
         }
-
 
         function openAddDoctorPopup() {
             document.getElementById('addDoctorPopup').style.display = 'flex';
@@ -62,8 +77,8 @@ function updateStatus(bookingId, newStatus) {
         function addDoctorDropdown() {
             const container = document.getElementById('doctorContainer');
             const firstDropdown = container.querySelector('select');
-            const newDropdown = firstDropdown.cloneNode(true); // clone dropdown pertama
-            newDropdown.value = ""; // reset value
+            const newDropdown = firstDropdown.cloneNode(true);
+            newDropdown.value = "";
             container.appendChild(newDropdown);
         }
 

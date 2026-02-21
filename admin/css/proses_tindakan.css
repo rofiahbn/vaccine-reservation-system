@@ -856,3 +856,365 @@ body {
     background: #e5e7eb;
     color: #374151;
 }
+
+/* ===== CARD TENAGA KESEHATAN ===== */
+.staff-card {
+    margin-bottom: 20px;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    background: white;
+    overflow: hidden;
+}
+
+.staff-card .side-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.staff-card .header-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.staff-card .header-title i {
+    font-size: 20px;
+    color: #fbac07;
+}
+
+.staff-card .header-title h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.staff-card .staff-count {
+    background: #fbac07;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.staff-card .side-body {
+    padding: 16px 20px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.staff-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #f1f3f5;
+    transition: background 0.2s;
+}
+
+.staff-item:hover {
+    background: #f8f9fa;
+}
+
+.staff-item:last-child {
+    border-bottom: none;
+}
+
+.staff-info {
+    flex: 1;
+}
+
+.staff-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.staff-name i {
+    color: #6c757d;
+    font-size: 16px;
+}
+
+.staff-sip {
+    font-size: 11px;
+    color: #6c757d;
+    margin-left: 24px;
+    margin-top: 2px;
+}
+
+.btn-delete-staff {
+    background: none;
+    border: none;
+    color: #dc3545;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    opacity: 0.7;
+}
+
+.btn-delete-staff:hover {
+    background: #fee2e2;
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.btn-delete-staff i {
+    font-size: 14px;
+}
+
+.empty-staff {
+    text-align: center;
+    padding: 30px 20px;
+    color: #6c757d;
+}
+
+.empty-staff i {
+    font-size: 40px;
+    margin-bottom: 10px;
+    color: #dee2e6;
+}
+
+.empty-staff p {
+    margin: 0;
+    font-size: 14px;
+}
+
+.btn-add-worker {
+    width: calc(100% - 40px);
+    margin: 0 20px 20px 20px;
+    padding: 12px;
+    background: #fbac07;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+.btn-add-worker:hover {
+    background: #e59c06;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(251, 172, 7, 0.3);
+}
+
+.btn-add-worker i {
+    font-size: 16px;
+}
+
+/* ===== POPUP TAMBAH DOKTER ===== */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.popup-content {
+    background: white;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    animation: popupFadeIn 0.3s ease;
+}
+
+@keyframes popupFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.popup-header {
+    padding: 20px 24px;
+    border-bottom: 2px solid #fbac07;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 16px 16px 0 0;
+}
+
+.popup-header h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.popup-header h3 i {
+    color: #fbac07;
+    font-size: 24px;
+}
+
+.popup-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.popup-close:hover {
+    background: #fee2e2;
+    color: #dc3545;
+}
+
+.popup-body {
+    padding: 24px;
+}
+
+.doctor-select-container {
+    margin-bottom: 15px;
+}
+
+.doctor-select-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.doctor-select {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.3s;
+}
+
+.doctor-select:focus {
+    outline: none;
+    border-color: #fbac07;
+}
+
+.doctor-select:disabled {
+    background: #e9ecef;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.btn-remove-row {
+    background: none;
+    border: none;
+    color: #dc3545;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.btn-remove-row:hover {
+    background: #fee2e2;
+    transform: scale(1.1);
+}
+
+.btn-add-row {
+    width: 100%;
+    padding: 14px;
+    background: #f8f9fa;
+    border: 2px dashed black;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s;
+    margin-top: 10px;
+}
+
+.btn-add-row i {
+    font-size: 16px;
+}
+
+.popup-footer {
+    padding: 20px 24px;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    background: #f8f9fa;
+    border-radius: 0 0 16px 16px;
+}
+
+.btn-selesai {
+    background: #19a463;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+.btn-selesai:hover {
+    background: #158c54;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(25, 164, 99, 0.3);
+}
+
+.btn-batal-popup {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+.btn-batal-popup:hover {
+    background: #545b62;
+    transform: translateY(-2px);
+}
