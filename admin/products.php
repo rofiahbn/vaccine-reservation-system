@@ -96,6 +96,12 @@ $categories_result = $conn->query($sql_categories);
                     </a>
                 </li>
                 <li>
+                    <a href="products_jasa.php" 
+                    class="<?= $current_page == 'products_jasa.php' ? 'active' : '' ?>">
+                    Jasa
+                    </a>
+                </li>
+                <li>
                     <a href="products_pelayanan.php" 
                     class="<?= $current_page == 'products_pelayanan.php' ? 'active' : '' ?>">
                     Pelayanan/Paket

@@ -283,6 +283,11 @@ foreach ($staff_list as $key => $staff) {
                     </a>
                 </li>
                 <li>
+                    <a href="products_jasa.php" class="<?= $current_page == 'products_jasa.php' ? 'active' : '' ?>">
+                    Jasa
+                    </a>
+                </li>
+                <li>
                     <a href="products_pelayanan.php" class="<?= basename($_SERVER['PHP_SELF']) == 'products_pelayanan.php' ? 'active' : '' ?>">
                         Pelayanan/Paket
                     </a>

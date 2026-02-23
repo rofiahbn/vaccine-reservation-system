@@ -96,6 +96,12 @@ $categories_result = $conn->query($sql_categories);
         </a>
         <ul class="submenu open">
             <li><a href="products.php">Stok</a></li>
+            <li>
+                    <a href="products_jasa.php" 
+                    class="<?= $current_page == 'products_jasa.php' ? 'active' : '' ?>">
+                    Jasa
+                    </a>
+                </li>
             <li><a href="products_pelayanan.php" class="active">Pelayanan/Paket</a></li>
         </ul>
         <a href="patients.php" class="nav-item"><i class="fas fa-users"></i><span>Pasien</span></a>

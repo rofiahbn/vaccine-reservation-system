@@ -471,10 +471,26 @@ echo json_encode($service_options);
                     </select>
                 </div>
                 <div class="package-visit">
-                    <input type="number" name="package_items[${packageCounter}][visit_order]" class="form-control" value="${packageCounter + 1}" min="1" required>
+                    <input type="text" 
+                        name="package_items[${packageCounter}][visit_order]" 
+                        class="form-control" 
+                        placeholder="Kunjungan Ke -"
+                        pattern="[0-9]*"
+                        inputmode="numeric"
+                        required
+                        title="Masukkan angka untuk urutan kunjungan"
+                        onchange="validateNumber(this)">
                 </div>
                 <div class="package-qty">
-                    <input type="number" name="package_items[${packageCounter}][qty]" class="form-control" value="1" min="1" required onchange="updatePackagePrice(this, '${rowId}')">
+                    <input type="text" 
+                        name="package_items[${packageCounter}][qty]" 
+                        class="form-control" 
+                        placeholder="Jumlah"
+                        pattern="[0-9]*"
+                        inputmode="numeric"
+                        required 
+                        title="Masukkan jumlah"
+                        onchange="validateNumber(this); updatePackagePrice(this, '${rowId}')">
                 </div>
                 <div class="package-price" id="${rowId}_price">Rp 0</div>
                 <button type="button" class="btn-remove" onclick="removeRow('${rowId}')">
@@ -486,6 +502,14 @@ echo json_encode($service_options);
         container.insertAdjacentHTML('beforeend', rowHtml);
         packageCounter++;
         hitungTotalPaket();
+    }
+
+    // Fungsi untuk memastikan input hanya angka
+    function validateNumber(input) {
+        input.value = input.value.replace(/[^0-9]/g, '');
+        if (input.value === '' || parseInt(input.value) < 1) {
+            input.value = '1';
+        }
     }
 
     // Update harga komponen
