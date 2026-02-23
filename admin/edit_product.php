@@ -42,29 +42,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'update_product') {
         $nama_produk = $_POST['nama_produk'];
         $kode_produk = $_POST['kode_produk'];
+        $merk = $_POST['merk'] ?? ''; // Tambahkan merk
         $jenis = $_POST['jenis'];
         $kategori = $_POST['kategori'];
         $satuan = $_POST['satuan'];
-        $harga = str_replace('.', '', $_POST['harga']);
         $deskripsi = $_POST['deskripsi'];
         $minimal_stok = $_POST['minimal_stok'];
 
         $sql_update = "UPDATE products SET 
             nama_produk = ?, 
             kode_produk = ?, 
+            merk = ?,  -- Tambahkan field merk
             jenis = ?, 
             kategori = ?, 
             satuan = ?, 
-            harga = ?, 
             deskripsi = ?,
             minimal_stok = ?,
             updated_at = NOW()
             WHERE id = ?";
         
         $stmt = $conn->prepare($sql_update);
-        $stmt->bind_param('ssssssisi', 
-            $nama_produk, $kode_produk, $jenis, $kategori, 
-            $satuan, $harga, $deskripsi, $minimal_stok, $product_id
+        $stmt->bind_param('sssssssii', 
+            $nama_produk, 
+            $kode_produk, 
+            $merk,  // Bind parameter untuk merk
+            $jenis, 
+            $kategori, 
+            $satuan, 
+            $deskripsi, 
+            $minimal_stok, 
+            $product_id
         );
         
         if ($stmt->execute()) {
@@ -267,6 +274,14 @@ unset($_SESSION['success']);
                                    placeholder="Contoh: Vaksin COVID-19">
                         </div>
 
+                        <div class="form-group">
+                            <label>Merk</label>
+                            <input type="text" 
+                                name="merk" 
+                                value="<?= htmlspecialchars($product['merk'] ?? '') ?>"
+                                placeholder="Contoh: BioFarma, Sanofi, GSK">
+                        </div>
+
                         <!-- Kode Produk -->
                         <div class="form-group">
                             <label>Kode Produk</label>
@@ -302,6 +317,10 @@ unset($_SESSION['success']);
                                 <option value="">-- Pilih Kategori --</option>
                                 
                                 <?php 
+                                // Ambil kategori dari database untuk dropdown
+                                $sql_categories = "SELECT DISTINCT kategori FROM products WHERE kategori IS NOT NULL AND kategori != '' ORDER BY kategori";
+                                $categories_result = $conn->query($sql_categories);
+                                
                                 // Kategori default
                                 $default_categories = [
                                     'Influenza',
@@ -319,18 +338,19 @@ unset($_SESSION['success']);
                                 if ($categories_result && $categories_result->num_rows > 0) {
                                     while ($cat = $categories_result->fetch_assoc()) {
                                         $kategori_db = $cat['kategori'];
-                                        // ✅ Cek jika belum ada di array, baru tambahkan
                                         if (!in_array($kategori_db, $all_categories) && !empty($kategori_db)) {
                                             $all_categories[] = $kategori_db;
                                         }
                                     }
                                 }
                                 
-                                // Tampilkan semua kategori (unique)
-                                foreach ($all_categories as $kategori): 
+                                // Tampilkan semua kategori dan tandai yang selected
+                                foreach ($all_categories as $kategori_option): 
+                                    // Cek apakah kategori_option sama dengan kategori produk yang sedang diedit
+                                    $selected = ($kategori_option == $product['kategori']) ? 'selected' : '';
                                 ?>
-                                    <option value="<?= htmlspecialchars($kategori) ?>">
-                                        <?= htmlspecialchars($kategori) ?>
+                                    <option value="<?= htmlspecialchars($kategori_option) ?>" <?= $selected ?>>
+                                        <?= htmlspecialchars($kategori_option) ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>

@@ -318,6 +318,7 @@ $categories_result = $conn->query($sql_categories);
             </a>
             <ul class="submenu open">
                 <li><a href="products.php" class="active">Vaksin & Obat</a></li>
+                <li><a href="products_jasa.php">Jasa</a></li>
                 <li><a href="products_pelayanan.php">Pelayanan/Paket</a></li>
             </ul>
             <a href="patients.php" class="nav-item">
@@ -383,6 +384,15 @@ $categories_result = $conn->query($sql_categories);
                                    name="nama_produk" 
                                    required
                                    placeholder="Contoh: Vaksin Influenza">
+                        </div>
+
+                        <!-- Merk (BARU) -->
+                        <div class="form-group">
+                            <label>Merk</label>
+                            <input type="text" 
+                                   name="merk" 
+                                   placeholder="Contoh: BioFarma, Sanofi, GSK">
+                            <small class="form-text">Merk atau pabrikan produk</small>
                         </div>
 
                         <!-- Jenis -->

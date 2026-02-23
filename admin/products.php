@@ -241,6 +241,11 @@ $categories_result = $conn->query($sql_categories);
                             <?php endif; ?>
 
                             <div class="info-row">
+                                <span class="info-label">Merk</span>
+                                <span class="info-value"><?= htmlspecialchars($product['merk'] ?? '-') ?></span>
+                            </div>
+
+                            <div class="info-row">
                                 <span class="info-label">Jenis</span>
                                 <span class="info-value"><?= htmlspecialchars($product['jenis'] ?? '-') ?></span>
                             </div>

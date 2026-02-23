@@ -12,6 +12,7 @@ $action = $_POST['action'] ?? 'add';
 // ========== VALIDASI INPUT ==========
 $kode_produk = trim($_POST['kode_produk'] ?? '');
 $nama_produk = trim($_POST['nama_produk'] ?? ''); 
+$merk = trim($_POST['merk'] ?? '');
 $jenis = $_POST['jenis'] ?? '';
 $kategori = $_POST['kategori'] ?? '';
 $satuan = $_POST['satuan'] ?? 'dosis';
@@ -45,6 +46,7 @@ if ($action == 'add') {
     $sql = "INSERT INTO products (
         kode_produk, 
         nama_produk, 
+        merk,
         jenis, 
         kategori, 
         satuan, 
@@ -52,14 +54,15 @@ if ($action == 'add') {
         minimal_stok, 
         deskripsi, 
         created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
     
     $stmt = $conn->prepare($sql);
     // Format: s = string, i = integer
-    // kode_produk(s), nama_produk(s), jenis(s), kategori(s), satuan(s), harga(i), minimal_stok(i), deskripsi(s)
+    // kode_produk(s), nama_produk(s), merk(s), jenis(s), kategori(s), satuan(s), harga(i), minimal_stok(i), deskripsi(s)
     $stmt->bind_param("sssssiis", 
         $kode_produk, 
         $nama_produk, 
+        $merk,
         $jenis, 
         $kategori, 
         $satuan, 
@@ -75,6 +78,7 @@ if ($action == 'add') {
     $sql = "UPDATE products SET 
         kode_produk = ?,
         nama_produk = ?,
+        merk = ?, 
         jenis = ?,
         kategori = ?,
         satuan = ?,
@@ -84,10 +88,10 @@ if ($action == 'add') {
         WHERE id = ?";
     
     $stmt = $conn->prepare($sql);
-    // 8 parameter + 1 where id = 9 parameter
-    $stmt->bind_param("sssssiisi", 
+    $stmt->bind_param("ssssssiisi", 
         $kode_produk, 
-        $nama_produk, 
+        $nama_produk,
+        $merk,  
         $jenis, 
         $kategori, 
         $satuan, 
