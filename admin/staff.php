@@ -279,7 +279,7 @@ foreach ($staff_list as $key => $staff) {
             <ul class="submenu <?= (basename($_SERVER['PHP_SELF']) == 'products.php' || basename($_SERVER['PHP_SELF']) == 'products_pelayanan.php') ? 'open' : '' ?>">
                 <li>
                     <a href="products.php" class="<?= basename($_SERVER['PHP_SELF']) == 'products.php' ? 'active' : '' ?>">
-                        Stok
+                        Vaksin & Obat
                     </a>
                 </li>
                 <li>

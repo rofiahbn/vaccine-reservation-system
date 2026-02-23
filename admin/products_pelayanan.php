@@ -95,7 +95,7 @@ $categories_result = $conn->query($sql_categories);
             <i class="fas fa-capsules"></i><span>Produk</span><i class="fas fa-chevron-down arrow"></i>
         </a>
         <ul class="submenu open">
-            <li><a href="products.php">Stok</a></li>
+            <li><a href="products.php">Vaksin & Obat</a></li>
             <li>
                     <a href="products_jasa.php" 
                     class="<?= $current_page == 'products_jasa.php' ? 'active' : '' ?>">

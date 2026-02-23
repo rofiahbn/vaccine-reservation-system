@@ -319,7 +319,7 @@ $categories_result = $conn->query($sql_categories);
                 <i class="fas fa-chevron-down arrow"></i>
             </a>
             <ul class="submenu open">
-                <li><a href="products.php">Stok</a></li>
+                <li><a href="products.php">Vaksin & Obat</a></li>
                 <li><a href="products_pelayanan.php">Pelayanan/Paket</a></li>
                 <li><a href="products_jasa.php" class="active">Jasa</a></li>
             </ul>
@@ -442,15 +442,6 @@ $categories_result = $conn->query($sql_categories);
                                 <input type="hidden" name="harga" id="harga">
                             </div>
                             <small class="form-text">Harga layanan jasa</small>
-                        </div>
-
-                        <!-- Kode Paket -->
-                        <div class="form-group">
-                            <label>Kode Paket</label>
-                            <input type="text" 
-                                   name="kode_paket" 
-                                   placeholder="Contoh: PKT-001">
-                            <small class="form-text">Kode paket (opsional)</small>
                         </div>
 
                         <div class="form-group">

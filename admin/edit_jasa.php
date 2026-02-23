@@ -128,7 +128,7 @@ unset($_SESSION['success']);
                 <li>
                     <a href="products.php">
                         <i class="fas fa-box"></i>
-                        Stok
+                        Vaksin & Obat
                     </a>
                 </li>
                 <li>

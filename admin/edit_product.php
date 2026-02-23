@@ -178,18 +178,9 @@ unset($_SESSION['success']);
                 <i class="fas fa-chevron-down arrow"></i>
             </a>
             <ul class="submenu open">
-                <li>
-                    <a href="products.php" class="active">
-                        <i class="fas fa-box"></i>
-                        Stok
-                    </a>
-                </li>
-                <li>
-                    <a href="products_pelayanan.php">
-                        <i class="fas fa-package"></i>
-                        Pelayanan/Paket
-                    </a>
-                </li>
+                <li><a href="products.php" class="active">Vaksin & Obat</a></li>
+                <li><a href="products_jasa.php">Jasa</a></li>
+                <li><a href="products_pelayanan.php">Pelayanan/Paket</a></li>
             </ul>
             <a href="patients.php" class="nav-item">
                 <i class="fas fa-users"></i>
@@ -307,52 +298,17 @@ unset($_SESSION['success']);
                             </select>
                         </div>
 
-                        <!-- Kategori -->
+                        <!-- Kategori Usia -->
                         <div class="form-group">
                             <label>
-                                Kategori 
+                                Kategori Usia 
                                 <span class="required">*</span>
                             </label>
                             <select name="kategori" required>
-                                <option value="">-- Pilih Kategori --</option>
-                                
-                                <?php 
-                                // Ambil kategori dari database untuk dropdown
-                                $sql_categories = "SELECT DISTINCT kategori FROM products WHERE kategori IS NOT NULL AND kategori != '' ORDER BY kategori";
-                                $categories_result = $conn->query($sql_categories);
-                                
-                                // Kategori default
-                                $default_categories = [
-                                    'Influenza',
-                                    'HPV',
-                                    'Hepatitis',
-                                    'COVID-19',
-                                    'Antibiotik',
-                                    'Antipiretik',
-                                    'Vitamin'
-                                ];
-                                
-                                // Gabungkan kategori dari database
-                                $all_categories = $default_categories;
-                                
-                                if ($categories_result && $categories_result->num_rows > 0) {
-                                    while ($cat = $categories_result->fetch_assoc()) {
-                                        $kategori_db = $cat['kategori'];
-                                        if (!in_array($kategori_db, $all_categories) && !empty($kategori_db)) {
-                                            $all_categories[] = $kategori_db;
-                                        }
-                                    }
-                                }
-                                
-                                // Tampilkan semua kategori dan tandai yang selected
-                                foreach ($all_categories as $kategori_option): 
-                                    // Cek apakah kategori_option sama dengan kategori produk yang sedang diedit
-                                    $selected = ($kategori_option == $product['kategori']) ? 'selected' : '';
-                                ?>
-                                    <option value="<?= htmlspecialchars($kategori_option) ?>" <?= $selected ?>>
-                                        <?= htmlspecialchars($kategori_option) ?>
-                                    </option>
-                                <?php endforeach; ?>
+                                <option value="">-- Pilih Kategori Usia --</option>
+                                <option value="Anak" <?= ($product['kategori'] ?? '') == 'Anak' ? 'selected' : '' ?>>Anak (0-18 tahun)</option>
+                                <option value="Dewasa" <?= ($product['kategori'] ?? '') == 'Dewasa' ? 'selected' : '' ?>>Dewasa (>18 tahun)</option>
+                                <option value="Semua Usia" <?= ($product['kategori'] ?? '') == 'Semua Usia' ? 'selected' : '' ?>>Semua Usia</option>
                             </select>
                         </div>
 

@@ -92,7 +92,7 @@ $categories_result = $conn->query($sql_categories);
                 <li>
                     <a href="products.php" 
                     class="<?= $current_page == 'products.php' ? 'active' : '' ?>">
-                    Stok
+                    Vaksin & Obat
                     </a>
                 </li>
                 <li>

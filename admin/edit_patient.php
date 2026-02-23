@@ -762,7 +762,12 @@ unset($_SESSION['success'], $_SESSION['error']);
             <ul class="submenu <?= in_array($current_page, ['products.php','products_pelayanan.php']) ? 'open' : '' ?>">
                 <li>
                     <a href="products.php" class="<?= $current_page == 'products.php' ? 'active' : '' ?>">
-                        Stok
+                        Vaksin & Obat
+                    </a>
+                </li>
+                <li>
+                    <a href="products_jasa.php" class="<?= $current_page == 'products_jasa.php' ? 'active' : '' ?>">
+                    Jasa
                     </a>
                 </li>
                 <li>

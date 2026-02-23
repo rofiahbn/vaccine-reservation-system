@@ -446,7 +446,7 @@ $total_weeks = ceil($total_days / 7);
             <ul class="submenu <?= in_array($current_page, ['products.php','products_pelayanan.php']) ? 'open' : '' ?>">
                 <li>
                     <a href="products.php" class="<?= $current_page == 'products.php' ? 'active' : '' ?>">
-                        Stok
+                        Vaksin & Obat
                     </a>
                 </li>
                 <li>

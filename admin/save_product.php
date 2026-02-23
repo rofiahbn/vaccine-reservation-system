@@ -59,7 +59,7 @@ if ($action == 'add') {
     $stmt = $conn->prepare($sql);
     // Format: s = string, i = integer
     // kode_produk(s), nama_produk(s), merk(s), jenis(s), kategori(s), satuan(s), harga(i), minimal_stok(i), deskripsi(s)
-    $stmt->bind_param("sssssiis", 
+    $stmt->bind_param("ssssssiis", 
         $kode_produk, 
         $nama_produk, 
         $merk,

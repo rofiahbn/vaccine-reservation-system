@@ -137,6 +137,7 @@ $jasa_result = $conn->query($sql_jasa);
         </a>
         <ul class="submenu open">
             <li><a href="products.php">Vaksin & Obat</a></li>
+            <li><a href="products_jasa.php">Jasa</a></li>
             <li><a href="products_pelayanan.php" class="active">Pelayanan/Paket</a></li>
         </ul>
         <a href="patients.php" class="nav-item">

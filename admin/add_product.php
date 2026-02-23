@@ -411,47 +411,17 @@ $categories_result = $conn->query($sql_categories);
                             </select>
                         </div>
 
-                        <!-- Kategori -->
+                        <!-- Kategori Usia -->
                         <div class="form-group">
                             <label>
-                                Kategori 
+                                Kategori Usia 
                                 <span class="required">*</span>
                             </label>
                             <select name="kategori" required>
-                                <option value="">-- Pilih Kategori --</option>
-                                
-                                <?php 
-                                // Kategori default
-                                $default_categories = [
-                                    'Influenza',
-                                    'HPV',
-                                    'Hepatitis',
-                                    'COVID-19',
-                                    'Antibiotik',
-                                    'Antipiretik',
-                                    'Vitamin'
-                                ];
-                                
-                                // Gabungkan kategori dari database
-                                $all_categories = $default_categories;
-                                
-                                if ($categories_result && $categories_result->num_rows > 0) {
-                                    while ($cat = $categories_result->fetch_assoc()) {
-                                        $kategori_db = $cat['kategori'];
-                                        // ✅ Cek jika belum ada di array, baru tambahkan
-                                        if (!in_array($kategori_db, $all_categories) && !empty($kategori_db)) {
-                                            $all_categories[] = $kategori_db;
-                                        }
-                                    }
-                                }
-                                
-                                // Tampilkan semua kategori (unique)
-                                foreach ($all_categories as $kategori): 
-                                ?>
-                                    <option value="<?= htmlspecialchars($kategori) ?>">
-                                        <?= htmlspecialchars($kategori) ?>
-                                    </option>
-                                <?php endforeach; ?>
+                                <option value="">-- Pilih Kategori Usia --</option>
+                                <option value="Anak" <?= ($product['kategori'] ?? '') == 'Anak' ? 'selected' : '' ?>>Anak (0-18 tahun)</option>
+                                <option value="Dewasa" <?= ($product['kategori'] ?? '') == 'Dewasa' ? 'selected' : '' ?>>Dewasa (>18 tahun)</option>
+                                <option value="Semua Usia" <?= ($product['kategori'] ?? '') == 'Semua Usia' ? 'selected' : '' ?>>Semua Usia</option>
                             </select>
                         </div>
 
