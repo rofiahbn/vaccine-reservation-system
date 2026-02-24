@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Feb 19, 2026 at 04:21 PM
+-- Generation Time: Feb 24, 2026 at 05:28 AM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.30
 
@@ -198,7 +198,8 @@ INSERT INTO `booking_staff` (`id`, `booking_id`, `staff_id`, `created_at`) VALUE
 (39, 121, 2, '2026-02-18 13:00:04'),
 (40, 88, 3, '2026-02-19 06:31:53'),
 (41, 118, 1, '2026-02-19 06:32:37'),
-(42, 119, 1, '2026-02-19 07:57:59');
+(63, 119, 2, '2026-02-21 05:18:03'),
+(64, 119, 1, '2026-02-21 05:19:05');
 
 -- --------------------------------------------------------
 
@@ -771,6 +772,7 @@ CREATE TABLE `products` (
   `id` int NOT NULL,
   `kode_produk` varchar(50) DEFAULT NULL,
   `nama_produk` varchar(255) NOT NULL,
+  `merk` varchar(100) DEFAULT NULL,
   `kategori` varchar(100) DEFAULT NULL,
   `jenis` varchar(50) DEFAULT NULL,
   `deskripsi` text,
@@ -785,10 +787,12 @@ CREATE TABLE `products` (
 -- Dumping data for table `products`
 --
 
-INSERT INTO `products` (`id`, `kode_produk`, `nama_produk`, `kategori`, `jenis`, `deskripsi`, `satuan`, `harga`, `minimal_stok`, `created_at`, `updated_at`) VALUES
-(1, 'FLU-001', 'Vaksin Influenza', 'Influenza', 'Vaksin', '0', 'dosis', 235000, 10, '2026-02-12 13:22:19', '2026-02-18 10:41:28'),
-(2, 'HPV-001', 'Vaksin HPV', 'HPV', 'Vaksin', 'Vaksin HPV untuk pencegahan kanker serviks. Untuk usia 9-26 tahun.', 'dosis', 364000, 10, '2026-02-12 13:22:19', '2026-02-13 07:29:28'),
-(3, 'PCT-001', 'Paracetamol Infus', 'Antipiretik', 'Obat', 'Paracetamol infus untuk penurun panas dan pereda nyeri. Penggunaan sesuai resep dokter.', 'botol', 40000, 10, '2026-02-12 13:22:19', '2026-02-13 07:29:28');
+INSERT INTO `products` (`id`, `kode_produk`, `nama_produk`, `merk`, `kategori`, `jenis`, `deskripsi`, `satuan`, `harga`, `minimal_stok`, `created_at`, `updated_at`) VALUES
+(1, 'FLU-001', 'Vaksin Influenza', 'Sanofi', 'Anak', 'Vaksin', '0', 'dosis', 235000, 10, '2026-02-12 13:22:19', '2026-02-23 14:58:14'),
+(2, 'HPV-001', 'Vaksin HPV', NULL, 'Semua usia', 'Vaksin', 'Vaksin HPV untuk pencegahan kanker serviks. Untuk usia 9-26 tahun.', 'dosis', 364000, 10, '2026-02-12 13:22:19', '2026-02-23 14:58:35'),
+(3, 'PCT-001', 'Paracetamol Infus', NULL, 'Dewasa', 'Obat', 'Paracetamol infus untuk penurun panas dan pereda nyeri. Penggunaan sesuai resep dokter.', 'botol', 40000, 10, '2026-02-12 13:22:19', '2026-02-23 14:58:44'),
+(16, 'Cov-001', 'Vaksin Covid', 'Biofarma', 'Semua Usia', 'Vaksin', '', 'dosis', 100, 10, '2026-02-23 15:13:47', '2026-02-23 15:13:47'),
+(17, 'Vit-c', 'Vitamin C', 'Sanofi', 'Semua Usia', 'Vitamin', '', 'tablet', 100, 10, '2026-02-23 15:18:34', '2026-02-23 15:18:34');
 
 -- --------------------------------------------------------
 
@@ -815,7 +819,9 @@ INSERT INTO `product_stock` (`id`, `product_id`, `batch_number`, `expired_date`,
 (2, 1, 'FLU-2025-002', '2026-12-20', 25, '2026-02-12 13:22:19', '2026-02-12 13:22:19'),
 (3, 2, 'HPV-2025-001', '2027-01-30', 30, '2026-02-12 13:22:19', '2026-02-12 13:22:19'),
 (4, 3, 'PCT-2025-001', '2026-06-15', 100, '2026-02-12 13:22:19', '2026-02-12 13:22:19'),
-(5, 1, 'FLU-2025-009', '2026-02-28', 20, '2026-02-18 06:49:55', '2026-02-18 06:49:55');
+(5, 1, 'FLU-2025-009', '2026-02-28', 20, '2026-02-18 06:49:55', '2026-02-18 06:49:55'),
+(7, 16, 'cov-001-2026', '2028-11-30', 50, '2026-02-23 15:14:08', '2026-02-23 15:14:08'),
+(8, 17, 'VIT-C-001-2026', '2028-10-24', 52, '2026-02-23 15:18:52', '2026-02-24 04:35:51');
 
 -- --------------------------------------------------------
 
@@ -882,7 +888,13 @@ INSERT INTO `services` (`id`, `kode_layanan`, `nama_layanan`, `kategori_usia`, `
 (16, 'JAS-006', 'Jasa Perawat Home Care', 'Semua Usia', 'jasa', 'Kunjungan perawat ke rumah', 75000, NULL, '2026-02-14 18:01:14', '2026-02-14 18:03:44'),
 (17, 'JAS-014', 'Skrining Kesehatan Awal', 'Semua Usia', 'jasa', 'Pemeriksaan kesehatan awal', 35000, NULL, '2026-02-14 18:01:14', '2026-02-14 18:03:44'),
 (18, 'JAS-015', 'Cek Tekanan Darah', 'Semua Usia', 'jasa', 'Pemeriksaan tekanan darah', 20000, NULL, '2026-02-14 18:01:14', '2026-02-14 18:03:44'),
-(19, 'JAS-016', 'Cek Suhu Tubuh', 'Semua Usia', 'jasa', 'Pemeriksaan suhu tubuh', 10000, NULL, '2026-02-14 18:01:14', '2026-02-14 18:03:44');
+(19, 'JAS-016', 'Cek Suhu Tubuh', 'Semua Usia', 'jasa', 'Pemeriksaan suhu tubuh', 10000, NULL, '2026-02-14 18:01:14', '2026-02-14 18:03:44'),
+(20, 'loremm', 'lorem', 'Anak', 'jasa', 'lorem', 10, 'lorem', '2026-02-23 04:21:47', '2026-02-23 04:37:39'),
+(21, 'Jasa-003', 'Jasa Konsultasi Dokter Anak', 'Anak', 'jasa', '', 200000, '', '2026-02-23 15:15:26', '2026-02-23 15:15:26'),
+(22, NULL, 'Vaksin Influenza', 'Anak', 'pelayanan', '', 230000, NULL, '2026-02-23 15:16:50', '2026-02-23 15:16:50'),
+(23, 'JSA-50', 'Jasa Konsultasi Dokter', 'Semua Usia', 'jasa', '', 150000, '', '2026-02-23 15:19:24', '2026-02-23 15:19:24'),
+(24, NULL, 'Infus Vit C', 'Semua Usia', 'pelayanan', '', 200000, NULL, '2026-02-23 15:19:51', '2026-02-23 15:19:51'),
+(25, NULL, 'Paket umroh', 'Semua Usia', 'paket', '', 500000, '', '2026-02-23 15:20:21', '2026-02-23 15:20:21');
 
 --
 -- Triggers `services`
@@ -941,7 +953,9 @@ CREATE TABLE `service_jasa_components` (
 INSERT INTO `service_jasa_components` (`id`, `service_id`, `jasa_id`, `quantity`, `created_at`, `updated_at`) VALUES
 (3, 6, 12, 1, '2026-02-14 18:55:10', NULL),
 (4, 7, 15, 1, '2026-02-14 19:17:46', NULL),
-(5, 6, 17, 1, '2026-02-18 07:01:01', NULL);
+(5, 6, 17, 1, '2026-02-18 07:01:01', NULL),
+(6, 22, 12, 1, '2026-02-23 15:16:50', '2026-02-23 15:16:50'),
+(7, 24, 12, 1, '2026-02-23 15:19:51', '2026-02-23 15:19:51');
 
 --
 -- Triggers `service_jasa_components`
@@ -977,7 +991,10 @@ INSERT INTO `service_package_items` (`id`, `package_id`, `service_id`, `quantity
 (2, 4, 2, 1, 2, '2026-02-12 13:22:19'),
 (3, 4, 2, 1, 3, '2026-02-12 13:22:19'),
 (4, 5, 1, 1, 1, '2026-02-12 13:22:19'),
-(5, 5, 1, 1, 2, '2026-02-12 13:22:19');
+(5, 5, 1, 1, 2, '2026-02-12 13:22:19'),
+(6, 25, 3, 1, 1, '2026-02-23 15:20:21'),
+(7, 25, 3, 1, 2, '2026-02-23 15:20:21'),
+(9, 25, 2, 1, 1, '2026-02-24 04:37:33');
 
 -- --------------------------------------------------------
 
@@ -1003,7 +1020,9 @@ INSERT INTO `service_product_components` (`id`, `service_id`, `product_id`, `qua
 (2, 6, 1, 1, '2026-02-14 17:43:21', '2026-02-14 17:43:21'),
 (3, 2, 2, 1, '2026-02-12 13:22:19', '2026-02-12 13:22:19'),
 (4, 7, 2, 1, '2026-02-14 17:47:35', '2026-02-14 17:47:35'),
-(5, 3, 3, 1, '2026-02-12 13:22:19', '2026-02-12 13:22:19');
+(5, 3, 3, 1, '2026-02-12 13:22:19', '2026-02-12 13:22:19'),
+(8, 22, 1, 1, '2026-02-23 15:16:50', '2026-02-23 15:16:50'),
+(9, 24, 17, 1, '2026-02-23 15:19:51', '2026-02-23 15:19:51');
 
 --
 -- Triggers `service_product_components`
@@ -1037,7 +1056,9 @@ CREATE TABLE `staff` (
 INSERT INTO `staff` (`id`, `nama_lengkap`, `gelar`, `sip`, `role`, `created_at`) VALUES
 (1, 'Anna Rahma', 'dr.', '123/SIP/2024', 'dokter', '2026-01-20 03:23:31'),
 (2, 'Budi Santoso', 'dr.', NULL, 'dokter', '2026-01-20 03:23:31'),
-(3, 'Dewi Lestari', 'dr.', NULL, 'dokter', '2026-01-20 03:23:31');
+(3, 'Dewi Lestari', 'dr.', NULL, 'dokter', '2026-01-20 03:23:31'),
+(4, 'Rofiah Budi Nadia', 'dr.', '1234', 'dokter', '2026-02-20 06:35:26'),
+(5, 'admin', '', '', 'admin', '2026-02-20 08:37:00');
 
 -- --------------------------------------------------------
 
@@ -1517,7 +1538,7 @@ ALTER TABLE `booking_services`
 -- AUTO_INCREMENT for table `booking_staff`
 --
 ALTER TABLE `booking_staff`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
 
 --
 -- AUTO_INCREMENT for table `jadwal_khusus`
@@ -1613,13 +1634,13 @@ ALTER TABLE `payment_methods_detail`
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `product_stock`
 --
 ALTER TABLE `product_stock`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `reservations`
@@ -1631,7 +1652,7 @@ ALTER TABLE `reservations`
 -- AUTO_INCREMENT for table `services`
 --
 ALTER TABLE `services`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `service_components`
@@ -1643,25 +1664,25 @@ ALTER TABLE `service_components`
 -- AUTO_INCREMENT for table `service_jasa_components`
 --
 ALTER TABLE `service_jasa_components`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `service_package_items`
 --
 ALTER TABLE `service_package_items`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `service_product_components`
 --
 ALTER TABLE `service_product_components`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `staff`
 --
 ALTER TABLE `staff`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `surat`
