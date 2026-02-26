@@ -1,224 +1,240 @@
 <?php
 session_start();
-include "../config.php";
+require "../config.php";
 
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-error_reporting(E_ALL);
 ini_set('display_errors', 1);
+error_reporting(E_ALL);
 
-
-header("Content-Type: application/json");
+// mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+header('Content-Type: application/json');
 
 try {
 
-    // ================= VALIDASI =================
-    if (!isset($_POST['booking_id']) || !isset($_POST['patient_id'])) {
+    if (empty($_POST['booking_id']) || empty($_POST['patient_id'])) {
         throw new Exception("Booking / pasien tidak valid");
     }
 
-    $booking_id = intval($_POST['booking_id']);
-    $patient_id = intval($_POST['patient_id']);
+    $booking_id = (int) $_POST['booking_id'];
+    $patient_id = (int) $_POST['patient_id'];
 
-    // ================= DATA ANAMNESIS =================
-    $keluhan = $_POST['keluhan'] ?? 'Tidak ada keluhan';
-    $kipi_sebelumnya = $_POST['kipi_sebelumnya'] ?? 'Tidak ada';
-    $kontraindikasi = $_POST['kontraindikasi'] ?? 'Tidak ada';
-    $anamnesis = $_POST['anamnesis'] ?? '';
-    
-    // ================= DATA PEMERIKSAAN FISIK =================
-    $bb = !empty($_POST['bb']) && $_POST['bb'] !== '' ? floatval($_POST['bb']) : null;
-    $tb = !empty($_POST['tb']) && $_POST['tb'] !== '' ? floatval($_POST['tb']) : null;
-    $lingkar_kepala = !empty($_POST['lingkar_kepala']) && $_POST['lingkar_kepala'] !== '' ? floatval($_POST['lingkar_kepala']) : null;
-    $pf_lainnya = $_POST['pf_lainnya'] ?? 'Dalam batas normal';
-    $pemeriksaan_fisik = $_POST['pemeriksaan_fisik'] ?? '';
+    // ================= HEADER DATA =================
+    $keluhan                = $_POST['keluhan'] ?? null;
+    $kipi                   = $_POST['kipi_sebelumnya'] ?? null;
+    $kontraindikasi         = $_POST['kontraindikasi'] ?? null;
+    $anamnesis              = $_POST['anamnesis'] ?? null;
+    $pemeriksaan_fisik      = $_POST['pemeriksaan_fisik'] ?? null;
+    $diagnosis              = $_POST['diagnosis'] ?? null;
+    $tatalaksana_text       = $_POST['tatalaksana'] ?? null;
 
-    // ================= VITAL SIGNS =================
-    $suhu = !empty($_POST['suhu']) && $_POST['suhu'] !== '' ? floatval($_POST['suhu']) : null;
-    $tekanan_darah = $_POST['tekanan_darah'] ?? '';
-    $respirasi = !empty($_POST['respirasi']) && $_POST['respirasi'] !== '' ? intval($_POST['respirasi']) : null;
-    $nadi = !empty($_POST['nadi']) && $_POST['nadi'] !== '' ? intval($_POST['nadi']) : null;
-    
-    // ================= DIAGNOSIS & TATALAKSANA =================
-    $diagnosis = $_POST['diagnosis'] ?? '';
-    $tatalaksana = $_POST['tatalaksana'] ?? '';
+    $suhu                   = $_POST['suhu'] !== '' ? $_POST['suhu'] : null;
+    $tekanan_darah          = $_POST['tekanan_darah'] ?? null;
+    $respirasi              = isset($_POST['respirasi']) && $_POST['respirasi'] !== ''
+                                ? $_POST['respirasi']
+                                : null;
+    $nadi                   = isset($_POST['nadi']) && $_POST['nadi'] !== '' 
+                                ? $_POST['nadi'] 
+                                : null;
+    $bb                     = $_POST['bb'] !== '' ? $_POST['bb'] : null;
+    $tb                     = $_POST['tb'] !== '' ? $_POST['tb'] : null;
+    $lingkar_kepala         = $_POST['lingkar_kepala'] !== '' ? $_POST['lingkar_kepala'] : null;
+    $pf_lainnya             = $_POST['pf_lainnya'] ?? null;
 
-    // ================= DATA VAKSIN =================
-    $jenis_vaksin = $_POST['jenis_vaksin'] ?? '';
-    $batch_vaksin = $_POST['batch_vaksin'] ?? '';
-    $expired_vaksin = !empty($_POST['expired_vaksin']) ? $_POST['expired_vaksin'] : null;
+    $jenis_vaksin           = $_POST['jenis_vaksin'] ?? null;
+    $batch_vaksin           = $_POST['batch_vaksin'] ?? null;
+    $expired_vaksin         = !empty($_POST['expired_vaksin']) ? $_POST['expired_vaksin'] : null;
 
-    // ================= KEDATANGAN =================
-    $kedatangan_ke = !empty($_POST['kedatangan_ke']) ? intval($_POST['kedatangan_ke']) : null;
-    // ✅ FIX: kedatangan_selanjutnya adalah DATE, bukan integer!
+    $kedatangan_ke          = $_POST['kedatangan_ke'] !== '' ? $_POST['kedatangan_ke'] : null;
     $kedatangan_selanjutnya = !empty($_POST['kedatangan_selanjutnya']) ? $_POST['kedatangan_selanjutnya'] : null;
-    
-    $status = $_POST['status'] ?? 'Aktif';
+    $status                 = $_POST['status'] ?? null;
 
-    // ================= CEK SUDAH ADA TINDAKAN? =================
+    $conn->begin_transaction();
+
+    // ================= CEK HEADER TINDAKAN =================
     $cek = $conn->prepare("SELECT id FROM tindakan WHERE booking_id = ?");
     $cek->bind_param("i", $booking_id);
     $cek->execute();
-    $res = $cek->get_result();
+    $result = $cek->get_result();
 
-    if ($res->num_rows > 0) {
+    if ($result->num_rows > 0) {
 
-        // ================= UPDATE =================
-        $row = $res->fetch_assoc();
+        // ===== UPDATE HEADER =====
+        $row = $result->fetch_assoc();
         $tindakan_id = $row['id'];
 
-        $sql = "UPDATE tindakan SET
-            keluhan = ?,
-            kipi_sebelumnya = ?,
-            kontraindikasi = ?,
-            anamnesis = ?,
-            bb = ?,
-            tb = ?,
-            lingkar_kepala = ?,
-            pf_lainnya = ?,
-            pemeriksaan_fisik = ?,
-            diagnosis = ?,
-            tatalaksana = ?,
-            suhu = ?,
-            tekanan_darah = ?,
-            respirasi = ?,
-            nadi = ?,
-            status = ?,
-            jenis_vaksin = ?,
-            batch_vaksin = ?,
-            expired_vaksin = ?,
-            kedatangan_ke = ?,
-            kedatangan_selanjutnya = ?,
-            updated_at = NOW()
-        WHERE id = ?";
-
-        $stmt = $conn->prepare($sql);
-
-        if (!$stmt) {
-            throw new Exception("Prepare error: " . $conn->error);
-        }
+        $stmt = $conn->prepare("
+            UPDATE tindakan SET
+                keluhan = ?,
+                kipi_sebelumnya = ?,
+                kontraindikasi = ?,
+                anamnesis = ?,
+                pemeriksaan_fisik = ?,
+                diagnosis = ?,
+                tatalaksana = ?,
+                suhu = ?,
+                tekanan_darah = ?,
+                respirasi = ?,
+                nadi = ?,
+                bb = ?,
+                tb = ?,
+                lingkar_kepala = ?,
+                pf_lainnya = ?,
+                jenis_vaksin = ?,
+                batch_vaksin = ?,
+                expired_vaksin = ?,
+                kedatangan_ke = ?,
+                kedatangan_selanjutnya = ?,
+                status = ?,
+                updated_at = NOW()
+            WHERE id = ?
+        ");
 
         $stmt->bind_param(
-            "ssssdddssssdsiissssisi",
+            "sssssssssssssssssssssi",
             $keluhan,
-            $kipi_sebelumnya,
+            $kipi,
             $kontraindikasi,
             $anamnesis,
-            $bb,
-            $tb,
-            $lingkar_kepala,
-            $pf_lainnya,
             $pemeriksaan_fisik,
             $diagnosis,
-            $tatalaksana,
+            $tatalaksana_text,
             $suhu,
             $tekanan_darah,
             $respirasi,
             $nadi,
-            $status,
+            $bb,
+            $tb,
+            $lingkar_kepala,
+            $pf_lainnya,
             $jenis_vaksin,
             $batch_vaksin,
             $expired_vaksin,
             $kedatangan_ke,
             $kedatangan_selanjutnya,
+            $status,
             $tindakan_id
         );
 
-        if (!$stmt->execute()) {
-            throw new Exception("Update error: " . $stmt->error);
-        }
+        $stmt->execute();
+        $stmt->close();
 
     } else {
 
-        // ================= INSERT BARU =================
-        $sql = "INSERT INTO tindakan (
-            booking_id,
-            patient_id,
-            keluhan,
-            kipi_sebelumnya,
-            kontraindikasi,
-            anamnesis,
-            bb,
-            tb,
-            lingkar_kepala,
-            pf_lainnya,
-            pemeriksaan_fisik,
-            diagnosis,
-            tatalaksana,
-            suhu,
-            tekanan_darah,
-            respirasi,
-            nadi,
-            status,
-            jenis_vaksin,
-            batch_vaksin,
-            expired_vaksin,
-            kedatangan_ke,
-            kedatangan_selanjutnya,
-            created_at,
-            updated_at
-        ) VALUES (
-            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-            NOW(),
-            NOW()
-        )";
-
-        $stmt = $conn->prepare($sql);
-
-        if (!$stmt) {
-            throw new Exception("Prepare error: " . $conn->error);
-        }
+        // ===== INSERT HEADER =====
+        $stmt = $conn->prepare("
+            INSERT INTO tindakan (
+                booking_id, patient_id,
+                keluhan, kipi_sebelumnya, kontraindikasi,
+                anamnesis, pemeriksaan_fisik,
+                diagnosis, tatalaksana,
+                suhu, tekanan_darah, respirasi, nadi,
+                bb, tb, lingkar_kepala,
+                pf_lainnya,
+                jenis_vaksin, batch_vaksin, expired_vaksin,
+                kedatangan_ke, kedatangan_selanjutnya,
+                status, created_at, updated_at
+            ) VALUES (
+                ?, ?,
+                ?, ?, ?,
+                ?, ?,
+                ?, ?,
+                ?, ?, ?, ?,
+                ?, ?, ?,
+                ?,
+                ?, ?, ?,
+                ?, ?,
+                ?, NOW(), NOW()
+            )
+        ");
 
         $stmt->bind_param(
-            "iissssdddssssdssisssis",
+            "iisssssssssssssssssssss",
             $booking_id,
             $patient_id,
             $keluhan,
-            $kipi_sebelumnya,
+            $kipi,
             $kontraindikasi,
             $anamnesis,
-            $bb,
-            $tb,
-            $lingkar_kepala,
-            $pf_lainnya,
             $pemeriksaan_fisik,
             $diagnosis,
-            $tatalaksana,
+            $tatalaksana_text,
             $suhu,
             $tekanan_darah,
             $respirasi,
             $nadi,
-            $status,
+            $bb,
+            $tb,
+            $lingkar_kepala,
+            $pf_lainnya,
             $jenis_vaksin,
             $batch_vaksin,
             $expired_vaksin,
             $kedatangan_ke,
-            $kedatangan_selanjutnya
+            $kedatangan_selanjutnya,
+            $status
         );
 
-        if (!$stmt->execute()) {
-            throw new Exception("Insert error: " . $stmt->error);
+        $stmt->execute();
+        $tindakan_id = $conn->insert_id;
+        $stmt->close();
+    }
+
+    // ================= SIMPAN DETAIL TATALAKSANA =================
+
+    // Hapus detail lama dulu
+    $hapus = $conn->prepare("DELETE FROM tatalaksana WHERE tindakan_id = ?");
+    $hapus->bind_param("i", $tindakan_id);
+    $hapus->execute();
+    $hapus->close();
+
+    if (!empty($_POST['product_id'])) {
+
+        foreach ($_POST['product_id'] as $index => $product_id) {
+
+            $lokasi = $_POST['lokasi'][$index] ?? '';
+            $rute   = $_POST['rute'][$index] ?? '';
+            $dosis  = $_POST['dosis'][$index] ?? 1;
+            $batch  = $_POST['batch'][$index] ?? null;
+            $expired_date = $_POST['expired_date'][$index] ?? null;
+
+            if (empty($batch)) continue;
+
+            $insert = $conn->prepare("
+                INSERT INTO tatalaksana
+                (tindakan_id, booking_id, patient_id, product_id, batch_number, expired_date, lokasi, rute, dosis, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+            ");
+
+            $insert->bind_param(
+                "iiiissssi",
+                $tindakan_id,
+                $booking_id,
+                $patient_id,
+                $product_id,
+                $batch,
+                $expired_date,
+                $lokasi,
+                $rute,
+                $dosis
+            );
+
+            $insert->execute();
+            $insert->close();
         }
     }
 
-    // ================= TANDAI BOOKING SUDAH ADA TINDAKAN =================
-    $sql_flag = "UPDATE bookings 
-            SET tindakan_selesai = 1
-            WHERE id = ?";
-
-    $stmt_flag = $conn->prepare($sql_flag);
-    $stmt_flag->bind_param("i", $booking_id);
-    $stmt_flag->execute();
+    $conn->commit();
 
     echo json_encode([
         "success" => true,
         "message" => "Tindakan berhasil disimpan"
     ]);
 
-} catch (Exception $e) {
+} catch (Throwable $e) {
+
+    $conn->rollback();
 
     echo json_encode([
         "success" => false,
-        "message" => $e->getMessage()
+        "message" => "Gagal simpan tindakan: " . $e->getMessage()
     ]);
 }
-?>

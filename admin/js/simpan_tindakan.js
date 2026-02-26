@@ -18,25 +18,26 @@ document.getElementById("formTindakan").addEventListener("submit", function(e) {
         method: "POST",
         body: formData
     })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            alert("✅ Tindakan berhasil disimpan");
+    .then(res => res.text())
+    .then(text => {
+        try {
+            const data = JSON.parse(text);
 
-            // reload halaman biar data fresh
-            const parentId = document.querySelector('input[name="parent_booking_id"]').value;
-            const patientId = document.querySelector('input[name="patient_id"]').value;
+            if (data.success) {
+                const parentId = document.querySelector('input[name="parent_booking_id"]').value;
+                const patientId = document.querySelector('input[name="patient_id"]').value;
 
-            window.location.href =
-                "proses_tindakan.php?id=" + parentId +
-                "&participant_id=" + patientId;
+                window.location.href =
+                    "proses_tindakan.php?id=" + parentId +
+                    "&participant_id=" + patientId;
 
-        } else {
-            alert("❌ Gagal simpan tindakan: " + data.message);
+            } else {
+                alert("❌ Gagal simpan tindakan: " + data.message);
+            }
+
+        } catch (e) {
+            console.error("Response bukan JSON:", text);
+            alert("Terjadi kesalahan server");
         }
-    })
-    .catch(err => {
-        console.error(err);
-        alert("Terjadi kesalahan server");
     });
 });

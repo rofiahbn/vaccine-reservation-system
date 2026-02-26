@@ -49,9 +49,11 @@ function updateStatus(bookingId, newStatus) {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert(data.message);
+
                     closeAddDoctorPopup();
-                    location.reload();
+
+                    updateStatus(bookingId, 'confirmed');
+
                 } else {
                     alert('Gagal: ' + data.message);
                     selesaiBtn.innerHTML = originalText;

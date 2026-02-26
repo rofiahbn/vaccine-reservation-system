@@ -77,6 +77,24 @@ $stmt_t->bind_param("i", $current_booking_id);
 $stmt_t->execute();
 $tindakan = $stmt_t->get_result()->fetch_assoc();
 
+// ================= AMBIL DATA TATALAKSANA PRODUK YANG SUDAH ADA =================
+$tatalaksana_produk = [];
+if ($tindakan) {
+    // Cek dulu apakah kolom 'lokasi' ada di tabel tindakan
+    $check_column = $conn->query("SHOW COLUMNS FROM tindakan LIKE 'lokasi'");
+    if ($check_column->num_rows > 0) {
+        // Data sudah ada di kolom lokasi (sebagai JSON atau string)
+        $lokasi_data = $tindakan['lokasi'] ?? '';
+        if (!empty($lokasi_data)) {
+            // Coba parse sebagai JSON
+            $decoded = json_decode($lokasi_data, true);
+            if (is_array($decoded)) {
+                $tatalaksana_produk = $decoded;
+            }
+        }
+    }
+}
+
 function hitungUsia($tanggal_lahir) {
     $lahir = new DateTime($tanggal_lahir);
     $sekarang = new DateTime();
@@ -602,10 +620,279 @@ if ($status_booking === 'pending') {
                                 name="diagnosis"><?= htmlspecialchars($tindakan['diagnosis'] ?? '') ?></textarea>
                         </div>
 
-                        <div class="detail-item full-width">
-                            <label>Tatalaksana</label>
+                        <!-- ================= TATALAKSANA - TABEL PRODUK ================= -->
+                        <div class="detail-item full-width" style="margin-top: 20px;">
+                            <label>
+                               Tatalaksana
+                            </label>
+                            
+                            <div style="background: white; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; margin-bottom: 24px; overflow-x:auto;">
+                                <table style="width: 100%; border-collapse: collapse;">
+                                    <thead style="background: #f8f9fa; border-bottom: 2px solid #e9ecef;">
+                                        <tr>
+                                            <th style="padding: 14px 12px; text-align: Center; font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.3px;">Layanan</th>
+                                            <th style="padding: 14px 12px; text-align: Center; font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.3px;">Tindakan</th>
+                                            <th style="padding: 14px 12px; text-align: Center; font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.3px;">Merk</th>
+                                            <th style="padding: 14px 12px; text-align: Center; font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.3px;">Lokasi</th>
+                                            <th style="padding: 14px 12px; text-align: Center; font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.3px;">Rute</th>
+                                            <th style="padding: 14px 12px; text-align: Center; font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.3px;">Dosis</th>
+                                            <th style="padding: 14px 12px; text-align: Center; font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.3px;">Batch</th>
+                                            <th style="padding: 14px 12px; text-align: Center; font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.3px;">Exp Date</th>
+                                        </tr>
+                                    </thead>
+                                    <?php
+                                    // ================= AMBIL DETAIL TATALAKSANA =================
+                                    $tatalaksana_map = [];
+
+                                    if (!empty($tindakan['id'])) {
+
+                                        $sql_detail = "SELECT * FROM tatalaksana WHERE tindakan_id = ?";
+                                        $stmt_detail = $conn->prepare($sql_detail);
+                                        $stmt_detail->bind_param("i", $tindakan['id']);
+                                        $stmt_detail->execute();
+                                        $detail_result = $stmt_detail->get_result();
+
+                                        while ($row = $detail_result->fetch_assoc()) {
+                                            $tatalaksana_map[] = $row;
+                                        }
+
+                                        $stmt_detail->close();
+                                    }
+                                    ?>
+                                    <tbody>
+                                        <?php
+                                        // Reset semua result set ke awal
+                                        if (isset($layanan_result)) $layanan_result->data_seek(0);
+                                        
+                                        // Ambil layanan untuk booking ini dengan error handling
+                                        $sql_layanan = "SELECT bs.*, s.nama_layanan, s.tipe 
+                                                    FROM booking_services bs 
+                                                    JOIN services s ON bs.service_id = s.id 
+                                                    WHERE bs.booking_id = ?";
+                                        $stmt_layanan = $conn->prepare($sql_layanan);
+                                        
+                                        if ($stmt_layanan) {
+                                            $stmt_layanan->bind_param("i", $current_booking_id);
+                                            $stmt_layanan->execute();
+                                            $layanan_result = $stmt_layanan->get_result();
+                                            
+                                            $total_baris = 0;
+                                            
+                                            while ($layanan = $layanan_result->fetch_assoc()):
+                                                // Jika layanan adalah paket, ambil komponennya
+                                                if ($layanan['tipe'] == 'paket') {
+                                                    $sql_komponen = "
+                                                        SELECT spi.*, s.nama_layanan as nama_komponen, s.tipe 
+                                                        FROM service_package_items spi
+                                                        JOIN services s ON spi.service_id = s.id 
+                                                        WHERE spi.package_id = ?
+                                                    ";
+                                                    $stmt_komp = $conn->prepare($sql_komponen);
+                                                    
+                                                    if ($stmt_komp) {
+                                                        $stmt_komp->bind_param("i", $layanan['service_id']);
+                                                        $stmt_komp->execute();
+                                                        $komponen_result = $stmt_komp->get_result();
+                                                        
+                                                        while ($komponen = $komponen_result->fetch_assoc()):
+                                                            if ($komponen['tipe'] == 'pelayanan') {
+                                                                $sql_produk = "
+                                                                    SELECT spc.*, p.nama_produk, p.merk, p.satuan
+                                                                    FROM service_product_components spc
+                                                                    JOIN products p ON spc.product_id = p.id
+                                                                    WHERE spc.service_id = ?
+                                                                    ";
+                                                                $stmt_prod = $conn->prepare($sql_produk);
+                                                                
+                                                                if ($stmt_prod) {
+                                                                    $stmt_prod->bind_param("i", $komponen['service_id']);
+                                                                    $stmt_prod->execute();
+                                                                    $produk_result = $stmt_prod->get_result();
+                                                                    
+                                                                    while ($produk = $produk_result->fetch_assoc()):
+                                                                        $sql_batch = "SELECT batch_number, expired_date, stock 
+                                                                                    FROM product_stock 
+                                                                                    WHERE product_id = ? AND stock > 0 
+                                                                                    ORDER BY expired_date ASC LIMIT 1";
+                                                                        $stmt_batch = $conn->prepare($sql_batch);
+                                                                        
+                                                                        $batch = null;
+                                                                        if ($stmt_batch) {
+                                                                            $stmt_batch->bind_param("i", $produk['product_id']);
+                                                                            $stmt_batch->execute();
+                                                                            $batch = $stmt_batch->get_result()->fetch_assoc();
+                                                                            $stmt_batch->close();
+                                                                        }
+                                                                        $total_baris++;
+                                                                        $data_saved = $tatalaksana_map[$total_baris - 1] ?? [];
+                                                                    ?>
+                                                                        <tr style="border-bottom: 1px solid #f1f3f5;">
+                                                                            <td style="padding: 12px; font-size: 13px; color: #374151;">
+                                                                                <?= htmlspecialchars($layanan['nama_layanan']) ?>
+                                                                                <div style="font-size: 11px; color: #6b7280;"><?= htmlspecialchars($komponen['nama_komponen']) ?></div>
+                                                                            </td>
+                                                                            <td style="padding: 12px; font-size: 13px;"><?= htmlspecialchars($produk['nama_produk'] ?? '-') ?></td>
+                                                                            <td style="padding: 12px; font-size: 13px;"><?= htmlspecialchars($produk['merk'] ?? '-') ?></td>
+                                                                            <td style="padding: 12px;">
+                                                                                <select name="lokasi[<?= $total_baris ?>]" class="modern-select" style="width: 120px; padding: 6px 8px; font-size: 12px;">
+                                                                                    <option value="">Pilih</option>
+                                                                                    <option value="Lengan Kanan" <?= ($data_saved['lokasi'] ?? '') == 'Lengan Kanan' ? 'selected' : '' ?>>Lengan Kanan</option>
+                                                                                    <option value="Lengan Kiri" <?= ($data_saved['lokasi'] ?? '') == 'Lengan Kiri' ? 'selected' : '' ?>>Lengan Kiri</option>
+                                                                                    <option value="Paha Kanan" <?= ($data_saved['lokasi'] ?? '') == 'Paha Kanan' ? 'selected' : '' ?>>Paha Kanan</option>
+                                                                                    <option value="Paha Kiri" <?= ($data_saved['lokasi'] ?? '') == 'Paha Kiri' ? 'selected' : '' ?>>Paha Kiri</option>
+                                                                                    <option value="Gluteus Kanan" <?= ($data_saved['lokasi'] ?? '') == 'Gluteus Kanan' ? 'selected' : '' ?>>Gluteus Kanan</option>
+                                                                                    <option value="Gluteus Kiri" <?= ($data_saved['lokasi'] ?? '') == 'Gluteus Kiri' ? 'selected' : '' ?>>Gluteus Kiri</option>
+                                                                                </select>
+                                                                            </td>
+                                                                            <td style="padding: 12px;">
+                                                                                <select name="rute[<?= $total_baris ?>]" class="modern-select" style="width: 100px; padding: 6px 8px; font-size: 12px;">
+                                                                                    <option value="IM" <?= ($data_saved['rute'] ?? '') == 'IM' ? 'selected' : '' ?>>IM</option>
+                                                                                    <option value="SC" <?= ($data_saved['rute'] ?? '') == 'SC' ? 'selected' : '' ?>>SC</option>
+                                                                                    <option value="ID" <?= ($data_saved['rute'] ?? '') == 'ID' ? 'selected' : '' ?>>ID</option>
+                                                                                    <option value="IV" <?= ($data_saved['rute'] ?? '') == 'IV' ? 'selected' : '' ?>>IV</option>
+                                                                                    <option value="Oral" <?= ($data_saved['rute'] ?? '') == 'Oral' ? 'selected' : '' ?>>Oral</option>
+                                                                                </select>
+                                                                            </td>
+                                                                            <td style="padding: 12px;">
+                                                                                <input 
+                                                                                    type="number" 
+                                                                                    name="dosis[<?= $total_baris ?>]" 
+                                                                                    value="<?= htmlspecialchars($data_saved['dosis'] ?? 1) ?>" 
+                                                                                    min="1" 
+                                                                                    class="modern-input" 
+                                                                                    style="width: 60px; padding: 6px 8px; font-size: 12px;">
+                                                                            </td>
+                                                                            <td style="padding: 12px; font-size: 13px;">
+                                                                                <?php if ($batch && isset($batch['batch_number'])): ?>
+                                                                                    <?= htmlspecialchars($batch['batch_number']) ?>
+                                                                                    <input type="hidden" name="batch[<?= $total_baris ?>]" value="<?= htmlspecialchars($batch['batch_number']) ?>">
+                                                                                    <input type="hidden" name="product_id[<?= $total_baris ?>]" value="<?= $produk['product_id'] ?>">
+                                                                                    <input type="hidden" name="expired_date[<?= $total_baris ?>]" value="<?= $batch['expired_date'] ?? '' ?>">
+                                                                                <?php else: ?>
+                                                                                    <span style="color: #dc3545;">Stok habis</span>
+                                                                                <?php endif; ?>
+                                                                            </td>
+                                                                            <td style="padding: 12px; font-size: 13px;">
+                                                                                <?php if ($batch && isset($batch['expired_date'])): ?>
+                                                                                    <?= date('d/m/Y', strtotime($batch['expired_date'])) ?>
+                                                                                <?php else: ?>
+                                                                                    -
+                                                                                <?php endif; ?>
+                                                                            </td>
+                                                                        </tr>
+                                                                    <?php 
+                                                                    endwhile;
+                                                                    $stmt_prod->close();
+                                                                }
+                                                            }
+                                                        endwhile;
+                                                        $stmt_komp->close();
+                                                    }
+                                                } else {
+                                                    // Layanan biasa (pelayanan)
+                                                    $sql_produk = "
+                                                        SELECT spc.*, p.nama_produk, p.merk, p.satuan
+                                                        FROM service_product_components spc
+                                                        JOIN products p ON spc.product_id = p.id
+                                                        WHERE spc.service_id = ?
+                                                    ";
+                                                    $stmt_prod = $conn->prepare($sql_produk);
+                                                    
+                                                    if ($stmt_prod) {
+                                                        $stmt_prod->bind_param("i", $layanan['service_id']);
+                                                        $stmt_prod->execute();
+                                                        $produk_result = $stmt_prod->get_result();
+                                                        
+                                                        while ($produk = $produk_result->fetch_assoc()):
+                                                            $sql_batch = "SELECT batch_number, expired_date, stock 
+                                                                        FROM product_stock 
+                                                                        WHERE product_id = ? AND stock > 0 
+                                                                        ORDER BY expired_date ASC LIMIT 1";
+                                                            $stmt_batch = $conn->prepare($sql_batch);
+                                                            
+                                                            $batch = null;
+                                                            if ($stmt_batch) {
+                                                                $stmt_batch->bind_param("i", $produk['product_id']);
+                                                                $stmt_batch->execute();
+                                                                $batch = $stmt_batch->get_result()->fetch_assoc();
+                                                                $stmt_batch->close();
+                                                            }
+                                                            $total_baris++;
+                                                            $data_saved = $tatalaksana_map[$total_baris - 1] ?? [];
+                                                        ?>
+                                                            <tr style="border-bottom: 1px solid #f1f3f5;">
+                                                                <td style="padding: 12px; font-size: 13px;"><?= htmlspecialchars($layanan['nama_layanan']) ?></td>
+                                                                <td style="padding: 12px; font-size: 13px;"><?= htmlspecialchars($produk['nama_produk'] ?? '-') ?></td>
+                                                                <td style="padding: 12px; font-size: 13px;"><?= htmlspecialchars($produk['merk'] ?? '-') ?></td>
+                                                                <td style="padding: 12px;">
+                                                                                <select name="lokasi[<?= $total_baris ?>]" class="modern-select" style="width: 120px; padding: 6px 8px; font-size: 12px;">
+                                                                                    <option value="">Pilih</option>
+                                                                                    <option value="Lengan Kanan" <?= ($data_saved['lokasi'] ?? '') == 'Lengan Kanan' ? 'selected' : '' ?>>Lengan Kanan</option>
+                                                                                    <option value="Lengan Kiri" <?= ($data_saved['lokasi'] ?? '') == 'Lengan Kiri' ? 'selected' : '' ?>>Lengan Kiri</option>
+                                                                                    <option value="Paha Kanan" <?= ($data_saved['lokasi'] ?? '') == 'Paha Kanan' ? 'selected' : '' ?>>Paha Kanan</option>
+                                                                                    <option value="Paha Kiri" <?= ($data_saved['lokasi'] ?? '') == 'Paha Kiri' ? 'selected' : '' ?>>Paha Kiri</option>
+                                                                                    <option value="Gluteus Kanan" <?= ($data_saved['lokasi'] ?? '') == 'Gluteus Kanan' ? 'selected' : '' ?>>Gluteus Kanan</option>
+                                                                                    <option value="Gluteus Kiri" <?= ($data_saved['lokasi'] ?? '') == 'Gluteus Kiri' ? 'selected' : '' ?>>Gluteus Kiri</option>
+                                                                                </select>
+                                                                            </td>
+                                                                <td style="padding: 12px;">
+                                                                                <select name="rute[<?= $total_baris ?>]" class="modern-select" style="width: 100px; padding: 6px 8px; font-size: 12px;">
+                                                                                    <option value="IM" <?= ($data_saved['rute'] ?? '') == 'IM' ? 'selected' : '' ?>>IM</option>
+                                                                                    <option value="SC" <?= ($data_saved['rute'] ?? '') == 'SC' ? 'selected' : '' ?>>SC</option>
+                                                                                    <option value="ID" <?= ($data_saved['rute'] ?? '') == 'ID' ? 'selected' : '' ?>>ID</option>
+                                                                                    <option value="IV" <?= ($data_saved['rute'] ?? '') == 'IV' ? 'selected' : '' ?>>IV</option>
+                                                                                    <option value="Oral" <?= ($data_saved['rute'] ?? '') == 'Oral' ? 'selected' : '' ?>>Oral</option>
+                                                                                </select>
+                                                                            </td>
+                                                                <td style="padding: 12px;">
+                                                                                <input 
+                                                                                    type="number" 
+                                                                                    name="dosis[<?= $total_baris ?>]" 
+                                                                                    value="<?= htmlspecialchars($data_saved['dosis'] ?? 1) ?>" 
+                                                                                    min="1" 
+                                                                                    class="modern-input" 
+                                                                                    style="width: 60px; padding: 6px 8px; font-size: 12px;">
+                                                                            </td>
+                                                                <td style="padding: 12px; font-size: 13px;">
+                                                                    <?php if ($batch && isset($batch['batch_number'])): ?>
+                                                                        <?= htmlspecialchars($batch['batch_number']) ?>
+                                                                        <input type="hidden" name="batch[<?= $total_baris ?>]" value="<?= htmlspecialchars($batch['batch_number']) ?>">
+                                                                        <input type="hidden" name="product_id[<?= $total_baris ?>]" value="<?= $produk['product_id'] ?>">
+                                                                        <input type="hidden" name="expired_date[<?= $total_baris ?>]" value="<?= $batch['expired_date'] ?? '' ?>">
+                                                                    <?php else: ?>
+                                                                        <span style="color: #dc3545;">Stok habis</span>
+                                                                    <?php endif; ?>
+                                                                </td>
+                                                                <td style="padding: 12px; font-size: 13px;">
+                                                                    <?php if ($batch && isset($batch['expired_date'])): ?>
+                                                                        <?= date('d/m/Y', strtotime($batch['expired_date'])) ?>
+                                                                    <?php else: ?>
+                                                                        -
+                                                                    <?php endif; ?>
+                                                                </td>
+                                                            </tr>
+                                                        <?php 
+                                                        endwhile;
+                                                        $stmt_prod->close();
+                                                    }
+                                                }
+                                            endwhile;
+                                            $stmt_layanan->close();
+                                        }
+                                        
+                                        if (!isset($total_baris) || $total_baris == 0): ?>
+                                            <tr>
+                                                <td colspan="7" style="padding: 30px; text-align: center; color: #6b7280;">
+                                                    <i class="fas fa-info-circle" style="font-size: 20px; margin-bottom: 8px; display: block;"></i>
+                                                    Belum ada produk yang digunakan
+                                                </td>
+                                            </tr>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
+                            </div>
                             <textarea name="tatalaksana"><?= htmlspecialchars($tindakan['tatalaksana'] ?? '') ?></textarea>
-                        </div>
+                        </div> 
                     </div>
 
                     <!-- ACTION BUTTON -->
@@ -1051,6 +1338,54 @@ if ($status_booking === 'pending') {
             }
         }, 5000);
     }
+</script>
+<script>
+function tambahJadwal() {
+    const container = document.getElementById('jadwal-container');
+    if (!container) return;
+    
+    const rowCount = container.children.length;
+    
+    // Hapus pesan "Belum ada jadwal" jika ada
+    if (rowCount === 1 && container.children[0] && container.children[0].children[0] && container.children[0].children[0].colSpan === 4) {
+        container.innerHTML = '';
+    }
+    
+    // Ambil data vaksin dari PHP (sudah di-generate di awal)
+    <?php
+    $vaksin_options = '';
+    $sql_vaksin = "SELECT id, nama_produk FROM products WHERE jenis = 'Vaksin' ORDER BY nama_produk";
+    $vaksin_result = $conn->query($sql_vaksin);
+    if ($vaksin_result && $vaksin_result->num_rows > 0) {
+        while ($vaksin = $vaksin_result->fetch_assoc()) {
+            $vaksin_options .= '<option value="' . $vaksin['id'] . '">' . addslashes($vaksin['nama_produk']) . '</option>';
+        }
+    }
+    ?>
+    
+    const newRow = document.createElement('tr');
+    newRow.style.borderBottom = '1px solid #e9ecef';
+    newRow.innerHTML = `
+        <td style="padding: 10px;">
+            <select name="vaksin_next[]" class="modern-select" style="width: 100%; padding: 8px; font-size: 13px;">
+                <option value="">Pilih Vaksin</option>
+                <?= $vaksin_options ?>
+            </select>
+        </td>
+        <td style="padding: 10px;">
+            <input type="date" name="tanggal_next[]" class="modern-input" style="width: 100%; padding: 8px; font-size: 13px;" min="<?= date('Y-m-d') ?>">
+        </td>
+        <td style="padding: 10px;">
+            <input type="number" name="dosis_next[]" min="1" value="1" class="modern-input" style="width: 70px; padding: 8px; font-size: 13px;">
+        </td>
+        <td style="padding: 10px; text-align: center;">
+            <button type="button" onclick="this.closest('tr').remove()" class="btn-delete-staff" style="background: none; border: none; color: #dc3545; cursor: pointer; padding: 6px;">
+                <i class="fas fa-trash"></i>
+            </button>
+        </td>
+    `;
+    container.appendChild(newRow);
+}
 </script>
 <script src="js/preview_surat.js"></script>
 <script src="js/simpan_tindakan.js"></script>
