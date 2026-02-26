@@ -626,10 +626,6 @@ $limit_umroh = (clone $today)->modify('+7 days');
     <script src="provinces.js"></script>
     <script src="script.js?v=<?php echo time(); ?>"></script>
     <script src="service.js"></script>
-    // ==========================================
-// SOLUSI FINAL - MANUAL FORM SUBMISSION
-// Paste di order.php REPLACE semua script validasi
-// ==========================================
 
 <script>
 console.log('🔥 MANUAL FORM SUBMISSION LOADED');
