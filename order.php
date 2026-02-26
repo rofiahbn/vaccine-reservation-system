@@ -96,6 +96,8 @@ $hari_ini = ($bulan == date('n') && $tahun == date('Y')) ? date('j') : 0;
 $is_umroh_selected = isset($_GET['is_umroh']) && $_GET['is_umroh'] == 1;
 
 $today = new DateTime();
+$today->setTime(0, 0, 0);
+
 $limit_umroh = (clone $today)->modify('+7 days');
 
 ?>
