@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Feb 26, 2026 at 06:05 PM
+-- Generation Time: Feb 27, 2026 at 04:50 AM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.30
 
@@ -18,37 +18,38 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `reservation_db`
+-- Database: reservation_db
 --
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `bookings`
+-- Table structure for table bookings
 --
 
-CREATE TABLE `bookings` (
-  `id` int NOT NULL,
-  `parent_id` int DEFAULT NULL,
-  `patient_id` int NOT NULL,
-  `service_type` enum('Home Service','In Clinic') COLLATE utf8mb4_unicode_ci NOT NULL,
-  `nomor_antrian` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `tanggal_booking` date NOT NULL,
-  `waktu_booking` time NOT NULL,
-  `status` enum('pending','confirmed','completed','cancelled') COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
-  `catatan` text COLLATE utf8mb4_unicode_ci,
-  `created_at` datetime NOT NULL,
-  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `doctor_id` int DEFAULT NULL,
-  `payment_status` enum('unpaid','paid') COLLATE utf8mb4_unicode_ci DEFAULT 'unpaid',
-  `tindakan_selesai` tinyint(1) DEFAULT '0'
+DROP TABLE IF EXISTS bookings;
+CREATE TABLE bookings (
+  id int NOT NULL,
+  parent_id int DEFAULT NULL,
+  patient_id int NOT NULL,
+  service_type enum('Home Service','In Clinic') COLLATE utf8mb4_unicode_ci NOT NULL,
+  nomor_antrian varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  tanggal_booking date NOT NULL,
+  waktu_booking time NOT NULL,
+  status enum('pending','confirmed','completed','cancelled') COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
+  catatan text COLLATE utf8mb4_unicode_ci,
+  created_at datetime NOT NULL,
+  updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  doctor_id int DEFAULT NULL,
+  payment_status enum('unpaid','paid') COLLATE utf8mb4_unicode_ci DEFAULT 'unpaid',
+  tindakan_selesai tinyint(1) DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `bookings`
+-- Dumping data for table bookings
 --
 
-INSERT INTO `bookings` (`id`, `parent_id`, `patient_id`, `service_type`, `nomor_antrian`, `tanggal_booking`, `waktu_booking`, `status`, `catatan`, `created_at`, `updated_at`, `doctor_id`, `payment_status`, `tindakan_selesai`) VALUES
+INSERT INTO bookings (id, parent_id, patient_id, service_type, nomor_antrian, tanggal_booking, waktu_booking, status, catatan, created_at, updated_at, doctor_id, payment_status, tindakan_selesai) VALUES
 (78, NULL, 1, 'In Clinic', '20260120-001', '2026-01-23', '09:30:00', 'confirmed', 'Pendaftaran online', '2026-01-20 09:38:53', '2026-01-26 13:37:47', 1, 'unpaid', 0),
 (79, NULL, 2, 'In Clinic', '20260121-001', '2026-01-23', '09:00:00', 'cancelled', 'Pendaftaran online', '2026-01-20 23:23:09', '2026-01-23 21:33:47', NULL, 'unpaid', 0),
 (80, NULL, 3, 'In Clinic', '20260122-002', '2026-01-23', '11:00:00', 'confirmed', 'Pendaftaran online', '2026-01-22 15:53:09', '2026-02-05 20:13:16', NULL, 'unpaid', 1),
@@ -91,28 +92,29 @@ INSERT INTO `bookings` (`id`, `parent_id`, `patient_id`, `service_type`, `nomor_
 -- --------------------------------------------------------
 
 --
--- Table structure for table `booking_services`
+-- Table structure for table booking_services
 --
 
-CREATE TABLE `booking_services` (
-  `id` int NOT NULL,
-  `parent_booking_id` int DEFAULT NULL,
-  `booking_id` int NOT NULL,
-  `patient_id` int DEFAULT NULL,
-  `nama_layanan` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  `service_id` int DEFAULT NULL,
-  `harga` int DEFAULT '0',
-  `diskon` int DEFAULT '0',
-  `diskon_tipe` enum('persen','nilai') COLLATE utf8mb4_unicode_ci DEFAULT 'nilai',
-  `total` int DEFAULT '0'
+DROP TABLE IF EXISTS booking_services;
+CREATE TABLE booking_services (
+  id int NOT NULL,
+  parent_booking_id int DEFAULT NULL,
+  booking_id int NOT NULL,
+  patient_id int DEFAULT NULL,
+  nama_layanan varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  created_at datetime DEFAULT CURRENT_TIMESTAMP,
+  service_id int DEFAULT NULL,
+  harga int DEFAULT '0',
+  diskon int DEFAULT '0',
+  diskon_tipe enum('persen','nilai') COLLATE utf8mb4_unicode_ci DEFAULT 'nilai',
+  total int DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `booking_services`
+-- Dumping data for table booking_services
 --
 
-INSERT INTO `booking_services` (`id`, `parent_booking_id`, `booking_id`, `patient_id`, `nama_layanan`, `created_at`, `service_id`, `harga`, `diskon`, `diskon_tipe`, `total`) VALUES
+INSERT INTO booking_services (id, parent_booking_id, booking_id, patient_id, nama_layanan, created_at, service_id, harga, diskon, diskon_tipe, total) VALUES
 (18, 78, 78, 1, 'Adacel (Sanofi)', '2026-01-20 09:38:53', NULL, 0, 0, 'nilai', 0),
 (19, 79, 79, 2, 'Campak (Biofarma)', '2026-01-20 23:23:09', NULL, 0, 0, 'nilai', 0),
 (20, 79, 79, 2, 'Swab Antigen COVID-19', '2026-01-20 23:23:09', NULL, 0, 0, 'nilai', 0),
@@ -161,21 +163,22 @@ INSERT INTO `booking_services` (`id`, `parent_booking_id`, `booking_id`, `patien
 -- --------------------------------------------------------
 
 --
--- Table structure for table `booking_staff`
+-- Table structure for table booking_staff
 --
 
-CREATE TABLE `booking_staff` (
-  `id` int NOT NULL,
-  `booking_id` int NOT NULL,
-  `staff_id` int NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+DROP TABLE IF EXISTS booking_staff;
+CREATE TABLE booking_staff (
+  id int NOT NULL,
+  booking_id int NOT NULL,
+  staff_id int NOT NULL,
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `booking_staff`
+-- Dumping data for table booking_staff
 --
 
-INSERT INTO `booking_staff` (`id`, `booking_id`, `staff_id`, `created_at`) VALUES
+INSERT INTO booking_staff (id, booking_id, staff_id, created_at) VALUES
 (13, 78, 3, '2026-01-23 14:34:10'),
 (14, 80, 1, '2026-01-23 14:36:03'),
 (19, 85, 2, '2026-01-26 09:08:23'),
@@ -208,48 +211,50 @@ INSERT INTO `booking_staff` (`id`, `booking_id`, `staff_id`, `created_at`) VALUE
 -- --------------------------------------------------------
 
 --
--- Table structure for table `jadwal_khusus`
+-- Table structure for table jadwal_khusus
 --
 
-CREATE TABLE `jadwal_khusus` (
-  `id` int NOT NULL,
-  `tanggal` date NOT NULL COMMENT 'Tanggal individual (hasil generate dari rentang)',
-  `tanggal_mulai` date NOT NULL COMMENT 'Tanggal mulai rentang',
-  `tanggal_selesai` date NOT NULL COMMENT 'Tanggal selesai rentang',
-  `jam_buka` time NOT NULL,
-  `jam_tutup` time NOT NULL,
-  `keterangan` varchar(255) DEFAULT NULL,
-  `status` enum('buka','tutup') NOT NULL DEFAULT 'buka',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+DROP TABLE IF EXISTS jadwal_khusus;
+CREATE TABLE jadwal_khusus (
+  id int NOT NULL,
+  tanggal date NOT NULL COMMENT 'Tanggal individual (hasil generate dari rentang)',
+  tanggal_mulai date NOT NULL COMMENT 'Tanggal mulai rentang',
+  tanggal_selesai date NOT NULL COMMENT 'Tanggal selesai rentang',
+  jam_buka time NOT NULL,
+  jam_tutup time NOT NULL,
+  keterangan varchar(255) DEFAULT NULL,
+  status enum('buka','tutup') NOT NULL DEFAULT 'buka',
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Dumping data for table `jadwal_khusus`
+-- Dumping data for table jadwal_khusus
 --
 
-INSERT INTO `jadwal_khusus` (`id`, `tanggal`, `tanggal_mulai`, `tanggal_selesai`, `jam_buka`, `jam_tutup`, `keterangan`, `status`, `created_at`, `updated_at`) VALUES
+INSERT INTO jadwal_khusus (id, tanggal, tanggal_mulai, tanggal_selesai, jam_buka, jam_tutup, keterangan, status, created_at, updated_at) VALUES
 (2, '2026-02-11', '2026-02-11', '2026-02-11', '09:00:00', '17:00:00', '', 'tutup', '2026-02-09 15:48:51', '2026-02-09 15:48:51');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `jadwal_klinik`
+-- Table structure for table jadwal_klinik
 --
 
-CREATE TABLE `jadwal_klinik` (
-  `id` int NOT NULL,
-  `hari_week` int DEFAULT NULL COMMENT '1=Minggu, 2=Senin, ..., 7=Sabtu',
-  `jam_buka` time DEFAULT NULL,
-  `jam_tutup` time DEFAULT NULL,
-  `status` enum('buka','tutup') COLLATE utf8mb4_general_ci DEFAULT 'buka'
+DROP TABLE IF EXISTS jadwal_klinik;
+CREATE TABLE jadwal_klinik (
+  id int NOT NULL,
+  hari_week int DEFAULT NULL COMMENT '1=Minggu, 2=Senin, ..., 7=Sabtu',
+  jam_buka time DEFAULT NULL,
+  jam_tutup time DEFAULT NULL,
+  status enum('buka','tutup') COLLATE utf8mb4_general_ci DEFAULT 'buka'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `jadwal_klinik`
+-- Dumping data for table jadwal_klinik
 --
 
-INSERT INTO `jadwal_klinik` (`id`, `hari_week`, `jam_buka`, `jam_tutup`, `status`) VALUES
+INSERT INTO jadwal_klinik (id, hari_week, jam_buka, jam_tutup, status) VALUES
 (7, 2, '09:00:00', '16:30:00', 'buka'),
 (8, 3, '09:00:00', '16:30:00', 'buka'),
 (9, 4, '09:00:00', '16:30:00', 'buka'),
@@ -260,21 +265,22 @@ INSERT INTO `jadwal_klinik` (`id`, `hari_week`, `jam_buka`, `jam_tutup`, `status
 -- --------------------------------------------------------
 
 --
--- Table structure for table `jadwal_libur`
+-- Table structure for table jadwal_libur
 --
 
-CREATE TABLE `jadwal_libur` (
-  `id` int NOT NULL,
-  `tanggal` date DEFAULT NULL,
-  `keterangan` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `jenis` enum('nasional','khusus','minggu') COLLATE utf8mb4_general_ci DEFAULT 'nasional'
+DROP TABLE IF EXISTS jadwal_libur;
+CREATE TABLE jadwal_libur (
+  id int NOT NULL,
+  tanggal date DEFAULT NULL,
+  keterangan varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  jenis enum('nasional','khusus','minggu') COLLATE utf8mb4_general_ci DEFAULT 'nasional'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `jadwal_libur`
+-- Dumping data for table jadwal_libur
 --
 
-INSERT INTO `jadwal_libur` (`id`, `tanggal`, `keterangan`, `jenis`) VALUES
+INSERT INTO jadwal_libur (id, tanggal, keterangan, jenis) VALUES
 (43, '2024-03-11', 'Hari Raya Nyepi', 'nasional'),
 (44, '2024-04-10', 'Idul Fitri 1445 H', 'nasional'),
 (45, '2024-05-01', 'Hari Buruh Internasional', 'nasional'),
@@ -302,114 +308,119 @@ INSERT INTO `jadwal_libur` (`id`, `tanggal`, `keterangan`, `jenis`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `kipi_records`
+-- Table structure for table kipi_records
 --
 
-CREATE TABLE `kipi_records` (
-  `id` int NOT NULL,
-  `reservation_id` int NOT NULL,
-  `patient_id` int NOT NULL,
-  `kipi_date` date NOT NULL,
-  `symptoms` text COLLATE utf8mb4_general_ci,
-  `severity` enum('Ringan','Sedang','Berat') COLLATE utf8mb4_general_ci DEFAULT 'Ringan',
-  `action_taken` text COLLATE utf8mb4_general_ci,
-  `notes` text COLLATE utf8mb4_general_ci,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+DROP TABLE IF EXISTS kipi_records;
+CREATE TABLE kipi_records (
+  id int NOT NULL,
+  reservation_id int NOT NULL,
+  patient_id int NOT NULL,
+  kipi_date date NOT NULL,
+  symptoms text COLLATE utf8mb4_general_ci,
+  severity enum('Ringan','Sedang','Berat') COLLATE utf8mb4_general_ci DEFAULT 'Ringan',
+  action_taken text COLLATE utf8mb4_general_ci,
+  notes text COLLATE utf8mb4_general_ci,
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `medical_actions`
+-- Table structure for table medical_actions
 --
 
-CREATE TABLE `medical_actions` (
-  `id` int NOT NULL,
-  `booking_id` int NOT NULL,
-  `patient_id` int NOT NULL,
-  `layanan` text COLLATE utf8mb4_general_ci,
-  `tanggal_vaksinasi` date DEFAULT NULL,
-  `jenis_vaksin` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `batch_vaksin` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `expired_vaksin` date DEFAULT NULL,
-  `kedatangan_ke` int DEFAULT NULL,
-  `kedatangan_selanjutnya` int DEFAULT NULL,
-  `status` enum('Aktif','Selesai') COLLATE utf8mb4_general_ci DEFAULT 'Aktif',
-  `anamnesis` text COLLATE utf8mb4_general_ci,
-  `pemeriksaan_fisik` text COLLATE utf8mb4_general_ci,
-  `diagnosis` text COLLATE utf8mb4_general_ci,
-  `tatalaksana` text COLLATE utf8mb4_general_ci,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+DROP TABLE IF EXISTS medical_actions;
+CREATE TABLE medical_actions (
+  id int NOT NULL,
+  booking_id int NOT NULL,
+  patient_id int NOT NULL,
+  layanan text COLLATE utf8mb4_general_ci,
+  tanggal_vaksinasi date DEFAULT NULL,
+  jenis_vaksin varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  batch_vaksin varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  expired_vaksin date DEFAULT NULL,
+  kedatangan_ke int DEFAULT NULL,
+  kedatangan_selanjutnya int DEFAULT NULL,
+  status enum('Aktif','Selesai') COLLATE utf8mb4_general_ci DEFAULT 'Aktif',
+  anamnesis text COLLATE utf8mb4_general_ci,
+  pemeriksaan_fisik text COLLATE utf8mb4_general_ci,
+  diagnosis text COLLATE utf8mb4_general_ci,
+  tatalaksana text COLLATE utf8mb4_general_ci,
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `medical_letters`
+-- Table structure for table medical_letters
 --
 
-CREATE TABLE `medical_letters` (
-  `id` int NOT NULL,
-  `action_id` int NOT NULL,
-  `jenis` enum('sehat','sakit','vaksin') COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `tanggal` date DEFAULT NULL,
-  `dokter_id` int DEFAULT NULL,
-  `posisi` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+DROP TABLE IF EXISTS medical_letters;
+CREATE TABLE medical_letters (
+  id int NOT NULL,
+  action_id int NOT NULL,
+  jenis enum('sehat','sakit','vaksin') COLLATE utf8mb4_general_ci DEFAULT NULL,
+  tanggal date DEFAULT NULL,
+  dokter_id int DEFAULT NULL,
+  posisi varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `medical_records`
+-- Table structure for table medical_records
 --
 
-CREATE TABLE `medical_records` (
-  `id` int NOT NULL,
-  `patient_id` int NOT NULL,
-  `reservation_id` int DEFAULT NULL,
-  `record_date` datetime NOT NULL,
-  `keluhan` text COLLATE utf8mb4_general_ci,
-  `diagnosis` text COLLATE utf8mb4_general_ci,
-  `treatment` text COLLATE utf8mb4_general_ci,
-  `notes` text COLLATE utf8mb4_general_ci,
-  `doctor_name` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+DROP TABLE IF EXISTS medical_records;
+CREATE TABLE medical_records (
+  id int NOT NULL,
+  patient_id int NOT NULL,
+  reservation_id int DEFAULT NULL,
+  record_date datetime NOT NULL,
+  keluhan text COLLATE utf8mb4_general_ci,
+  diagnosis text COLLATE utf8mb4_general_ci,
+  treatment text COLLATE utf8mb4_general_ci,
+  notes text COLLATE utf8mb4_general_ci,
+  doctor_name varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `patients`
+-- Table structure for table patients
 --
 
-CREATE TABLE `patients` (
-  `id` int NOT NULL,
-  `no_rekam_medis` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
-  `nama_lengkap` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `nama_panggilan` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `tanggal_lahir` date NOT NULL,
-  `usia` int DEFAULT NULL,
-  `kategori_usia` enum('Anak','Dewasa') COLLATE utf8mb4_general_ci NOT NULL,
-  `jenis_kelamin` enum('L','P') COLLATE utf8mb4_general_ci NOT NULL,
-  `nik` varchar(16) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `paspor` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `kebangsaan` varchar(50) COLLATE utf8mb4_general_ci DEFAULT 'Indonesia',
-  `pekerjaan` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `nama_wali` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `riwayat_alergi` text COLLATE utf8mb4_general_ci,
-  `riwayat_penyakit` text COLLATE utf8mb4_general_ci,
-  `riwayat_obat` text COLLATE utf8mb4_general_ci,
-  `pelayanan` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+DROP TABLE IF EXISTS patients;
+CREATE TABLE patients (
+  id int NOT NULL,
+  no_rekam_medis varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  nama_lengkap varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  nama_panggilan varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  tanggal_lahir date NOT NULL,
+  usia int DEFAULT NULL,
+  kategori_usia enum('Anak','Dewasa') COLLATE utf8mb4_general_ci NOT NULL,
+  jenis_kelamin enum('L','P') COLLATE utf8mb4_general_ci NOT NULL,
+  nik varchar(16) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  paspor varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  kebangsaan varchar(50) COLLATE utf8mb4_general_ci DEFAULT 'Indonesia',
+  pekerjaan varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  nama_wali varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  riwayat_alergi text COLLATE utf8mb4_general_ci,
+  riwayat_penyakit text COLLATE utf8mb4_general_ci,
+  riwayat_obat text COLLATE utf8mb4_general_ci,
+  pelayanan varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `patients`
+-- Dumping data for table patients
 --
 
-INSERT INTO `patients` (`id`, `no_rekam_medis`, `nama_lengkap`, `nama_panggilan`, `tanggal_lahir`, `usia`, `kategori_usia`, `jenis_kelamin`, `nik`, `paspor`, `kebangsaan`, `pekerjaan`, `nama_wali`, `riwayat_alergi`, `riwayat_penyakit`, `riwayat_obat`, `pelayanan`, `created_at`, `updated_at`) VALUES
+INSERT INTO patients (id, no_rekam_medis, nama_lengkap, nama_panggilan, tanggal_lahir, usia, kategori_usia, jenis_kelamin, nik, paspor, kebangsaan, pekerjaan, nama_wali, riwayat_alergi, riwayat_penyakit, riwayat_obat, pelayanan, created_at, updated_at) VALUES
 (1, 'RM202601200001', 'Rofi\'ah Budi Nadia', 'fiah', '2003-01-07', 23, 'Dewasa', 'P', '3314014701030001', NULL, 'Indonesia', 'umum', '', 'gaada', 'gerd', NULL, 'In Clinic', '2026-01-20 02:38:53', '2026-02-05 12:02:33'),
 (2, 'RM202601200002', 'Leo', '', '2000-04-21', 26, 'Dewasa', 'L', '3314123456789098', NULL, 'namibiaa', 'karyawan swasta', '', 'sifud', 'sakit kepala', 'alkohol', 'In Clinic', '2026-01-20 16:23:09', '2026-02-12 15:58:59'),
 (3, 'RM202601220001', 'Dillon', '', '1999-01-28', 26, 'Dewasa', 'L', '3314567654890765', NULL, 'Indonesia', 'karyawan swasta', '', '', '', '', 'Vaksinasi Umum/Infus Vitamin', '2026-01-22 08:53:09', '2026-01-22 08:53:09'),
@@ -441,23 +452,24 @@ INSERT INTO `patients` (`id`, `no_rekam_medis`, `nama_lengkap`, `nama_panggilan`
 -- --------------------------------------------------------
 
 --
--- Table structure for table `patient_addresses`
+-- Table structure for table patient_addresses
 --
 
-CREATE TABLE `patient_addresses` (
-  `id` int NOT NULL,
-  `patient_id` int NOT NULL,
-  `alamat` text COLLATE utf8mb4_general_ci NOT NULL,
-  `provinsi` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `kota` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `is_primary` tinyint(1) DEFAULT '0'
+DROP TABLE IF EXISTS patient_addresses;
+CREATE TABLE patient_addresses (
+  id int NOT NULL,
+  patient_id int NOT NULL,
+  alamat text COLLATE utf8mb4_general_ci NOT NULL,
+  provinsi varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  kota varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  is_primary tinyint(1) DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `patient_addresses`
+-- Dumping data for table patient_addresses
 --
 
-INSERT INTO `patient_addresses` (`id`, `patient_id`, `alamat`, `provinsi`, `kota`, `is_primary`) VALUES
+INSERT INTO patient_addresses (id, patient_id, alamat, provinsi, kota, is_primary) VALUES
 (74, 1, 'Salam, Rt.13, Saren, Kalijambe', 'Jawa Barat', 'Bandung', 1),
 (75, 2, 'Bandung - Jawa Barat', 'Jawa Barat', 'Cimahi', 1),
 (76, 3, 'cribon', 'Jawa Barat', 'Cirebon', 1),
@@ -500,21 +512,22 @@ INSERT INTO `patient_addresses` (`id`, `patient_id`, `alamat`, `provinsi`, `kota
 -- --------------------------------------------------------
 
 --
--- Table structure for table `patient_emails`
+-- Table structure for table patient_emails
 --
 
-CREATE TABLE `patient_emails` (
-  `id` int NOT NULL,
-  `patient_id` int NOT NULL,
-  `email` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `is_primary` tinyint(1) DEFAULT '0'
+DROP TABLE IF EXISTS patient_emails;
+CREATE TABLE patient_emails (
+  id int NOT NULL,
+  patient_id int NOT NULL,
+  email varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  is_primary tinyint(1) DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `patient_emails`
+-- Dumping data for table patient_emails
 --
 
-INSERT INTO `patient_emails` (`id`, `patient_id`, `email`, `is_primary`) VALUES
+INSERT INTO patient_emails (id, patient_id, email, is_primary) VALUES
 (78, 3, 'dillon@gmail.com', 1),
 (79, 4, 'joya@gmail.com', 1),
 (80, 5, 'paul@gmail.com', 1),
@@ -547,21 +560,22 @@ INSERT INTO `patient_emails` (`id`, `patient_id`, `email`, `is_primary`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `patient_phones`
+-- Table structure for table patient_phones
 --
 
-CREATE TABLE `patient_phones` (
-  `id` int NOT NULL,
-  `patient_id` int NOT NULL,
-  `phone` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
-  `is_primary` tinyint(1) DEFAULT '0'
+DROP TABLE IF EXISTS patient_phones;
+CREATE TABLE patient_phones (
+  id int NOT NULL,
+  patient_id int NOT NULL,
+  phone varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  is_primary tinyint(1) DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `patient_phones`
+-- Dumping data for table patient_phones
 --
 
-INSERT INTO `patient_phones` (`id`, `patient_id`, `phone`, `is_primary`) VALUES
+INSERT INTO patient_phones (id, patient_id, phone, is_primary) VALUES
 (78, 2, '085787652345', 1),
 (79, 3, '087654323456', 1),
 (80, 4, '087698764536', 1),
@@ -595,22 +609,23 @@ INSERT INTO `patient_phones` (`id`, `patient_id`, `phone`, `is_primary`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `patient_services`
+-- Table structure for table patient_services
 --
 
-CREATE TABLE `patient_services` (
-  `id` int NOT NULL,
-  `patient_id` int NOT NULL,
-  `service_type` enum('Vaksin','Vitamin','Antigen','PCR','Obat') COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `service_name` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+DROP TABLE IF EXISTS patient_services;
+CREATE TABLE patient_services (
+  id int NOT NULL,
+  patient_id int NOT NULL,
+  service_type enum('Vaksin','Vitamin','Antigen','PCR','Obat') COLLATE utf8mb4_general_ci DEFAULT NULL,
+  service_name varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `patient_services`
+-- Dumping data for table patient_services
 --
 
-INSERT INTO `patient_services` (`id`, `patient_id`, `service_type`, `service_name`, `created_at`) VALUES
+INSERT INTO patient_services (id, patient_id, service_type, service_name, created_at) VALUES
 (1, 10, 'Vaksin', 'Adacel (Sanofi)', '2025-12-30 08:02:22'),
 (2, 11, 'Vaksin', 'Arexvy (GSK)', '2025-12-30 08:15:39'),
 (3, 12, 'Vaksin', 'Pneumovax 23 (MSD)', '2025-12-30 08:42:08'),
@@ -620,31 +635,32 @@ INSERT INTO `patient_services` (`id`, `patient_id`, `service_type`, `service_nam
 -- --------------------------------------------------------
 
 --
--- Table structure for table `payments`
+-- Table structure for table payments
 --
 
-CREATE TABLE `payments` (
-  `id` int NOT NULL,
-  `booking_id` int NOT NULL,
-  `metode` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `subtotal` decimal(12,2) DEFAULT NULL,
-  `diskon` decimal(12,2) DEFAULT NULL,
-  `diskon_tipe` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `total` decimal(12,2) DEFAULT NULL,
-  `amount_paid` decimal(12,2) DEFAULT NULL,
-  `remaining_balance` decimal(12,2) DEFAULT NULL,
-  `payment_type` enum('full','partial','installment') COLLATE utf8mb4_general_ci DEFAULT 'full',
-  `jatuh_tempo` date DEFAULT NULL,
-  `status` enum('unpaid','paid','partial','cancelled','refunded') COLLATE utf8mb4_general_ci DEFAULT 'unpaid',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+DROP TABLE IF EXISTS payments;
+CREATE TABLE payments (
+  id int NOT NULL,
+  booking_id int NOT NULL,
+  metode varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  subtotal decimal(12,2) DEFAULT NULL,
+  diskon decimal(12,2) DEFAULT NULL,
+  diskon_tipe varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  total decimal(12,2) DEFAULT NULL,
+  amount_paid decimal(12,2) DEFAULT NULL,
+  remaining_balance decimal(12,2) DEFAULT NULL,
+  payment_type enum('full','partial','installment') COLLATE utf8mb4_general_ci DEFAULT 'full',
+  jatuh_tempo date DEFAULT NULL,
+  status enum('unpaid','paid','partial','cancelled','refunded') COLLATE utf8mb4_general_ci DEFAULT 'unpaid',
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `payments`
+-- Dumping data for table payments
 --
 
-INSERT INTO `payments` (`id`, `booking_id`, `metode`, `subtotal`, `diskon`, `diskon_tipe`, `total`, `amount_paid`, `remaining_balance`, `payment_type`, `jatuh_tempo`, `status`, `created_at`, `updated_at`) VALUES
+INSERT INTO payments (id, booking_id, metode, subtotal, diskon, diskon_tipe, total, amount_paid, remaining_balance, payment_type, jatuh_tempo, status, created_at, updated_at) VALUES
 (1, 82, 'tunai', 0.00, 0.00, NULL, 0.00, 0.00, 0.00, 'full', '2026-01-26', 'paid', '2026-01-26 02:59:53', '2026-02-05 06:14:48'),
 (2, 78, 'tunai', 0.00, 0.00, NULL, 0.00, 0.00, 0.00, 'full', '2026-01-26', 'paid', '2026-01-26 05:31:42', '2026-02-05 06:14:48'),
 (3, 78, 'tunai', 0.00, 0.00, NULL, 0.00, 0.00, 0.00, 'full', '2026-01-26', 'paid', '2026-01-26 05:31:48', '2026-02-05 06:14:48'),
@@ -686,26 +702,27 @@ INSERT INTO `payments` (`id`, `booking_id`, `metode`, `subtotal`, `diskon`, `dis
 -- --------------------------------------------------------
 
 --
--- Table structure for table `payments_backup_2026`
+-- Table structure for table payments_backup_2026
 --
 
-CREATE TABLE `payments_backup_2026` (
-  `id` int NOT NULL DEFAULT '0',
-  `booking_id` int NOT NULL,
-  `metode` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `subtotal` int DEFAULT NULL,
-  `diskon` int DEFAULT '0',
-  `diskon_tipe` enum('persen','nilai') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `total` int DEFAULT NULL,
-  `status` enum('unpaid','paid') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'paid',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+DROP TABLE IF EXISTS payments_backup_2026;
+CREATE TABLE payments_backup_2026 (
+  id int NOT NULL DEFAULT '0',
+  booking_id int NOT NULL,
+  metode varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  subtotal int DEFAULT NULL,
+  diskon int DEFAULT '0',
+  diskon_tipe enum('persen','nilai') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  total int DEFAULT NULL,
+  status enum('unpaid','paid') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'paid',
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Dumping data for table `payments_backup_2026`
+-- Dumping data for table payments_backup_2026
 --
 
-INSERT INTO `payments_backup_2026` (`id`, `booking_id`, `metode`, `subtotal`, `diskon`, `diskon_tipe`, `total`, `status`, `created_at`) VALUES
+INSERT INTO payments_backup_2026 (id, booking_id, metode, subtotal, diskon, diskon_tipe, total, status, created_at) VALUES
 (1, 82, 'tunai', 0, 0, NULL, 0, 'paid', '2026-01-26 02:59:53'),
 (2, 78, 'tunai', 0, 0, NULL, 0, 'paid', '2026-01-26 05:31:42'),
 (3, 78, 'tunai', 0, 0, NULL, 0, 'paid', '2026-01-26 05:31:48'),
@@ -725,40 +742,42 @@ INSERT INTO `payments_backup_2026` (`id`, `booking_id`, `metode`, `subtotal`, `d
 -- --------------------------------------------------------
 
 --
--- Table structure for table `payment_installments`
+-- Table structure for table payment_installments
 --
 
-CREATE TABLE `payment_installments` (
-  `id` int NOT NULL,
-  `payment_id` int DEFAULT NULL,
-  `installment_number` int DEFAULT NULL,
-  `amount` decimal(12,2) DEFAULT NULL,
-  `due_date` date DEFAULT NULL,
-  `status` enum('pending','paid','overdue') DEFAULT 'pending',
-  `paid_at` datetime DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+DROP TABLE IF EXISTS payment_installments;
+CREATE TABLE payment_installments (
+  id int NOT NULL,
+  payment_id int DEFAULT NULL,
+  installment_number int DEFAULT NULL,
+  amount decimal(12,2) DEFAULT NULL,
+  due_date date DEFAULT NULL,
+  status enum('pending','paid','overdue') DEFAULT 'pending',
+  paid_at datetime DEFAULT NULL,
+  created_at timestamp NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `payment_methods_detail`
+-- Table structure for table payment_methods_detail
 --
 
-CREATE TABLE `payment_methods_detail` (
-  `id` int NOT NULL,
-  `payment_id` int NOT NULL,
-  `metode` varchar(50) NOT NULL,
-  `amount` decimal(12,2) NOT NULL,
-  `reference` varchar(100) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+DROP TABLE IF EXISTS payment_methods_detail;
+CREATE TABLE payment_methods_detail (
+  id int NOT NULL,
+  payment_id int NOT NULL,
+  metode varchar(50) NOT NULL,
+  amount decimal(12,2) NOT NULL,
+  reference varchar(100) DEFAULT NULL,
+  created_at timestamp NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Dumping data for table `payment_methods_detail`
+-- Dumping data for table payment_methods_detail
 --
 
-INSERT INTO `payment_methods_detail` (`id`, `payment_id`, `metode`, `amount`, `reference`, `created_at`) VALUES
+INSERT INTO payment_methods_detail (id, payment_id, metode, amount, reference, created_at) VALUES
 (1, 32, 'transfer', 565000.00, '', '2026-02-05 16:37:53'),
 (2, 33, 'debit', 225000.00, '', '2026-02-05 16:50:45'),
 (3, 34, 'qris', 24000.00, '', '2026-02-05 17:01:56'),
@@ -772,29 +791,30 @@ INSERT INTO `payment_methods_detail` (`id`, `payment_id`, `metode`, `amount`, `r
 -- --------------------------------------------------------
 
 --
--- Table structure for table `products`
+-- Table structure for table products
 --
 
-CREATE TABLE `products` (
-  `id` int NOT NULL,
-  `kode_produk` varchar(50) DEFAULT NULL,
-  `nama_produk` varchar(255) NOT NULL,
-  `merk` varchar(100) DEFAULT NULL,
-  `kategori` varchar(100) DEFAULT NULL,
-  `jenis` varchar(50) DEFAULT NULL,
-  `deskripsi` text,
-  `satuan` varchar(20) DEFAULT 'dosis',
-  `harga` int DEFAULT '0',
-  `minimal_stok` int DEFAULT '10',
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+DROP TABLE IF EXISTS products;
+CREATE TABLE products (
+  id int NOT NULL,
+  kode_produk varchar(50) DEFAULT NULL,
+  nama_produk varchar(255) NOT NULL,
+  merk varchar(100) DEFAULT NULL,
+  kategori varchar(100) DEFAULT NULL,
+  jenis varchar(50) DEFAULT NULL,
+  deskripsi text,
+  satuan varchar(20) DEFAULT 'dosis',
+  harga int DEFAULT '0',
+  minimal_stok int DEFAULT '10',
+  created_at timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Dumping data for table `products`
+-- Dumping data for table products
 --
 
-INSERT INTO `products` (`id`, `kode_produk`, `nama_produk`, `merk`, `kategori`, `jenis`, `deskripsi`, `satuan`, `harga`, `minimal_stok`, `created_at`, `updated_at`) VALUES
+INSERT INTO products (id, kode_produk, nama_produk, merk, kategori, jenis, deskripsi, satuan, harga, minimal_stok, created_at, updated_at) VALUES
 (1, 'FLU-001', 'Vaksin Influenza', 'Sanofi', 'Anak', 'Vaksin', '0', 'dosis', 235000, 10, '2026-02-12 13:22:19', '2026-02-23 14:58:14'),
 (2, 'HPV-001', 'Vaksin HPV', NULL, 'Semua usia', 'Vaksin', 'Vaksin HPV untuk pencegahan kanker serviks. Untuk usia 9-26 tahun.', 'dosis', 364000, 10, '2026-02-12 13:22:19', '2026-02-23 14:58:35'),
 (3, 'PCT-001', 'Paracetamol Infus', 'Sanofi', 'Dewasa', 'Obat', 'Paracetamol infus untuk penurun panas dan pereda nyeri. Penggunaan sesuai resep dokter.', 'botol', 40000, 10, '2026-02-12 13:22:19', '2026-02-26 11:47:20'),
@@ -804,24 +824,25 @@ INSERT INTO `products` (`id`, `kode_produk`, `nama_produk`, `merk`, `kategori`, 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `product_stock`
+-- Table structure for table product_stock
 --
 
-CREATE TABLE `product_stock` (
-  `id` int NOT NULL,
-  `product_id` int NOT NULL,
-  `batch_number` varchar(100) NOT NULL,
-  `expired_date` date NOT NULL,
-  `stock` int DEFAULT '0',
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+DROP TABLE IF EXISTS product_stock;
+CREATE TABLE product_stock (
+  id int NOT NULL,
+  product_id int NOT NULL,
+  batch_number varchar(100) NOT NULL,
+  expired_date date NOT NULL,
+  stock int DEFAULT '0',
+  created_at timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Dumping data for table `product_stock`
+-- Dumping data for table product_stock
 --
 
-INSERT INTO `product_stock` (`id`, `product_id`, `batch_number`, `expired_date`, `stock`, `created_at`, `updated_at`) VALUES
+INSERT INTO product_stock (id, product_id, batch_number, expired_date, stock, created_at, updated_at) VALUES
 (1, 1, 'FLU-2025-001', '2026-10-15', 50, '2026-02-12 13:22:19', '2026-02-12 13:22:19'),
 (2, 1, 'FLU-2025-002', '2026-12-20', 25, '2026-02-12 13:22:19', '2026-02-12 13:22:19'),
 (3, 2, 'HPV-2025-001', '2027-01-30', 27, '2026-02-12 13:22:19', '2026-02-26 12:16:37'),
@@ -833,51 +854,53 @@ INSERT INTO `product_stock` (`id`, `product_id`, `batch_number`, `expired_date`,
 -- --------------------------------------------------------
 
 --
--- Table structure for table `reservations`
+-- Table structure for table reservations
 --
 
-CREATE TABLE `reservations` (
-  `id` int NOT NULL,
-  `reservation_code` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
-  `patient_id` int NOT NULL,
-  `vaccine_id` int NOT NULL,
-  `slot_id` int NOT NULL,
-  `reservation_date` date NOT NULL,
-  `reservation_time` time NOT NULL,
-  `status` enum('Pending','Confirmed','Completed','Cancelled','Rescheduled') COLLATE utf8mb4_general_ci DEFAULT 'Pending',
-  `total_price` decimal(10,2) DEFAULT '0.00',
-  `payment_status` enum('Unpaid','Paid') COLLATE utf8mb4_general_ci DEFAULT 'Unpaid',
-  `notes` text COLLATE utf8mb4_general_ci,
-  `reminder_h_minus_1` tinyint(1) DEFAULT '0',
-  `reminder_h_plus_1` tinyint(1) DEFAULT '0',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+DROP TABLE IF EXISTS reservations;
+CREATE TABLE reservations (
+  id int NOT NULL,
+  reservation_code varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  patient_id int NOT NULL,
+  vaccine_id int NOT NULL,
+  slot_id int NOT NULL,
+  reservation_date date NOT NULL,
+  reservation_time time NOT NULL,
+  status enum('Pending','Confirmed','Completed','Cancelled','Rescheduled') COLLATE utf8mb4_general_ci DEFAULT 'Pending',
+  total_price decimal(10,2) DEFAULT '0.00',
+  payment_status enum('Unpaid','Paid') COLLATE utf8mb4_general_ci DEFAULT 'Unpaid',
+  notes text COLLATE utf8mb4_general_ci,
+  reminder_h_minus_1 tinyint(1) DEFAULT '0',
+  reminder_h_plus_1 tinyint(1) DEFAULT '0',
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `services`
+-- Table structure for table services
 --
 
-CREATE TABLE `services` (
-  `id` int NOT NULL,
-  `kode_layanan` varchar(50) DEFAULT NULL,
-  `nama_layanan` varchar(255) NOT NULL,
-  `kategori_usia` enum('Anak','Dewasa','Semua Usia') DEFAULT 'Semua Usia',
-  `tipe` enum('pelayanan','paket','jasa') NOT NULL,
-  `deskripsi` text,
-  `harga` int DEFAULT '0',
-  `kode_paket` varchar(50) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+DROP TABLE IF EXISTS services;
+CREATE TABLE services (
+  id int NOT NULL,
+  kode_layanan varchar(50) DEFAULT NULL,
+  nama_layanan varchar(255) NOT NULL,
+  kategori_usia enum('Anak','Dewasa','Semua Usia') DEFAULT 'Semua Usia',
+  tipe enum('pelayanan','paket','jasa') NOT NULL,
+  deskripsi text,
+  harga int DEFAULT '0',
+  kode_paket varchar(50) DEFAULT NULL,
+  created_at timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Dumping data for table `services`
+-- Dumping data for table services
 --
 
-INSERT INTO `services` (`id`, `kode_layanan`, `nama_layanan`, `kategori_usia`, `tipe`, `deskripsi`, `harga`, `kode_paket`, `created_at`, `updated_at`) VALUES
+INSERT INTO services (id, kode_layanan, nama_layanan, kategori_usia, tipe, deskripsi, harga, kode_paket, created_at, updated_at) VALUES
 (1, 'SVC-FLU', 'Vaksinasi Influenza', 'Semua Usia', 'pelayanan', NULL, 250000, NULL, '2026-02-12 13:22:19', '2026-02-12 13:22:19'),
 (2, 'SVC-HPV', 'Vaksinasi HPV', 'Anak', 'pelayanan', NULL, 350000, NULL, '2026-02-12 13:22:19', '2026-02-12 13:22:19'),
 (3, 'SVC-INF', 'Infus Obat Demam', 'Semua Usia', 'pelayanan', NULL, 200000, NULL, '2026-02-12 13:22:19', '2026-02-12 13:22:19'),
@@ -904,8 +927,9 @@ INSERT INTO `services` (`id`, `kode_layanan`, `nama_layanan`, `kategori_usia`, `
 (25, NULL, 'Paket umroh', 'Semua Usia', 'paket', '', 500000, '', '2026-02-23 15:20:21', '2026-02-23 15:20:21');
 
 --
--- Triggers `services`
+-- Triggers services
 --
+DROP TRIGGER IF EXISTS `services_before_update`;
 DELIMITER $$
 CREATE TRIGGER `services_before_update` BEFORE UPDATE ON `services` FOR EACH ROW BEGIN
     SET NEW.updated_at = NOW();
@@ -916,22 +940,23 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
--- Table structure for table `service_components`
+-- Table structure for table service_components
 --
 
-CREATE TABLE `service_components` (
-  `id` int NOT NULL,
-  `service_id` int NOT NULL,
-  `product_id` int NOT NULL,
-  `quantity` int DEFAULT '1',
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+DROP TABLE IF EXISTS service_components;
+CREATE TABLE service_components (
+  id int NOT NULL,
+  service_id int NOT NULL,
+  product_id int NOT NULL,
+  quantity int DEFAULT '1',
+  created_at timestamp NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Dumping data for table `service_components`
+-- Dumping data for table service_components
 --
 
-INSERT INTO `service_components` (`id`, `service_id`, `product_id`, `quantity`, `created_at`) VALUES
+INSERT INTO service_components (id, service_id, product_id, quantity, created_at) VALUES
 (1, 1, 1, 1, '2026-02-12 13:22:19'),
 (2, 2, 2, 1, '2026-02-12 13:22:19'),
 (3, 3, 3, 1, '2026-02-12 13:22:19'),
@@ -941,23 +966,24 @@ INSERT INTO `service_components` (`id`, `service_id`, `product_id`, `quantity`, 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `service_jasa_components`
+-- Table structure for table service_jasa_components
 --
 
-CREATE TABLE `service_jasa_components` (
-  `id` int NOT NULL,
-  `service_id` int NOT NULL,
-  `jasa_id` int NOT NULL,
-  `quantity` int DEFAULT '1',
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT NULL
+DROP TABLE IF EXISTS service_jasa_components;
+CREATE TABLE service_jasa_components (
+  id int NOT NULL,
+  service_id int NOT NULL,
+  jasa_id int NOT NULL,
+  quantity int DEFAULT '1',
+  created_at timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Dumping data for table `service_jasa_components`
+-- Dumping data for table service_jasa_components
 --
 
-INSERT INTO `service_jasa_components` (`id`, `service_id`, `jasa_id`, `quantity`, `created_at`, `updated_at`) VALUES
+INSERT INTO service_jasa_components (id, service_id, jasa_id, quantity, created_at, updated_at) VALUES
 (3, 6, 12, 1, '2026-02-14 18:55:10', NULL),
 (4, 7, 15, 1, '2026-02-14 19:17:46', NULL),
 (5, 6, 17, 1, '2026-02-18 07:01:01', NULL),
@@ -965,8 +991,9 @@ INSERT INTO `service_jasa_components` (`id`, `service_id`, `jasa_id`, `quantity`
 (7, 24, 12, 1, '2026-02-23 15:19:51', '2026-02-23 15:19:51');
 
 --
--- Triggers `service_jasa_components`
+-- Triggers service_jasa_components
 --
+DROP TRIGGER IF EXISTS `service_jasa_components_before_update`;
 DELIMITER $$
 CREATE TRIGGER `service_jasa_components_before_update` BEFORE UPDATE ON `service_jasa_components` FOR EACH ROW BEGIN
     SET NEW.updated_at = CURRENT_TIMESTAMP;
@@ -977,23 +1004,24 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
--- Table structure for table `service_package_items`
+-- Table structure for table service_package_items
 --
 
-CREATE TABLE `service_package_items` (
-  `id` int NOT NULL,
-  `package_id` int NOT NULL,
-  `service_id` int NOT NULL,
-  `quantity` int DEFAULT '1',
-  `visit_order` int DEFAULT '1',
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+DROP TABLE IF EXISTS service_package_items;
+CREATE TABLE service_package_items (
+  id int NOT NULL,
+  package_id int NOT NULL,
+  service_id int NOT NULL,
+  quantity int DEFAULT '1',
+  visit_order int DEFAULT '1',
+  created_at timestamp NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Dumping data for table `service_package_items`
+-- Dumping data for table service_package_items
 --
 
-INSERT INTO `service_package_items` (`id`, `package_id`, `service_id`, `quantity`, `visit_order`, `created_at`) VALUES
+INSERT INTO service_package_items (id, package_id, service_id, quantity, visit_order, created_at) VALUES
 (1, 4, 2, 1, 1, '2026-02-12 13:22:19'),
 (2, 4, 2, 1, 2, '2026-02-12 13:22:19'),
 (3, 4, 2, 1, 3, '2026-02-12 13:22:19'),
@@ -1006,23 +1034,24 @@ INSERT INTO `service_package_items` (`id`, `package_id`, `service_id`, `quantity
 -- --------------------------------------------------------
 
 --
--- Table structure for table `service_product_components`
+-- Table structure for table service_product_components
 --
 
-CREATE TABLE `service_product_components` (
-  `id` int NOT NULL,
-  `service_id` int NOT NULL,
-  `product_id` int NOT NULL,
-  `quantity` int DEFAULT '1',
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT NULL
+DROP TABLE IF EXISTS service_product_components;
+CREATE TABLE service_product_components (
+  id int NOT NULL,
+  service_id int NOT NULL,
+  product_id int NOT NULL,
+  quantity int DEFAULT '1',
+  created_at timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Dumping data for table `service_product_components`
+-- Dumping data for table service_product_components
 --
 
-INSERT INTO `service_product_components` (`id`, `service_id`, `product_id`, `quantity`, `created_at`, `updated_at`) VALUES
+INSERT INTO service_product_components (id, service_id, product_id, quantity, created_at, updated_at) VALUES
 (1, 1, 1, 1, '2026-02-12 13:22:19', '2026-02-12 13:22:19'),
 (2, 6, 1, 1, '2026-02-14 17:43:21', '2026-02-14 17:43:21'),
 (3, 2, 2, 1, '2026-02-12 13:22:19', '2026-02-12 13:22:19'),
@@ -1033,8 +1062,9 @@ INSERT INTO `service_product_components` (`id`, `service_id`, `product_id`, `qua
 (10, 11, 3, 1, '2026-02-26 10:56:50', NULL);
 
 --
--- Triggers `service_product_components`
+-- Triggers service_product_components
 --
+DROP TRIGGER IF EXISTS `service_product_components_before_update`;
 DELIMITER $$
 CREATE TRIGGER `service_product_components_before_update` BEFORE UPDATE ON `service_product_components` FOR EACH ROW BEGIN
     SET NEW.updated_at = CURRENT_TIMESTAMP;
@@ -1045,23 +1075,24 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
--- Table structure for table `staff`
+-- Table structure for table staff
 --
 
-CREATE TABLE `staff` (
-  `id` int NOT NULL,
-  `nama_lengkap` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
-  `gelar` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `sip` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `role` enum('dokter','perawat','admin') COLLATE utf8mb4_general_ci NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+DROP TABLE IF EXISTS staff;
+CREATE TABLE staff (
+  id int NOT NULL,
+  nama_lengkap varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
+  gelar varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  sip varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  role enum('dokter','perawat','admin') COLLATE utf8mb4_general_ci NOT NULL,
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `staff`
+-- Dumping data for table staff
 --
 
-INSERT INTO `staff` (`id`, `nama_lengkap`, `gelar`, `sip`, `role`, `created_at`) VALUES
+INSERT INTO staff (id, nama_lengkap, gelar, sip, role, created_at) VALUES
 (1, 'Anna Rahma', 'dr.', '123/SIP/2024', 'dokter', '2026-01-20 03:23:31'),
 (2, 'Budi Santoso', 'dr.', NULL, 'dokter', '2026-01-20 03:23:31'),
 (3, 'Dewi Lestari', 'dr.', NULL, 'dokter', '2026-01-20 03:23:31'),
@@ -1071,33 +1102,34 @@ INSERT INTO `staff` (`id`, `nama_lengkap`, `gelar`, `sip`, `role`, `created_at`)
 -- --------------------------------------------------------
 
 --
--- Table structure for table `surat`
+-- Table structure for table surat
 --
 
-CREATE TABLE `surat` (
-  `id` int NOT NULL,
-  `booking_id` int DEFAULT NULL,
-  `patient_id` int DEFAULT NULL,
-  `jenis_surat` enum('sehat','sakit','vaksin') COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `dokter_id` int DEFAULT NULL,
-  `posisi` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `tanggal_surat` date DEFAULT NULL,
-  `lama_istirahat` int DEFAULT NULL,
-  `tgl_awal` date DEFAULT NULL,
-  `tgl_akhir` date DEFAULT NULL,
-  `pf_lain` text COLLATE utf8mb4_general_ci,
-  `jenis_vaksin` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `batch_vaksin` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `expired_vaksin` date DEFAULT NULL,
-  `file_pdf` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+DROP TABLE IF EXISTS surat;
+CREATE TABLE surat (
+  id int NOT NULL,
+  booking_id int DEFAULT NULL,
+  patient_id int DEFAULT NULL,
+  jenis_surat enum('sehat','sakit','vaksin') COLLATE utf8mb4_general_ci DEFAULT NULL,
+  dokter_id int DEFAULT NULL,
+  posisi varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  tanggal_surat date DEFAULT NULL,
+  lama_istirahat int DEFAULT NULL,
+  tgl_awal date DEFAULT NULL,
+  tgl_akhir date DEFAULT NULL,
+  pf_lain text COLLATE utf8mb4_general_ci,
+  jenis_vaksin varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  batch_vaksin varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  expired_vaksin date DEFAULT NULL,
+  file_pdf varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `surat`
+-- Dumping data for table surat
 --
 
-INSERT INTO `surat` (`id`, `booking_id`, `patient_id`, `jenis_surat`, `dokter_id`, `posisi`, `tanggal_surat`, `lama_istirahat`, `tgl_awal`, `tgl_akhir`, `pf_lain`, `jenis_vaksin`, `batch_vaksin`, `expired_vaksin`, `file_pdf`, `created_at`) VALUES
+INSERT INTO surat (id, booking_id, patient_id, jenis_surat, dokter_id, posisi, tanggal_surat, lama_istirahat, tgl_awal, tgl_akhir, pf_lain, jenis_vaksin, batch_vaksin, expired_vaksin, file_pdf, created_at) VALUES
 (1, 78, 1, 'sakit', 1, 'Dokter Penanggung Jawab', '2026-01-23', 0, '0000-00-00', '0000-00-00', '', 'a', '123', '2026-01-31', NULL, '2026-01-23 08:46:51'),
 (2, 83, 1, 'vaksin', 1, 'Dokter Penanggung Jawab', '2026-01-27', NULL, NULL, NULL, NULL, 'a', 'a', '2026-01-24', 'surat_1769533341_83.pdf', '2026-01-27 17:02:21'),
 (3, 83, 1, 'sehat', 1, 'Dokter Penanggung Jawab', '2026-01-27', NULL, NULL, NULL, NULL, 'a', 'a', '2026-01-24', 'surat_1769533378_83.pdf', '2026-01-27 17:02:58'),
@@ -1108,28 +1140,29 @@ INSERT INTO `surat` (`id`, `booking_id`, `patient_id`, `jenis_surat`, `dokter_id
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tatalaksana`
+-- Table structure for table tatalaksana
 --
 
-CREATE TABLE `tatalaksana` (
-  `id` int NOT NULL,
-  `tindakan_id` int NOT NULL,
-  `booking_id` int NOT NULL,
-  `patient_id` int NOT NULL,
-  `product_id` int NOT NULL,
-  `batch_number` varchar(100) DEFAULT NULL,
-  `expired_date` date DEFAULT NULL,
-  `lokasi` varchar(100) DEFAULT NULL,
-  `rute` varchar(20) DEFAULT NULL,
-  `dosis` int DEFAULT '1',
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP
+DROP TABLE IF EXISTS tatalaksana;
+CREATE TABLE tatalaksana (
+  id int NOT NULL,
+  tindakan_id int NOT NULL,
+  booking_id int NOT NULL,
+  patient_id int NOT NULL,
+  product_id int NOT NULL,
+  batch_number varchar(100) DEFAULT NULL,
+  expired_date date DEFAULT NULL,
+  lokasi varchar(100) DEFAULT NULL,
+  rute varchar(20) DEFAULT NULL,
+  dosis int DEFAULT '1',
+  created_at datetime DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Dumping data for table `tatalaksana`
+-- Dumping data for table tatalaksana
 --
 
-INSERT INTO `tatalaksana` (`id`, `tindakan_id`, `booking_id`, `patient_id`, `product_id`, `batch_number`, `expired_date`, `lokasi`, `rute`, `dosis`, `created_at`) VALUES
+INSERT INTO tatalaksana (id, tindakan_id, booking_id, patient_id, product_id, batch_number, expired_date, lokasi, rute, dosis, created_at) VALUES
 (104, 33, 123, 1, 3, 'PCT-2025-001', '2026-06-15', 'Lengan Kanan', 'IV', 1, '2026-02-27 00:42:31'),
 (105, 33, 123, 1, 3, 'PCT-2025-001', '2026-06-15', 'Paha Kanan', 'IM', 1, '2026-02-27 00:42:31'),
 (106, 33, 123, 1, 2, 'HPV-2025-001', '2027-01-30', 'Paha Kiri', 'IM', 1, '2026-02-27 00:42:31');
@@ -1137,23 +1170,24 @@ INSERT INTO `tatalaksana` (`id`, `tindakan_id`, `booking_id`, `patient_id`, `pro
 -- --------------------------------------------------------
 
 --
--- Table structure for table `time_slots`
+-- Table structure for table time_slots
 --
 
-CREATE TABLE `time_slots` (
-  `id` int NOT NULL,
-  `slot_date` date NOT NULL,
-  `slot_time` time NOT NULL,
-  `max_capacity` int DEFAULT '3',
-  `current_booking` int DEFAULT '0',
-  `is_active` tinyint(1) DEFAULT '1'
+DROP TABLE IF EXISTS time_slots;
+CREATE TABLE time_slots (
+  id int NOT NULL,
+  slot_date date NOT NULL,
+  slot_time time NOT NULL,
+  max_capacity int DEFAULT '3',
+  current_booking int DEFAULT '0',
+  is_active tinyint(1) DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `time_slots`
+-- Dumping data for table time_slots
 --
 
-INSERT INTO `time_slots` (`id`, `slot_date`, `slot_time`, `max_capacity`, `current_booking`, `is_active`) VALUES
+INSERT INTO time_slots (id, slot_date, slot_time, max_capacity, current_booking, is_active) VALUES
 (1, '2025-12-24', '08:00:00', 3, 0, 1),
 (2, '2025-12-24', '08:30:00', 3, 0, 1),
 (3, '2025-12-24', '09:00:00', 3, 0, 1),
@@ -1171,43 +1205,44 @@ INSERT INTO `time_slots` (`id`, `slot_date`, `slot_time`, `max_capacity`, `curre
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tindakan`
+-- Table structure for table tindakan
 --
 
-CREATE TABLE `tindakan` (
-  `id` int NOT NULL,
-  `booking_id` int DEFAULT NULL,
-  `patient_id` int DEFAULT NULL,
-  `keluhan` text COLLATE utf8mb4_general_ci,
-  `kipi_sebelumnya` text COLLATE utf8mb4_general_ci,
-  `kontraindikasi` text COLLATE utf8mb4_general_ci,
-  `anamnesis` text COLLATE utf8mb4_general_ci,
-  `pemeriksaan_fisik` text COLLATE utf8mb4_general_ci,
-  `diagnosis` text COLLATE utf8mb4_general_ci,
-  `tatalaksana` text COLLATE utf8mb4_general_ci,
-  `suhu` decimal(4,1) DEFAULT NULL,
-  `tekanan_darah` varchar(10) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `respirasi` int DEFAULT NULL,
-  `nadi` int DEFAULT NULL,
-  `status` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` datetime DEFAULT NULL,
-  `jenis_vaksin` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `batch_vaksin` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `expired_vaksin` date DEFAULT NULL,
-  `kedatangan_ke` int DEFAULT NULL,
-  `kedatangan_selanjutnya` date DEFAULT NULL,
-  `bb` float DEFAULT NULL,
-  `tb` float DEFAULT NULL,
-  `lingkar_kepala` float DEFAULT NULL,
-  `pf_lainnya` text COLLATE utf8mb4_general_ci
+DROP TABLE IF EXISTS tindakan;
+CREATE TABLE tindakan (
+  id int NOT NULL,
+  booking_id int DEFAULT NULL,
+  patient_id int DEFAULT NULL,
+  keluhan text COLLATE utf8mb4_general_ci,
+  kipi_sebelumnya text COLLATE utf8mb4_general_ci,
+  kontraindikasi text COLLATE utf8mb4_general_ci,
+  anamnesis text COLLATE utf8mb4_general_ci,
+  pemeriksaan_fisik text COLLATE utf8mb4_general_ci,
+  diagnosis text COLLATE utf8mb4_general_ci,
+  tatalaksana text COLLATE utf8mb4_general_ci,
+  suhu decimal(4,1) DEFAULT NULL,
+  tekanan_darah varchar(10) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  respirasi int DEFAULT NULL,
+  nadi int DEFAULT NULL,
+  status varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at datetime DEFAULT NULL,
+  jenis_vaksin varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  batch_vaksin varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  expired_vaksin date DEFAULT NULL,
+  kedatangan_ke int DEFAULT NULL,
+  kedatangan_selanjutnya date DEFAULT NULL,
+  bb float DEFAULT NULL,
+  tb float DEFAULT NULL,
+  lingkar_kepala float DEFAULT NULL,
+  pf_lainnya text COLLATE utf8mb4_general_ci
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tindakan`
+-- Dumping data for table tindakan
 --
 
-INSERT INTO `tindakan` (`id`, `booking_id`, `patient_id`, `keluhan`, `kipi_sebelumnya`, `kontraindikasi`, `anamnesis`, `pemeriksaan_fisik`, `diagnosis`, `tatalaksana`, `suhu`, `tekanan_darah`, `respirasi`, `nadi`, `status`, `created_at`, `updated_at`, `jenis_vaksin`, `batch_vaksin`, `expired_vaksin`, `kedatangan_ke`, `kedatangan_selanjutnya`, `bb`, `tb`, `lingkar_kepala`, `pf_lainnya`) VALUES
+INSERT INTO tindakan (id, booking_id, patient_id, keluhan, kipi_sebelumnya, kontraindikasi, anamnesis, pemeriksaan_fisik, diagnosis, tatalaksana, suhu, tekanan_darah, respirasi, nadi, status, created_at, updated_at, jenis_vaksin, batch_vaksin, expired_vaksin, kedatangan_ke, kedatangan_selanjutnya, bb, tb, lingkar_kepala, pf_lainnya) VALUES
 (2, 78, 1, NULL, NULL, NULL, 'a', 's', 'p', 'f', 36.0, '120', 0, 0, '0', '2026-01-23 08:53:46', NULL, 'a', 'a', '2026-01-24', 1, NULL, NULL, NULL, NULL, NULL),
 (3, 80, 3, NULL, NULL, NULL, 'p', 'p', 'p', 'p', 30.0, '', 0, 0, '0', '2026-01-23 08:53:39', NULL, '', '', NULL, 1, NULL, NULL, NULL, NULL, NULL),
 (4, 83, 1, NULL, NULL, NULL, 'a', 'a', 'a', 'a', 36.0, '120', 0, 0, '0', '2026-01-26 04:00:59', NULL, 'a', 'a', '2026-01-24', 1, NULL, NULL, NULL, NULL, NULL),
@@ -1244,41 +1279,43 @@ INSERT INTO `tindakan` (`id`, `booking_id`, `patient_id`, `keluhan`, `kipi_sebel
 -- --------------------------------------------------------
 
 --
--- Table structure for table `vaccination_history`
+-- Table structure for table vaccination_history
 --
 
-CREATE TABLE `vaccination_history` (
-  `id` int NOT NULL,
-  `patient_id` int NOT NULL,
-  `vaccine_name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `vaccination_date` date NOT NULL,
-  `location` varchar(200) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `batch_number` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `notes` text COLLATE utf8mb4_general_ci
+DROP TABLE IF EXISTS vaccination_history;
+CREATE TABLE vaccination_history (
+  id int NOT NULL,
+  patient_id int NOT NULL,
+  vaccine_name varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  vaccination_date date NOT NULL,
+  location varchar(200) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  batch_number varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  notes text COLLATE utf8mb4_general_ci
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `vaccines`
+-- Table structure for table vaccines
 --
 
-CREATE TABLE `vaccines` (
-  `id` int NOT NULL,
-  `vaccine_name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `description` text COLLATE utf8mb4_general_ci,
-  `price` decimal(10,2) DEFAULT '0.00',
-  `stock` int DEFAULT '0',
-  `min_age` int DEFAULT '0',
-  `max_age` int DEFAULT '100',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+DROP TABLE IF EXISTS vaccines;
+CREATE TABLE vaccines (
+  id int NOT NULL,
+  vaccine_name varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  description text COLLATE utf8mb4_general_ci,
+  price decimal(10,2) DEFAULT '0.00',
+  stock int DEFAULT '0',
+  min_age int DEFAULT '0',
+  max_age int DEFAULT '100',
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `vaccines`
+-- Dumping data for table vaccines
 --
 
-INSERT INTO `vaccines` (`id`, `vaccine_name`, `description`, `price`, `stock`, `min_age`, `max_age`, `created_at`) VALUES
+INSERT INTO vaccines (id, vaccine_name, description, price, stock, min_age, max_age, created_at) VALUES
 (1, 'COVID-19 (Pfizer)', 'Vaksin COVID-19 dari Pfizer-BioNTech', 0.00, 100, 12, 100, '2025-12-24 06:40:17'),
 (2, 'COVID-19 (Moderna)', 'Vaksin COVID-19 dari Moderna', 0.00, 100, 12, 100, '2025-12-24 06:40:17'),
 (3, 'Influenza', 'Vaksin Flu Musiman', 150000.00, 50, 6, 100, '2025-12-24 06:40:17'),
@@ -1289,16 +1326,17 @@ INSERT INTO `vaccines` (`id`, `vaccine_name`, `description`, `price`, `stock`, `
 -- --------------------------------------------------------
 
 --
--- Table structure for table `vital_signs`
+-- Table structure for table vital_signs
 --
 
-CREATE TABLE `vital_signs` (
-  `id` int NOT NULL,
-  `action_id` int NOT NULL,
-  `suhu` decimal(4,1) DEFAULT NULL,
-  `tekanan_darah` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `respirasi` int DEFAULT NULL,
-  `nadi` int DEFAULT NULL
+DROP TABLE IF EXISTS vital_signs;
+CREATE TABLE vital_signs (
+  id int NOT NULL,
+  action_id int NOT NULL,
+  suhu decimal(4,1) DEFAULT NULL,
+  tekanan_darah varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  respirasi int DEFAULT NULL,
+  nadi int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -1306,611 +1344,611 @@ CREATE TABLE `vital_signs` (
 --
 
 --
--- Indexes for table `bookings`
+-- Indexes for table bookings
 --
-ALTER TABLE `bookings`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_patient` (`patient_id`),
-  ADD KEY `idx_tanggal` (`tanggal_booking`),
-  ADD KEY `idx_waktu` (`waktu_booking`),
-  ADD KEY `idx_tanggal_waktu` (`tanggal_booking`,`waktu_booking`),
-  ADD KEY `idx_status` (`status`),
-  ADD KEY `idx_nomor_antrian` (`nomor_antrian`),
-  ADD KEY `fk_doctor_id` (`doctor_id`);
+ALTER TABLE bookings
+  ADD PRIMARY KEY (id),
+  ADD KEY idx_patient (patient_id),
+  ADD KEY idx_tanggal (tanggal_booking),
+  ADD KEY idx_waktu (waktu_booking),
+  ADD KEY idx_tanggal_waktu (tanggal_booking,waktu_booking),
+  ADD KEY idx_status (status),
+  ADD KEY idx_nomor_antrian (nomor_antrian),
+  ADD KEY fk_doctor_id (doctor_id);
 
 --
--- Indexes for table `booking_services`
+-- Indexes for table booking_services
 --
-ALTER TABLE `booking_services`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_booking` (`booking_id`);
+ALTER TABLE booking_services
+  ADD PRIMARY KEY (id),
+  ADD KEY idx_booking (booking_id);
 
 --
--- Indexes for table `booking_staff`
+-- Indexes for table booking_staff
 --
-ALTER TABLE `booking_staff`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `booking_id` (`booking_id`),
-  ADD KEY `staff_id` (`staff_id`);
+ALTER TABLE booking_staff
+  ADD PRIMARY KEY (id),
+  ADD KEY booking_id (booking_id),
+  ADD KEY staff_id (staff_id);
 
 --
--- Indexes for table `jadwal_khusus`
+-- Indexes for table jadwal_khusus
 --
-ALTER TABLE `jadwal_khusus`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_tanggal` (`tanggal`),
-  ADD KEY `idx_rentang` (`tanggal_mulai`,`tanggal_selesai`);
+ALTER TABLE jadwal_khusus
+  ADD PRIMARY KEY (id),
+  ADD KEY idx_tanggal (tanggal),
+  ADD KEY idx_rentang (tanggal_mulai,tanggal_selesai);
 
 --
--- Indexes for table `jadwal_klinik`
+-- Indexes for table jadwal_klinik
 --
-ALTER TABLE `jadwal_klinik`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE jadwal_klinik
+  ADD PRIMARY KEY (id);
 
 --
--- Indexes for table `jadwal_libur`
+-- Indexes for table jadwal_libur
 --
-ALTER TABLE `jadwal_libur`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE jadwal_libur
+  ADD PRIMARY KEY (id);
 
 --
--- Indexes for table `kipi_records`
+-- Indexes for table kipi_records
 --
-ALTER TABLE `kipi_records`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `reservation_id` (`reservation_id`),
-  ADD KEY `patient_id` (`patient_id`);
+ALTER TABLE kipi_records
+  ADD PRIMARY KEY (id),
+  ADD KEY reservation_id (reservation_id),
+  ADD KEY patient_id (patient_id);
 
 --
--- Indexes for table `medical_actions`
+-- Indexes for table medical_actions
 --
-ALTER TABLE `medical_actions`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `booking_id` (`booking_id`),
-  ADD KEY `patient_id` (`patient_id`);
+ALTER TABLE medical_actions
+  ADD PRIMARY KEY (id),
+  ADD KEY booking_id (booking_id),
+  ADD KEY patient_id (patient_id);
 
 --
--- Indexes for table `medical_letters`
+-- Indexes for table medical_letters
 --
-ALTER TABLE `medical_letters`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `action_id` (`action_id`),
-  ADD KEY `dokter_id` (`dokter_id`);
+ALTER TABLE medical_letters
+  ADD PRIMARY KEY (id),
+  ADD KEY action_id (action_id),
+  ADD KEY dokter_id (dokter_id);
 
 --
--- Indexes for table `medical_records`
+-- Indexes for table medical_records
 --
-ALTER TABLE `medical_records`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `patient_id` (`patient_id`),
-  ADD KEY `reservation_id` (`reservation_id`);
+ALTER TABLE medical_records
+  ADD PRIMARY KEY (id),
+  ADD KEY patient_id (patient_id),
+  ADD KEY reservation_id (reservation_id);
 
 --
--- Indexes for table `patients`
+-- Indexes for table patients
 --
-ALTER TABLE `patients`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `no_rekam_medis` (`no_rekam_medis`),
-  ADD UNIQUE KEY `no_rekam_medis_2` (`no_rekam_medis`),
-  ADD UNIQUE KEY `unique_nik` (`nik`),
-  ADD UNIQUE KEY `unique_paspor` (`paspor`);
+ALTER TABLE patients
+  ADD PRIMARY KEY (id),
+  ADD UNIQUE KEY no_rekam_medis (no_rekam_medis),
+  ADD UNIQUE KEY no_rekam_medis_2 (no_rekam_medis),
+  ADD UNIQUE KEY unique_nik (nik),
+  ADD UNIQUE KEY unique_paspor (paspor);
 
 --
--- Indexes for table `patient_addresses`
+-- Indexes for table patient_addresses
 --
-ALTER TABLE `patient_addresses`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `patient_id` (`patient_id`);
+ALTER TABLE patient_addresses
+  ADD PRIMARY KEY (id),
+  ADD KEY patient_id (patient_id);
 
 --
--- Indexes for table `patient_emails`
+-- Indexes for table patient_emails
 --
-ALTER TABLE `patient_emails`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `patient_id` (`patient_id`);
+ALTER TABLE patient_emails
+  ADD PRIMARY KEY (id),
+  ADD KEY patient_id (patient_id);
 
 --
--- Indexes for table `patient_phones`
+-- Indexes for table patient_phones
 --
-ALTER TABLE `patient_phones`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `patient_id` (`patient_id`);
+ALTER TABLE patient_phones
+  ADD PRIMARY KEY (id),
+  ADD KEY patient_id (patient_id);
 
 --
--- Indexes for table `patient_services`
+-- Indexes for table patient_services
 --
-ALTER TABLE `patient_services`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE patient_services
+  ADD PRIMARY KEY (id);
 
 --
--- Indexes for table `payments`
+-- Indexes for table payments
 --
-ALTER TABLE `payments`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `booking_id` (`booking_id`),
-  ADD KEY `idx_payments_booking_status` (`booking_id`,`status`),
-  ADD KEY `idx_payments_jatuh_tempo` (`jatuh_tempo`);
+ALTER TABLE payments
+  ADD PRIMARY KEY (id),
+  ADD KEY booking_id (booking_id),
+  ADD KEY idx_payments_booking_status (booking_id,status),
+  ADD KEY idx_payments_jatuh_tempo (jatuh_tempo);
 
 --
--- Indexes for table `payment_installments`
+-- Indexes for table payment_installments
 --
-ALTER TABLE `payment_installments`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `payment_id` (`payment_id`);
+ALTER TABLE payment_installments
+  ADD PRIMARY KEY (id),
+  ADD KEY payment_id (payment_id);
 
 --
--- Indexes for table `payment_methods_detail`
+-- Indexes for table payment_methods_detail
 --
-ALTER TABLE `payment_methods_detail`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_payment_methods_payment` (`payment_id`);
+ALTER TABLE payment_methods_detail
+  ADD PRIMARY KEY (id),
+  ADD KEY idx_payment_methods_payment (payment_id);
 
 --
--- Indexes for table `products`
+-- Indexes for table products
 --
-ALTER TABLE `products`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `kode_produk` (`kode_produk`);
+ALTER TABLE products
+  ADD PRIMARY KEY (id),
+  ADD UNIQUE KEY kode_produk (kode_produk);
 
 --
--- Indexes for table `product_stock`
+-- Indexes for table product_stock
 --
-ALTER TABLE `product_stock`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_product_id` (`product_id`),
-  ADD KEY `idx_expired` (`expired_date`);
+ALTER TABLE product_stock
+  ADD PRIMARY KEY (id),
+  ADD KEY idx_product_id (product_id),
+  ADD KEY idx_expired (expired_date);
 
 --
--- Indexes for table `reservations`
+-- Indexes for table reservations
 --
-ALTER TABLE `reservations`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `reservation_code` (`reservation_code`),
-  ADD KEY `patient_id` (`patient_id`),
-  ADD KEY `vaccine_id` (`vaccine_id`),
-  ADD KEY `slot_id` (`slot_id`);
+ALTER TABLE reservations
+  ADD PRIMARY KEY (id),
+  ADD UNIQUE KEY reservation_code (reservation_code),
+  ADD KEY patient_id (patient_id),
+  ADD KEY vaccine_id (vaccine_id),
+  ADD KEY slot_id (slot_id);
 
 --
--- Indexes for table `services`
+-- Indexes for table services
 --
-ALTER TABLE `services`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `kode_layanan` (`kode_layanan`),
-  ADD KEY `idx_tipe` (`tipe`),
-  ADD KEY `idx_kategori` (`kategori_usia`);
+ALTER TABLE services
+  ADD PRIMARY KEY (id),
+  ADD UNIQUE KEY kode_layanan (kode_layanan),
+  ADD KEY idx_tipe (tipe),
+  ADD KEY idx_kategori (kategori_usia);
 
 --
--- Indexes for table `service_components`
+-- Indexes for table service_components
 --
-ALTER TABLE `service_components`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `product_id` (`product_id`),
-  ADD KEY `idx_service_id` (`service_id`);
+ALTER TABLE service_components
+  ADD PRIMARY KEY (id),
+  ADD KEY product_id (product_id),
+  ADD KEY idx_service_id (service_id);
 
 --
--- Indexes for table `service_jasa_components`
+-- Indexes for table service_jasa_components
 --
-ALTER TABLE `service_jasa_components`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `service_id` (`service_id`),
-  ADD KEY `jasa_id` (`jasa_id`);
+ALTER TABLE service_jasa_components
+  ADD PRIMARY KEY (id),
+  ADD KEY service_id (service_id),
+  ADD KEY jasa_id (jasa_id);
 
 --
--- Indexes for table `service_package_items`
+-- Indexes for table service_package_items
 --
-ALTER TABLE `service_package_items`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `service_id` (`service_id`),
-  ADD KEY `idx_package_id` (`package_id`);
+ALTER TABLE service_package_items
+  ADD PRIMARY KEY (id),
+  ADD KEY service_id (service_id),
+  ADD KEY idx_package_id (package_id);
 
 --
--- Indexes for table `service_product_components`
+-- Indexes for table service_product_components
 --
-ALTER TABLE `service_product_components`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `service_id` (`service_id`),
-  ADD KEY `product_id` (`product_id`);
+ALTER TABLE service_product_components
+  ADD PRIMARY KEY (id),
+  ADD KEY service_id (service_id),
+  ADD KEY product_id (product_id);
 
 --
--- Indexes for table `staff`
+-- Indexes for table staff
 --
-ALTER TABLE `staff`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE staff
+  ADD PRIMARY KEY (id);
 
 --
--- Indexes for table `surat`
+-- Indexes for table surat
 --
-ALTER TABLE `surat`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE surat
+  ADD PRIMARY KEY (id);
 
 --
--- Indexes for table `tatalaksana`
+-- Indexes for table tatalaksana
 --
-ALTER TABLE `tatalaksana`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE tatalaksana
+  ADD PRIMARY KEY (id);
 
 --
--- Indexes for table `time_slots`
+-- Indexes for table time_slots
 --
-ALTER TABLE `time_slots`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `unique_slot` (`slot_date`,`slot_time`);
+ALTER TABLE time_slots
+  ADD PRIMARY KEY (id),
+  ADD UNIQUE KEY unique_slot (slot_date,slot_time);
 
 --
--- Indexes for table `tindakan`
+-- Indexes for table tindakan
 --
-ALTER TABLE `tindakan`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE tindakan
+  ADD PRIMARY KEY (id);
 
 --
--- Indexes for table `vaccination_history`
+-- Indexes for table vaccination_history
 --
-ALTER TABLE `vaccination_history`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `patient_id` (`patient_id`);
+ALTER TABLE vaccination_history
+  ADD PRIMARY KEY (id),
+  ADD KEY patient_id (patient_id);
 
 --
--- Indexes for table `vaccines`
+-- Indexes for table vaccines
 --
-ALTER TABLE `vaccines`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE vaccines
+  ADD PRIMARY KEY (id);
 
 --
--- Indexes for table `vital_signs`
+-- Indexes for table vital_signs
 --
-ALTER TABLE `vital_signs`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `action_id` (`action_id`);
+ALTER TABLE vital_signs
+  ADD PRIMARY KEY (id),
+  ADD KEY action_id (action_id);
 
 --
 -- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT for table `bookings`
+-- AUTO_INCREMENT for table bookings
 --
-ALTER TABLE `bookings`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=124;
+ALTER TABLE bookings
+  MODIFY id int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=124;
 
 --
--- AUTO_INCREMENT for table `booking_services`
+-- AUTO_INCREMENT for table booking_services
 --
-ALTER TABLE `booking_services`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
+ALTER TABLE booking_services
+  MODIFY id int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
 
 --
--- AUTO_INCREMENT for table `booking_staff`
+-- AUTO_INCREMENT for table booking_staff
 --
-ALTER TABLE `booking_staff`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=75;
+ALTER TABLE booking_staff
+  MODIFY id int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=75;
 
 --
--- AUTO_INCREMENT for table `jadwal_khusus`
+-- AUTO_INCREMENT for table jadwal_khusus
 --
-ALTER TABLE `jadwal_khusus`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+ALTER TABLE jadwal_khusus
+  MODIFY id int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT for table `jadwal_klinik`
+-- AUTO_INCREMENT for table jadwal_klinik
 --
-ALTER TABLE `jadwal_klinik`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+ALTER TABLE jadwal_klinik
+  MODIFY id int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
--- AUTO_INCREMENT for table `jadwal_libur`
+-- AUTO_INCREMENT for table jadwal_libur
 --
-ALTER TABLE `jadwal_libur`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
+ALTER TABLE jadwal_libur
+  MODIFY id int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
 
 --
--- AUTO_INCREMENT for table `kipi_records`
+-- AUTO_INCREMENT for table kipi_records
 --
-ALTER TABLE `kipi_records`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+ALTER TABLE kipi_records
+  MODIFY id int NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `medical_actions`
+-- AUTO_INCREMENT for table medical_actions
 --
-ALTER TABLE `medical_actions`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+ALTER TABLE medical_actions
+  MODIFY id int NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `medical_letters`
+-- AUTO_INCREMENT for table medical_letters
 --
-ALTER TABLE `medical_letters`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+ALTER TABLE medical_letters
+  MODIFY id int NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `medical_records`
+-- AUTO_INCREMENT for table medical_records
 --
-ALTER TABLE `medical_records`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+ALTER TABLE medical_records
+  MODIFY id int NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `patients`
+-- AUTO_INCREMENT for table patients
 --
-ALTER TABLE `patients`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+ALTER TABLE patients
+  MODIFY id int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
--- AUTO_INCREMENT for table `patient_addresses`
+-- AUTO_INCREMENT for table patient_addresses
 --
-ALTER TABLE `patient_addresses`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=124;
+ALTER TABLE patient_addresses
+  MODIFY id int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=124;
 
 --
--- AUTO_INCREMENT for table `patient_emails`
+-- AUTO_INCREMENT for table patient_emails
 --
-ALTER TABLE `patient_emails`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=132;
+ALTER TABLE patient_emails
+  MODIFY id int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=132;
 
 --
--- AUTO_INCREMENT for table `patient_phones`
+-- AUTO_INCREMENT for table patient_phones
 --
-ALTER TABLE `patient_phones`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=134;
+ALTER TABLE patient_phones
+  MODIFY id int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=134;
 
 --
--- AUTO_INCREMENT for table `patient_services`
+-- AUTO_INCREMENT for table patient_services
 --
-ALTER TABLE `patient_services`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+ALTER TABLE patient_services
+  MODIFY id int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT for table `payments`
+-- AUTO_INCREMENT for table payments
 --
-ALTER TABLE `payments`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
+ALTER TABLE payments
+  MODIFY id int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
--- AUTO_INCREMENT for table `payment_installments`
+-- AUTO_INCREMENT for table payment_installments
 --
-ALTER TABLE `payment_installments`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+ALTER TABLE payment_installments
+  MODIFY id int NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `payment_methods_detail`
+-- AUTO_INCREMENT for table payment_methods_detail
 --
-ALTER TABLE `payment_methods_detail`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+ALTER TABLE payment_methods_detail
+  MODIFY id int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
--- AUTO_INCREMENT for table `products`
+-- AUTO_INCREMENT for table products
 --
-ALTER TABLE `products`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+ALTER TABLE products
+  MODIFY id int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
--- AUTO_INCREMENT for table `product_stock`
+-- AUTO_INCREMENT for table product_stock
 --
-ALTER TABLE `product_stock`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+ALTER TABLE product_stock
+  MODIFY id int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
--- AUTO_INCREMENT for table `reservations`
+-- AUTO_INCREMENT for table reservations
 --
-ALTER TABLE `reservations`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+ALTER TABLE reservations
+  MODIFY id int NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `services`
+-- AUTO_INCREMENT for table services
 --
-ALTER TABLE `services`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+ALTER TABLE services
+  MODIFY id int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
--- AUTO_INCREMENT for table `service_components`
+-- AUTO_INCREMENT for table service_components
 --
-ALTER TABLE `service_components`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+ALTER TABLE service_components
+  MODIFY id int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
--- AUTO_INCREMENT for table `service_jasa_components`
+-- AUTO_INCREMENT for table service_jasa_components
 --
-ALTER TABLE `service_jasa_components`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+ALTER TABLE service_jasa_components
+  MODIFY id int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
--- AUTO_INCREMENT for table `service_package_items`
+-- AUTO_INCREMENT for table service_package_items
 --
-ALTER TABLE `service_package_items`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+ALTER TABLE service_package_items
+  MODIFY id int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
--- AUTO_INCREMENT for table `service_product_components`
+-- AUTO_INCREMENT for table service_product_components
 --
-ALTER TABLE `service_product_components`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+ALTER TABLE service_product_components
+  MODIFY id int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
--- AUTO_INCREMENT for table `staff`
+-- AUTO_INCREMENT for table staff
 --
-ALTER TABLE `staff`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+ALTER TABLE staff
+  MODIFY id int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT for table `surat`
+-- AUTO_INCREMENT for table surat
 --
-ALTER TABLE `surat`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+ALTER TABLE surat
+  MODIFY id int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
--- AUTO_INCREMENT for table `tatalaksana`
+-- AUTO_INCREMENT for table tatalaksana
 --
-ALTER TABLE `tatalaksana`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=107;
+ALTER TABLE tatalaksana
+  MODIFY id int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=107;
 
 --
--- AUTO_INCREMENT for table `time_slots`
+-- AUTO_INCREMENT for table time_slots
 --
-ALTER TABLE `time_slots`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+ALTER TABLE time_slots
+  MODIFY id int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
--- AUTO_INCREMENT for table `tindakan`
+-- AUTO_INCREMENT for table tindakan
 --
-ALTER TABLE `tindakan`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+ALTER TABLE tindakan
+  MODIFY id int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
--- AUTO_INCREMENT for table `vaccination_history`
+-- AUTO_INCREMENT for table vaccination_history
 --
-ALTER TABLE `vaccination_history`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+ALTER TABLE vaccination_history
+  MODIFY id int NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `vaccines`
+-- AUTO_INCREMENT for table vaccines
 --
-ALTER TABLE `vaccines`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+ALTER TABLE vaccines
+  MODIFY id int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
--- AUTO_INCREMENT for table `vital_signs`
+-- AUTO_INCREMENT for table vital_signs
 --
-ALTER TABLE `vital_signs`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+ALTER TABLE vital_signs
+  MODIFY id int NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
 --
 
 --
--- Constraints for table `bookings`
+-- Constraints for table bookings
 --
-ALTER TABLE `bookings`
-  ADD CONSTRAINT `fk_doctor_id` FOREIGN KEY (`doctor_id`) REFERENCES `staff` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `fk_patient_id` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE;
+ALTER TABLE bookings
+  ADD CONSTRAINT fk_doctor_id FOREIGN KEY (doctor_id) REFERENCES staff (id) ON DELETE SET NULL,
+  ADD CONSTRAINT fk_patient_id FOREIGN KEY (patient_id) REFERENCES patients (id) ON DELETE CASCADE;
 
 --
--- Constraints for table `booking_services`
+-- Constraints for table booking_services
 --
-ALTER TABLE `booking_services`
-  ADD CONSTRAINT `booking_services_ibfk_1` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`id`) ON DELETE CASCADE;
+ALTER TABLE booking_services
+  ADD CONSTRAINT booking_services_ibfk_1 FOREIGN KEY (booking_id) REFERENCES bookings (id) ON DELETE CASCADE;
 
 --
--- Constraints for table `booking_staff`
+-- Constraints for table booking_staff
 --
-ALTER TABLE `booking_staff`
-  ADD CONSTRAINT `booking_staff_ibfk_1` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `booking_staff_ibfk_2` FOREIGN KEY (`staff_id`) REFERENCES `staff` (`id`) ON DELETE CASCADE;
+ALTER TABLE booking_staff
+  ADD CONSTRAINT booking_staff_ibfk_1 FOREIGN KEY (booking_id) REFERENCES bookings (id) ON DELETE CASCADE,
+  ADD CONSTRAINT booking_staff_ibfk_2 FOREIGN KEY (staff_id) REFERENCES staff (id) ON DELETE CASCADE;
 
 --
--- Constraints for table `kipi_records`
+-- Constraints for table kipi_records
 --
-ALTER TABLE `kipi_records`
-  ADD CONSTRAINT `kipi_records_ibfk_1` FOREIGN KEY (`reservation_id`) REFERENCES `reservations` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `kipi_records_ibfk_2` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE;
+ALTER TABLE kipi_records
+  ADD CONSTRAINT kipi_records_ibfk_1 FOREIGN KEY (reservation_id) REFERENCES reservations (id) ON DELETE CASCADE,
+  ADD CONSTRAINT kipi_records_ibfk_2 FOREIGN KEY (patient_id) REFERENCES patients (id) ON DELETE CASCADE;
 
 --
--- Constraints for table `medical_actions`
+-- Constraints for table medical_actions
 --
-ALTER TABLE `medical_actions`
-  ADD CONSTRAINT `medical_actions_ibfk_1` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`id`),
-  ADD CONSTRAINT `medical_actions_ibfk_2` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`);
+ALTER TABLE medical_actions
+  ADD CONSTRAINT medical_actions_ibfk_1 FOREIGN KEY (booking_id) REFERENCES bookings (id),
+  ADD CONSTRAINT medical_actions_ibfk_2 FOREIGN KEY (patient_id) REFERENCES patients (id);
 
 --
--- Constraints for table `medical_letters`
+-- Constraints for table medical_letters
 --
-ALTER TABLE `medical_letters`
-  ADD CONSTRAINT `medical_letters_ibfk_1` FOREIGN KEY (`action_id`) REFERENCES `medical_actions` (`id`),
-  ADD CONSTRAINT `medical_letters_ibfk_2` FOREIGN KEY (`dokter_id`) REFERENCES `staff` (`id`);
+ALTER TABLE medical_letters
+  ADD CONSTRAINT medical_letters_ibfk_1 FOREIGN KEY (action_id) REFERENCES medical_actions (id),
+  ADD CONSTRAINT medical_letters_ibfk_2 FOREIGN KEY (dokter_id) REFERENCES staff (id);
 
 --
--- Constraints for table `medical_records`
+-- Constraints for table medical_records
 --
-ALTER TABLE `medical_records`
-  ADD CONSTRAINT `medical_records_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `medical_records_ibfk_2` FOREIGN KEY (`reservation_id`) REFERENCES `reservations` (`id`) ON DELETE SET NULL;
+ALTER TABLE medical_records
+  ADD CONSTRAINT medical_records_ibfk_1 FOREIGN KEY (patient_id) REFERENCES patients (id) ON DELETE CASCADE,
+  ADD CONSTRAINT medical_records_ibfk_2 FOREIGN KEY (reservation_id) REFERENCES reservations (id) ON DELETE SET NULL;
 
 --
--- Constraints for table `patient_addresses`
+-- Constraints for table patient_addresses
 --
-ALTER TABLE `patient_addresses`
-  ADD CONSTRAINT `patient_addresses_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE;
+ALTER TABLE patient_addresses
+  ADD CONSTRAINT patient_addresses_ibfk_1 FOREIGN KEY (patient_id) REFERENCES patients (id) ON DELETE CASCADE;
 
 --
--- Constraints for table `patient_emails`
+-- Constraints for table patient_emails
 --
-ALTER TABLE `patient_emails`
-  ADD CONSTRAINT `patient_emails_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE;
+ALTER TABLE patient_emails
+  ADD CONSTRAINT patient_emails_ibfk_1 FOREIGN KEY (patient_id) REFERENCES patients (id) ON DELETE CASCADE;
 
 --
--- Constraints for table `patient_phones`
+-- Constraints for table patient_phones
 --
-ALTER TABLE `patient_phones`
-  ADD CONSTRAINT `patient_phones_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE;
+ALTER TABLE patient_phones
+  ADD CONSTRAINT patient_phones_ibfk_1 FOREIGN KEY (patient_id) REFERENCES patients (id) ON DELETE CASCADE;
 
 --
--- Constraints for table `payments`
+-- Constraints for table payments
 --
-ALTER TABLE `payments`
-  ADD CONSTRAINT `payments_ibfk_1` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`id`);
+ALTER TABLE payments
+  ADD CONSTRAINT payments_ibfk_1 FOREIGN KEY (booking_id) REFERENCES bookings (id);
 
 --
--- Constraints for table `payment_installments`
+-- Constraints for table payment_installments
 --
-ALTER TABLE `payment_installments`
-  ADD CONSTRAINT `payment_installments_ibfk_1` FOREIGN KEY (`payment_id`) REFERENCES `payments` (`id`);
+ALTER TABLE payment_installments
+  ADD CONSTRAINT payment_installments_ibfk_1 FOREIGN KEY (payment_id) REFERENCES payments (id);
 
 --
--- Constraints for table `payment_methods_detail`
+-- Constraints for table payment_methods_detail
 --
-ALTER TABLE `payment_methods_detail`
-  ADD CONSTRAINT `payment_methods_detail_ibfk_1` FOREIGN KEY (`payment_id`) REFERENCES `payments` (`id`) ON DELETE CASCADE;
+ALTER TABLE payment_methods_detail
+  ADD CONSTRAINT payment_methods_detail_ibfk_1 FOREIGN KEY (payment_id) REFERENCES payments (id) ON DELETE CASCADE;
 
 --
--- Constraints for table `product_stock`
+-- Constraints for table product_stock
 --
-ALTER TABLE `product_stock`
-  ADD CONSTRAINT `product_stock_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;
+ALTER TABLE product_stock
+  ADD CONSTRAINT product_stock_ibfk_1 FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE;
 
 --
--- Constraints for table `reservations`
+-- Constraints for table reservations
 --
-ALTER TABLE `reservations`
-  ADD CONSTRAINT `reservations_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `reservations_ibfk_2` FOREIGN KEY (`vaccine_id`) REFERENCES `vaccines` (`id`),
-  ADD CONSTRAINT `reservations_ibfk_3` FOREIGN KEY (`slot_id`) REFERENCES `time_slots` (`id`);
+ALTER TABLE reservations
+  ADD CONSTRAINT reservations_ibfk_1 FOREIGN KEY (patient_id) REFERENCES patients (id) ON DELETE CASCADE,
+  ADD CONSTRAINT reservations_ibfk_2 FOREIGN KEY (vaccine_id) REFERENCES vaccines (id),
+  ADD CONSTRAINT reservations_ibfk_3 FOREIGN KEY (slot_id) REFERENCES time_slots (id);
 
 --
--- Constraints for table `service_components`
+-- Constraints for table service_components
 --
-ALTER TABLE `service_components`
-  ADD CONSTRAINT `service_components_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `service_components_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE RESTRICT;
+ALTER TABLE service_components
+  ADD CONSTRAINT service_components_ibfk_1 FOREIGN KEY (service_id) REFERENCES services (id) ON DELETE CASCADE,
+  ADD CONSTRAINT service_components_ibfk_2 FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE RESTRICT;
 
 --
--- Constraints for table `service_jasa_components`
+-- Constraints for table service_jasa_components
 --
-ALTER TABLE `service_jasa_components`
-  ADD CONSTRAINT `service_jasa_components_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`),
-  ADD CONSTRAINT `service_jasa_components_ibfk_2` FOREIGN KEY (`jasa_id`) REFERENCES `services` (`id`);
+ALTER TABLE service_jasa_components
+  ADD CONSTRAINT service_jasa_components_ibfk_1 FOREIGN KEY (service_id) REFERENCES services (id),
+  ADD CONSTRAINT service_jasa_components_ibfk_2 FOREIGN KEY (jasa_id) REFERENCES services (id);
 
 --
--- Constraints for table `service_package_items`
+-- Constraints for table service_package_items
 --
-ALTER TABLE `service_package_items`
-  ADD CONSTRAINT `service_package_items_ibfk_1` FOREIGN KEY (`package_id`) REFERENCES `services` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `service_package_items_ibfk_2` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE RESTRICT;
+ALTER TABLE service_package_items
+  ADD CONSTRAINT service_package_items_ibfk_1 FOREIGN KEY (package_id) REFERENCES services (id) ON DELETE CASCADE,
+  ADD CONSTRAINT service_package_items_ibfk_2 FOREIGN KEY (service_id) REFERENCES services (id) ON DELETE RESTRICT;
 
 --
--- Constraints for table `service_product_components`
+-- Constraints for table service_product_components
 --
-ALTER TABLE `service_product_components`
-  ADD CONSTRAINT `service_product_components_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`),
-  ADD CONSTRAINT `service_product_components_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`);
+ALTER TABLE service_product_components
+  ADD CONSTRAINT service_product_components_ibfk_1 FOREIGN KEY (service_id) REFERENCES services (id),
+  ADD CONSTRAINT service_product_components_ibfk_2 FOREIGN KEY (product_id) REFERENCES products (id);
 
 --
--- Constraints for table `vaccination_history`
+-- Constraints for table vaccination_history
 --
-ALTER TABLE `vaccination_history`
-  ADD CONSTRAINT `vaccination_history_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE;
+ALTER TABLE vaccination_history
+  ADD CONSTRAINT vaccination_history_ibfk_1 FOREIGN KEY (patient_id) REFERENCES patients (id) ON DELETE CASCADE;
 
 --
--- Constraints for table `vital_signs`
+-- Constraints for table vital_signs
 --
-ALTER TABLE `vital_signs`
-  ADD CONSTRAINT `vital_signs_ibfk_1` FOREIGN KEY (`action_id`) REFERENCES `medical_actions` (`id`);
+ALTER TABLE vital_signs
+  ADD CONSTRAINT vital_signs_ibfk_1 FOREIGN KEY (action_id) REFERENCES medical_actions (id);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
