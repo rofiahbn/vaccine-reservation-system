@@ -1,7 +1,7 @@
 <?php
 session_start();
 require_once '../config.php';
-require_once '../helpers/calendar_helper.php';
+require_once '../calendar_helper.php';
 
 header('Content-Type: application/json');
 

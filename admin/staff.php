@@ -193,22 +193,27 @@ foreach ($staff_list as $key => $staff) {
         }
     }
     
-    // CEK 3: Jika masih 0, cek di tabel bookings (created_by)
+    // CEK 3: Jika masih 0, cek di tabel bookings (hanya jika kolom ada)
     if ($total_pasien == 0) {
-        $sql_created = "SELECT COUNT(DISTINCT patient_id) as total
-                       FROM bookings 
-                       WHERE created_by = ?";
+        // Cek apakah kolom 'created_by' benar-benar ada di tabel 'bookings'
+        $check_created_by = @mysqli_query($conn, "SHOW COLUMNS FROM bookings LIKE 'created_by'");
         
-        $stmt_created = mysqli_prepare($conn, $sql_created);
-        if ($stmt_created) {
-            mysqli_stmt_bind_param($stmt_created, 'i', $staff['id']);
-            mysqli_stmt_execute($stmt_created);
-            $result_created = mysqli_stmt_get_result($stmt_created);
-            if ($result_created) {
-                $data_created = mysqli_fetch_assoc($result_created);
-                $total_pasien = $data_created['total'] ?? 0;
+        if ($check_created_by && mysqli_num_rows($check_created_by) > 0) {
+            $sql_created = "SELECT COUNT(DISTINCT patient_id) as total
+                           FROM bookings 
+                           WHERE created_by = ?";
+            
+            $stmt_created = mysqli_prepare($conn, $sql_created);
+            if ($stmt_created) {
+                mysqli_stmt_bind_param($stmt_created, 'i', $staff['id']);
+                mysqli_stmt_execute($stmt_created);
+                $result_created = mysqli_stmt_get_result($stmt_created);
+                if ($result_created) {
+                    $data_created = mysqli_fetch_assoc($result_created);
+                    $total_pasien = $data_created['total'] ?? 0;
+                }
+                mysqli_stmt_close($stmt_created);
             }
-            mysqli_stmt_close($stmt_created);
         }
     }
     
