@@ -390,8 +390,8 @@ foreach ($staff_list as $key => $staff) {
                                     <th>SIP / NIP</th>
                                     <th>Role</th>
                                     <th>Total Pasien</th>
-                                    <th>Total Jam Kerja</th>
-                                    <th>Total Gaji</th>
+                                    <!-- <th>Total Jam Kerja</th>
+                                    <th>Total Gaji</th> -->
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
@@ -427,6 +427,7 @@ foreach ($staff_list as $key => $staff) {
                                             <span class="stat-number"><?= number_format($staff['total_pasien'] ?? 0) ?></span>
                                             <span class="stat-label">pasien</span>
                                         </td>
+                                        <!-- KOMENTAR TOTAL JAM KERJA
                                         <td>
                                             <?php if (!empty($staff['total_jam_kerja']) && $staff['total_jam_kerja'] > 0): ?>
                                                 <span class="stat-number">
@@ -436,11 +437,14 @@ foreach ($staff_list as $key => $staff) {
                                                 <span class="no-data">0 jam</span>
                                             <?php endif; ?>
                                         </td>
+                                        -->
+                                        <!-- KOMENTAR TOTAL GAJI
                                         <td>
                                             <span class="salary-amount">
                                                 Rp <?= number_format($total_gaji, 0, ',', '.') ?>
                                             </span>
                                         </td>
+                                        -->
                                         <td>
                                             <div class="action-buttons">
                                                 <button type="button" 
@@ -468,16 +472,19 @@ foreach ($staff_list as $key => $staff) {
                         </table>
                     </div>
                     
+
                     <!-- Info jumlah data -->
                     <div class="table-footer">
                         <div class="total-count">
                             <i class="fas fa-user-md"></i>
                             <span>Total: <?= count($staff_list) ?> staff</span>
                         </div>
+                        <!--
                         <div class="table-info">
                             <i class="fas fa-info-circle"></i>
                             <span>Rate per jam: Rp <?= number_format($rate_per_jam, 0, ',', '.') ?></span>
                         </div>
+                        -->
                     </div>
                     
                 <?php else: ?>

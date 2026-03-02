@@ -164,14 +164,12 @@ if ($active_tab == 'stok') {
                     p.id,
                     p.nama_produk,
                     p.jenis,
-                    COALESCE(SUM(ps.stock), 0) as stok_awal,
-                    COALESCE(SUM(CASE WHEN ps.stock > 0 THEN ps.stock ELSE 0 END), 0) as stok_masuk,
-                    COALESCE(SUM(CASE WHEN ps.stock < 0 THEN ABS(ps.stock) ELSE 0 END), 0) as stok_keluar,
-                    COALESCE(SUM(ps.stock), 0) as stok_akhir
+                    p.minimal_stok,
+                    COALESCE(SUM(ps.stock), 0) as stok_sisa
                  FROM products p
                  LEFT JOIN product_stock ps ON p.id = ps.product_id
                  WHERE $where_sql
-                 GROUP BY p.id, p.nama_produk, p.jenis
+                 GROUP BY p.id, p.nama_produk, p.jenis, p.minimal_stok
                  ORDER BY p.nama_produk ASC";
     
     $result_stok = $conn->query($sql_stok);
@@ -330,11 +328,6 @@ if ($active_tab == 'stok') {
                            placeholder="🔍 Cari No. Rm / Nama /" 
                            value="<?= htmlspecialchars($search ?? '') ?>"
                            onchange="window.location.href='?tab=invoice&search='+this.value">
-                    <select class="filter-select" onchange="window.location.href='?tab=invoice&layanan='+this.value">
-                        <option value="">Layanan</option>
-                        <option value="vaksin">Vaksin</option>
-                        <option value="vitamin">Vitamin</option>
-                    </select>
                     <select class="filter-select" onchange="window.location.href='?tab=invoice&status_filter='+this.value">
                         <option value="">Status Pembayaran</option>
                         <option value="lunas" <?= ($_GET['status_filter'] ?? '') == 'lunas' ? 'selected' : '' ?>>Lunas</option>
@@ -417,10 +410,8 @@ if ($active_tab == 'stok') {
                         <tr>
                             <th>Nama Produk</th>
                             <th>Jenis</th>
-                            <th>Stock Awal</th>
-                            <th>Stock Masuk</th>
-                            <th>Stock Keluar</th>
-                            <th>Stock Akhir</th>
+                            <th>Stok Sisa</th>
+                            <th>Minimal Stok</th>
                             <th>Status</th>
                         </tr>
                     </thead>
@@ -430,14 +421,23 @@ if ($active_tab == 'stok') {
                                 <tr>
                                     <td><?= htmlspecialchars($stok['nama_produk']) ?></td>
                                     <td><?= htmlspecialchars($stok['jenis']) ?></td>
-                                    <td><?= $stok['stok_awal'] ?? 0 ?></td>
-                                    <td><?= $stok['stok_masuk'] ?? 0 ?></td>
-                                    <td><?= $stok['stok_keluar'] ?? 0 ?></td>
-                                    <td><?= $stok['stok_akhir'] ?? 0 ?></td>
+                                    <td><?= $stok['stok_sisa'] ?? 0 ?></td>
+                                    <td><?= $stok['minimal_stok'] ?? 10 ?></td>
                                     <td>
                                         <?php 
-                                        $status_class = $stok['stok_akhir'] <= 10 ? 'status-menipis' : 'status-tersedia';
-                                        $status_text = $stok['stok_akhir'] <= 10 ? 'Stock Menipis' : 'Tersedia';
+                                        $stok_sisa = $stok['stok_sisa'] ?? 0;
+                                        $minimal = $stok['minimal_stok'] ?? 10;
+                                        
+                                        if ($stok_sisa <= 0) {
+                                            $status_class = 'status-habis';
+                                            $status_text = 'Stok Habis';
+                                        } elseif ($stok_sisa <= $minimal) {
+                                            $status_class = 'status-menipis';
+                                            $status_text = 'Stok Menipis';
+                                        } else {
+                                            $status_class = 'status-tersedia';
+                                            $status_text = 'Tersedia';
+                                        }
                                         ?>
                                         <span class="status-badge <?= $status_class ?>"><?= $status_text ?></span>
                                     </td>
@@ -445,7 +445,7 @@ if ($active_tab == 'stok') {
                             <?php endwhile; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="7" style="text-align: center; padding: 40px; color: #94a3b8;">
+                                <td colspan="5" style="text-align: center; padding: 40px; color: #94a3b8;">
                                     Belum ada data stok
                                 </td>
                             </tr>

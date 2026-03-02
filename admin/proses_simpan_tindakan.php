@@ -219,6 +219,16 @@ try {
 
             $insert->execute();
             $insert->close();
+
+            // ===== KURANGI STOK DI SINI =====
+            $kurangi_stok = $conn->prepare("
+                UPDATE product_stock 
+                SET stock = stock - ? 
+                WHERE product_id = ? AND batch_number = ?
+            ");
+            $kurangi_stok->bind_param("iis", $dosis, $product_id, $batch);
+            $kurangi_stok->execute();
+            $kurangi_stok->close();
         }
     }
 
