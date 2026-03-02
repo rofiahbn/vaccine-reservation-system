@@ -18,11 +18,11 @@ function checkDateStatus($conn, $tanggal) {
 
     /*
     =====================================
-    1. CEK LIBUR
+    1. CEK LIBUR (RANGE TANGGAL - SESUAI STRUKTUR TABEL)
     =====================================
     */
 
-    $query_libur = "SELECT keterangan FROM jadwal_libur WHERE tanggal = ?";
+    $query_libur = "SELECT keterangan FROM jadwal_libur WHERE ? BETWEEN tanggal_mulai AND tanggal_selesai LIMIT 1";
     $stmt = mysqli_prepare($conn, $query_libur);
     mysqli_stmt_bind_param($stmt, 's', $tanggal);
     mysqli_stmt_execute($stmt);
@@ -37,14 +37,14 @@ function checkDateStatus($conn, $tanggal) {
 
     /*
     =====================================
-    2. CEK JADWAL KHUSUS (OVERRIDE)
+    2. CEK JADWAL KHUSUS (RANGE TANGGAL)
     =====================================
     */
 
     $query_khusus = "
         SELECT jam_buka, jam_tutup, status
         FROM jadwal_khusus
-        WHERE tanggal = ?
+        WHERE ? BETWEEN tanggal_mulai AND tanggal_selesai
         LIMIT 1
     ";
 

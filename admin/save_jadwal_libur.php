@@ -24,32 +24,31 @@ VALIDASI SEMUA INPUT DULU
 
 foreach($_POST['libur'] as $row){
 
-$mulai = $row['mulai'] ?? '';
-$selesai = $row['selesai'] ?? '';
-$ket = $row['keterangan'] ?? '';
-$jenis = $row['jenis'] ?? '';
+    $mulai = $row['mulai'] ?? '';
+    $selesai = $row['selesai'] ?? '';
+    $ket = $row['keterangan'] ?? '';
+    $jenis = $row['jenis'] ?? '';
 
+    // Validasi tanggal kosong
+    if(!$mulai || !$selesai){
+        $_SESSION['error'] = "Tanggal libur wajib diisi";
+        header("Location: calendar_setting.php");
+        exit;
+    }
 
-// Validasi tanggal kosong
-if(!$mulai || !$selesai){
-    $_SESSION['error'] = "Tanggal libur wajib diisi";
-    header("Location: calendar_setting.php");
-    exit;
-}
+    // Validasi tanggal
+    if($mulai > $selesai){
+        $_SESSION['error'] = "Tanggal mulai libur tidak boleh lebih besar dari selesai";
+        header("Location: calendar_setting.php");
+        exit;
+    }
 
-// Validasi tanggal
-if($mulai > $selesai){
-    $_SESSION['error'] = "Tanggal mulai libur tidak boleh lebih besar dari selesai";
-    header("Location: calendar_setting.php");
-    exit;
-}
-
-// Validasi keterangan
-if(empty(trim($ket))){
-    $_SESSION['error'] = "Keterangan libur wajib diisi";
-    header("Location: calendar_setting.php");
-    exit;
-}
+    // Validasi keterangan
+    if(empty(trim($ket))){
+        $_SESSION['error'] = "Keterangan libur wajib diisi";
+        header("Location: calendar_setting.php");
+        exit;
+    }
 
 }
 
@@ -65,36 +64,36 @@ mysqli_query($conn,"DELETE FROM jadwal_libur");
 
 /*
 =========================================
-INSERT DATA BARU
+INSERT DATA BARU (LANGSUNG RANGE)
 =========================================
 */
 
 foreach($_POST['libur'] as $row){
 
-$mulai = $row['mulai'];
-$selesai = $row['selesai'];
-$ket = $row['keterangan'];
-$jenis = $row['jenis'];
+    $mulai = $row['mulai'];
+    $selesai = $row['selesai'];
+    $ket = $row['keterangan'];
+    $jenis = $row['jenis'];
 
-$current = strtotime($mulai);
-$end = strtotime($selesai);
+    // INSERT LANGSUNG DENGAN RANGE TANGGAL (TIDAK PERLU LOOP PER HARI)
+    $stmt = $conn->prepare("
+        INSERT INTO jadwal_libur
+        (tanggal_mulai, tanggal_selesai, keterangan, jenis)
+        VALUES (?, ?, ?, ?)
+    ");
 
-while($current <= $end){
+    if ($stmt === false) {
+        die("Error prepare: " . $conn->error);
+    }
 
-$tanggal = date('Y-m-d',$current);
+    $stmt->bind_param("ssss", $mulai, $selesai, $ket, $jenis);
+    $stmt->execute();
 
-$stmt = $conn->prepare("
-INSERT INTO jadwal_libur
-(tanggal,keterangan,jenis)
-VALUES (?,?,?)
-");
+    if ($stmt->error) {
+        die("Error execute: " . $stmt->error);
+    }
 
-$stmt->bind_param("sss",$tanggal,$ket,$jenis);
-$stmt->execute();
-
-$current = strtotime("+1 day",$current);
-}
-
+    $stmt->close();
 }
 
 
@@ -108,3 +107,4 @@ $_SESSION['success'] = "Jadwal libur berhasil disimpan";
 
 header("Location: calendar_setting.php");
 exit;
+?>

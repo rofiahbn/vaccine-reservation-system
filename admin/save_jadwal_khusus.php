@@ -84,34 +84,34 @@ foreach($_POST['khusus'] as $row){
     $ket = $row['keterangan'] ?? '';
     $status = $row['status'];
 
-    $current = strtotime($mulai);
-    $end = strtotime($selesai);
+    // INSERT LANGSUNG DENGAN RANGE TANGGAL (TIDAK PERLU LOOP PER HARI)
+    $stmt = $conn->prepare("
+        INSERT INTO jadwal_khusus 
+        (tanggal_mulai, tanggal_selesai, jam_buka, jam_tutup, keterangan, status)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ");
 
-    while($current <= $end){
-
-        $tanggal = date('Y-m-d',$current);
-
-        $stmt = $conn->prepare("
-            INSERT INTO jadwal_khusus 
-            (tanggal,tanggal_mulai,tanggal_selesai,jam_buka,jam_tutup,keterangan,status)
-            VALUES (?,?,?,?,?,?,?)
-        ");
-
-        $stmt->bind_param(
-            "sssssss",
-            $tanggal,
-            $mulai,
-            $selesai,
-            $jam_buka,
-            $jam_tutup,
-            $ket,
-            $status
-        );
-
-        $stmt->execute();
-
-        $current = strtotime("+1 day",$current);
+    if ($stmt === false) {
+        die("Error prepare: " . $conn->error);
     }
+
+    $stmt->bind_param(
+        "ssssss",
+        $mulai,
+        $selesai,
+        $jam_buka,
+        $jam_tutup,
+        $ket,
+        $status
+    );
+
+    $stmt->execute();
+
+    if ($stmt->error) {
+        die("Error execute: " . $stmt->error);
+    }
+
+    $stmt->close();
 }
 
 
@@ -125,3 +125,4 @@ $_SESSION['success'] = "Jadwal khusus berhasil disimpan";
 
 header("Location: calendar_setting.php");
 exit;
+?>

@@ -10,9 +10,14 @@ $current_page = 'calendar_setting.php';
 $query_jadwal = "SELECT * FROM jadwal_klinik ORDER BY hari_week ASC";
 $result_jadwal = mysqli_query($conn, $query_jadwal);
 
-// Ambil semua jadwal libur
-$query_libur = "SELECT * FROM jadwal_libur ORDER BY tanggal ASC";
+// Ambil semua jadwal libur - PERBAIKAN: gunakan tanggal_mulai karena struktur sudah berubah
+$query_libur = "SELECT * FROM jadwal_libur ORDER BY tanggal_mulai ASC";
 $result_libur = mysqli_query($conn, $query_libur);
+
+// CEK APAKAH QUERY BERHASIL
+if (!$result_libur) {
+    die("Error query jadwal libur: " . mysqli_error($conn));
+}
 
 $hari_names = [
     1 => 'Minggu',
@@ -390,9 +395,13 @@ $jenis_libur = ['nasional', 'khusus', 'minggu'];
                         <div id="jadwalLiburContainer">
                             <?php 
                             $libur_array = [];
-                            mysqli_data_seek($result_libur, 0);
-                            while ($row = mysqli_fetch_assoc($result_libur)) {
-                                $libur_array[] = $row;
+                            
+                            // CEK DULU APAKAH result_libur VALID
+                            if ($result_libur && mysqli_num_rows($result_libur) > 0) {
+                                mysqli_data_seek($result_libur, 0);
+                                while ($row = mysqli_fetch_assoc($result_libur)) {
+                                    $libur_array[] = $row;
+                                }
                             }
                             
                             if (empty($libur_array)) {
@@ -442,12 +451,12 @@ $jenis_libur = ['nasional', 'khusus', 'minggu'];
                                 <div class="date-input-wrapper">
                                     <div class="input-group">
                                         <span class="input-label">Mulai</span>
-                                        <input type="date" class="date-input" name="libur[<?= $libur_num ?>][mulai]" value="<?= $libur['tanggal'] ?>" required>
+                                        <input type="date" class="date-input" name="libur[<?= $libur_num ?>][mulai]" value="<?= $libur['tanggal_mulai'] ?>" required>
                                     </div>
                                     
                                     <div class="input-group">
                                         <span class="input-label">Selesai</span>
-                                        <input type="date" class="date-input" name="libur[<?= $libur_num ?>][selesai]" value="<?= $libur['tanggal'] ?>" required>
+                                        <input type="date" class="date-input" name="libur[<?= $libur_num ?>][selesai]" value="<?= $libur['tanggal_selesai'] ?>" required>
                                     </div>
 
                                     <div class="input-group" style="flex: 1;">

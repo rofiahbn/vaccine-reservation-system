@@ -508,7 +508,26 @@ function generateTimeSlots(tanggal) {
 
     // Fetch available slots dari server
     fetch(`check_slots.php?tanggal=${tanggal}`)
-        .then(response => response.json())
+        .then(response => {
+            // Cek apakah response ok
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.text(); // Ambil sebagai text dulu untuk debug
+        })
+        .then(text => {
+            console.log('Raw response:', text.substring(0, 200)); // Log 200 karakter pertama
+            
+            // Coba parse JSON
+            try {
+                const data = JSON.parse(text);
+                return data;
+            } catch (e) {
+                console.error('JSON parse error:', e);
+                console.error('Response text:', text);
+                throw new Error('Response bukan JSON yang valid');
+            }
+        })
         .then(data => {
             if (!data.success) {
                 container.innerHTML = '<div class="no-results">❌ Gagal memuat jadwal</div>';
@@ -561,7 +580,7 @@ function generateTimeSlots(tanggal) {
         })
         .catch(error => {
             console.error('Error:', error);
-            container.innerHTML = '<div class="no-results">❌ Gagal memuat jadwal</div>';
+            container.innerHTML = `<div class="no-results">❌ Gagal memuat jadwal: ${error.message}</div>`;
         });
 }
 

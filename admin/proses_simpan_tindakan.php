@@ -224,6 +224,12 @@ try {
 
     $conn->commit();
 
+    // ===== UPDATE TINDAKAN_SELESAI DI BOOKINGS =====
+    $update_booking = $conn->prepare("UPDATE bookings SET tindakan_selesai = 1 WHERE id = ?");
+    $update_booking->bind_param("i", $booking_id);
+    $update_booking->execute();
+    $update_booking->close();
+
     echo json_encode([
         "success" => true,
         "message" => "Tindakan berhasil disimpan"
