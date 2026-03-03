@@ -1,5 +1,5 @@
 /* ===================================================
-   RESCHEDULE MODAL - MENGGUNAKAN SISTEM ORDER.PHP
+   RESCHEDULE MODAL - FIXED VERSION
 =================================================== */
 
 let currentDateReschedule = new Date();
@@ -95,7 +95,22 @@ async function renderCalendarReschedule() {
 // ========== CEK STATUS TANGGAL ==========
 async function checkDateStatusReschedule(dateStr, dayDiv, dateObj) {
     try {
-        const response = await fetch(`../admin/check_date_status.php?tanggal=${dateStr}`);
+        const response = await fetch(`check_date_status.php?tanggal=${dateStr}`);
+        
+        // CEK RESPONSE OK
+        if (!response.ok) {
+            console.error('HTTP error:', response.status);
+            return;
+        }
+        
+        // CEK CONTENT TYPE
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            const text = await response.text();
+            console.error('Response bukan JSON:', text);
+            return;
+        }
+        
         const data = await response.json();
         
         if (!data.success) {
@@ -161,7 +176,20 @@ async function loadTimeSlotsReschedule(dateStr) {
     section.style.display = 'block';
     
     try {
-        const response = await fetch(`../check_slots.php?tanggal=${dateStr}`);
+        const response = await fetch(`../../check_slots.php?tanggal=${dateStr}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        // CEK CONTENT TYPE
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            const text = await response.text();
+            console.error('Response bukan JSON:', text);
+            throw new Error('Server tidak mengembalikan JSON');
+        }
+        
         const data = await response.json();
         
         if (!data.success) {
@@ -179,7 +207,6 @@ async function loadTimeSlotsReschedule(dateStr) {
             return;
         }
         
-        // Render time slots
         container.innerHTML = '';
         
         if (!data.all_slots || data.all_slots.length === 0) {
@@ -208,7 +235,7 @@ async function loadTimeSlotsReschedule(dateStr) {
         
     } catch (error) {
         console.error('Error loading slots:', error);
-        container.innerHTML = '<p style="text-align:center; color:#dc2626;">Terjadi kesalahan</p>';
+        container.innerHTML = `<p style="text-align:center; color:#dc2626;">Error: ${error.message}</p>`;
     }
 }
 
@@ -274,6 +301,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     body: formData
                 });
                 
+                // CEK RESPONSE OK
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                // CEK CONTENT TYPE & PARSE
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    const text = await response.text();
+                    console.error('Response bukan JSON:', text);
+                    throw new Error('Server error. Lihat console untuk detail.');
+                }
+                
                 const result = await response.json();
                 
                 if (result.success) {
@@ -287,7 +327,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('❌ Terjadi kesalahan!');
+                alert('❌ Terjadi kesalahan: ' + error.message);
                 btnSubmit.disabled = false;
                 btnSubmit.textContent = 'Jadwalkan Ulang';
             }

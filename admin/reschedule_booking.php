@@ -48,10 +48,10 @@ try {
     =====================================
     */
 
-    // CEK JADWAL KHUSUS DULU
+    // CEK JADWAL KHUSUS DULU (RANGE TANGGAL)
     $query_khusus = "SELECT jam_buka, jam_tutup, status 
                      FROM jadwal_khusus 
-                     WHERE tanggal = ? LIMIT 1";
+                     WHERE ? BETWEEN tanggal_mulai AND tanggal_selesai LIMIT 1";
 
     $stmt = $conn->prepare($query_khusus);
     $stmt->bind_param("s", $newDate);
@@ -107,14 +107,15 @@ try {
                    FROM bookings
                    WHERE tanggal_booking = ?
                    AND waktu_booking = ?
-                   AND status IN ('confirmed','scheduled')
+                   AND status IN ('confirmed', 'pending')
                    AND id != ?";
 
     $stmt = $conn->prepare($checkQuery);
     $stmt->bind_param("ssi", $newDate, $newTimeFormatted, $bookingId);
     $stmt->execute();
-    $stmt->bind_result($count);
-    $stmt->fetch();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $count = $row['count'] ?? 0;
     $stmt->close();
 
     if ($count > 0) {
