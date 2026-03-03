@@ -50,18 +50,26 @@ $sql = "
         p.kategori_usia,
         t.id as tindakan_id,
         t.booking_id,
-        GROUP_CONCAT(DISTINCT bs.nama_layanan SEPARATOR ', ') as layanan,
         t.kedatangan_ke,
         t.kedatangan_selanjutnya,
         t.status as status_tindakan,
         b.tanggal_booking,
-        b.waktu_booking
+        b.waktu_booking,
+        GROUP_CONCAT(DISTINCT s.nama_layanan SEPARATOR ', ') as layanan,
+        -- Hitung total kunjungan dari package_items
+        (
+            SELECT COUNT(DISTINCT spi.id) 
+            FROM booking_services bs2
+            JOIN service_package_items spi ON bs2.service_id = spi.package_id
+            WHERE bs2.booking_id = b.id
+        ) as total_kunjungan
     FROM patients p
     LEFT JOIN tindakan t ON p.id = t.patient_id
     LEFT JOIN bookings b ON t.booking_id = b.id
     LEFT JOIN booking_services bs ON b.id = bs.booking_id
+    LEFT JOIN services s ON bs.service_id = s.id
     $where_sql
-    GROUP BY p.id, t.id
+    GROUP BY p.id, t.id, b.id
     HAVING t.id IS NOT NULL
     ORDER BY t.created_at DESC
 ";
@@ -236,7 +244,18 @@ $stmt->close();
                                         </td>
                                         <td>
                                             <span class="visit-count">
-                                                <?= $patient['kedatangan_ke'] ?>/<?= ($patient['kedatangan_ke'] ?? 0) + 2 ?>
+                                                <?php 
+                                                $kedatangan_ke = $patient['kedatangan_ke'] ?? 0;
+                                                $total_kunjungan = $patient['total_kunjungan'] ?? 0;
+                                                
+                                                if ($total_kunjungan > 0) {
+                                                    // Untuk paket: tampilkan progress
+                                                    echo $kedatangan_ke . '/' . $total_kunjungan;
+                                                } else {
+                                                    // Untuk layanan biasa (bukan paket)
+                                                    echo $kedatangan_ke . '/1';
+                                                }
+                                                ?>
                                             </span>
                                         </td>
                                         <td>
