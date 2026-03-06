@@ -74,6 +74,7 @@ get('/proses_tindakan.php', 'system/admin/proses_tindakan.php');
 post('/proses_simpan_tindakan.php', 'system/admin/proses_simpan_tindakan.php');
 post('/update_status.php', 'system/admin/update_status.php');
 post('/update_diskon.php', 'system/admin/update_diskon.php');
+post('/update_deskripsi.php', 'system/admin/update_deskripsi.php');
 post('/update_booking.php', 'system/admin/update_booking.php');
 get('/staff.php', 'system/admin/staff.php');
 post('/save_staff.php', 'system/admin/save_staff.php');

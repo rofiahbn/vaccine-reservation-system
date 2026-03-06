@@ -8,6 +8,14 @@ if ($booking_id == 0) {
     exit;
 }
 
+// Ambil data services untuk dropdown edit deskripsi
+$sql_services_list = "SELECT id, nama_layanan, tipe, harga FROM services WHERE tipe IN ('pelayanan', 'paket') ORDER BY tipe, nama_layanan ASC";
+$result_services_list = $conn->query($sql_services_list);
+$services_list = [];
+while ($row = $result_services_list->fetch_assoc()) {
+    $services_list[] = $row;
+}
+
 /* ================= CEK JENIS BOOKING ================= */
 $sql_jenis = "SELECT parent_id, service_type, tanggal_booking FROM bookings WHERE id = ?";
 $stmt_jenis = $conn->prepare($sql_jenis);
@@ -432,7 +440,7 @@ if (!$all_completed) {
                             $diskon_tipe = $srv['diskon_tipe'] ?? '';
                             $diskon_persen = $diskon_item > 0 ? round(($diskon_item / $harga) * 100) : 0;
                         ?>
-                        <tr data-harga="<?= $harga ?>" data-index="<?= $i ?>">
+                        <tr data-harga="<?= $harga ?>" data-harga-lama="<?= $harga ?>" data-index="<?= $i ?>">
                             <td><?= $counter++ ?></td>
                             <?php if ($jumlah_peserta > 1): ?>
                                 <td>
@@ -441,7 +449,17 @@ if (!$all_completed) {
                                     </span>
                                 </td>
                             <?php endif; ?>
-                            <td><?= htmlspecialchars($srv['nama_layanan']) ?></td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span id="deskripsi-text-<?= $i ?>"><?= htmlspecialchars($srv['nama_layanan']) ?></span>
+                                    <button type="button"
+                                        class="btn-edit-diskon"
+                                        onclick="openEditDeskripsi(<?= $id_item ?>, <?= $i ?>, '<?= htmlspecialchars($srv['nama_layanan'], ENT_QUOTES) ?>')"
+                                        title="Edit Deskripsi">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </div>
+                            </td>
                             <td>1</td>
                             <td class="harga-item">Rp <?= number_format($harga, 0, ',', '.') ?></td>
                             <td class="diskon-cell" id="diskon-cell-<?= $i ?>">
@@ -730,14 +748,13 @@ if (!$all_completed) {
                         <div style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #64748b; font-weight: 600;">
                             Rp
                         </div>
-                        <input type="number" name="jumlahBayar" id="jumlahBayar"
-                            value="<?= $sisa_tagihan ?>" 
+                        <input type="text" name="jumlahBayar" id="jumlahBayar"
+                            value="<?= number_format($sisa_tagihan, 0, ',', '.') ?>" 
                             readonly
-                            min="1" max="<?= $sisa_tagihan ?>"
                             style="width: 100%; padding: 15px 15px 15px 40px; 
                                     font-size: 20px; font-weight: 600; text-align: center;
                                     border: 2px solid #cbd5e1; border-radius: 8px;"
-                            oninput="updatePaymentMethods()">
+                            data-original="<?= $sisa_tagihan ?>">
                     </div>
                 </div>
                 
@@ -950,6 +967,83 @@ if (!$all_completed) {
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+    <!-- ================= MODAL EDIT DESKRIPSI ================= -->
+    <div id="popupEditDeskripsi" class="popup-overlay" style="display:none;">
+        <div class="popup-box" style="width: 450px;">
+            <div class="popup-header">
+                <h2><i class="fas fa-edit"></i> Edit Deskripsi Layanan</h2>
+                <button class="popup-close" onclick="closeEditDeskripsi()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div style="background: #f0f9ff; border-radius: 10px; padding: 15px; margin-bottom: 20px;">
+                <div style="font-weight: 600; color: #0369a1; margin-bottom: 5px;">
+                    <i class="fas fa-info-circle"></i> Pilih Nama Layanan
+                </div>
+                <div style="color: #64748b; font-size: 14px;">
+                    Nama layanan saat ini: <span id="currentDeskripsiLabel" style="font-weight:600; color:#1e293b;"></span>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; color: #475569; font-weight: 600; margin-bottom: 8px;">
+                    Pilih Layanan Baru
+                </label>
+
+                <!-- Search Box -->
+                <input type="text" id="searchDeskripsi"
+                    placeholder="🔍 Ketik nama layanan..."
+                    oninput="filterDeskripsiOptions()"
+                    style="width: 100%; padding: 10px 15px; margin-bottom: 8px;
+                        border: 2px solid #cbd5e1; border-radius: 8px; font-size: 14px;
+                        box-sizing: border-box;">
+
+                <select id="selectDeskripsi" size="6"
+                    style="width: 100%; padding: 8px;
+                        border: 2px solid #cbd5e1; border-radius: 8px; font-size: 15px;
+                        background: white; box-sizing: border-box; height: 180px;">
+                    <option value="">-- Pilih Layanan --</option>
+                    <?php 
+                    $current_tipe = '';
+                    foreach ($services_list as $svc): 
+                        // Tambah separator per tipe
+                        if ($svc['tipe'] !== $current_tipe):
+                            if ($current_tipe !== '') echo '</optgroup>';
+                            $current_tipe = $svc['tipe'];
+                            $label_tipe = $svc['tipe'] === 'pelayanan' ? 'Pelayanan' : 'Paket';
+                            echo "<optgroup label='$label_tipe'>";
+                        endif;
+                    ?>
+                        <option value="<?= htmlspecialchars($svc['nama_layanan']) ?>">
+                            <?= htmlspecialchars($svc['nama_layanan']) ?> 
+                            (Rp <?= number_format($svc['harga'], 0, ',', '.') ?>)
+                        </option>
+                    <?php endforeach; ?>
+                    <?php if ($current_tipe !== '') echo '</optgroup>'; ?>
+                </select>
+            </div>
+
+            <input type="hidden" id="editDeskripsiID">
+            <input type="hidden" id="editDeskripsiIndex">
+
+            <div style="display: flex; gap: 15px;">
+                <button type="button"
+                    onclick="saveEditDeskripsi()"
+                    style="flex: 1; background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                        color: white; border: none; padding: 14px; border-radius: 10px;
+                        font-size: 16px; font-weight: 600; cursor: pointer;">
+                    <i class="fas fa-check"></i> Simpan
+                </button>
+                <button type="button"
+                    onclick="closeEditDeskripsi()"
+                    style="background: #6b7280; color: white; border: none; padding: 14px 24px;
+                        border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer;">
+                    <i class="fas fa-times"></i> Batal
+                </button>
+            </div>
         </div>
     </div>
     <script>
@@ -1234,6 +1328,192 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('✅ Form submit handler installed');
     }
 });
+
+// ✅ EDIT DESKRIPSI
+function openEditDeskripsi(id, index, namaLayanan) {
+    document.getElementById('editDeskripsiID').value = id;
+    document.getElementById('editDeskripsiIndex').value = index;
+    document.getElementById('currentDeskripsiLabel').textContent = namaLayanan;
+    // Reset search saat buka modal
+    document.getElementById('searchDeskripsi').value = '';
+    filterDeskripsiOptions();
+
+    // Set dropdown ke nilai sekarang jika ada
+    const select = document.getElementById('selectDeskripsi');
+    for (let i = 0; i < select.options.length; i++) {
+        if (select.options[i].value === namaLayanan) {
+            select.selectedIndex = i;
+            break;
+        }
+    }
+
+    document.getElementById('popupEditDeskripsi').style.display = 'flex';
+}
+
+function closeEditDeskripsi() {
+    document.getElementById('popupEditDeskripsi').style.display = 'none';
+}
+
+function saveEditDeskripsi() {
+    const id = document.getElementById('editDeskripsiID').value;
+    const index = document.getElementById('editDeskripsiIndex').value;
+    const nama = document.getElementById('selectDeskripsi').value;
+
+    if (!nama) {
+        alert('Pilih layanan terlebih dahulu');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('id', id);
+    formData.append('nama_layanan', nama);
+    formData.append('action', 'update_deskripsi');
+
+    fetch('update_deskripsi.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            // Update nama di tabel
+            document.getElementById(`deskripsi-text-${index}`).textContent = nama;
+
+            // Inisialisasi variabel untuk update paymentData
+            let hargaLama = 0;
+            let hargaBaru = data.harga || 0;
+            let rowDitemukan = false;
+
+            // Update harga di tabel jika ada
+            if (data.harga) {
+                const row = document.querySelector(`tr[data-index="${index}"]`);
+                if (row) {
+                    rowDitemukan = true;
+                    
+                    // AMBIL HARGA LAMA SEBELUM DIUPDATE
+                    hargaLama = parseFloat(row.getAttribute('data-harga-lama')) || 
+                               parseFloat(row.getAttribute('data-harga')) || 0;
+                    
+                    // Update atribut row
+                    row.setAttribute('data-harga', hargaBaru);
+                    row.setAttribute('data-harga-lama', hargaBaru);
+
+                    // Update harga cell
+                    const hargaCell = row.querySelector('.harga-item');
+                    if (hargaCell) {
+                        hargaCell.textContent = 'Rp ' + formatNumber(hargaBaru);
+                    }
+                    
+                    // Reset total cell
+                    const totalCell = document.getElementById(`total-item-${index}`);
+                    if (totalCell) {
+                        totalCell.textContent = 'Rp ' + formatNumber(hargaBaru);
+                    }
+                    
+                    // Reset diskon cell
+                    const diskonCell = document.getElementById(`diskon-cell-${index}`);
+                    if (diskonCell) {
+                        diskonCell.innerHTML = `
+                            <span class="no-diskon">-</span>
+                            <button type="button" class="btn-edit-diskon"
+                                onclick="openDiskonItem(${id}, ${index}, ${hargaBaru}, '', 0, '')"
+                                title="Tambah Diskon">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        `;
+                    }
+
+                    // Reset hidden inputs untuk item ini
+                    const allServiceDiskonInputs = document.querySelectorAll('input[name="service_diskon[]"]');
+                    const allServiceTipeInputs = document.querySelectorAll('input[name="service_diskon_tipe[]"]');
+                    
+                    if (allServiceDiskonInputs[index]) {
+                        allServiceDiskonInputs[index].value = 0;
+                    }
+                    if (allServiceTipeInputs[index]) {
+                        allServiceTipeInputs[index].value = '';
+                    }
+
+                    // Reset diskonItems untuk index ini
+                    if (window.diskonItems && window.diskonItems[index]) {
+                        delete window.diskonItems[index];
+                    }
+                }
+            }
+
+            // UPDATE PAYMENT DATA (hanya jika row ditemukan)
+            if (rowDitemukan && window.paymentData) {
+                // Kurangi subtotal dengan harga lama, tambah dengan harga baru
+                window.paymentData.subtotal = window.paymentData.subtotal - hargaLama + hargaBaru;
+                window.paymentData.totalTagihan = window.paymentData.subtotal; // karena diskon item direset
+                window.paymentData.sisaTagihan = window.paymentData.totalTagihan - window.paymentData.sudahDibayar;
+                window.paymentData.totalDiskonItem = 0; // reset karena diskon dihapus
+
+                // Update hidden inputs di form payment
+                const subtotalInput = document.getElementById('subtotalInput');
+                const totalTagihanInput = document.getElementById('totalTagihanInput');
+                const sisaTagihanInput = document.getElementById('sisaTagihanInput');
+                
+                if (subtotalInput) subtotalInput.value = window.paymentData.subtotal;
+                if (totalTagihanInput) totalTagihanInput.value = window.paymentData.totalTagihan;
+                if (sisaTagihanInput) sisaTagihanInput.value = window.paymentData.sisaTagihan;
+
+                // Update summary display
+                const subtotalDisplay = document.getElementById('subtotalDisplay');
+                const totalTagihan = document.getElementById('totalTagihan');
+                const sisaTagihan = document.getElementById('sisaTagihan');
+                const totalTagihanSummary = document.getElementById('totalTagihanSummary');
+                const sisaTagihanSummary = document.getElementById('sisaTagihanSummary');
+                const totalDiskonItems = document.getElementById('total-diskon-items');
+
+                if (subtotalDisplay) subtotalDisplay.textContent = 'Rp ' + formatNumber(window.paymentData.subtotal);
+                if (totalTagihan) totalTagihan.textContent = 'Rp ' + formatNumber(window.paymentData.totalTagihan);
+                if (sisaTagihan) sisaTagihan.textContent = 'Rp ' + formatNumber(window.paymentData.sisaTagihan);
+                if (totalTagihanSummary) totalTagihanSummary.textContent = 'Rp ' + formatNumber(window.paymentData.totalTagihan);
+                if (sisaTagihanSummary) sisaTagihanSummary.textContent = 'Rp ' + formatNumber(window.paymentData.sisaTagihan);
+                if (totalDiskonItems) totalDiskonItems.textContent = '- Rp 0';
+            }
+
+            // ✅ PANGGIL UPDATE TOTAL SUMMARY
+            if (typeof updateTotalSummary === 'function') {
+                updateTotalSummary();
+            }
+
+            closeEditDeskripsi();
+            
+            // ✅ LANGSUNG RELOAD TANPA TOAST
+            setTimeout(() => {
+                location.reload();
+            }, 500);
+            
+        } else {
+            alert('Gagal: ' + data.message);
+        }
+    })
+    .catch(err => {
+        alert('Error: ' + err.message);
+    });
+}
+
+function filterDeskripsiOptions() {
+    const keyword = document.getElementById('searchDeskripsi').value.toLowerCase();
+    const select = document.getElementById('selectDeskripsi');
+    const options = select.querySelectorAll('option');
+
+    options.forEach(opt => {
+        if (opt.value === '') return; // skip placeholder
+        const text = opt.textContent.toLowerCase();
+        opt.style.display = text.includes(keyword) ? '' : 'none';
+    });
+
+    // Tampilkan/sembunyikan optgroup jika semua anaknya hidden
+    const optgroups = select.querySelectorAll('optgroup');
+    optgroups.forEach(group => {
+        const visibleOptions = [...group.querySelectorAll('option')]
+            .filter(o => o.style.display !== 'none');
+        group.style.display = visibleOptions.length > 0 ? '' : 'none';
+    });
+}
 
 console.log('✅ PEMBAYARAN.JS PATCH LOADED');
     </script>
