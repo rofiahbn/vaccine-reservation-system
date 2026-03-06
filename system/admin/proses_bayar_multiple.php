@@ -11,7 +11,8 @@ error_log("POST data: " . print_r($_POST, true));
 // Ambil data
 $booking_id = intval($_POST['booking_id'] ?? 0);
 $payment_methods = json_decode($_POST['payment_methods'] ?? '[]', true);
-$jumlah_bayar = floatval($_POST['jumlahBayar'] ?? 0);
+// Bersihkan format angka (hapus titik pemisah ribuan)
+$jumlah_bayar = floatval(str_replace('.', '', $_POST['jumlahBayar'] ?? 0));
 $diskon_total = floatval($_POST['diskon_total'] ?? 0);
 $subtotal = floatval($_POST['subtotal'] ?? 0);
 $total_tagihan = floatval($_POST['total_tagihan'] ?? 0);
