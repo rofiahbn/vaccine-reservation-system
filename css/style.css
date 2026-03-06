@@ -1,0 +1,864 @@
+* {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', Arial, sans-serif;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      background: #FBAD17;  
+      padding: 0.3vw 17%;
+      display: flex; 
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .logo {  
+      width: 12vw; /* Atur sesuai kebutuhan logo Anda */
+    }
+
+    /* NAVIGATION CONTAINER */
+    #nav { 
+      display: flex; 
+      align-items: center;
+      flex: 1;
+      justify-content: flex-end;
+    }
+
+    /* MENU UTAMA */
+    .menu {
+      display: flex;
+      list-style: none;
+      gap: 0.1vw;   
+    }
+
+    .menu li {
+      position: relative; /* Kunci untuk dropdown desktop */
+    }
+
+    .menu a {
+      text-decoration: none;
+      color: white;
+      padding: 1vw 1vw;
+      display: block;
+      font-size: 0.8vw;
+    }
+
+    /* DROPDOWN DESKTOP */
+    .dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: #3b3a3f;
+      min-width: 200px;
+      border-radius: 0 0 8px 8px;
+      list-style: none;
+      padding: 10px 0;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    .dropdown li a {
+      padding: 10px 20px;
+      font-size: 0.9rem;
+    }
+
+    .dropdown li a:hover {
+      background: #fbad17;
+      color: white;
+    }
+
+    /* BUTTON */
+    .btn2 {
+      background: #fff;
+      border-radius: 999px;
+      text-decoration: none;
+      color: #FB7F09;
+      font-weight: bold; 
+      padding: 0.6vw 1vw;
+      font-size: 1vw;  
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      margin-left: 1vw;
+      transition: 0.3s;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+    .btn_login{
+        width:100%;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    background:#ff8c00;
+    color:white;
+    font-weight:500;
+    cursor:pointer;
+    transition:0.3s;
+    }
+    .btn_login:hover{
+    background:#e67600;
+}
+
+    /* HAMBURGER */
+    .hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 6.87vw;
+      cursor: pointer; 
+      width:15vw;
+    }
+
+    /* DESKTOP HOVER LOGIC */
+    @media (min-width: 769px) {
+      .has-dropdown:hover > .dropdown {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+    }
+
+    #banner{ 
+      margin-top:2vw;
+      margin-left:50%;
+      transform:translateX(-50%); 
+      background-image: url("../img/klinik-vaksin.jpg"); 
+      background-size:100% 100%;
+      width:66%;
+      height:19vw;
+      border-radius:3vw;
+    }
+    .content h1{
+          color:white;
+          font-size:3vw;
+          font-family: 'Poppins', Arial, sans-serif;
+          font-weight:bold;
+          padding-top:6vw ;
+      width:20%;
+          padding-left:2vw;  
+          font-weight: 800;
+      } 
+      .content p {
+        color:white;
+        font-size:0.9vw;
+        font-family: 'Poppins', Arial, sans-serif; 
+        padding-left:2vw;
+        font-weight: 600;
+        width:46%; 
+      }
+    #callus{
+        position:absolute;
+        bottom:0.4vw;
+        right:0%; 
+        width:20vw; 
+        
+      }
+    #chat-us{
+      position:fixed;
+      width:12vw;
+      left:8%;
+      bottom:20px;
+      z-index:10;
+    }
+    #service-count{
+      margin-top:5vw;
+      margin-left:50%;
+      transform:translateX(-50%);
+      background-image: linear-gradient(to bottom, #FBAD17 15%, transparent 5%);
+      width:66%;
+      height:30.6vw;
+      border-radius:3vw;
+       box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      color:#FBAD17;
+      padding-top:6vw;
+      padding-left:4vw;
+      padding-right:28vw;
+    }
+    #service-count p{
+      font-size:2.5vw;
+      font-family: 'Poppins', Arial, sans-serif;
+      font-weight:600;
+    }
+    #service-count img{
+      width:31.8vw; 
+      position:absolute;
+      right:-2vw;
+      bottom:0%;
+      
+    }
+     #count-img{
+        left:2%;
+        top:82%;  
+      }
+    /* Layout Kartu Layanan */
+.services{ 
+  margin-top:5vw;
+  width:68vw;
+  color:#FB7B08;
+  margin-left:17%;
+  font-size:1vw;
+  font-family: 'Poppins', Arial, sans-serif;
+  font-weight:600;
+}
+.services h2{
+  font-size:2.5vw;
+  padding-left:5vw; 
+  font-family: 'Poppins', Arial, sans-serif;}
+.service-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10px, 1fr));
+  gap: 1vw;
+  padding: 0px;
+  
+}
+
+.service-card {
+  text-align: center; 
+  overflow: hidden;
+  position: relative;
+  margin-top:1vw;
+  padding-bottom:3vw;
+  border-radius: 10px; 
+}
+
+.service-card img {
+  width: 16.3vw;
+  height: auto; 
+  
+}
+
+/* Tombol di dalam kartu */
+.btn-outline { 
+  position:absolute;
+  background: #fff; 
+  color:#FB7F09; 
+  padding: 0.2vw 2vw;
+  border-radius: 20px;
+  text-decoration: none;
+  font-weight: bold;
+  margin-bottom: 10px;
+  margin-top:-4vw; 
+  margin-left:0%;
+  transform:translateX(-50%);
+  width:80%;
+  height:2.1vw;
+}
+.btn-text { 
+  position:absolute;
+  background: #fff; 
+  color:#FB7F09; 
+  padding: 0.2vw 2vw;
+  border-radius: 20px;
+  text-decoration: none;
+  width:80%;
+   height:2.1vw;
+  font-weight: bold; 
+  margin-top:-1.5vw;
+ margin-left:0%;
+  transform:translateX(-50%);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+#google-review{
+       background-image: url("../img/Subtract.jpg"); 
+      background-size:100% 100%;
+      width:67.2%;
+      height:27.7vw;
+      margin-left:17%;
+      margin-top:2vw; 
+  padding-left:1vw;
+  padding-right:1vw;
+      
+}
+#google-review h2{
+  color:#FB7B08;
+  font-size:2.5vw;  
+  float:right;
+  margin-right:8.5vw;
+   font-family: 'Poppins', Arial, sans-serif;
+  font-weight:600;
+}
+.tagembed-widget{ 
+  transform:translateX(-50%) translateY(15%);
+  margin-left:50%;  
+  overflow:hidden;
+  height:19vw;
+}
+#home-service{
+  margin-top:3vw;
+  margin-left:51%;
+  transform:translateX(-50%); 
+  width:71%;
+  height:30.6vw; 
+  text-align:center;
+  color:#FB7B08; 
+  font-family: 'Poppins', Arial, sans-serif;
+  font-weight:600;
+  font-size:1.7vw;  
+}
+.howtoorder-card{
+  margin-top:3vw;
+  margin-left:1.3vw; 
+  background-color:#FBA915;
+  border-radius:2vw;
+  height:20.17vw;
+  width:15.8vw;
+  font-size:1vw;
+  color:white; 
+  padding-top:3.5vw;
+  padding-left:0.5vw;
+  font-family: 'Poppins', Arial, sans-serif; 
+  float:left;
+}
+.icon-card{
+  height:6vw;
+}
+.number{
+  position:absolute;
+  margin-left:-5vw;
+  margin-top:-4.5vw;
+  width:4vw;
+  padding-top:1vw;
+  padding-bottom:0.9vw;
+  font-size:1.5vw; 
+  background-color:#3B3A3F;
+  border-radius:50%;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+.ht-desc{
+  font-weight:400;
+  padding: 1vw 0.5vw;
+}
+
+    #footer{
+      margin-top:5vw; 
+      width:100%;
+      background-color:#3B3A3F;
+      height:30.6vw; 
+      color:white;
+      padding-top:1vw;
+      padding-left:17vw;
+      padding-right:10vw;
+      font-size:0.8vw;
+    }
+#footer h2{
+  font-size:1vw;
+  margin-top:1vw;
+  font-family: 'Poppins', Arial, sans-serif;
+}
+    #operational{
+      width:21.6vw;
+      height:6vw; 
+      float:left; 
+      padding:1vw;
+    }
+#alamat{
+      width:21.6vw;
+      height:6vw; 
+      float:left;
+      font-size:1vw;
+    }
+#maps{
+      width:21.6vw;
+      float:left;
+      font-size:1vw;
+      margin-left:3vw;
+    }
+#maps iframe{
+  width:100%;
+  height:18vw;
+}
+  
+
+    /* MOBILE VIEW (Breakpoints) */
+    @media (max-width: 768px) {
+      .hamburger {
+        display: block;
+        
+      }
+      .navbar {
+      background: #FBAD17;  
+      padding: 0.3vw 4.7vw;
+      display: flex; 
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+      .logo {  
+      width: 28.7vw; /* Atur sesuai kebutuhan logo Anda */
+    }
+      #nav {
+        display: none; /* Sembunyikan menu */
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: #FBAD17;
+        padding: 20px 0;
+        align-items: flex-start;
+      }
+
+      #nav.active {
+        display: flex;
+      }
+
+      .menu {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .menu li {
+        width: 100%;
+      }
+
+      .menu a {
+        padding: 2vw 8vw;
+        width: 100%;
+        font-size: 2.8vw;
+      }
+ 
+      /* DROPDOWN MOBILE */
+      .dropdown {
+        position: static; /* PENTING: Mendorong menu ke bawah */
+        display: none; 
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        background: rgb(58 58 65);
+        box-shadow: none;
+        width: 100%;
+      }
+
+      .has-dropdown.active > .dropdown {
+        display: block;
+      }
+
+      .btn2 {
+        margin: 20px 8%;
+        width: 84%;
+        text-align: center;
+        font-size: 3vw;
+        padding-top:2vw;
+        padding-bottom:2vw;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+      }
+      #banner{
+      margin-top:4vw;
+      margin-left:50%;
+      transform:translateX(-50%);
+      background-image: url("../img/klinik-vaksin-mobile.jpg");
+      background-repeat:no-repeat;
+      background-size:100% 100%;
+      width:92.1%;
+      height:123vw;
+      border-radius:3vw;
+    }
+    .content h1{
+      color:white;
+      font-size:9vw;
+      font-family: 'Poppins', Arial, sans-serif;
+      font-weight:bold;
+      padding-top:6vw ;
+      padding-left:7vw;  
+      font-weight: 800;
+    } 
+      .content p {
+        color:white;
+        font-size:3vw;
+        font-family: 'Poppins', Arial, sans-serif; 
+        padding:0vw 7vw;
+        font-weight: 600;
+        width:100%;
+      }
+      #callus{
+        position:absolute;
+        bottom:2.2vw;
+        right:0%; 
+        width:51%; 
+        
+      }
+      #service-count{
+      margin-top:5vw;
+      margin-left:50%;
+      transform:translateX(-50%);
+      background-image: linear-gradient(to bottom, #FBAD17 15%, transparent 5%);
+      width:92.1%;
+      height:40.6vw;
+      border-radius:3vw;
+       box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      color:#FBAD17;
+      padding-top:8vw;
+      padding-left:5vw;
+      padding-right:35vw;
+    }
+    #service-count p{
+      font-size:4vw;
+      font-family: 'Poppins', Arial, sans-serif;
+      font-weight:600;
+    }
+    #service-count img{
+      width:42.8vw; 
+      position:absolute;
+      right:-2vw;
+      bottom:0%;
+      
+    }
+      #chat-us{
+        display:none;
+      }
+      #count-img{
+        left:2%;
+        top:84%;  
+      }
+        /* Layout Kartu Layanan */
+.services{ 
+  margin-top:7vw;
+  width:92vw;
+  color:#FB7B08;
+  margin-left:4%;
+  font-size:3vw;
+  font-family: 'Poppins', Arial, sans-serif;
+  font-weight:600;
+}
+.services h2{
+  padding-left:5vw; 
+  font-family: 'Poppins', Arial, sans-serif;}
+.service-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(40vw, 1fr));
+  gap: 1vw;
+  padding: 0px;
+}
+
+.service-card {
+  text-align: center; 
+  overflow: hidden;
+  position: relative;
+  margin-top:1vw;
+  padding-bottom:3vw;
+  border-radius: 10px; 
+}
+
+.service-card img {
+  width: 40vw;
+  height: auto; 
+  
+}
+
+/* Tombol di dalam kartu */
+.btn-outline { 
+  position:absolute;
+  background: #fff; 
+  color:#FB7F09; 
+  padding: 0.2vw 2vw;
+  border-radius: 20px;
+  text-decoration: none;
+  font-weight: bold;
+  margin-bottom: 10px;
+  margin-top:-12vw; 
+  margin-left:0%;
+  transform:translateX(-50%);
+  width:70%;
+  height:5.8vw;
+}
+.btn-text { 
+  position:absolute;
+  background: #fff; 
+  color:#FB7F09; 
+  padding: 0.2vw 2vw;
+  border-radius: 20px;
+  text-decoration: none;
+  width:70%;
+   height:5.8vw;
+  font-weight: bold; 
+  margin-top:-4.5vw;
+ margin-left:0%;
+  transform:translateX(-50%);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+      #google-review{
+       background-image: url("../img/Subtract2.jpg"); 
+      background-size:100% 100%;
+      width:85%;
+      height:113vw;
+      margin-left:7.5%;
+      margin-top:6vw; 
+      
+}
+#google-review h2{
+  color:#FB7B08;
+  font-size:5vw;
+  float:right;
+  margin-right:22.5vw;
+  margin-top:2vw;
+  margin-bottom:7vw;
+   font-family: 'Poppins', Arial, sans-serif;
+  font-weight:600;
+}
+      
+.tagembed-widget{
+  width:56vw;
+  transform:translateX(-50%) translateY(5%);
+  margin-left:50%; 
+  height:100vw;
+}
+
+    
+#home-service{
+  width:92%;
+  height:112.6vw;  
+  font-size:3.4vw;   
+  padding-left:8VW;
+  margin-top:10VW;
+}
+.howtoorder-card{
+  margin-top:8vw;
+  margin-left:5vw; 
+  background-color:#FBA915;
+  border-radius:2vw;
+  height:40.34vw;
+  width:31.6vw;
+  font-size:2.5vw;
+  color:white; 
+  padding-top:5.5vw;
+  padding-left:0.5vw;
+  font-family: 'Poppins', Arial, sans-serif; 
+  float:left;
+}
+.icon-card{
+  height:10vw;
+}
+.number{
+  position:absolute;
+  margin-left:-11vw;
+  margin-top:-7.5vw;
+  width:10vw;
+  padding-top:2vw;
+  padding-bottom:2vw;
+  font-size:3.5vw; 
+  background-color:#3B3A3F;
+  border-radius:50%;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+.ht-desc{
+  font-weight:400;
+  padding: 1vw 0.5vw;
+}
+
+      #footer{
+      margin-top:5vw; 
+      width:100%;
+      background-color:#3B3A3F;
+      height:170.6vw; 
+      color:white;
+      padding-top:5vw;
+      padding-left:17vw;
+      padding-right:17vw;
+      font-size:2.8vw;
+    }
+#footer h2{
+  font-size:2.8vw;
+  margin-top:3vw;
+  font-family: 'Poppins', Arial, sans-serif;
+}
+    #operational{
+      width:80vw; 
+      height:50vw; 
+      float:left; 
+      padding:1vw;
+    }
+#alamat{
+      width:80vw; 
+      height:50vw; 
+      float:left;
+      font-size:2.8vw;
+    }
+#maps{
+      width:66vw; 
+      height:40vw; 
+      float:left; 
+    }
+#maps iframe{
+  width:100%;
+  height:48vw;
+}
+
+
+      
+  }
+
+
+.login-card{
+    background:white;
+    width:20vw;
+    margin-left:40vw;
+  margin-top:2vw;
+    padding:40px;
+    border-radius:16px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.15);
+}
+
+.login-card h2{
+    text-align:center;
+    margin-bottom:30px;
+    font-weight:600;
+}
+ 
+.form-group2{
+    margin-bottom:20px;
+    display:flex;
+    flex-direction:column;
+}
+
+.form-group2 label{
+    font-size:14px;
+    margin-bottom:6px;
+}
+
+.form-group2 input{
+    padding:10px;
+    border-radius:8px;
+    border:1px solid #ddd;
+    font-size:14px;
+    transition:0.3s;
+}
+
+.form-group2 input:focus{
+    border-color:#ff8c00;
+    outline:none;
+    box-shadow:0 0 0 2px rgba(255,140,0,0.2);
+}
+ /*
+button{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    background:#ff8c00;
+    color:white;
+    font-weight:500;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover{
+    background:#e67600;
+}
+*/
+.message{
+    text-align:center;
+    margin-top:15px;
+    font-size:14px;
+}
+a {
+  text-decoration:none;
+}
+ /* Kontainer Utama Artikel */
+.article-container {
+    max-width: 1000px; /* Lebar maksimal konten */
+    margin: 0 auto;
+    padding: 20px;
+    overflow-x: hidden; /* Mencegah scroll horizontal */
+}
+
+/* Handler Gambar di Dalam Konten */
+.entry-content img {
+    max-width: 100% !important; /* Paksa gambar tidak melebihi lebar layar */
+    height: auto !important;     /* Jaga proporsi asli gambar */
+    display: block;
+    margin: 20px auto;           /* Posisi gambar di tengah */
+    border-radius: 8px;          /* Opsional: mempercantik sudut gambar */
+}
+
+/* Handler untuk Tabel atau Iframe (Video) jika ada */
+.entry-content table, 
+.entry-content iframe {
+    max-width: 100% !important;
+    width: 100% !important;
+    height: auto !important;
+}
+
+/* Tipografi untuk Mobile */
+@media (max-width: 768px) {
+    .entry-title {
+        font-size: 1.8rem;
+    }
+    .article-container {
+        padding: 15px;
+    }
+}
+
+.breadcrumb {
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 20px;
+}
+
+.entry-title {
+    font-size: 2.8rem;
+    line-height: 1.2;
+    margin-bottom: 15px;
+    color: #222;
+}
+
+.entry-meta {
+    margin-bottom: 30px;
+    font-size: 14px;
+    color: #666;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
+/* Styling konten dinamis */
+.entry-content p {
+    margin-bottom: 20px;
+    font-size: 1.15rem;
+}
+
+.entry-content h3 {
+    margin: 35px 0 15px;
+    font-size: 1.8rem;
+    color: #f39c12;
+}
+
+.entry-content ul {
+    margin-bottom: 25px;
+    padding-left: 20px;
+}
+
+.entry-content li {
+    margin-bottom: 10px;
+}
+
+.entry-content blockquote {
+    background: #f9f9f9;
+    margin: 30px 0;
+    font-size: 1.2rem;
+}
+
+.entry-content table {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+}
+#call-us-icon{
+  position:fixed;
+  z-index:10;
+  width:12.6vw;
+  left:8vw;
+  bottom:1vw;
+} 

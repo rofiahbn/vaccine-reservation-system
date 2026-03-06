@@ -1,0 +1,12 @@
+# HTTP to HTTPS redirection
+#Header always set Content-Security-Policy "upgrade-insecure-requests"
+RewriteEngine On
+#RewriteCond %{HTTPS} off
+#RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Set Content-Security-Policy to allow framing from specified domains
+#Header always set Content-Security-Policy "frame-ancestors 'self' https://goarglobal.com https://arkids.co.id/ https://cicc.com.sa/ https://dev.arkids.co.id/ https://www.deepar.ai/"
+
+# Rewrite untuk menangani request yang tidak termasuk dalam daftar file yang disebutkan
+RewriteCond %{REQUEST_URI} !(\.data|\.wasm|\.png|\.jpg|\.gif|\.jpeg|\.zip|\.css|\.svg|\.js|\.webp|\.ico|\.mp4|\.json|\.unityweb|\.html|\.patt|\.dat|\.deepar|\.task|\.glb)$
+RewriteRule (.*) routes.php [QSA,L]

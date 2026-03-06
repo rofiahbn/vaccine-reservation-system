@@ -1,0 +1,745 @@
+/* ===================================================
+   GLOBAL RESET
+=================================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f5f5f5;
+    display: flex;
+    min-height: 100vh;
+}
+
+/* ===================================================
+   MAIN CONTENT
+=================================================== */
+.main-content {
+    position:absolute;
+    margin-left: 0px;
+    flex: 1;
+    padding: 30px 40px;
+    background: #f5f5f5;
+     min-height:100%;
+}
+
+.page-header {
+    margin-bottom: 25px;
+}
+
+.page-header h1 {
+    font-size: 28px;
+    color: #2d3748;
+    font-weight: 600;
+}
+
+.today-info {
+    text-align: right;
+}
+
+.today-date {
+    font-size: 14px;
+    color: #374151;
+    font-weight: 500;
+}
+
+.today-time {
+    font-size: 18px;
+    font-weight: 600;
+    color: #111827;
+    margin-top: 2px;
+}
+
+.service-toggle {
+    display: flex;
+    background: #d4d4d4;
+    border-radius: 20px;
+    padding: 4px;
+}
+
+.toggle-btn {
+    border: none;
+    background: transparent;
+    padding: 6px 14px;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #555;
+    transition: 0.2s;
+}
+
+.toggle-btn.active {
+    background: #4CAF50;
+    color: white;
+}
+
+.toggle-btn:hover {
+    background: #ddd;
+}
+
+.page-header.home_service .toggle-btn.active {
+    background: #ff9f43;
+    color: white;
+    border-color: #ff9f43;
+}
+
+.page-header.in_clinic .toggle-btn.active {
+    background: #2ecc71;
+    color: white;
+    border-color: #2ecc71;
+}
+
+/* ===================================================
+   DASHBOARD CARDS
+=================================================== */
+.dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.card-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: white;
+}
+
+.card-icon.green {
+    background: #10b981;
+}
+
+.card-icon.red {
+    background: #ef4444;
+}
+
+.card-icon.blue {
+    background: #3b82f6;
+}
+
+.card-content {
+    flex: 1;
+}
+
+.card-label {
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 5px;
+}
+
+.card-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1;
+    margin-bottom: 3px;
+}
+
+.card-subtitle {
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+.now-serving-card {
+    margin-top: 25px;
+    margin-bottom: 35px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px 26px;
+    display: flex;
+    align-items: flex-start;
+    gap: 30px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+}
+
+/* KIRI */
+.now-number {
+    min-width: 160px;
+    text-align: center;
+    padding-top: 10px;
+}
+
+.now-number .label {
+    font-size: 14px;
+    color: #777;
+    margin-bottom: 6px;
+}
+
+.now-number .number {
+    font-size: 44px;
+    font-weight: 700;
+    color: #333;
+}
+
+/* PEMISAH */
+.divider {
+    width: 1px;
+    height: 90px;
+    background: #ddd;
+}
+
+/* INFO */
+.now-info {
+    min-width: 220px;
+    padding: 12px 26px 20px 26px;
+}
+
+.info-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+.info-row i {
+    color: #2ecc71;
+}
+
+.info-label {
+    color: #777;
+}
+
+.info-value {
+    font-weight: 600;
+    color: #333;
+}
+
+/* LAYANAN */
+.service-list {
+    margin-left: 22px;
+    font-size: 13px;
+    color: #444;
+    line-height: 1.5;
+}
+
+/* ICON KANAN */
+.now-icon {
+    margin-left: auto;
+    font-size: 26px;
+    color: #4a6cf7;
+}
+
+/* Tombol refresh */
+.refresh-btn {
+    cursor: pointer;
+    font-size: 24px;
+    color: #4a6cf7;
+    transition: transform 0.3s ease;
+}
+
+/* Hover efek */
+.refresh-btn:hover {
+    transform: rotate(90deg);
+}
+
+.now-status {
+    margin-top: 6px;
+    font-size: 13px;
+    color: #2ecc71;
+    font-weight: 600;
+}
+
+@media (max-width: 900px) {
+
+    .now-serving-card {
+        gap: 20px;
+    }
+
+    /* Nomor antrian full width */
+    .now-number {
+        width: 100%;
+        text-align: left;
+    }
+
+    /* Nama + layanan sejajar, tapi pindah baris */
+    .now-main-info {
+        width: 100%;
+        gap: 30px;
+    }
+
+    .now-block {
+        min-width: 200px;
+    }
+
+    /* Icon refresh tetap di kanan */
+    .now-icon {
+        margin-left: auto;
+    }
+}
+
+@media (max-width: 900px) {
+
+    .now-serving-card {
+        gap: 20px;
+    }
+
+    /* Nomor antrian full width */
+    .now-number {
+        width: 100%;
+        text-align: left;
+    }
+
+    /* Nama + layanan sejajar, tapi pindah baris */
+    .now-main-info {
+        width: 100%;
+        gap: 30px;
+    }
+
+    .now-block {
+        min-width: 200px;
+    }
+
+    /* Icon refresh tetap di kanan */
+    .now-icon {
+        margin-left: auto;
+    }
+}
+
+@media (max-width: 600px) {
+
+    .now-serving-card {
+        padding: 20px;
+        gap: 16px;
+    }
+
+    /* Nomor antrian center */
+    .now-number {
+        width: 100%;
+        text-align: center;
+    }
+
+    .now-number .number {
+        font-size: 36px;   /* lebih kecil biar muat */
+    }
+
+    /* Info stack vertical */
+    .now-main-info {
+        flex-direction: column;
+        gap: 16px;
+        width: 100%;
+    }
+
+    .now-block {
+        min-width: unset;
+        width: 100%;
+    }
+
+    /* Refresh pindah ke kanan bawah */
+    .now-icon {
+        margin-left: auto;
+        align-self: flex-end;
+    }
+}
+
+
+/* ===================================================
+   BOOKING VIEW SECTION
+=================================================== */
+.booking-view {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-header h2 {
+    font-size: 20px;
+    color: #2d3748;
+    font-weight: 600;
+}
+
+.filters {
+    display: flex;
+    gap: 10px;
+}
+
+.filters select,
+.filter-select {
+    padding: 8px 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: white;
+    font-size: 14px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.filters select:focus,
+.filter-select:focus {
+    outline: none;
+    border-color: #fbac07;
+}
+
+/* ===================================================
+   CALENDAR GRID TABLE
+=================================================== */
+
+.calendar-wrapper {
+    max-height: 520px;        /* atur sesuai layout */
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-radius: 8px;
+    position: relative;
+}
+
+.calendar-grid {
+    margin-bottom: 15px;
+}
+
+.booking-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+}
+
+.booking-table thead {
+    background: #f9fafb;
+}
+
+.booking-table th {
+    padding: 12px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    border: 1px solid #e5e7eb;
+}
+
+.booking-table td {
+    padding: 8px;
+    border: 1px solid #e5e7eb;
+    text-align: center;
+    vertical-align: middle;
+    min-height: 60px;
+}
+
+.booking-table thead th {
+    position: sticky;
+    top: 0;
+    background: #EDECEF;
+    z-index: 50;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.time-cell {
+    font-weight: 600;
+    color: #6b7280;
+    background: #f9fafb;
+    width: 80px;
+}
+
+.booking-cell {
+    position: relative;
+    min-width: 120px;
+    background: #ffffff;
+}
+
+.booking-legend {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+    font-size: 13px;
+    color: #374151;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.legend-dot.pending {
+    background: #fbac07;
+}
+
+.legend-dot.confirmed {
+    background: #1e40af;
+}
+
+.legend-dot.completed {
+    background: #10b981;
+}
+
+.legend-dot.cancelled {
+    background: #ef4444;
+}
+
+
+/* ===================================================
+   BOOKING ITEM (Kotak Kuning)
+=================================================== */
+/* Base booking item */
+.booking-item {
+    border-radius: 6px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    min-height: 60px; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    font-size: 12px;
+}
+
+.booking-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+}
+
+/* Status: Pending (Kuning) */
+.booking-item.status-pending {
+    background: linear-gradient(135deg, #fbac07 0%, #f59e0b 100%);
+}
+
+.booking-item.status-pending .booking-status {
+    color: #78350f; /* Coklat tua - lebih kontras */
+}
+
+.booking-item.status-pending .booking-count {
+    color: #1f2937;
+}
+
+/* Status: Confirmed (Hijau) */
+.booking-item.status-confirmed {
+    background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+    color : white;
+}
+
+.booking-item.status-confirmed .booking-status {
+    color: #ffffff; /* Putih biar kontras */
+}
+
+.booking-item.status-confirmed .booking-count {
+    color: white;
+}
+
+/* Status: Completed (Hijau) */
+.booking-item.status-completed {
+    background: linear-gradient(135deg, #065f46 0%, #1e8a47 100%);
+    color : white;
+}
+
+.booking-item.status-completed .booking-status {
+    color: #ffffff; /* Putih biar kontras */
+}
+
+.booking-item.status-completed .booking-count {
+    color: white;
+}
+
+/* Status: Cancelled (Merah) */
+.booking-item.status-cancelled {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color : white;
+}
+
+.booking-item.status-cancelled .booking-status {
+    color: #ffffff; /* Putih */
+}
+
+.booking-item.status-cancelled .booking-count {
+    color: white;
+}
+
+
+.booking-status {
+    font-size: 10px; /* Dari 11px jadi 10px */
+    font-weight: 600; /* Dari 500 jadi 600 - BOLD */
+    margin-bottom: 4px;
+    line-height: 1.2;
+    text-align: center;
+    text-transform: capitalize;
+}
+
+.booking-count {
+    font-size: 20px; /* Dari 18px jadi 20px */
+    font-weight: 700;
+    text-align: center;
+}
+
+.booking-cell.current-slot {
+    background-color: #fffbf0;
+    border: 2px solid #fbac07;
+}
+
+.booking-row {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    line-height: 1.2;
+    flex-direction: column; 
+}
+
+.queue-no {
+    font-weight: 700;
+}
+
+.patient-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* ===================================================
+   BOOKING LIST TABLE
+=================================================== */
+.booking-list {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.list-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.list-table thead {
+    background: linear-gradient(135deg, #fbac07 0%, #f59e0b 100%);
+}
+
+.list-table th {
+    padding: 14px 16px;
+    text-align: left;
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    border: none;
+}
+
+.list-table th:first-child {
+    border-radius: 8px 0 0 0;
+}
+
+.list-table th:last-child {
+    border-radius: 0 8px 0 0;
+}
+
+.list-table tbody tr {
+    border-bottom: 1px solid #e5e7eb;
+    transition: background 0.2s;
+}
+
+.list-table tbody tr:hover {
+    background: #f9fafb;
+}
+
+.list-table td {
+    padding: 14px 16px;
+    font-size: 14px;
+    color: #374151;
+}
+
+/* ===================================================
+   STATUS BADGES
+=================================================== */
+.status-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-badge.completed {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-badge.confirmed {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.status-badge.pending {
+    background: #fefddb;
+    color: #fbac07;
+}
+
+.status-badge.cancelled {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* ===================================================
+   RESPONSIVE
+=================================================== */
+@media (max-width: 1400px) {
+    .dashboard-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 1024px) {
+   
+    
+    .nav-item span {
+        display: none;
+    }
+    
+    .main-content {
+        margin-left: 70px;
+       
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .main-content {
+        padding: 20px;
+        margin-left: 0;
+    }
+  
+    .calendar-grid {
+        overflow-x: scroll;
+    }
+}
