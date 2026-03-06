@@ -675,10 +675,37 @@ if (!$all_completed) {
                     
                     <!-- Tombol Cetak - SELALU TAMPIL -->
                     <button class="btn-cetak" 
-                            onclick="window.open('cetak_pembayaran.php?id=<?php echo $parent_booking_id; ?>', '_blank')"
-                            title="Cetak faktur pembayaran">
+                            onclick="window.open('cetak_pembayaran.php?id=<?= $parent_booking_id ?>', '_blank')"
+                            title="Cetak faktur semua peserta">
                         <i class="fas fa-print"></i> Cetak Pembayaran
                     </button>
+
+                    <?php if ($jumlah_peserta > 1): ?>
+                    <!-- Dropdown Cetak Per Peserta -->
+                    <div class="dropdown-cetak" style="position: relative; display: inline-block;">
+                        <button class="btn-cetak" onclick="toggleDropdownCetak()" 
+                                style="background: #0369a1;"
+                                title="Cetak per peserta">
+                            <i class="fas fa-user-check"></i> Cetak Per Peserta <i class="fas fa-chevron-down" style="font-size:10px;"></i>
+                        </button>
+                        <div id="dropdownCetakMenu" style="display:none; position:absolute; bottom:110%; left:0;
+                                background:white; border:1px solid #e2e8f0; border-radius:8px; 
+                                box-shadow:0 4px 12px rgba(0,0,0,0.15); min-width:220px; z-index:999;">
+                            <?php foreach ($semua_peserta as $p): ?>
+                            <a href="cetak_pembayaran.php?id=<?= $parent_booking_id ?>&peserta_id=<?= $p['id'] ?>"
+                            target="_blank"
+                            onclick="document.getElementById('dropdownCetakMenu').style.display='none'"
+                            style="display:block; padding:10px 15px; color:#1e293b; text-decoration:none;
+                                    border-bottom:1px solid #f1f5f9; font-size:13px;"
+                            onmouseover="this.style.background='#f0f9ff'"
+                            onmouseout="this.style.background='white'">
+                                <i class="fas fa-user" style="color:#0369a1; margin-right:6px;"></i>
+                                <?= htmlspecialchars($p['nama_lengkap']) ?>
+                            </a>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                     
                     <!-- Tombol Kirim Invoice - SELALU TAMPIL -->
                     <button class="btn-invoice" onclick="kirimInvoice()">
@@ -1516,6 +1543,19 @@ function filterDeskripsiOptions() {
 }
 
 console.log('✅ PEMBAYARAN.JS PATCH LOADED');
+
+    function toggleDropdownCetak() {
+        const menu = document.getElementById('dropdownCetakMenu');
+        menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // Tutup dropdown jika klik di luar
+    document.addEventListener('click', function(e) {
+        const dropdown = document.querySelector('.dropdown-cetak');
+        if (dropdown && !dropdown.contains(e.target)) {
+            document.getElementById('dropdownCetakMenu').style.display = 'none';
+        }
+    });
     </script>
     <script src="system/admin/js/pembayaran.js"></script>
     <script src="system/admin/js/sidebar-toggle.js"></script>

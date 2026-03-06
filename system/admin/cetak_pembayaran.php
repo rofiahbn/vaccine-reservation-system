@@ -1,4 +1,6 @@
 <?php 
+
+date_default_timezone_set('Asia/Jakarta');
 include "config.php";
 require_once "system/vendor/autoload.php";
 
@@ -28,6 +30,10 @@ $is_child = ($jenis_data['parent_id'] != NULL);
 $parent_booking_id = $is_child ? $jenis_data['parent_id'] : $booking_id;
 $service_type = $jenis_data['service_type'];
 $tanggal_layanan = $jenis_data['tanggal_booking'];
+
+/* ================= CEK MODE CETAK PER PESERTA ================= */
+$peserta_id = isset($_GET['peserta_id']) ? intval($_GET['peserta_id']) : 0;
+$mode_per_peserta = ($peserta_id > 0);
 
 /* ================= HITUNG JATUH TEMPO ================= */
 function hitungJatuhTempo($service_type, $tanggal_pesanan, $tanggal_layanan) {
@@ -76,7 +82,7 @@ if (!$booking) {
 
 /* ================= AMBIL SEMUA PESERTA ================= */
 $sql_peserta = "
-    SELECT b.*, p.nama_lengkap 
+    SELECT b.*, p.nama_lengkap, p.id as patient_id_ref
     FROM bookings b 
     JOIN patients p ON b.patient_id = p.id 
     WHERE b.parent_id = ? OR b.id = ?
@@ -95,7 +101,42 @@ while ($row = $peserta_result->fetch_assoc()) {
     $jumlah_peserta++;
 }
 
-/* ================= AMBIL NO HP UTAMA ================= */
+/* ================= CARI DATA PESERTA YANG DICETAK (MODE PER PESERTA) ================= */
+$peserta_cetak = null;
+$nama_cetak = $booking['nama_lengkap'];
+$phone_cetak = null;
+$address_cetak = null;
+
+if ($mode_per_peserta) {
+    foreach ($semua_peserta as $p) {
+        if ($p['id'] == $peserta_id) {
+            $peserta_cetak = $p;
+            $nama_cetak = $p['nama_lengkap'];
+            break;
+        }
+    }
+
+    // Validasi peserta_id benar-benar milik booking ini
+    if (!$peserta_cetak) {
+        die("Peserta tidak ditemukan dalam booking ini.");
+    }
+
+    // Ambil no HP peserta spesifik
+    $sql_phone_p = "SELECT phone FROM patient_phones WHERE patient_id = ? ORDER BY is_primary DESC LIMIT 1";
+    $stmt_ph_p = $conn->prepare($sql_phone_p);
+    $stmt_ph_p->bind_param("i", $peserta_cetak['patient_id']);
+    $stmt_ph_p->execute();
+    $phone_cetak = $stmt_ph_p->get_result()->fetch_assoc()['phone'] ?? '-';
+
+    // Ambil alamat peserta spesifik
+    $sql_addr_p = "SELECT * FROM patient_addresses WHERE patient_id = ? AND is_primary = 1 LIMIT 1";
+    $stmt_ad_p = $conn->prepare($sql_addr_p);
+    $stmt_ad_p->bind_param("i", $peserta_cetak['patient_id']);
+    $stmt_ad_p->execute();
+    $address_cetak = $stmt_ad_p->get_result()->fetch_assoc();
+}
+
+/* ================= AMBIL NO HP & ALAMAT BOOKING UTAMA (mode semua) ================= */
 $sql_phone = "SELECT phone FROM patient_phones 
               WHERE patient_id = ? 
               ORDER BY is_primary DESC 
@@ -105,7 +146,6 @@ $stmt_ph->bind_param("i", $booking['patient_id']);
 $stmt_ph->execute();
 $phone = $stmt_ph->get_result()->fetch_assoc()['phone'] ?? '-';
 
-/* ================= AMBIL ALAMAT UTAMA ================= */
 $sql_addr = "SELECT * FROM patient_addresses 
              WHERE patient_id = ? 
              AND is_primary = 1 
@@ -114,6 +154,11 @@ $stmt_ad = $conn->prepare($sql_addr);
 $stmt_ad->bind_param("i", $booking['patient_id']);
 $stmt_ad->execute();
 $address = $stmt_ad->get_result()->fetch_assoc();
+
+// Tentukan data yang dipakai untuk section "Kepada"
+$tampil_nama   = $mode_per_peserta ? $nama_cetak : $booking['nama_lengkap'];
+$tampil_phone  = $mode_per_peserta ? ($phone_cetak ?? $phone) : $phone;
+$tampil_alamat = $mode_per_peserta ? ($address_cetak ?? $address) : $address;
 
 /* ================= AMBIL RIWAYAT PEMBAYARAN ================= */
 $sql_riwayat = "
@@ -132,22 +177,33 @@ $stmt_riwayat->execute();
 $result_riwayat = $stmt_riwayat->get_result();
 
 $riwayat_data = [];
-$total_sudah_dibayar = 0;
+$total_sudah_dibayar_global = 0;
 $total_diskon_global = 0;
 
 while ($row = $result_riwayat->fetch_assoc()) {
     $riwayat_data[] = $row;
     if ($row['status'] == 'paid' || $row['status'] == 'partial') {
-        $total_sudah_dibayar += $row['amount_paid'];
+        $total_sudah_dibayar_global += $row['amount_paid'];
     }
     $total_diskon_global += floatval($row['diskon'] ?? 0);
 }
 
-// Ambil payment terakhir untuk info di faktur
 $payment_terakhir = !empty($riwayat_data) ? $riwayat_data[0] : null;
 
 /* ================= AMBIL LAYANAN & HITUNG TOTAL ================= */
-if ($jumlah_peserta > 1) {
+if ($mode_per_peserta) {
+    // Hanya layanan milik peserta ini
+    $sql_services = "
+        SELECT bs.*, b.id as booking_id, p.nama_lengkap
+        FROM booking_services bs
+        JOIN bookings b ON bs.booking_id = b.id
+        JOIN patients p ON b.patient_id = p.id
+        WHERE b.id = ?
+        ORDER BY bs.id
+    ";
+    $stmt_s = $conn->prepare($sql_services);
+    $stmt_s->bind_param("i", $peserta_id);
+} elseif ($jumlah_peserta > 1) {
     $sql_services = "
         SELECT bs.*, b.id as booking_id, p.nama_lengkap
         FROM booking_services bs
@@ -180,22 +236,55 @@ while ($row = $result_services->fetch_assoc()) {
     $row['jumlah'] = 1;
     $diskon = $row['diskon'] ?? 0;
     $row['total'] = $row['harga'] - $diskon;
-    
     $subtotal += $row['harga'];
     $total_tagihan += $row['total'];
     $total_diskon_item += $diskon;
     $data_services[] = $row;
 }
 
-// 🔥 PERBAIKAN: Hitung total tagihan final dengan diskon global
-$total_tagihan_final = $total_tagihan - $total_diskon_global;
-if ($total_tagihan_final < 0) $total_tagihan_final = 0;
+/* ================= HITUNG TOTAL TAGIHAN ================= */
+if ($mode_per_peserta) {
+    // Ambil total tagihan SEMUA peserta dalam grup (untuk hitung proporsi)
+    $sql_total_grup = "
+        SELECT SUM(bs.harga - IFNULL(bs.diskon, 0)) as total_grup
+        FROM booking_services bs
+        JOIN bookings b ON bs.booking_id = b.id
+        WHERE b.parent_id = ? OR b.id = ?
+    ";
+    $stmt_tg = $conn->prepare($sql_total_grup);
+    $stmt_tg->bind_param("ii", $parent_booking_id, $parent_booking_id);
+    $stmt_tg->execute();
+    $total_grup_row = $stmt_tg->get_result()->fetch_assoc();
+    $total_tagihan_grup = floatval($total_grup_row['total_grup'] ?? 0);
 
-$sisa_tagihan = $total_tagihan_final - $total_sudah_dibayar;
-if ($sisa_tagihan < 0) $sisa_tagihan = 0;
+    // Proporsi peserta ini = tagihan peserta ÷ tagihan grup
+    // Sudah dibayar peserta = proporsi × total sudah dibayar grup
+    if ($total_tagihan_grup > 0) {
+        $proporsi = $total_tagihan / $total_tagihan_grup;
+        $sudah_dibayar_per_peserta = round($total_sudah_dibayar_global * $proporsi);
+    } else {
+        $sudah_dibayar_per_peserta = 0;
+    }
 
-/* ================= DISKON TOTAL (jika ada di payment terakhir) ================= */
-$diskon_total = $total_diskon_global; // Gunakan total diskon global
+    // Total tagihan peserta = tagihan layanan peserta (diskon item sudah terhitung)
+    $total_tagihan_final = $total_tagihan;
+    if ($total_tagihan_final < 0) $total_tagihan_final = 0;
+
+    $total_sudah_dibayar = $sudah_dibayar_per_peserta;
+    $diskon_total        = 0; // diskon tambahan tidak ditampilkan di faktur per peserta
+
+    $sisa_tagihan = $total_tagihan_final - $total_sudah_dibayar;
+    if ($sisa_tagihan < 0) $sisa_tagihan = 0;
+} else {
+    $total_tagihan_final = $total_tagihan - $total_diskon_global;
+    if ($total_tagihan_final < 0) $total_tagihan_final = 0;
+
+    $total_sudah_dibayar = $total_sudah_dibayar_global;
+    $diskon_total        = $total_diskon_global;
+
+    $sisa_tagihan = $total_tagihan_final - $total_sudah_dibayar;
+    if ($sisa_tagihan < 0) $sisa_tagihan = 0;
+}
 
 /* ================= FORMAT TANGGAL ================= */
 function formatTanggalIndo($date) {
@@ -208,38 +297,35 @@ function formatTanggalIndo($date) {
 }
 
 $tanggal_pelayanan = formatTanggalIndo($booking['tanggal_booking']);
-$tanggal_faktur = $payment_terakhir ? formatTanggalIndo(date('Y-m-d', strtotime($payment_terakhir['created_at']))) : formatTanggalIndo(date('Y-m-d'));
+$tanggal_faktur    = $payment_terakhir 
+    ? formatTanggalIndo(date('Y-m-d', strtotime($payment_terakhir['created_at']))) 
+    : formatTanggalIndo(date('Y-m-d'));
 $jatuh_tempo_format = formatTanggalIndo($jatuh_tempo);
 
 /* ================= METODE PEMBAYARAN ================= */
 $metode_bayar = 'TUNAI';
 if ($payment_terakhir) {
-    $metode_raw = $payment_terakhir['metode_detail'] ?? $payment_terakhir['metode'];
+    $metode_raw   = $payment_terakhir['metode_detail'] ?? $payment_terakhir['metode'];
     $metode_bayar = strtoupper($metode_raw);
 }
 
-// Format metode bayar lebih readable
-if (strpos($metode_bayar, 'TUNAI') !== false) {
-    $payment_text = 'TUNAI';
-} else if (strpos($metode_bayar, 'TRANSFER') !== false) {
-    $payment_text = 'TRANSFER BANK';
-} else if (strpos($metode_bayar, 'QRIS') !== false) {
-    $payment_text = 'QRIS';
-} else if (strpos($metode_bayar, 'DEBIT') !== false) {
-    $payment_text = 'KARTU DEBIT';
-} else if (strpos($metode_bayar, 'KREDIT') !== false || strpos($metode_bayar, 'CREDIT') !== false) {
-    $payment_text = 'KARTU KREDIT';
-} else {
-    $payment_text = $metode_bayar;
-}
+if (strpos($metode_bayar, 'TUNAI') !== false)         $payment_text = 'TUNAI';
+else if (strpos($metode_bayar, 'TRANSFER') !== false)  $payment_text = 'TRANSFER BANK';
+else if (strpos($metode_bayar, 'QRIS') !== false)      $payment_text = 'QRIS';
+else if (strpos($metode_bayar, 'DEBIT') !== false)     $payment_text = 'KARTU DEBIT';
+else if (strpos($metode_bayar, 'KREDIT') !== false || strpos($metode_bayar, 'CREDIT') !== false)
+                                                        $payment_text = 'KARTU KREDIT';
+else                                                    $payment_text = $metode_bayar;
 
 /* ================= LOGO ================= */
 $logo_path = __DIR__ . '/../../img/vaksinin-logo-orange-no-bg.png';
-$logo_src = '';
-
+$logo_src  = '';
 if (file_exists($logo_path)) {
     $logo_src = 'file:///' . str_replace('\\', '/', realpath($logo_path));
 }
+
+/* ================= JUDUL FAKTUR ================= */
+$judul_faktur = 'Faktur Pembayaran';
 
 /* ================= GENERATE HTML ================= */
 $html = '
@@ -248,227 +334,70 @@ $html = '
 <head>
     <meta charset="UTF-8">
     <style>
-        @page {
-            margin: 20mm 15mm;
-        }
+        @page { margin: 20mm 15mm; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; font-size: 11px; color: #333; }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        .header { background: #f5a623; padding: 15px 20px; display: table; width: 100%; }
+        .header-left { display: table-cell; vertical-align: middle; width: 50%; }
+        .header-left img { height: 40px; }
+        .header-right { display: table-cell; vertical-align: middle; text-align: right; width: 50%; }
+        .header-right h1 { font-size: 26px; font-weight: bold; color: #333; margin: 0; }
+        .header-right .subtitle { font-size: 12px; color: #555; margin-top: 3px; }
 
-        body {
-            font-family: Arial, sans-serif;
-            font-size: 11px;
-            color: #333;
-        }
+        .info-section { padding: 15px 20px; background: #f9f9f9; display: table; width: 100%; }
+        .info-left { display: table-cell; vertical-align: top; width: 60%; }
+        .info-left p { margin: 2px 0; font-size: 10px; line-height: 1.4; }
+        .info-right { display: table-cell; vertical-align: top; width: 40%; }
+        .info-table { width: 100%; font-size: 11px; }
+        .info-table td { padding: 3px 0; }
+        .info-table td:nth-child(2) { width: 15px; text-align: center; }
 
-        .header {
-            background: #f5a623;
-            padding: 15px 20px;
-            display: table;
-            width: 100%;
-        }
-
-        .header-left {
-            display: table-cell;
-            vertical-align: middle;
-            width: 50%;
-        }
-
-        .header-left img {
-            height: 40px;
-        }
-
-        .header-right {
-            display: table-cell;
-            vertical-align: middle;
-            text-align: right;
-            width: 50%;
-        }
-
-        .header-right h1 {
-            font-size: 28px;
-            font-weight: bold;
-            color: #333;
-            margin: 0;
-        }
-
-        .info-section {
-            padding: 15px 20px;
-            background: #f9f9f9;
-            display: table;
-            width: 100%;
-        }
-
-        .info-left {
-            display: table-cell;
-            vertical-align: top;
-            width: 60%;
-        }
-
-        .info-left p {
-            margin: 2px 0;
-            font-size: 10px;
-            line-height: 1.4;
-        }
-
-        .info-right {
-            display: table-cell;
-            vertical-align: top;
-            width: 40%;
-        }
-
-        .info-table {
-            width: 100%;
-            font-size: 11px;
-        }
-
-        .info-table td {
-            padding: 3px 0;
-        }
-
-        .info-table td:nth-child(2) {
-            width: 15px;
-            text-align: center;
-        }
-
-        .kepada-section {
-            padding: 15px 20px;
-        }
-
-        .kepada-section p {
-            margin: 4px 0;
-            font-size: 11px;
-        }
-
-        .pembayaran-section {
-            padding: 15px 25px;
-            border-top: 1px solid #ddd;
-        }
-
-        .pembayaran-section p {
-            margin: 4px 0;
-            font-size: 11px;
-        }
-
-        .layanan-table {
-            width: calc(100% - 50px);
-            margin: 15px 25px;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        .layanan-table th {
-            padding: 10px 8px;
-            border: 1px solid #333;
-            font-weight: 600;
-            text-align: left;
-            background: #f5f5f5;
-            font-size: 11px;
-        }
-
-        .layanan-table td {
-            padding: 10px 8px;
-            border: 1px solid #333;
-            font-size: 11px;
-        }
-
-        .empty-row {
-            height: 80px;
-        }
-
-        .footer-section {
-            padding: 15px 20px;
-            display: table;
-            width: 100%;
-        }
-
-        .keterangan {
-            display: table-cell;
-            vertical-align: top;
-            width: 50%;
-        }
-
-        .keterangan p {
-            margin: 4px 0;
-            font-size: 11px;
-        }
-
-        .total-section {
-            display: table-cell;
-            vertical-align: top;
-            width: 50%;
-        }
-
-        .total-table {
-            width: 100%;
-            font-size: 12px;
-            float: right;
-            max-width: 300px;
-        }
-
-        .total-table td {
-            padding: 5px 0;
-        }
-
-        .total-table td:nth-child(2) {
-            width: 15px;
-            text-align: center;
-        }
-
-        .total-table td:last-child {
-            text-align: right;
-        }
-
-        .total-row td {
-            border-top: 2px solid #333;
-            padding-top: 8px !important;
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        .status-badge {
+        .peserta-badge {
             display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 11px;
-            margin-top: 5px;
-        }
-        
-        .status-lunas {
-            background: #10b981;
+            background: #0369a1;
             color: white;
-        }
-        
-        .status-sebagian {
-            background: #f59e0b;
-            color: white;
-        }
-        
-        .status-belum {
-            background: #ef4444;
-            color: white;
-        }
-        
-        .payment-history {
-            padding: 15px 25px;
-            background: #f9f9f9;
-            margin: 10px 25px;
-            border-radius: 5px;
-        }
-        
-        .payment-history h3 {
-            font-size: 12px;
-            margin-bottom: 10px;
-        }
-        
-        .payment-item {
-            padding: 8px 0;
-            border-bottom: 1px solid #ddd;
+            padding: 3px 10px;
+            border-radius: 12px;
             font-size: 10px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .kepada-section { padding: 15px 20px; }
+        .kepada-section p { margin: 4px 0; font-size: 11px; }
+
+        .layanan-table { width: calc(100% - 50px); margin: 15px 25px; border-collapse: collapse; }
+        .layanan-table th { padding: 10px 8px; border: 1px solid #333; font-weight: 600; text-align: left; background: #f5f5f5; font-size: 11px; }
+        .layanan-table td { padding: 10px 8px; border: 1px solid #333; font-size: 11px; }
+        .empty-row { height: 80px; }
+
+        .footer-section { padding: 15px 20px; display: table; width: 100%; }
+        .keterangan { display: table-cell; vertical-align: top; width: 50%; }
+        .keterangan p { margin: 4px 0; font-size: 11px; }
+        .total-section { display: table-cell; vertical-align: top; width: 50%; }
+        .total-table { width: 100%; font-size: 12px; float: right; max-width: 300px; }
+        .total-table td { padding: 5px 0; }
+        .total-table td:nth-child(2) { width: 15px; text-align: center; }
+        .total-table td:last-child { text-align: right; }
+        .total-row td { border-top: 2px solid #333; padding-top: 8px !important; font-weight: bold; font-size: 14px; }
+
+        .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-weight: 600; font-size: 11px; margin-top: 5px; }
+        .status-lunas { background: #10b981; color: white; }
+        .status-sebagian { background: #f59e0b; color: white; }
+        .status-belum { background: #ef4444; color: white; }
+
+        .payment-history { padding: 15px 25px; background: #f9f9f9; margin: 10px 25px; border-radius: 5px; }
+        .payment-history h3 { font-size: 12px; margin-bottom: 10px; }
+        .payment-item { padding: 8px 0; border-bottom: 1px solid #ddd; font-size: 10px; }
+
+        .note-per-peserta {
+            background: #fffbeb;
+            border-left: 3px solid #f59e0b;
+            padding: 8px 12px;
+            margin: 10px 25px;
+            font-size: 10px;
+            color: #92400e;
         }
     </style>
 </head>
@@ -479,7 +408,9 @@ $html = '
             <img src="' . $logo_src . '" alt="Vaksinin">
         </div>
         <div class="header-right">
-            <h1>Faktur Pembayaran</h1>
+            <h1>' . $judul_faktur . '</h1>';
+
+$html .= '
         </div>
     </div>
 
@@ -517,17 +448,18 @@ $html = '
                     <td><strong>Jenis Layanan</strong></td>
                     <td>:</td>
                     <td>' . htmlspecialchars($service_type) . '</td>
-                </tr>
+                </tr>';
+
+$html .= '
                 <tr>
                     <td><strong>Status</strong></td>
                     <td>:</td>
                     <td>';
 
-// Status badge
 if ($sisa_tagihan <= 0) {
     $html .= '<span class="status-badge status-lunas">LUNAS</span>';
 } elseif ($total_sudah_dibayar > 0) {
-    $percentage = $total_tagihan > 0 ? round(($total_sudah_dibayar / $total_tagihan) * 100) : 0;
+    $percentage = $total_tagihan_final > 0 ? round(($total_sudah_dibayar / $total_tagihan_final) * 100) : 0;
     $html .= '<span class="status-badge status-sebagian">SEBAGIAN (' . $percentage . '%)</span>';
 } else {
     $html .= '<span class="status-badge status-belum">BELUM BAYAR</span>';
@@ -542,32 +474,25 @@ $html .= '
 
     <div class="kepada-section">
         <p><strong>Kepada:</strong></p>
-        <p>' . htmlspecialchars($booking['nama_lengkap']) . '</p>
-        <p>Telp: ' . htmlspecialchars($phone) . '</p>';
+        <p>' . htmlspecialchars($tampil_nama) . '</p>
+        <p>Telp: ' . htmlspecialchars($tampil_phone) . '</p>';
 
-if ($address) {
-    $html .= '<p>' . htmlspecialchars($address['alamat']) . ', ' . 
-             htmlspecialchars($address['kota']) . ', ' . 
-             htmlspecialchars($address['provinsi']) . '</p>';
+if ($tampil_alamat) {
+    $html .= '<p>' . htmlspecialchars($tampil_alamat['alamat']) . ', ' .
+             htmlspecialchars($tampil_alamat['kota']) . ', ' .
+             htmlspecialchars($tampil_alamat['provinsi']) . '</p>';
 }
 
 $html .= '
     </div>';
 
-// Info jumlah peserta
-if ($jumlah_peserta > 1) {
-    $html .= '
-    <div style="padding: 0 25px 10px 25px;">
-        <p><strong>Jumlah Peserta:</strong> ' . $jumlah_peserta . ' orang</p>
-    </div>';
-}
 
-// Riwayat pembayaran (jika ada lebih dari 1 payment)
-if (count($riwayat_data) > 0) {
+
+// Riwayat pembayaran - hanya tampil di mode cetak semua (grup)
+if (!$mode_per_peserta && count($riwayat_data) > 0) {
     $html .= '
     <div class="payment-history">
         <h3>Riwayat Pembayaran:</h3>';
-    
     foreach ($riwayat_data as $idx => $riwayat) {
         $html .= '
         <div class="payment-item">
@@ -577,10 +502,12 @@ if (count($riwayat_data) > 0) {
             <em>(' . strtoupper($riwayat['status']) . ')</em>
         </div>';
     }
-    
-    $html .= '
-    </div>';
+    $html .= '</div>';
 }
+
+// Tabel layanan — kolom Peserta hanya muncul di mode SEMUA dengan >1 peserta
+$tampilkan_kolom_peserta = (!$mode_per_peserta && $jumlah_peserta > 1);
+$colspan = $tampilkan_kolom_peserta ? 7 : 6;
 
 $html .= '
     <table class="layanan-table">
@@ -588,7 +515,7 @@ $html .= '
             <tr>
                 <th style="width: 40px;">No.</th>';
 
-if ($jumlah_peserta > 1) {
+if ($tampilkan_kolom_peserta) {
     $html .= '<th>Peserta</th>';
 }
 
@@ -604,28 +531,24 @@ $html .= '
 
 $no = 1;
 foreach ($data_services as $srv) {
-    $harga = $srv['harga'];
-    $diskon_item = $srv['diskon'] ?? 0;
+    $harga         = $srv['harga'];
+    $diskon_item   = $srv['diskon'] ?? 0;
     $total_per_item = $harga - $diskon_item;
-    $diskon_tipe = $srv['diskon_tipe'] ?? '';
+    $diskon_tipe   = $srv['diskon_tipe'] ?? '';
     $diskon_persen = $diskon_item > 0 ? round(($diskon_item / $harga) * 100) : 0;
-    
-    $peserta_nama = isset($srv['nama_lengkap']) ? $srv['nama_lengkap'] : $booking['nama_lengkap'];
-    
-    $html .= '
-            <tr>
-                <td style="text-align: center;">' . $no++ . '</td>';
-    
-    if ($jumlah_peserta > 1) {
+    $peserta_nama  = isset($srv['nama_lengkap']) ? $srv['nama_lengkap'] : $booking['nama_lengkap'];
+
+    $html .= '<tr><td style="text-align: center;">' . $no++ . '</td>';
+
+    if ($tampilkan_kolom_peserta) {
         $html .= '<td>' . htmlspecialchars($peserta_nama) . '</td>';
     }
-    
-    $html .= '
-                <td>' . htmlspecialchars($srv['nama_layanan']) . '</td>
-                <td style="text-align: center;">1</td>
-                <td style="text-align: right;">Rp. ' . number_format($harga, 0, ',', '.') . '</td>
-                <td style="text-align: right;">';
-    
+
+    $html .= '<td>' . htmlspecialchars($srv['nama_layanan']) . '</td>
+              <td style="text-align: center;">1</td>
+              <td style="text-align: right;">Rp. ' . number_format($harga, 0, ',', '.') . '</td>
+              <td style="text-align: right;">';
+
     if ($diskon_item > 0) {
         if ($diskon_tipe === 'persen') {
             $html .= $diskon_persen . '% (Rp. ' . number_format($diskon_item, 0, ',', '.') . ')';
@@ -635,17 +558,15 @@ foreach ($data_services as $srv) {
     } else {
         $html .= '-';
     }
-    
-    $html .= '
-                </td>
-                <td style="text-align: right;">Rp. ' . number_format($total_per_item, 0, ',', '.') . '</td>
-            </tr>';
+
+    $html .= '</td>
+              <td style="text-align: right;">Rp. ' . number_format($total_per_item, 0, ',', '.') . '</td>
+              </tr>';
 }
 
-// Baris kosong
 $html .= '
             <tr class="empty-row">
-                <td colspan="' . ($jumlah_peserta > 1 ? 7 : 6) . '">&nbsp;</td>
+                <td colspan="' . $colspan . '">&nbsp;</td>
             </tr>
         </tbody>
     </table>
@@ -665,8 +586,7 @@ if ($sisa_tagihan > 0) {
 
 $html .= '
             <p style="margin-top: 30px;">
-                <strong>Staf Administrasi,</strong><br>
-                <br><br><br>
+                <strong>Staf Administrasi,</strong><br><br><br><br>
                 _________________________
             </p>
         </div>
@@ -684,9 +604,10 @@ $html .= '
                 </tr>';
 
 if ($diskon_total > 0) {
+    $label_diskon = $mode_per_peserta ? 'Diskon Tambahan (proporsional)' : 'Diskon Tambahan';
     $html .= '
                 <tr>
-                    <td><strong>Diskon Tambahan</strong></td>
+                    <td><strong>' . $label_diskon . '</strong></td>
                     <td>:</td>
                     <td>- Rp. ' . number_format($diskon_total, 0, ',', '.') . '</td>
                 </tr>';
@@ -732,18 +653,22 @@ $dompdf->loadHtml($html);
 $dompdf->setPaper('A4', 'portrait');
 $dompdf->render();
 
-/* ================= SIMPAN FILE (OPTIONAL) ================= */
+/* ================= SIMPAN FILE ================= */
 $savePath = __DIR__ . '/../uploads/invoice';
 if (!is_dir($savePath)) {
     mkdir($savePath, 0777, true);
 }
 
-$filename = 'Faktur_' . $booking['nomor_antrian'] . '_' . date('Ymd_His') . '.pdf';
+if ($mode_per_peserta) {
+    $nama_file = preg_replace('/[^a-zA-Z0-9_]/', '_', $nama_cetak);
+    $filename = 'Faktur_' . $booking['nomor_antrian'] . '_' . $nama_file . '_' . date('Ymd_His') . '.pdf';
+} else {
+    $filename = 'Faktur_' . $booking['nomor_antrian'] . '_' . date('Ymd_His') . '.pdf';
+}
+
 file_put_contents($savePath . '/' . $filename, $dompdf->output());
 
 /* ================= OUTPUT PDF ================= */
-$dompdf->stream($filename, [
-    "Attachment" => false // false = tampilkan di browser, true = download
-]);
+$dompdf->stream($filename, ["Attachment" => false]);
 
 exit;
