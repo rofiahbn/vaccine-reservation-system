@@ -233,12 +233,12 @@ if (strpos($metode_bayar, 'TUNAI') !== false) {
     $payment_text = $metode_bayar;
 }
 
-/* ================= KONVERSI LOGO ================= */
-$logo_path = __DIR__ . '/vaksinin-logo-bw.png';
-$logo_base64 = '';
+/* ================= LOGO ================= */
+$logo_path = __DIR__ . '/../../img/vaksinin-logo-orange-no-bg.png';
+$logo_src = '';
+
 if (file_exists($logo_path)) {
-    $logo_data = file_get_contents($logo_path);
-    $logo_base64 = 'data:image/png;base64,' . base64_encode($logo_data);
+    $logo_src = 'file:///' . str_replace('\\', '/', realpath($logo_path));
 }
 
 /* ================= GENERATE HTML ================= */
@@ -476,7 +476,7 @@ $html = '
 
     <div class="header">
         <div class="header-left">
-            <img src="' . $logo_base64 . '" alt="Vaksinin">
+            <img src="' . $logo_src . '" alt="Vaksinin">
         </div>
         <div class="header-right">
             <h1>Faktur Pembayaran</h1>
