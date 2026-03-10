@@ -1,6 +1,26 @@
 <?php 
 include "config.php";
 
+function hitungUsiaLengkap($tanggal_lahir) {
+    $lahir = new DateTime($tanggal_lahir);
+    $sekarang = new DateTime();
+    $diff = $sekarang->diff($lahir);
+    
+    $tahun = $diff->y;
+    $bulan = $diff->m;
+    
+    if ($tahun > 0 && $bulan > 0) {
+        return $tahun . " tahun " . $bulan . " bulan";
+    } elseif ($tahun > 0) {
+        return $tahun . " tahun";
+    } elseif ($bulan > 0) {
+        return $bulan . " bulan";
+    } else {
+        $hari = $diff->d;
+        return $hari . " hari";
+    }
+}
+
 // Get booking ID
 $booking_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
@@ -90,6 +110,27 @@ $disable_accept = ($booking['status'] !== 'pending');
                 <i class="fas fa-arrow-left"></i> Kembali
             </button>
             <h1>Detail Pesanan #<?php echo $booking['nomor_antrian']; ?></h1>
+            <button onclick="window.open('cetak_label.php?id=<?= $booking_id ?>', '_blank')"
+                title="Cetak label pasien"
+                style="
+                    background: #f5a623;
+                    color: white;
+                    border: none;
+                    padding: 8px 16px;
+                    border-radius: 6px;
+                    font-size: 13px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 6px;
+                    transition: background 0.2s;
+                "
+                onmouseover="this.style.background='#e0951f'"
+                onmouseout="this.style.background='#f5a623'">
+            <i class="fas fa-print"></i> Cetak Label
+        </button>
 
         </div>
 
@@ -215,7 +256,9 @@ $disable_accept = ($booking['status'] !== 'pending');
                 </div>
 
                 <!-- Patient Info -->
-                <?php foreach ($participants as $index => $p): ?>
+                <?php foreach ($participants as $index => $p): 
+                    $usia_lengkap = hitungUsiaLengkap($p['tanggal_lahir']);
+                ?>    
 
                 <div class="participant-panel <?= $index == 0 ? 'active' : '' ?>" 
                     id="participant-<?= $index ?>"
@@ -241,7 +284,7 @@ $disable_accept = ($booking['status'] !== 'pending');
                                 <label>Tanggal Lahir</label>
                                 <p>
                                     <?= date('d F Y', strtotime($p['tanggal_lahir'])); ?>
-                                    (<?= $p['usia']; ?> tahun)
+                                    (<?= $usia_lengkap ?>) 
                                 </p>
                             </div>
 
@@ -727,10 +770,43 @@ $disable_accept = ($booking['status'] !== 'pending');
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>Kebangsaan</label>
-                                <select name="kebangsaan">
-                                    <option value="WNI">WNI</option>
-                                    <option value="WNA">WNA</option>
+                                <label>Kebangsaan <span class="required">*</span></label>
+                                <select name="kebangsaan" required>
+                                    <option value="">-- Pilih Negara --</option>
+                                    <option value="Indonesia" selected>🇮🇩 Indonesia</option>
+                                    <option value="Afghanistan">🇦🇫 Afghanistan</option>
+                                    <option value="Afrika Selatan">🇿🇦 Afrika Selatan</option>
+                                    <option value="Albania">🇦🇱 Albania</option>
+                                    <option value="Aljazair">🇩🇿 Aljazair</option>
+                                    <option value="Amerika Serikat">🇺🇸 Amerika Serikat</option>
+                                    <option value="Arab Saudi">🇸🇦 Arab Saudi</option>
+                                    <option value="Argentina">🇦🇷 Argentina</option>
+                                    <option value="Australia">🇦🇺 Australia</option>
+                                    <option value="Austria">🇦🇹 Austria</option>
+                                    <option value="Belanda">🇳🇱 Belanda</option>
+                                    <option value="Belgia">🇧🇪 Belgia</option>
+                                    <option value="Brasil">🇧🇷 Brasil</option>
+                                    <option value="Brunei">🇧🇳 Brunei</option>
+                                    <option value="China">🇨🇳 China</option>
+                                    <option value="Denmark">🇩🇰 Denmark</option>
+                                    <option value="Filipina">🇵🇭 Filipina</option>
+                                    <option value="Finlandia">🇫🇮 Finlandia</option>
+                                    <option value="India">🇮🇳 India</option>
+                                    <option value="Inggris">🇬🇧 Inggris</option>
+                                    <option value="Jepang">🇯🇵 Jepang</option>
+                                    <option value="Jerman">🇩🇪 Jerman</option>
+                                    <option value="Kanada">🇨🇦 Kanada</option>
+                                    <option value="Korea Selatan">🇰🇷 Korea Selatan</option>
+                                    <option value="Malaysia">🇲🇾 Malaysia</option>
+                                    <option value="Mesir">🇪🇬 Mesir</option>
+                                    <option value="Myanmar">🇲🇲 Myanmar</option>
+                                    <option value="Perancis">🇫🇷 Perancis</option>
+                                    <option value="Rusia">🇷🇺 Rusia</option>
+                                    <option value="Singapura">🇸🇬 Singapura</option>
+                                    <option value="Spanyol">🇪🇸 Spanyol</option>
+                                    <option value="Thailand">🇹🇭 Thailand</option>
+                                    <option value="Timor Leste">🇹🇱 Timor Leste</option>
+                                    <option value="Vietnam">🇻🇳 Vietnam</option>
                                 </select>
                             </div>
                         </div>
@@ -738,11 +814,22 @@ $disable_accept = ($booking['status'] !== 'pending');
                         <div class="form-row">
                             <div class="form-group">
                                 <label>NIK</label>
-                                <input type="text" name="nik" placeholder="Nomor NIK">
+                                <input type="text" 
+                                    name="nik" 
+                                    placeholder="Nomor NIK"
+                                    maxlength="16"
+                                    onkeyup="this.value = this.value.replace(/[^0-9]/g, '')">
+                                <small style="color: #666; display: block;">Masukkan 16 angka, boleh dikosongkan</small>
                             </div>
                             <div class="form-group">
                                 <label>No. Paspor</label>
-                                <input type="text" name="paspor" placeholder="Nomor paspor">
+                                <input type="text" 
+                                    name="paspor" 
+                                    placeholder="Nomor paspor"
+                                    minlength="7"
+                                    maxlength="8"
+                                    onkeyup="this.value = this.value.toUpperCase()">
+                                <small style="color: #666; display: block;">Masukkan 7-8 karakter, boleh dikosongkan</small>
                             </div>
                         </div>
                         
@@ -766,12 +853,36 @@ $disable_accept = ($booking['status'] !== 'pending');
                         
                         <div class="form-group">
                             <label>Email</label>
-                            <input type="email" name="email" placeholder="email@example.com">
+                            
+                            <div id="emailsContainer">
+                                <div style="display: flex; gap: 8px; margin-bottom: 8px; align-items: center;">
+                                    <input type="email" name="email[]" placeholder="email@gmail.com" style="flex: 1;">
+                                    <button type="button" onclick="this.parentElement.remove()" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 8px;">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <button type="button" onclick="addEmail()" style="background: #3b82f6; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; width: 35px; display: inline-flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-plus"></i>
+                            </button>
                         </div>
                         
                         <div class="form-group">
                             <label>Nomor HP</label>
-                            <input type="text" name="phone" placeholder="08123456789">
+                            
+                            <div id="phonesContainer">
+                                <div style="display: flex; gap: 8px; margin-bottom: 8px; align-items: center;">
+                                    <input type="text" name="phone[]" placeholder="08123456789" style="flex: 1;">
+                                    <button type="button" onclick="this.parentElement.remove()" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 8px;">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <button type="button" onclick="addPhone()" style="background: #3b82f6; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; width: 35px; display: inline-flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-plus"></i>
+                            </button>
                         </div>
                         
                         <!-- Data Alamat dengan Provinsi & Kota -->
@@ -857,10 +968,21 @@ $disable_accept = ($booking['status'] !== 'pending');
                     <!-- Akan diisi dengan info pasien -->
                 </div>
                 
-                <div class="services-list" id="servicesList">
-                    <div class="loading-services">
-                        <i class="fas fa-spinner fa-spin"></i> Memuat layanan...
+                <div class="services-list" id="servicesList" style="max-height: 300px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px;">
+                    <?php foreach ($services_list as $service): ?>
+                    <div class="service-item" data-nama="<?= strtolower(htmlspecialchars($service['nama_layanan'])) ?>">
+                        <label style="display: flex; align-items: center; gap: 10px; padding: 8px; cursor: pointer; border-bottom: 1px solid #f1f5f9;">
+                            <input type="checkbox" class="service-checkbox" value="<?= $service['id'] ?>" data-nama="<?= htmlspecialchars($service['nama_layanan']) ?>" data-harga="<?= $service['harga'] ?>">
+                            <div style="flex: 1;">
+                                <div style="font-weight: 500;"><?= htmlspecialchars($service['nama_layanan']) ?></div>
+                                <div style="font-size: 12px; color: #64748b;">
+                                    Rp <?= number_format($service['harga'], 0, ',', '.') ?> • 
+                                    <?= ucfirst($service['tipe']) ?>
+                                </div>
+                            </div>
+                        </label>
                     </div>
+                    <?php endforeach; ?>
                 </div>
                 
                 <div class="selected-services-summary">
@@ -952,6 +1074,33 @@ $disable_accept = ($booking['status'] !== 'pending');
         const participants = <?= json_encode(array_map(fn($p) => $p['patient_id'], $participants)) ?>;
         const bookingStatus = '<?= $booking['status'] ?>';
         const bookingStatusText = '<?= $booking['status'] == 'confirmed' ? 'dikonfirmasi' : ($booking['status'] == 'completed' ? 'selesai' : ($booking['status'] == 'cancelled' ? 'dibatalkan' : 'pending')) ?>';
+    </script>
+    <script>
+    function addEmail() {
+        const container = document.getElementById('emailsContainer');
+        const div = document.createElement('div');
+        div.style = 'display: flex; gap: 8px; margin-bottom: 8px; align-items: center;';
+        div.innerHTML = `
+            <input type="email" name="email[]" placeholder="email@gmail.com" style="flex: 1;">
+            <button type="button" onclick="this.parentElement.remove()" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 8px;">
+                <i class="fas fa-trash"></i>
+            </button>
+        `;
+        container.appendChild(div);
+    }
+
+    function addPhone() {
+        const container = document.getElementById('phonesContainer');
+        const div = document.createElement('div');
+        div.style = 'display: flex; gap: 8px; margin-bottom: 8px; align-items: center;';
+        div.innerHTML = `
+            <input type="text" name="phone[]" placeholder="08123456789" style="flex: 1;">
+            <button type="button" onclick="this.parentElement.remove()" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 8px;">
+                <i class="fas fa-trash"></i>
+            </button>
+        `;
+        container.appendChild(div);
+    }
     </script>
     <script src="system/provinces.js"></script>
     <script src="system/admin/js/detail_tabs.js"></script>

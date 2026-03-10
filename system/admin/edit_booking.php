@@ -229,7 +229,7 @@ while ($ms = $result_master->fetch_assoc()) {
                     </div>
                     <div class="form-group">
                         <label>Nama Panggilan</label>
-                        <input type="text" name="nama_panggilan" value="<?php echo htmlspecialchars($booking['nama_panggilan']); ?>">
+                        <input type="text" name="nama_panggilan" value="<?php echo htmlspecialchars($booking['nama_panggilan'] ?? ''); ?>">
                     </div>
                 </div>
                 <div class="form-row">
@@ -248,11 +248,11 @@ while ($ms = $result_master->fetch_assoc()) {
                 <div class="form-row">
                     <div class="form-group">
                         <label>NIK</label>
-                        <input type="text" name="nik" value="<?php echo htmlspecialchars($booking['nik']); ?>" maxlength="16">
+                        <input type="text" name="nik" value="<?php echo htmlspecialchars($booking['nik'] ?? ''); ?>" maxlength="16">
                     </div>
                     <div class="form-group">
                         <label>No. Paspor</label>
-                        <input type="text" name="paspor" value="<?php echo htmlspecialchars($booking['paspor']); ?>">
+                        <input type="text" name="paspor" value="<?php echo htmlspecialchars($booking['paspor'] ?? ''); ?>">
                     </div>
                 </div>
                 <div class="form-row">
@@ -319,7 +319,7 @@ while ($ms = $result_master->fetch_assoc()) {
 
                     <div class="form-group">
                         <label>Pekerjaan</label>
-                        <input type="text" name="pekerjaan" value="<?php echo htmlspecialchars($booking['pekerjaan']); ?>">
+                        <input type="text" name="pekerjaan" value="<?php echo htmlspecialchars($booking['pekerjaan'] ?? ''); ?>">
                     </div>
                 </div>
             </div>
@@ -453,15 +453,15 @@ while ($ms = $result_master->fetch_assoc()) {
                 <h3><i class="fas fa-file-medical"></i> Riwayat Kesehatan</h3>
                 <div class="form-group">
                     <label>Riwayat Alergi</label>
-                    <textarea name="riwayat_alergi" placeholder="Kosongkan jika tidak ada"><?php echo htmlspecialchars($booking['riwayat_alergi']); ?></textarea>
+                    <textarea name="riwayat_alergi" placeholder="Kosongkan jika tidak ada"><?php echo htmlspecialchars($booking['riwayat_alergi'] ?? ''); ?></textarea>
                 </div>
                 <div class="form-group">
                     <label>Riwayat Penyakit</label>
-                    <textarea name="riwayat_penyakit" placeholder="Kosongkan jika tidak ada"><?php echo htmlspecialchars($booking['riwayat_penyakit']); ?></textarea>
+                    <textarea name="riwayat_penyakit" placeholder="Kosongkan jika tidak ada"><?php echo htmlspecialchars($booking['riwayat_penyakit'] ?? ''); ?></textarea>
                 </div>
                 <div class="form-group">
                     <label>Riwayat Obat</label>
-                    <textarea name="riwayat_obat" placeholder="Kosongkan jika tidak ada"><?php echo htmlspecialchars($booking['riwayat_obat']); ?></textarea>
+                    <textarea name="riwayat_obat" placeholder="Kosongkan jika tidak ada"><?php echo htmlspecialchars($booking['riwayat_obat'] ?? ''); ?></textarea>
                 </div>
             </div>
 

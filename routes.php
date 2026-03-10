@@ -117,6 +117,7 @@ get('/delete_pelayanan.php', 'system/admin/delete_pelayanan.php');
 get('/check_date_status.php', 'system/admin/check_date_status.php');
 post('/cetak_surat.php', 'system/admin/cetak_surat.php');
 get('/cetak_pembayaran.php', 'system/admin/cetak_pembayaran.php');
+get('/cetak_label.php', 'system/admin/cetak_label.php');
 get('/calendar_setting.php', 'system/admin/calendar_setting.php');
 post('/assign_doctor.php', 'system/admin/assign_doctor.php');
 post('/add_participant.php', 'system/admin/add_participant.php');
