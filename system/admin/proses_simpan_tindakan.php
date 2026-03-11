@@ -4,7 +4,6 @@ require "config.php";
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-// mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 header('Content-Type: application/json');
 
 try {
@@ -27,12 +26,8 @@ try {
 
     $suhu                   = $_POST['suhu'] !== '' ? $_POST['suhu'] : null;
     $tekanan_darah          = $_POST['tekanan_darah'] ?? null;
-    $respirasi              = isset($_POST['respirasi']) && $_POST['respirasi'] !== ''
-                                ? $_POST['respirasi']
-                                : null;
-    $nadi                   = isset($_POST['nadi']) && $_POST['nadi'] !== '' 
-                                ? $_POST['nadi'] 
-                                : null;
+    $respirasi              = isset($_POST['respirasi']) && $_POST['respirasi'] !== '' ? $_POST['respirasi'] : null;
+    $nadi                   = isset($_POST['nadi']) && $_POST['nadi'] !== '' ? $_POST['nadi'] : null;
     $bb                     = $_POST['bb'] !== '' ? $_POST['bb'] : null;
     $tb                     = $_POST['tb'] !== '' ? $_POST['tb'] : null;
     $lingkar_kepala         = $_POST['lingkar_kepala'] !== '' ? $_POST['lingkar_kepala'] : null;
@@ -56,32 +51,19 @@ try {
 
     if ($result->num_rows > 0) {
 
-        // ===== UPDATE HEADER =====
         $row = $result->fetch_assoc();
         $tindakan_id = $row['id'];
 
         $stmt = $conn->prepare("
             UPDATE tindakan SET
-                keluhan = ?,
-                kipi_sebelumnya = ?,
-                kontraindikasi = ?,
-                anamnesis = ?,
-                pemeriksaan_fisik = ?,
-                diagnosis = ?,
-                tatalaksana = ?,
-                suhu = ?,
-                tekanan_darah = ?,
-                respirasi = ?,
-                nadi = ?,
-                bb = ?,
-                tb = ?,
-                lingkar_kepala = ?,
+                keluhan = ?, kipi_sebelumnya = ?, kontraindikasi = ?,
+                anamnesis = ?, pemeriksaan_fisik = ?,
+                diagnosis = ?, tatalaksana = ?,
+                suhu = ?, tekanan_darah = ?, respirasi = ?, nadi = ?,
+                bb = ?, tb = ?, lingkar_kepala = ?,
                 pf_lainnya = ?,
-                jenis_vaksin = ?,
-                batch_vaksin = ?,
-                expired_vaksin = ?,
-                kedatangan_ke = ?,
-                kedatangan_selanjutnya = ?,
+                jenis_vaksin = ?, batch_vaksin = ?, expired_vaksin = ?,
+                kedatangan_ke = ?, kedatangan_selanjutnya = ?,
                 status = ?,
                 updated_at = NOW()
             WHERE id = ?
@@ -89,26 +71,14 @@ try {
 
         $stmt->bind_param(
             "sssssssssssssssssssssi",
-            $keluhan,
-            $kipi,
-            $kontraindikasi,
-            $anamnesis,
-            $pemeriksaan_fisik,
-            $diagnosis,
-            $tatalaksana_text,
-            $suhu,
-            $tekanan_darah,
-            $respirasi,
-            $nadi,
-            $bb,
-            $tb,
-            $lingkar_kepala,
+            $keluhan, $kipi, $kontraindikasi,
+            $anamnesis, $pemeriksaan_fisik,
+            $diagnosis, $tatalaksana_text,
+            $suhu, $tekanan_darah, $respirasi, $nadi,
+            $bb, $tb, $lingkar_kepala,
             $pf_lainnya,
-            $jenis_vaksin,
-            $batch_vaksin,
-            $expired_vaksin,
-            $kedatangan_ke,
-            $kedatangan_selanjutnya,
+            $jenis_vaksin, $batch_vaksin, $expired_vaksin,
+            $kedatangan_ke, $kedatangan_selanjutnya,
             $status,
             $tindakan_id
         );
@@ -118,7 +88,6 @@ try {
 
     } else {
 
-        // ===== INSERT HEADER =====
         $stmt = $conn->prepare("
             INSERT INTO tindakan (
                 booking_id, patient_id,
@@ -126,8 +95,7 @@ try {
                 anamnesis, pemeriksaan_fisik,
                 diagnosis, tatalaksana,
                 suhu, tekanan_darah, respirasi, nadi,
-                bb, tb, lingkar_kepala,
-                pf_lainnya,
+                bb, tb, lingkar_kepala, pf_lainnya,
                 jenis_vaksin, batch_vaksin, expired_vaksin,
                 kedatangan_ke, kedatangan_selanjutnya,
                 status, created_at, updated_at
@@ -137,8 +105,7 @@ try {
                 ?, ?,
                 ?, ?,
                 ?, ?, ?, ?,
-                ?, ?, ?,
-                ?,
+                ?, ?, ?, ?,
                 ?, ?, ?,
                 ?, ?,
                 ?, NOW(), NOW()
@@ -147,28 +114,14 @@ try {
 
         $stmt->bind_param(
             "iisssssssssssssssssssss",
-            $booking_id,
-            $patient_id,
-            $keluhan,
-            $kipi,
-            $kontraindikasi,
-            $anamnesis,
-            $pemeriksaan_fisik,
-            $diagnosis,
-            $tatalaksana_text,
-            $suhu,
-            $tekanan_darah,
-            $respirasi,
-            $nadi,
-            $bb,
-            $tb,
-            $lingkar_kepala,
-            $pf_lainnya,
-            $jenis_vaksin,
-            $batch_vaksin,
-            $expired_vaksin,
-            $kedatangan_ke,
-            $kedatangan_selanjutnya,
+            $booking_id, $patient_id,
+            $keluhan, $kipi, $kontraindikasi,
+            $anamnesis, $pemeriksaan_fisik,
+            $diagnosis, $tatalaksana_text,
+            $suhu, $tekanan_darah, $respirasi, $nadi,
+            $bb, $tb, $lingkar_kepala, $pf_lainnya,
+            $jenis_vaksin, $batch_vaksin, $expired_vaksin,
+            $kedatangan_ke, $kedatangan_selanjutnya,
             $status
         );
 
@@ -177,63 +130,84 @@ try {
         $stmt->close();
     }
 
-    // ================= SIMPAN DETAIL TATALAKSANA =================
-
-    // Hapus detail lama dulu
+    // ================= HAPUS DETAIL LAMA =================
     $hapus = $conn->prepare("DELETE FROM tatalaksana WHERE tindakan_id = ?");
     $hapus->bind_param("i", $tindakan_id);
     $hapus->execute();
     $hapus->close();
 
-    if (!empty($_POST['product_id'])) {
+    // ================= SIMPAN DETAIL TATALAKSANA =================
+    $tipe_baris   = $_POST['tipe_baris'] ?? [];
+    $staff_arr    = $_POST['staff'] ?? [];
+    $lokasi_arr   = $_POST['lokasi'] ?? [];
+    $rute_arr     = $_POST['rute'] ?? [];
+    $dosis_arr    = $_POST['dosis'] ?? [];
+    $batch_arr    = $_POST['batch'] ?? [];
+    $product_arr  = $_POST['product_id'] ?? [];
+    $expired_arr  = $_POST['expired_date'] ?? [];
+    $jasa_arr     = $_POST['jasa_id'] ?? [];
 
-        foreach ($_POST['product_id'] as $index => $product_id) {
+    foreach ($tipe_baris as $index => $tipe) {
 
-            $lokasi = $_POST['lokasi'][$index] ?? '';
-            $rute   = $_POST['rute'][$index] ?? '';
-            $dosis  = $_POST['dosis'][$index] ?? 1;
-            $batch  = $_POST['batch'][$index] ?? null;
-            $expired_date = $_POST['expired_date'][$index] ?? null;
+        $staff_id = isset($staff_arr[$index]) && $staff_arr[$index] !== ''
+            ? (int)$staff_arr[$index] : null;
 
-            if (empty($batch)) continue;
+        if ($tipe === 'jasa') {
+            // ===== SIMPAN BARIS JASA =====
+            $jasa_id = isset($jasa_arr[$index]) ? (int)$jasa_arr[$index] : null;
+            if (!$jasa_id) continue;
 
             $insert = $conn->prepare("
                 INSERT INTO tatalaksana
-                (tindakan_id, booking_id, patient_id, product_id, batch_number, expired_date, lokasi, rute, dosis, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+                (tindakan_id, booking_id, patient_id, jasa_id, staff_id, created_at)
+                VALUES (?, ?, ?, ?, ?, NOW())
             ");
-
-            $insert->bind_param(
-                "iiiissssi",
-                $tindakan_id,
-                $booking_id,
-                $patient_id,
-                $product_id,
-                $batch,
-                $expired_date,
-                $lokasi,
-                $rute,
-                $dosis
+            $insert->bind_param("iiiii",
+                $tindakan_id, $booking_id, $patient_id,
+                $jasa_id, $staff_id
             );
-
             $insert->execute();
             $insert->close();
 
-            // ===== KURANGI STOK DI SINI =====
-            $kurangi_stok = $conn->prepare("
-                UPDATE product_stock 
-                SET stock = stock - ? 
+        } elseif ($tipe === 'produk') {
+            // ===== SIMPAN BARIS PRODUK =====
+            $product_id   = isset($product_arr[$index]) ? (int)$product_arr[$index] : null;
+            $batch        = $batch_arr[$index] ?? null;
+            $expired_date = $expired_arr[$index] ?? null;
+            $lokasi       = $lokasi_arr[$index] ?? '';
+            $rute         = $rute_arr[$index] ?? '';
+            $dosis        = $dosis_arr[$index] ?? 1;
+
+            if (!$product_id || empty($batch)) continue;
+
+            $insert = $conn->prepare("
+                INSERT INTO tatalaksana
+                (tindakan_id, booking_id, patient_id, product_id, batch_number,
+                 expired_date, lokasi, rute, dosis, staff_id, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+            ");
+            $insert->bind_param("iiiissssii",
+                $tindakan_id, $booking_id, $patient_id,
+                $product_id, $batch, $expired_date,
+                $lokasi, $rute, $dosis, $staff_id
+            );
+            $insert->execute();
+            $insert->close();
+
+            // Kurangi stok
+            $kurangi = $conn->prepare("
+                UPDATE product_stock SET stock = stock - ?
                 WHERE product_id = ? AND batch_number = ?
             ");
-            $kurangi_stok->bind_param("iis", $dosis, $product_id, $batch);
-            $kurangi_stok->execute();
-            $kurangi_stok->close();
+            $kurangi->bind_param("iis", $dosis, $product_id, $batch);
+            $kurangi->execute();
+            $kurangi->close();
         }
     }
 
     $conn->commit();
 
-    // ===== UPDATE TINDAKAN_SELESAI DI BOOKINGS =====
+    // Update tindakan_selesai
     $update_booking = $conn->prepare("UPDATE bookings SET tindakan_selesai = 1 WHERE id = ?");
     $update_booking->bind_param("i", $booking_id);
     $update_booking->execute();
@@ -245,9 +219,7 @@ try {
     ]);
 
 } catch (Throwable $e) {
-
     $conn->rollback();
-
     echo json_encode([
         "success" => false,
         "message" => "Gagal simpan tindakan: " . $e->getMessage()
